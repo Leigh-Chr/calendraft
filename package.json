@@ -1,0 +1,56 @@
+{
+  "name": "calendraft",
+  "private": true,
+  "type": "module",
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "hono": "^4.8.2",
+      "@trpc/server": "^11.5.0",
+      "better-auth": "^1.3.28",
+      "dotenv": "^17.2.2",
+      "zod": "^4.1.11",
+      "typescript": "^5.8.2",
+      "tsdown": "^0.15.5",
+      "@trpc/client": "^11.5.0",
+      "@prisma/client": "^6.15.0",
+      "@polar-sh/better-auth": "^1.1.3"
+    }
+  },
+  "scripts": {
+    "check": "biome check --write .",
+    "prepare": "husky",
+    "ruler:apply": "bunx @intellectronica/ruler@latest apply --local-only",
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:native": "turbo -F native dev",
+    "dev:web": "turbo -F web dev",
+    "dev:server": "turbo -F server dev",
+    "db:push": "turbo -F @calendraft/db db:push",
+    "db:studio": "turbo -F @calendraft/db db:studio",
+    "db:generate": "turbo -F @calendraft/db db:generate",
+    "db:migrate": "turbo -F @calendraft/db db:migrate"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.2",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "@biomejs/biome": "^2.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "tsdown": "^0.15.5",
+    "@types/bun": "^1.2.6"
+  },
+  "lint-staged": {
+    "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
+      "biome check --write ."
+    ]
+  },
+  "packageManager": "bun@1.3.1"
+}
