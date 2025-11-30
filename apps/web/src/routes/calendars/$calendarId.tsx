@@ -277,6 +277,7 @@ function CalendarViewComponent() {
 				<CalendarMonthView
 					calendarId={calendarId}
 					events={normalizedEvents}
+					calendarColor={calendar.color}
 					initialDate={search.date}
 					onDateChange={(date) => updateSearch({ date })}
 				/>

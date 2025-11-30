@@ -205,6 +205,38 @@ function useDeleteEvent(calendarId: string) {
 	return { handleDelete, isDeleting: mutation.isPending };
 }
 
+function useDuplicateEvent(calendarId: string) {
+	const queryClient = useQueryClient();
+
+	const mutation = useMutation(
+		trpc.event.duplicate.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.calendar.byId(calendarId),
+				});
+				toast.success("Événement dupliqué");
+			},
+			onError: (error: unknown) => {
+				const message =
+					error instanceof Error
+						? error.message
+						: "Erreur lors de la duplication";
+				toast.error(message);
+			},
+		}),
+	);
+
+	const handleDuplicate = useCallback(
+		(id: string) => {
+			mutation.mutate({ id, dayOffset: 0 });
+		},
+		[mutation],
+	);
+
+	return { handleDuplicate, isDuplicating: mutation.isPending };
+}
+
 // ----- Helper Functions -----
 
 function getDateRangeForFilter(
@@ -241,6 +273,7 @@ export function EventListView({
 		handleDateFilterChange,
 	} = useEventFilters(initialFilters, onFiltersChange);
 	const { handleDelete, isDeleting } = useDeleteEvent(calendarId);
+	const { handleDuplicate, isDuplicating } = useDuplicateEvent(calendarId);
 
 	// Query with filter state
 	const eventsQuery = useQuery({
@@ -288,7 +321,9 @@ export function EventListView({
 				events={events}
 				calendarId={calendarId}
 				onDelete={handleDelete}
+				onDuplicate={handleDuplicate}
 				isDeleting={isDeleting}
+				isDuplicating={isDuplicating}
 			/>
 
 			{nextCursor && (
@@ -307,12 +342,16 @@ function EventsList({
 	events,
 	calendarId,
 	onDelete,
+	onDuplicate,
 	isDeleting,
+	isDuplicating,
 }: {
 	events: EventItem[];
 	calendarId: string;
 	onDelete: (id: string) => void;
+	onDuplicate: (id: string) => void;
 	isDeleting: boolean;
+	isDuplicating: boolean;
 }) {
 	if (events.length === 0) {
 		return (
@@ -332,7 +371,9 @@ function EventsList({
 					event={event}
 					calendarId={calendarId}
 					onDelete={onDelete}
+					onDuplicate={onDuplicate}
 					isDeleting={isDeleting}
+					isDuplicating={isDuplicating}
 				/>
 			))}
 		</div>

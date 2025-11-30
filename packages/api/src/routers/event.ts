@@ -566,4 +566,172 @@ export const eventRouter = router({
 
 			return { success: true };
 		}),
+
+	duplicate: publicProcedure
+		.input(
+			z.object({
+				id: z.string(),
+				targetCalendarId: z.string().optional(), // If not provided, duplicate in same calendar
+				dayOffset: z.number().int().optional().default(0), // Offset in days for the new event
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			if (!ctx.userId) {
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "User ID required",
+				});
+			}
+
+			// Verify access to source event
+			const sourceEvent = await prisma.event.findFirst({
+				where: { id: input.id },
+				include: {
+					calendar: true,
+					attendees: true,
+					alarms: true,
+					categories: true,
+					resources: true,
+					recurrenceDates: true,
+				},
+			});
+
+			if (!sourceEvent) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Event not found",
+				});
+			}
+
+			// Verify calendar belongs to user
+			const sourceCalendar = await prisma.calendar.findFirst({
+				where: {
+					id: sourceEvent.calendarId,
+					OR: [
+						...(ctx.session?.user?.id ? [{ userId: ctx.session.user.id }] : []),
+						...(ctx.anonymousId ? [{ userId: ctx.anonymousId }] : []),
+					],
+				},
+			});
+
+			if (!sourceCalendar) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Access denied",
+				});
+			}
+
+			// Determine target calendar
+			const targetCalendarId = input.targetCalendarId || sourceEvent.calendarId;
+
+			// If target is different, verify access
+			if (targetCalendarId !== sourceEvent.calendarId) {
+				const targetCalendar = await prisma.calendar.findFirst({
+					where: {
+						id: targetCalendarId,
+						OR: [
+							...(ctx.session?.user?.id
+								? [{ userId: ctx.session.user.id }]
+								: []),
+							...(ctx.anonymousId ? [{ userId: ctx.anonymousId }] : []),
+						],
+					},
+				});
+
+				if (!targetCalendar) {
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: "Target calendar not found",
+					});
+				}
+			}
+
+			// Check event limit for anonymous users
+			await checkAnonymousEventLimit(ctx, targetCalendarId);
+
+			// Calculate new dates with offset
+			const offsetMs = input.dayOffset * 24 * 60 * 60 * 1000;
+			const newStartDate = new Date(sourceEvent.startDate.getTime() + offsetMs);
+			const newEndDate = new Date(sourceEvent.endDate.getTime() + offsetMs);
+
+			// Create duplicated event (without UID to generate a new one, and without recurrence-related fields)
+			const duplicatedEvent = await prisma.event.create({
+				data: {
+					calendarId: targetCalendarId,
+					title: sourceEvent.title,
+					startDate: newStartDate,
+					endDate: newEndDate,
+					description: sourceEvent.description,
+					location: sourceEvent.location,
+					status: sourceEvent.status,
+					priority: sourceEvent.priority,
+					url: sourceEvent.url,
+					class: sourceEvent.class,
+					comment: sourceEvent.comment,
+					contact: sourceEvent.contact,
+					sequence: 0, // Reset sequence for new event
+					transp: sourceEvent.transp,
+					// Don't copy rrule, recurrenceId, relatedTo for duplicates
+					geoLatitude: sourceEvent.geoLatitude,
+					geoLongitude: sourceEvent.geoLongitude,
+					organizerName: sourceEvent.organizerName,
+					organizerEmail: sourceEvent.organizerEmail,
+					// Generate new UID (null will be auto-handled)
+					uid: null,
+					dtstamp: new Date(),
+					color: sourceEvent.color,
+					// Duplicate relations
+					attendees:
+						sourceEvent.attendees.length > 0
+							? {
+									create: sourceEvent.attendees.map((a) => ({
+										name: a.name,
+										email: a.email,
+										role: a.role,
+										status: a.status,
+										rsvp: a.rsvp,
+									})),
+								}
+							: undefined,
+					alarms:
+						sourceEvent.alarms.length > 0
+							? {
+									create: sourceEvent.alarms.map((a) => ({
+										trigger: a.trigger,
+										action: a.action,
+										summary: a.summary,
+										description: a.description,
+										duration: a.duration,
+										repeat: a.repeat,
+									})),
+								}
+							: undefined,
+					categories:
+						sourceEvent.categories.length > 0
+							? {
+									create: sourceEvent.categories.map((c) => ({
+										category: c.category,
+									})),
+								}
+							: undefined,
+					resources:
+						sourceEvent.resources.length > 0
+							? {
+									create: sourceEvent.resources.map((r) => ({
+										resource: r.resource,
+									})),
+								}
+							: undefined,
+				},
+				include: {
+					attendees: true,
+					alarms: true,
+					categories: true,
+					resources: true,
+					recurrenceDates: true,
+				},
+			});
+
+			return duplicatedEvent;
+		}),
 });

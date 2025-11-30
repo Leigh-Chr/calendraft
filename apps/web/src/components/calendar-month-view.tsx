@@ -19,6 +19,8 @@ interface CalendarMonthViewProps {
 		location?: string | null;
 		color?: string | null;
 	}>;
+	/** Calendar color (used as default for events without their own color) */
+	calendarColor?: string | null;
 	/** Initial date to display (ISO date string YYYY-MM-DD) */
 	initialDate?: string;
 	/** Callback when the viewed date changes */
@@ -28,6 +30,7 @@ interface CalendarMonthViewProps {
 export function CalendarMonthView({
 	calendarId,
 	events,
+	calendarColor,
 	initialDate,
 	onDateChange,
 }: CalendarMonthViewProps) {
@@ -50,20 +53,24 @@ export function CalendarMonthView({
 
 	const calendarEvents = useMemo(
 		() =>
-			events.map((event) => ({
-				id: event.id,
-				title: event.title,
-				start: new Date(event.startDate),
-				end: new Date(event.endDate),
-				resource: event,
-				...(event.color && {
-					style: {
-						backgroundColor: event.color,
-						borderColor: event.color,
-					},
-				}),
-			})),
-		[events],
+			events.map((event) => {
+				// Use event color if set, otherwise use calendar color
+				const effectiveColor = event.color || calendarColor;
+				return {
+					id: event.id,
+					title: event.title,
+					start: new Date(event.startDate),
+					end: new Date(event.endDate),
+					resource: event,
+					...(effectiveColor && {
+						style: {
+							backgroundColor: effectiveColor,
+							borderColor: effectiveColor,
+						},
+					}),
+				};
+			}),
+		[events, calendarColor],
 	);
 
 	const handleSelectEvent = useCallback(

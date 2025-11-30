@@ -35,7 +35,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { ColorIndicator, ColorPicker } from "@/components/ui/color-picker";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useCalendraftTour } from "@/hooks/use-calendraft-tour";
 import {
 	useCalendars,
@@ -71,7 +73,12 @@ export const Route = createFileRoute("/calendars")({
 // Combined dialog state type - more maintainable than separate booleans
 type DialogState =
 	| { type: "delete"; calendar: { id: string; name: string } }
-	| { type: "rename"; calendar: { id: string; name: string }; newName: string }
+	| {
+			type: "edit";
+			calendar: { id: string; name: string; color?: string | null };
+			newName: string;
+			newColor: string | null;
+	  }
 	| null;
 
 function CalendarsListComponent() {
@@ -92,18 +99,35 @@ function CalendarsListComponent() {
 		setDialog({ type: "delete", calendar: { id, name } });
 	}, []);
 
-	const openRenameDialog = useCallback((id: string, name: string) => {
-		setDialog({ type: "rename", calendar: { id, name }, newName: name });
-	}, []);
+	const openEditDialog = useCallback(
+		(id: string, name: string, color?: string | null) => {
+			setDialog({
+				type: "edit",
+				calendar: { id, name, color },
+				newName: name,
+				newColor: color || null,
+			});
+		},
+		[],
+	);
 
 	const closeDialog = useCallback(() => {
 		setDialog(null);
 	}, []);
 
-	const handleRenameInputChange = useCallback((value: string) => {
+	const handleEditNameChange = useCallback((value: string) => {
 		setDialog((prev) => {
-			if (prev?.type === "rename") {
+			if (prev?.type === "edit") {
 				return { ...prev, newName: value };
+			}
+			return prev;
+		});
+	}, []);
+
+	const handleEditColorChange = useCallback((value: string | null) => {
+		setDialog((prev) => {
+			if (prev?.type === "edit") {
+				return { ...prev, newColor: value };
 			}
 			return prev;
 		});
@@ -116,11 +140,15 @@ function CalendarsListComponent() {
 		}
 	}, [dialog, deleteCalendar, closeDialog]);
 
-	const confirmRename = useCallback(() => {
-		if (dialog?.type === "rename") {
+	const confirmEdit = useCallback(() => {
+		if (dialog?.type === "edit") {
 			const trimmedName = dialog.newName.trim();
 			if (trimmedName) {
-				updateCalendar({ id: dialog.calendar.id, name: trimmedName });
+				updateCalendar({
+					id: dialog.calendar.id,
+					name: trimmedName,
+					color: dialog.newColor,
+				});
 				closeDialog();
 			} else {
 				toast.error("Le nom ne peut pas être vide");
@@ -191,7 +219,10 @@ function CalendarsListComponent() {
 					{calendars.map((calendar) => (
 						<Card key={calendar.id}>
 							<CardHeader>
-								<CardTitle className="line-clamp-1">{calendar.name}</CardTitle>
+								<CardTitle className="line-clamp-1 flex items-center gap-2">
+									<ColorIndicator color={calendar.color} size="md" />
+									{calendar.name}
+								</CardTitle>
 								<CardDescription>
 									{calendar.eventCount} événement
 									{calendar.eventCount !== 1 ? "s" : ""}
@@ -210,8 +241,11 @@ function CalendarsListComponent() {
 								<Button
 									variant="outline"
 									size="icon"
-									onClick={() => openRenameDialog(calendar.id, calendar.name)}
+									onClick={() =>
+										openEditDialog(calendar.id, calendar.name, calendar.color)
+									}
 									disabled={isUpdating}
+									title="Modifier"
 								>
 									<Edit className="h-4 w-4" />
 								</Button>
@@ -220,6 +254,7 @@ function CalendarsListComponent() {
 									size="icon"
 									onClick={() => openDeleteDialog(calendar.id, calendar.name)}
 									disabled={isDeleting}
+									title="Supprimer"
 								>
 									<Trash2 className="h-4 w-4" />
 								</Button>
@@ -252,35 +287,44 @@ function CalendarsListComponent() {
 				</AlertDialogContent>
 			</AlertDialog>
 
-			{/* Rename Dialog */}
+			{/* Edit Dialog */}
 			<AlertDialog
-				open={dialog?.type === "rename"}
+				open={dialog?.type === "edit"}
 				onOpenChange={(open) => !open && closeDialog()}
 			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Renommer le calendrier</AlertDialogTitle>
+						<AlertDialogTitle>Modifier le calendrier</AlertDialogTitle>
 						<AlertDialogDescription>
-							Entrez le nouveau nom pour "
-							{dialog?.type === "rename" ? dialog.calendar.name : ""}"
+							Modifiez les paramètres du calendrier "
+							{dialog?.type === "edit" ? dialog.calendar.name : ""}"
 						</AlertDialogDescription>
 					</AlertDialogHeader>
-					<div className="py-4">
-						<Input
-							value={dialog?.type === "rename" ? dialog.newName : ""}
-							onChange={(e) => handleRenameInputChange(e.target.value)}
-							placeholder="Nom du calendrier"
-							onKeyDown={(e) => {
-								if (e.key === "Enter") {
-									confirmRename();
-								}
-							}}
+					<div className="space-y-4 py-4">
+						<div className="space-y-2">
+							<Label htmlFor="calendar-name">Nom</Label>
+							<Input
+								id="calendar-name"
+								value={dialog?.type === "edit" ? dialog.newName : ""}
+								onChange={(e) => handleEditNameChange(e.target.value)}
+								placeholder="Nom du calendrier"
+								onKeyDown={(e) => {
+									if (e.key === "Enter") {
+										confirmEdit();
+									}
+								}}
+							/>
+						</div>
+						<ColorPicker
+							value={dialog?.type === "edit" ? dialog.newColor : null}
+							onChange={handleEditColorChange}
+							label="Couleur"
 						/>
 					</div>
 					<AlertDialogFooter>
 						<AlertDialogCancel>Annuler</AlertDialogCancel>
-						<AlertDialogAction onClick={confirmRename} disabled={isUpdating}>
-							Renommer
+						<AlertDialogAction onClick={confirmEdit} disabled={isUpdating}>
+							Enregistrer
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

@@ -186,6 +186,7 @@ export const calendarRouter = router({
 		return calendars.map((cal) => ({
 			id: cal.id,
 			name: cal.name,
+			color: cal.color,
 			eventCount: cal._count.events,
 			createdAt: cal.createdAt,
 			updatedAt: cal.updatedAt,
@@ -237,6 +238,11 @@ export const calendarRouter = router({
 					.min(1)
 					.max(200)
 					.transform((val) => val.trim()), // Max length validation with auto-trimming
+				color: z
+					.string()
+					.regex(/^#[0-9A-Fa-f]{6}$/, "Couleur invalide (format: #RRGGBB)")
+					.optional()
+					.nullable(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -246,6 +252,7 @@ export const calendarRouter = router({
 			const calendar = await prisma.calendar.create({
 				data: {
 					name: input.name, // Already trimmed by Zod transform
+					color: input.color || null,
 					userId: ctx.session?.user?.id || ctx.anonymousId || null,
 				},
 			});
@@ -262,7 +269,13 @@ export const calendarRouter = router({
 					.trim()
 					.min(1)
 					.max(200)
-					.transform((val) => val.trim()), // Max length validation with auto-trimming
+					.transform((val) => val.trim())
+					.optional(), // Now optional for partial updates
+				color: z
+					.string()
+					.regex(/^#[0-9A-Fa-f]{6}$/, "Couleur invalide (format: #RRGGBB)")
+					.optional()
+					.nullable(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -282,9 +295,17 @@ export const calendarRouter = router({
 				});
 			}
 
+			const updateData: { name?: string; color?: string | null } = {};
+			if (input.name !== undefined) {
+				updateData.name = input.name;
+			}
+			if (input.color !== undefined) {
+				updateData.color = input.color;
+			}
+
 			return await prisma.calendar.update({
 				where: { id: input.id },
-				data: { name: input.name }, // Already trimmed by Zod transform
+				data: updateData,
 			});
 		}),
 

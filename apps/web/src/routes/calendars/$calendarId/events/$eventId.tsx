@@ -2,6 +2,7 @@ import type { ValidationErrors } from "@calendraft/schemas";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { format } from "date-fns";
+import { Copy, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Breadcrumb } from "@/components/breadcrumb";
@@ -9,6 +10,19 @@ import {
 	type EventFormData,
 	EventFormExtended,
 } from "@/components/event-form-extended";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { transformEventFormDataForUpdate } from "@/lib/event-form-transform";
 import {
 	getFirstValidationError,
@@ -34,6 +48,8 @@ function EditEventComponent() {
 	const [serverValidationErrors, setServerValidationErrors] = useState<
 		ValidationErrors | undefined
 	>();
+	const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
+	const [dayOffset, setDayOffset] = useState(0);
 
 	const { data: event, isLoading } = useQuery({
 		...trpc.event.getById.queryOptions({ id: eventId }),
@@ -43,6 +59,37 @@ function EditEventComponent() {
 	const { data: calendar } = useQuery({
 		...trpc.calendar.getById.queryOptions({ id: calendarId }),
 	});
+
+	const duplicateMutation = useMutation(
+		trpc.event.duplicate.mutationOptions({
+			onSuccess: (duplicatedEvent) => {
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.calendar.byId(calendarId),
+				});
+				toast.success("Événement dupliqué avec succès");
+				setDuplicateDialogOpen(false);
+				// Navigate to the new event
+				navigate({
+					to: `/calendars/${calendarId}/events/${duplicatedEvent.id}`,
+				});
+			},
+			onError: (error: unknown) => {
+				const message =
+					error instanceof Error
+						? error.message
+						: "Erreur lors de la duplication";
+				toast.error(message);
+			},
+		}),
+	);
+
+	const handleDuplicate = () => {
+		duplicateMutation.mutate({
+			id: eventId,
+			dayOffset,
+		});
+	};
 
 	const updateMutation = useMutation(
 		trpc.event.update.mutationOptions({
@@ -172,15 +219,25 @@ function EditEventComponent() {
 
 	return (
 		<div className="container mx-auto max-w-4xl space-y-4 px-4 py-10">
-			<Breadcrumb
-				items={[
-					{
-						label: calendar?.name || "Calendrier",
-						href: `/calendars/${calendarId}`,
-					},
-					{ label: event?.title || "Événement" },
-				]}
-			/>
+			<div className="flex items-center justify-between">
+				<Breadcrumb
+					items={[
+						{
+							label: calendar?.name || "Calendrier",
+							href: `/calendars/${calendarId}`,
+						},
+						{ label: event?.title || "Événement" },
+					]}
+				/>
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => setDuplicateDialogOpen(true)}
+				>
+					<Copy className="mr-2 h-4 w-4" />
+					Dupliquer
+				</Button>
+			</div>
 			<EventFormExtended
 				mode="edit"
 				initialData={initialData}
@@ -190,6 +247,56 @@ function EditEventComponent() {
 				calendarId={calendarId}
 				initialValidationErrors={serverValidationErrors}
 			/>
+
+			{/* Duplicate Dialog */}
+			<AlertDialog
+				open={duplicateDialogOpen}
+				onOpenChange={setDuplicateDialogOpen}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Dupliquer l'événement</AlertDialogTitle>
+						<AlertDialogDescription>
+							Créez une copie de cet événement. Vous pouvez décaler les dates si
+							nécessaire.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<div className="space-y-4 py-4">
+						<div className="space-y-2">
+							<Label htmlFor="day-offset">Décalage en jours</Label>
+							<Input
+								id="day-offset"
+								type="number"
+								value={dayOffset}
+								onChange={(e) =>
+									setDayOffset(Number.parseInt(e.target.value, 10) || 0)
+								}
+								placeholder="0"
+							/>
+							<p className="text-muted-foreground text-xs">
+								0 = même date, 7 = une semaine plus tard, -7 = une semaine plus
+								tôt
+							</p>
+						</div>
+					</div>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Annuler</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={handleDuplicate}
+							disabled={duplicateMutation.isPending}
+						>
+							{duplicateMutation.isPending ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									Duplication...
+								</>
+							) : (
+								"Dupliquer"
+							)}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }

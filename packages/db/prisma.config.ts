@@ -1,6 +1,5 @@
 import path from "node:path";
 import dotenv from "dotenv";
-import type { PrismaConfig } from "prisma";
 
 dotenv.config({
 	path: "../../apps/server/.env",
@@ -11,4 +10,7 @@ export default {
 	migrations: {
 		path: path.join("prisma", "migrations"),
 	},
-} satisfies PrismaConfig;
+	datasource: {
+		url: process.env.DATABASE_URL || "file:./local.db",
+	},
+};

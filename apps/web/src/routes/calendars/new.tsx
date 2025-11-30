@@ -10,6 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { ColorPicker } from "@/components/ui/color-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useServerStatus } from "@/hooks/use-server-status";
@@ -63,6 +64,7 @@ export const Route = createFileRoute("/calendars/new")({
 function NewCalendarComponent() {
 	const navigate = useNavigate();
 	const [name, setName] = useState("");
+	const [color, setColor] = useState<string | null>("#3B82F6");
 	const { createCalendar, isCreating } = useCreateCalendar();
 	const { isOffline, isChecking } = useServerStatus();
 
@@ -85,7 +87,7 @@ function NewCalendarComponent() {
 
 		// Create calendar
 		createCalendar(
-			{ name: name.trim() },
+			{ name: name.trim(), color },
 			{
 				onSuccess: (calendar) => {
 					toast.success("Calendrier créé avec succès !");
@@ -145,6 +147,13 @@ function NewCalendarComponent() {
 							disabled={isCreating}
 						/>
 					</div>
+
+					<ColorPicker
+						value={color}
+						onChange={setColor}
+						disabled={isCreating}
+						label="Couleur du calendrier"
+					/>
 
 					<div className="flex gap-2">
 						<Button

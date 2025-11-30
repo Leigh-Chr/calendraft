@@ -8,3 +8,8 @@ const adapter = new PrismaLibSql({
 const prisma = new PrismaClient({ adapter });
 
 export default prisma;
+
+export type { PrismaClient } from "../prisma/generated/client";
+// Re-export Prisma generated types and enums
+export * from "../prisma/generated/enums";
+export * from "../prisma/generated/models";

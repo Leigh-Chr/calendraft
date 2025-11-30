@@ -45,6 +45,7 @@ enum RecurrenceDateType {
 model Calendar {
   id        String   @id @default(uuid())
   name      String
+  color     String?  // Calendar color (hex format like #3B82F6) - events inherit this color if they don't have their own
   userId    String?  // User ID (authenticated) or anonymous ID (anon-xxx format). Null only if neither is available.
   // Note: userId can be either a User.id (authenticated) or an anonymous ID (anon-xxx)
   // We don't use a relation here because anonymous IDs don't exist in the User table
