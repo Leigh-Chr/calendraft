@@ -39,6 +39,7 @@ import {
 	calendarViewDefaults,
 	calendarViewSearchSchema,
 } from "@/lib/search-params";
+import { TOUR_STEP_IDS } from "@/lib/tour-constants";
 import { trpc, trpcClient } from "@/utils/trpc";
 
 export const Route = createFileRoute("/calendars/$calendarId")({
@@ -186,6 +187,7 @@ function CalendarViewComponent() {
 				</div>
 				<div className="flex gap-2">
 					<Button
+						id={TOUR_STEP_IDS.ADD_EVENT_BUTTON}
 						variant="outline"
 						size="sm"
 						onClick={() =>
@@ -195,43 +197,47 @@ function CalendarViewComponent() {
 						<Plus className="mr-2 h-4 w-4" />
 						Ajouter un événement
 					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => navigate({ to: `/calendars/${calendarId}/import` })}
-					>
-						<Upload className="mr-2 h-4 w-4" />
-						Importer
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => setCleanDialogOpen(true)}
-					>
-						<Sparkles className="mr-2 h-4 w-4" />
-						Nettoyer
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() =>
-							navigate({
-								to: "/calendars/merge",
-								search: { selected: calendarId },
-							})
-						}
-					>
-						<Merge className="mr-2 h-4 w-4" />
-						Fusionner
-					</Button>
-					<Button variant="outline" size="sm" onClick={handleExport}>
-						<Download className="mr-2 h-4 w-4" />
-						Exporter
-					</Button>
+					<div id={TOUR_STEP_IDS.ACTION_BUTTONS} className="flex gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() =>
+								navigate({ to: `/calendars/${calendarId}/import` })
+							}
+						>
+							<Upload className="mr-2 h-4 w-4" />
+							Importer
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setCleanDialogOpen(true)}
+						>
+							<Sparkles className="mr-2 h-4 w-4" />
+							Nettoyer
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() =>
+								navigate({
+									to: "/calendars/merge",
+									search: { selected: calendarId },
+								})
+							}
+						>
+							<Merge className="mr-2 h-4 w-4" />
+							Fusionner
+						</Button>
+						<Button variant="outline" size="sm" onClick={handleExport}>
+							<Download className="mr-2 h-4 w-4" />
+							Exporter
+						</Button>
+					</div>
 				</div>
 			</div>
 
-			<div className="mb-4 flex gap-2">
+			<div id={TOUR_STEP_IDS.VIEW_TOGGLE} className="mb-4 flex gap-2">
 				<Button
 					variant={viewMode === "list" ? "default" : "outline"}
 					size="sm"

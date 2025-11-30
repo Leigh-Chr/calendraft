@@ -10,7 +10,12 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import Header from "@/components/header";
 import { PWAUpdatePrompt } from "@/components/pwa-update-prompt";
 import { ThemeProvider } from "@/components/theme-provider";
+import { TourProvider } from "@/components/tour";
 import { Toaster } from "@/components/ui/sonner";
+import {
+	isTourCompleted,
+	markTourCompleted,
+} from "@/hooks/use-calendraft-tour";
 import type { trpc } from "@/utils/trpc";
 import "../index.css";
 
@@ -121,23 +126,29 @@ function RootComponent() {
 				disableTransitionOnChange
 				storageKey="vite-ui-theme"
 			>
-				{/* Skip to main content link for keyboard navigation */}
-				<a
-					href="#main-content"
-					className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+				<TourProvider
+					onComplete={markTourCompleted}
+					onSkip={markTourCompleted}
+					isTourCompleted={isTourCompleted()}
 				>
-					Aller au contenu principal
-				</a>
-				<ErrorBoundary>
-					<div className="flex min-h-svh flex-col">
-						<Header />
-						<main id="main-content" className="flex-1" tabIndex={-1}>
-							<Outlet />
-						</main>
-					</div>
-				</ErrorBoundary>
-				<Toaster richColors />
-				<PWAUpdatePrompt />
+					{/* Skip to main content link for keyboard navigation */}
+					<a
+						href="#main-content"
+						className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+					>
+						Aller au contenu principal
+					</a>
+					<ErrorBoundary>
+						<div className="flex min-h-svh flex-col">
+							<Header />
+							<main id="main-content" className="flex-1" tabIndex={-1}>
+								<Outlet />
+							</main>
+						</div>
+					</ErrorBoundary>
+					<Toaster richColors />
+					<PWAUpdatePrompt />
+				</TourProvider>
 			</ThemeProvider>
 			<TanStackRouterDevtools position="bottom-left" />
 			<ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />

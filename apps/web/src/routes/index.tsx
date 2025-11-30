@@ -522,10 +522,7 @@ function StepCard({
 			style={{ animationDelay: `${delay}ms`, animationFillMode: "backwards" }}
 		>
 			{/* Step number - decorative, hidden from screen readers */}
-			<div
-				className="step-number mb-4 text-6xl sm:text-7xl"
-				aria-hidden="true"
-			>
+			<div className="step-number mb-4 text-6xl sm:text-7xl" aria-hidden="true">
 				{number}
 			</div>
 			<h3 className="mb-2 font-semibold text-lg">{title}</h3>

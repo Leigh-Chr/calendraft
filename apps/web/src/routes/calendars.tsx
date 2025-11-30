@@ -1,13 +1,22 @@
 import {
 	createFileRoute,
+	Link,
 	Outlet,
 	useLocation,
 	useNavigate,
 } from "@tanstack/react-router";
-import { Calendar, Edit, ExternalLink, Plus, Trash2 } from "lucide-react";
+import {
+	Calendar,
+	Edit,
+	ExternalLink,
+	FileUp,
+	Plus,
+	Trash2,
+} from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { AccountPrompt } from "@/components/account-prompt";
+import { TourAlertDialog } from "@/components/tour";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -27,11 +36,13 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useCalendraftTour } from "@/hooks/use-calendraft-tour";
 import {
 	useCalendars,
 	useDeleteCalendar,
 	useUpdateCalendar,
 } from "@/hooks/use-storage";
+import { TOUR_STEP_IDS } from "@/lib/tour-constants";
 
 const BASE_URL = "https://calendraft.app";
 
@@ -69,6 +80,10 @@ function CalendarsListComponent() {
 	const { calendars, isLoading } = useCalendars();
 	const { deleteCalendar, isDeleting } = useDeleteCalendar();
 	const { updateCalendar, isUpdating } = useUpdateCalendar();
+
+	// Tour state
+	const { openDialog: tourOpen, setOpenDialog: setTourOpen } =
+		useCalendraftTour();
 
 	// Single state for all dialogs
 	const [dialog, setDialog] = useState<DialogState>(null);
@@ -132,18 +147,32 @@ function CalendarsListComponent() {
 
 	return (
 		<div className="container mx-auto max-w-4xl px-4 py-10">
+			{/* Tour dialog */}
+			<TourAlertDialog isOpen={tourOpen} setIsOpen={setTourOpen} />
+
 			<div className="mb-6 flex items-center justify-between">
 				<h1 className="font-bold text-3xl">Mes calendriers</h1>
-				<Button onClick={() => navigate({ to: "/calendars/new" })}>
-					<Plus className="mr-2 h-4 w-4" />
-					Nouveau calendrier
-				</Button>
+				<div className="flex items-center gap-2">
+					<Button
+						id={TOUR_STEP_IDS.NEW_CALENDAR_BUTTON}
+						onClick={() => navigate({ to: "/calendars/new" })}
+					>
+						<Plus className="mr-2 h-4 w-4" />
+						Nouveau calendrier
+					</Button>
+					<Button id={TOUR_STEP_IDS.IMPORT_BUTTON} variant="outline" asChild>
+						<Link to="/calendars/import">
+							<FileUp className="mr-2 h-4 w-4" />
+							Importer
+						</Link>
+					</Button>
+				</div>
 			</div>
 
 			<AccountPrompt variant="banner" />
 
 			{calendars.length === 0 ? (
-				<Card>
+				<Card id={TOUR_STEP_IDS.CALENDAR_GRID}>
 					<CardContent className="py-10 text-center">
 						<Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
 						<p className="mb-4 text-muted-foreground">
@@ -155,7 +184,10 @@ function CalendarsListComponent() {
 					</CardContent>
 				</Card>
 			) : (
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+				<div
+					id={TOUR_STEP_IDS.CALENDAR_GRID}
+					className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+				>
 					{calendars.map((calendar) => (
 						<Card key={calendar.id}>
 							<CardHeader>

@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { QUERY_KEYS } from "@/lib/query-keys";
+import { TOUR_STEP_IDS } from "@/lib/tour-constants";
 import { trpc } from "@/utils/trpc";
 import { EventCard } from "./event-list/event-card";
 import { DateFilterButtons, SearchSortBar } from "./event-list/event-filters";
@@ -270,11 +271,13 @@ export function EventListView({
 	return (
 		<div className="space-y-4">
 			<DateFilterButtons
+				id={TOUR_STEP_IDS.DATE_FILTERS}
 				currentFilter={filters.dateFilter}
 				onFilterChange={handleDateFilterChange}
 			/>
 
 			<SearchSortBar
+				id={TOUR_STEP_IDS.SEARCH_BAR}
 				keyword={filters.keyword}
 				sortBy={filters.sortBy}
 				onKeywordChange={(keyword) => updateFilterWithReset({ keyword })}
