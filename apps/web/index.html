@@ -1,23 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#18181b" />
-    <meta name="description" content="Calendraft - Créez, gérez et partagez vos calendriers ICS avec facilité" />
+    
+    <!-- Primary Meta Tags -->
+    <title>Calendraft - Gérez vos calendriers .ics simplement</title>
+    <meta name="title" content="Calendraft - Gérez vos calendriers .ics simplement" />
+    <meta name="description" content="Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Compatible Google Calendar, Apple Calendar, Outlook. Gratuit et open-source." />
+    <meta name="keywords" content="calendrier, ics, ical, calendar, google calendar, apple calendar, outlook, fusion, import, export, pwa, gratuit" />
+    <meta name="author" content="Calendraft" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="French" />
+    <meta name="revisit-after" content="7 days" />
+    
+    <!-- Theme & Colors -->
+    <meta name="theme-color" content="#18181b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="msapplication-TileColor" content="#18181b" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://calendraft.app/" />
+    <meta property="og:title" content="Calendraft - Gérez vos calendriers .ics simplement" />
+    <meta property="og:description" content="Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Application PWA gratuite et open-source." />
+    <meta property="og:image" content="https://calendraft.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Calendraft - Gestionnaire de calendriers ICS" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="Calendraft" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://calendraft.app/" />
+    <meta name="twitter:title" content="Calendraft - Gérez vos calendriers .ics simplement" />
+    <meta name="twitter:description" content="Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Application PWA gratuite et open-source." />
+    <meta name="twitter:image" content="https://calendraft.app/og-image.png" />
+    <meta name="twitter:image:alt" content="Calendraft - Gestionnaire de calendriers ICS" />
+    
+    <!-- Canonical -->
+    <link rel="canonical" href="https://calendraft.app/" />
     
     <!-- PWA Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Calendraft" />
+    <meta name="application-name" content="Calendraft" />
+    <meta name="format-detection" content="telephone=no" />
     
-    <!-- Favicon -->
+    <!-- Favicon & Icons -->
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/pwa-192x192.png" type="image/png" sizes="192x192" />
+    <link rel="icon" href="/pwa-512x512.png" type="image/png" sizes="512x512" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <link rel="mask-icon" href="/maskable-icon-512x512.png" color="#6366f1" />
     
-    <title>Calendraft</title>
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Calendraft",
+      "description": "Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Compatible Google Calendar, Apple Calendar, Outlook.",
+      "url": "https://calendraft.app",
+      "applicationCategory": "ProductivityApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "featureList": [
+        "Import de fichiers ICS",
+        "Export vers Google Calendar, Apple Calendar, Outlook",
+        "Fusion de calendriers",
+        "Mode hors-ligne (PWA)",
+        "Synchronisation cloud"
+      ],
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "softwareVersion": "1.0.0",
+      "author": {
+        "@type": "Organization",
+        "name": "Calendraft"
+      }
+    }
+    </script>
   </head>
 
   <body>

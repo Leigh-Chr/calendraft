@@ -33,8 +33,28 @@ import {
 	useUpdateCalendar,
 } from "@/hooks/use-storage";
 
+const BASE_URL = "https://calendraft.app";
+
 export const Route = createFileRoute("/calendars")({
 	component: CalendarsListComponent,
+	head: () => ({
+		meta: [
+			{ title: "Mes calendriers - Calendraft" },
+			{
+				name: "description",
+				content:
+					"Gérez tous vos calendriers ICS en un seul endroit. Créez, modifiez, fusionnez et exportez vos calendriers facilement.",
+			},
+			{ property: "og:title", content: "Mes calendriers - Calendraft" },
+			{
+				property: "og:description",
+				content: "Gérez tous vos calendriers ICS en un seul endroit.",
+			},
+			{ property: "og:url", content: `${BASE_URL}/calendars` },
+			{ name: "robots", content: "noindex, nofollow" }, // Private page
+		],
+		links: [{ rel: "canonical", href: `${BASE_URL}/calendars` }],
+	}),
 });
 
 // Combined dialog state type - more maintainable than separate booleans

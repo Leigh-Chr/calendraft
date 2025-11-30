@@ -13,6 +13,12 @@ import { trpc } from "@/utils/trpc";
 
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
+	head: () => ({
+		meta: [
+			{ title: "Tableau de bord - Calendraft" },
+			{ name: "robots", content: "noindex, nofollow" },
+		],
+	}),
 	beforeLoad: async () => {
 		const session = await authClient.getSession();
 		if (!session.data) {

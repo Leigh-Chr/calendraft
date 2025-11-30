@@ -18,6 +18,12 @@ import { trpc } from "@/utils/trpc";
 
 export const Route = createFileRoute("/calendars/$calendarId/import")({
 	component: ImportIntoCalendarComponent,
+	head: () => ({
+		meta: [
+			{ title: "Importer dans le calendrier - Calendraft" },
+			{ name: "robots", content: "noindex, nofollow" },
+		],
+	}),
 });
 
 function ImportIntoCalendarComponent() {

@@ -15,8 +15,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/utils/trpc";
 
+const BASE_URL = "https://calendraft.app";
+
 export const Route = createFileRoute("/calendars/import")({
 	component: ImportCalendarComponent,
+	head: () => ({
+		meta: [
+			{ title: "Importer un calendrier .ics - Calendraft" },
+			{
+				name: "description",
+				content:
+					"Importez un fichier calendrier ICS depuis votre appareil. Compatible avec les exports de Google Calendar, Apple Calendar, Outlook et tous les formats iCalendar standard.",
+			},
+			{
+				property: "og:title",
+				content: "Importer un calendrier .ics - Calendraft",
+			},
+			{
+				property: "og:description",
+				content: "Importez un fichier calendrier ICS depuis votre appareil.",
+			},
+			{ property: "og:url", content: `${BASE_URL}/calendars/import` },
+		],
+		links: [{ rel: "canonical", href: `${BASE_URL}/calendars/import` }],
+	}),
 });
 
 function ImportCalendarComponent() {

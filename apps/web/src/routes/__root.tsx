@@ -19,24 +19,79 @@ export interface RouterAppContext {
 	queryClient: QueryClient;
 }
 
+const BASE_URL = "https://calendraft.app";
+
 export const Route = createRootRouteWithContext<RouterAppContext>()({
 	component: RootComponent,
 	head: () => ({
 		meta: [
 			{
-				title: "Calendraft",
+				title: "Calendraft - Gérez vos calendriers .ics simplement",
 			},
 			{
 				name: "description",
 				content:
-					"Calendraft - Créez, gérez et partagez vos calendriers ICS avec facilité",
+					"Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Compatible Google Calendar, Apple Calendar, Outlook. Gratuit et open-source.",
 			},
+			// Open Graph
+			{
+				property: "og:type",
+				content: "website",
+			},
+			{
+				property: "og:url",
+				content: BASE_URL,
+			},
+			{
+				property: "og:title",
+				content: "Calendraft - Gérez vos calendriers .ics simplement",
+			},
+			{
+				property: "og:description",
+				content:
+					"Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Application PWA gratuite et open-source.",
+			},
+			{
+				property: "og:image",
+				content: `${BASE_URL}/og-image.png`,
+			},
+			{
+				property: "og:locale",
+				content: "fr_FR",
+			},
+			{
+				property: "og:site_name",
+				content: "Calendraft",
+			},
+			// Twitter Card
+			{
+				name: "twitter:card",
+				content: "summary_large_image",
+			},
+			{
+				name: "twitter:title",
+				content: "Calendraft - Gérez vos calendriers .ics simplement",
+			},
+			{
+				name: "twitter:description",
+				content:
+					"Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Application PWA gratuite et open-source.",
+			},
+			{
+				name: "twitter:image",
+				content: `${BASE_URL}/og-image.png`,
+			},
+			// Theme
 			{
 				name: "theme-color",
 				content: "#18181b",
 			},
 		],
 		links: [
+			{
+				rel: "canonical",
+				href: BASE_URL,
+			},
 			{
 				rel: "icon",
 				href: "/favicon.ico",

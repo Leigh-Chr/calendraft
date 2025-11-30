@@ -5,6 +5,12 @@ import { successSearchSchema } from "@/lib/search-params";
 export const Route = createFileRoute("/success")({
 	component: SuccessPage,
 	validateSearch: zodValidator(successSearchSchema),
+	head: () => ({
+		meta: [
+			{ title: "Paiement réussi - Calendraft" },
+			{ name: "robots", content: "noindex, nofollow" },
+		],
+	}),
 });
 
 function SuccessPage() {

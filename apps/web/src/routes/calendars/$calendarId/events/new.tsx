@@ -28,6 +28,12 @@ export const Route = createFileRoute("/calendars/$calendarId/events/new")({
 	search: {
 		middlewares: [stripSearchParams(newEventDefaults)],
 	},
+	head: () => ({
+		meta: [
+			{ title: "Nouvel événement - Calendraft" },
+			{ name: "robots", content: "noindex, nofollow" },
+		],
+	}),
 });
 
 function NewEventComponent() {

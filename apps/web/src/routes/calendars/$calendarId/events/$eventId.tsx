@@ -19,6 +19,12 @@ import { trpc } from "@/utils/trpc";
 
 export const Route = createFileRoute("/calendars/$calendarId/events/$eventId")({
 	component: EditEventComponent,
+	head: () => ({
+		meta: [
+			{ title: "Modifier l'événement - Calendraft" },
+			{ name: "robots", content: "noindex, nofollow" },
+		],
+	}),
 });
 
 function EditEventComponent() {

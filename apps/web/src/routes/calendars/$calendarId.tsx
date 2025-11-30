@@ -47,6 +47,12 @@ export const Route = createFileRoute("/calendars/$calendarId")({
 	search: {
 		middlewares: [stripSearchParams(calendarViewDefaults)],
 	},
+	head: () => ({
+		meta: [
+			{ title: "Calendrier - Calendraft" },
+			{ name: "robots", content: "noindex, nofollow" },
+		],
+	}),
 });
 
 function CalendarViewComponent() {

@@ -16,32 +16,35 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const BASE_URL = "https://calendraft.app";
+const TITLE = "Calendraft - Gérez vos calendriers .ics simplement";
+const DESCRIPTION =
+	"Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Compatible Google Calendar, Apple Calendar, Outlook. Gratuit et open-source.";
+
 export const Route = createFileRoute("/")({
 	component: LandingPage,
 	head: () => ({
 		meta: [
-			{
-				title: "Calendraft - Gérez vos calendriers .ics simplement",
-			},
-			{
-				name: "description",
-				content:
-					"Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Compatible Google Calendar, Apple Calendar, Outlook. Gratuit et open-source.",
-			},
-			{
-				property: "og:title",
-				content: "Calendraft - Gérez vos calendriers .ics simplement",
-			},
-			{
-				property: "og:description",
-				content:
-					"Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Application PWA gratuite et open-source.",
-			},
-			{
-				property: "og:type",
-				content: "website",
-			},
+			{ title: TITLE },
+			{ name: "description", content: DESCRIPTION },
+			// Open Graph
+			{ property: "og:type", content: "website" },
+			{ property: "og:url", content: BASE_URL },
+			{ property: "og:title", content: TITLE },
+			{ property: "og:description", content: DESCRIPTION },
+			{ property: "og:image", content: `${BASE_URL}/og-image.png` },
+			{ property: "og:image:width", content: "1200" },
+			{ property: "og:image:height", content: "630" },
+			{ property: "og:locale", content: "fr_FR" },
+			{ property: "og:site_name", content: "Calendraft" },
+			// Twitter Card
+			{ name: "twitter:card", content: "summary_large_image" },
+			{ name: "twitter:url", content: BASE_URL },
+			{ name: "twitter:title", content: TITLE },
+			{ name: "twitter:description", content: DESCRIPTION },
+			{ name: "twitter:image", content: `${BASE_URL}/og-image.png` },
 		],
+		links: [{ rel: "canonical", href: BASE_URL }],
 	}),
 });
 

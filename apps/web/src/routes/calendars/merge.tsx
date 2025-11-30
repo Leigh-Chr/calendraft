@@ -34,6 +34,17 @@ export const Route = createFileRoute("/calendars/merge")({
 	search: {
 		middlewares: [stripSearchParams(mergeCalendarsDefaults)],
 	},
+	head: () => ({
+		meta: [
+			{ title: "Fusionner des calendriers - Calendraft" },
+			{
+				name: "description",
+				content:
+					"Fusionnez plusieurs calendriers ICS en un seul avec détection automatique des doublons.",
+			},
+			{ name: "robots", content: "noindex, nofollow" },
+		],
+	}),
 });
 
 function MergeCalendarsComponent() {

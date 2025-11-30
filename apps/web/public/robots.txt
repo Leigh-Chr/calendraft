@@ -1,0 +1,21 @@
+# Calendraft - robots.txt
+# https://calendraft.app
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://calendraft.app/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Disallow API routes and authenticated paths
+Disallow: /api/
+Disallow: /trpc/
+
+# Allow all pages
+Allow: /
+Allow: /calendars
+Allow: /login
+

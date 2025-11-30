@@ -16,8 +16,27 @@ import { useServerStatus } from "@/hooks/use-server-status";
 import { useCreateCalendar } from "@/hooks/use-storage";
 import { handleTRPCError } from "@/lib/error-handler";
 
+const BASE_URL = "https://calendraft.app";
+
 export const Route = createFileRoute("/calendars/new")({
 	component: NewCalendarComponent,
+	head: () => ({
+		meta: [
+			{ title: "Créer un calendrier - Calendraft" },
+			{
+				name: "description",
+				content:
+					"Créez un nouveau calendrier ICS vierge en quelques secondes. Ajoutez ensuite vos événements et exportez-les vers Google Calendar, Apple Calendar ou Outlook.",
+			},
+			{ property: "og:title", content: "Créer un calendrier - Calendraft" },
+			{
+				property: "og:description",
+				content: "Créez un nouveau calendrier ICS vierge en quelques secondes.",
+			},
+			{ property: "og:url", content: `${BASE_URL}/calendars/new` },
+		],
+		links: [{ rel: "canonical", href: `${BASE_URL}/calendars/new` }],
+	}),
 	errorComponent: ({ error }) => {
 		if (import.meta.env.DEV) {
 			console.error("Route error:", error);
