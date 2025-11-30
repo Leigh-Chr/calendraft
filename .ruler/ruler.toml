@@ -1,5 +1,8 @@
 # Ruler Configuration File
 # See https://okigu.com/ruler for documentation.
+#
+# Note: All .md files in .ruler/ are automatically loaded as context for AI agents.
+# The main project rules and documentation references are in bts.md
 
 # Default agents to run when --agents is not specified
 default_agents = ["cursor"]
