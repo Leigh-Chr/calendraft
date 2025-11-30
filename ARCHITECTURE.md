@@ -113,7 +113,7 @@ protectedProcedure.query(...)   // ctx.session garanti
 - **Constantes** : `FIELD_LIMITS`
 
 ### `@calendraft/db`
-- Client Prisma configuré avec adapter LibSQL
+- Client Prisma configuré avec adapter PostgreSQL
 - Modèles : `Calendar`, `Event`, `Attendee`, `Alarm`, `User`, `Session`
 
 ### `@calendraft/auth`

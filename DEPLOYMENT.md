@@ -5,7 +5,7 @@ Ce guide décrit les étapes pour déployer Calendraft en production.
 ## Prérequis
 
 - Node.js 18+ ou Bun 1.3.1+
-- Base de données SQLite (ou migration vers PostgreSQL/MySQL pour production)
+- Base de données PostgreSQL
 - Serveur web (Nginx, Caddy, etc.) pour reverse proxy (recommandé)
 - Certificat SSL/TLS (Let's Encrypt recommandé)
 
@@ -18,6 +18,10 @@ Créez un fichier `.env` dans `apps/server/` avec les variables suivantes :
 ```env
 NODE_ENV=production
 PORT=3000
+
+# Base de données PostgreSQL (obligatoire)
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+
 CORS_ORIGIN=https://votre-domaine.com
 BETTER_AUTH_SECRET=votre-secret-key-min-32-caracteres
 BETTER_AUTH_URL=https://api.votre-domaine.com
@@ -53,7 +57,62 @@ SENTRY_PROJECT=calendraft-web
 SENTRY_AUTH_TOKEN=sntrys_xxx
 ```
 
-## Build
+## Déploiement avec Docker (recommandé)
+
+Le moyen le plus simple de déployer Calendraft est d'utiliser Docker.
+
+### 1. Configurer les variables d'environnement
+
+```bash
+cp docker.env.example .env
+```
+
+Éditez `.env` avec vos valeurs de production :
+
+```env
+# Base de données
+POSTGRES_USER=calendraft
+POSTGRES_PASSWORD=votre_mot_de_passe_securise
+POSTGRES_DB=calendraft
+
+# Backend
+CORS_ORIGIN=https://votre-domaine.com
+BETTER_AUTH_SECRET=votre-secret-min-32-caracteres
+BETTER_AUTH_URL=https://api.votre-domaine.com
+
+# Frontend
+VITE_SERVER_URL=https://api.votre-domaine.com
+```
+
+### 2. Construire et démarrer
+
+```bash
+docker compose up -d --build
+```
+
+### 3. Vérifier le déploiement
+
+```bash
+# Voir l'état des services
+docker compose ps
+
+# Voir les logs
+docker compose logs -f
+
+# Tester le health check
+curl http://localhost:3000/health
+```
+
+### Mise à jour
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+---
+
+## Déploiement manuel (sans Docker)
 
 ### 1. Installer les dépendances
 
@@ -83,19 +142,19 @@ Cela va :
 - Build le frontend dans `apps/web/dist/`
 - Build le backend dans `apps/server/dist/`
 
-## Démarrage
+## Démarrage (sans Docker)
 
 ### Backend
 
 ```bash
 cd apps/server
-bun run dist/src/index.js
+bun run dist/index.js
 ```
 
 Ou avec PM2 (recommandé pour production) :
 
 ```bash
-pm2 start apps/server/dist/src/index.js --name calendraft-api
+pm2 start apps/server/dist/index.js --name calendraft-api
 ```
 
 ### Frontend
@@ -140,11 +199,19 @@ server {
 
 ## Checklist pré-déploiement
 
+### Docker
+- [ ] Fichier `.env` créé à partir de `docker.env.example`
+- [ ] `POSTGRES_PASSWORD` modifié avec un mot de passe sécurisé
+- [ ] `BETTER_AUTH_SECRET` généré (min 32 caractères) : `openssl rand -base64 32`
+- [ ] `CORS_ORIGIN` défini avec l'URL du frontend
+- [ ] Docker et Docker Compose installés
+- [ ] Ports 3000 et 3001 disponibles (ou personnalisés dans `.env`)
+
+### Général
 - [ ] Variables d'environnement configurées
 - [ ] `CORS_ORIGIN` défini et ne contient pas `*` ou `localhost`
 - [ ] `BETTER_AUTH_SECRET` généré et sécurisé (min 32 caractères)
-- [ ] Base de données initialisée (`bun run db:push`)
-- [ ] Build réussi (`bun run build`)
+- [ ] Base de données initialisée
 - [ ] Certificat SSL/TLS configuré (HTTPS)
 - [ ] Health check accessible (`/health`)
 - [ ] Rate limiting testé
@@ -152,6 +219,31 @@ server {
 - [ ] Logs configurés et accessibles
 - [ ] Backup de la base de données configuré
 - [ ] Sentry configuré (optionnel mais recommandé)
+
+## Commandes Docker utiles
+
+```bash
+# Voir les logs d'un service spécifique
+docker compose logs -f server
+
+# Accéder au conteneur PostgreSQL
+docker compose exec db psql -U calendraft -d calendraft
+
+# Backup de la base de données
+docker compose exec db pg_dump -U calendraft calendraft > backup.sql
+
+# Restaurer la base de données
+docker compose exec -T db psql -U calendraft calendraft < backup.sql
+
+# Redémarrer un service
+docker compose restart server
+
+# Reconstruire un service
+docker compose up -d --build server
+
+# Supprimer les volumes (ATTENTION: supprime les données)
+docker compose down -v
+```
 
 ## Monitoring
 

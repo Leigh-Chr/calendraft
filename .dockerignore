@@ -1,0 +1,76 @@
+# ===================================
+# Calendraft - Docker Ignore
+# ===================================
+
+# Git
+.git
+.gitignore
+
+# Dependencies (will be installed in container)
+node_modules
+**/node_modules
+
+# Build outputs (will be built in container)
+**/dist
+apps/web/dist
+apps/server/dist
+packages/*/dist
+
+# Development files
+.env
+.env.*
+!.env.example
+*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+.cursor
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun-debug.log*
+
+# Testing
+coverage
+.nyc_output
+*.test.ts
+*.spec.ts
+__tests__
+**/__tests__
+
+# Documentation (not needed in container)
+*.md
+!README.md
+docs
+
+# Local database files (SQLite legacy)
+*.db
+*.sqlite
+*.sqlite3
+apps/server/local.db
+packages/db/local.db
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files (optional - context reads dockerfile separately)
+# Dockerfile  # Keep commented - needed in context for COPY in some cases
+docker-compose*.yml
+.dockerignore
+
+# Misc
+.turbo
+.husky
+*.tsbuildinfo
+.ruler
+bts.jsonc
+knip.config.ts
+biome.json
+

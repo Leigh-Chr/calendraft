@@ -83,12 +83,12 @@ All database operations run from the root:
 
 ## Database Schema
 
-The database uses **SQLite** with Prisma. Schema files are in:
+The database uses **PostgreSQL** with Prisma. Schema files are in:
 - `packages/db/prisma/schema/schema.prisma` - Main config (generator, datasource)
 - `packages/db/prisma/schema/auth.prisma` - Better-Auth tables
 - `packages/db/prisma/schema/calendar.prisma` - Business tables (Calendar, Event, Attendee, Alarm)
 
-The Prisma client uses LibSQL adapter and is exported from `packages/db/src/index.ts`.
+The Prisma client uses PostgreSQL adapter and is exported from `packages/db/src/index.ts`.
 
 ## API Structure
 
@@ -113,7 +113,7 @@ The tRPC context includes:
 
 Authentication is handled by **Better-Auth**:
 - **Configuration**: `packages/auth/src/index.ts`
-- **Adapter**: Prisma adapter with SQLite
+- **Adapter**: Prisma adapter with PostgreSQL
 - **Features**: Email/password, anonymous users, Polar payments
 - **Cookies**: Secure in production (HttpOnly, Secure, SameSite)
 
@@ -149,6 +149,26 @@ import { appRouter, createContext } from '@calendraft/api';
 import { auth } from '@calendraft/auth';
 ```
 
+## Docker
+
+The project is fully dockerized. See `docker-compose.yml` for production and `docker-compose.dev.yml` for development.
+
+### Development with Docker
+```bash
+# Start PostgreSQL only
+docker compose -f docker-compose.dev.yml up -d
+
+# Run apps locally with hot reload
+bun run dev
+```
+
+### Production with Docker
+```bash
+cp docker.env.example .env
+# Edit .env with production values
+docker compose up -d --build
+```
+
 ## Environment Variables
 
 ### Backend (`apps/server/.env`)
@@ -157,7 +177,7 @@ PORT=3000
 CORS_ORIGIN=http://localhost:3001
 BETTER_AUTH_SECRET=your-secret-key-min-32-chars
 BETTER_AUTH_URL=http://localhost:3000
-DATABASE_URL=file:./local.db
+DATABASE_URL=postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev
 SENTRY_DSN=... (optional)
 ```
 

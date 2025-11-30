@@ -47,7 +47,7 @@ L'objectif est d'offrir une expérience moderne et intuitive permettant aux util
 - **tRPC** - APIs type-safe end-to-end
 - **Bun** - Runtime et gestionnaire de paquets
 - **Prisma** - ORM TypeScript-first
-- **SQLite** - Base de données
+- **PostgreSQL** - Base de données
 - **Better-Auth** - Authentification
 - **Biome** - Linting et formatting
 - **PWA** - Support Progressive Web App
@@ -59,6 +59,7 @@ L'objectif est d'offrir une expérience moderne et intuitive permettant aux util
 ### Prérequis
 
 - [Bun](https://bun.sh) (version 1.3.1 ou supérieure)
+- [Docker](https://www.docker.com/) (optionnel, pour PostgreSQL en local)
 
 ### Installation
 
@@ -70,25 +71,43 @@ bun install
 
 ### Configuration de la base de données
 
-Ce projet utilise SQLite avec Prisma.
+Ce projet utilise PostgreSQL avec Prisma.
 
-1. Générez le client Prisma et poussez le schéma :
+#### Option 1 : PostgreSQL avec Docker (recommandé)
 
 ```bash
-bun run db:push
+# Démarrer PostgreSQL en local
+docker compose -f docker-compose.dev.yml up -d
+
+# Configurer la variable d'environnement dans apps/server/.env
+DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"
 ```
 
-2. (Optionnel) Ouvrez Prisma Studio pour visualiser la base de données :
+#### Option 2 : PostgreSQL existant
+
+```env
+# Dans apps/server/.env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+```
+
+#### Initialiser la base de données
 
 ```bash
+# Générer le client Prisma et pousser le schéma
+bun run db:push
+
+# (Optionnel) Ouvrir Prisma Studio
 bun run db:studio
 ```
 
 ### Configuration de l'environnement
 
-Créez un fichier `.env` dans `apps/server` si nécessaire (la plupart des configurations ont des valeurs par défaut) :
+Créez un fichier `.env` dans `apps/server` :
 
 ```env
+# Base de données PostgreSQL (obligatoire)
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+
 # Port du serveur backend (défaut: 3000)
 PORT=3000
 
@@ -128,6 +147,49 @@ bun run dev:server
 # Frontend uniquement
 bun run dev:web
 ```
+
+## Docker
+
+Le projet est entièrement dockerisé pour faciliter le déploiement.
+
+### 🚀 Démarrage rapide
+
+#### Option 1 : Développement (PostgreSQL Docker + Apps locales)
+
+```bash
+# 1. Démarrer PostgreSQL
+docker-compose -f docker-compose.dev.yml up -d
+
+# 2. Initialiser la base de données
+bun run db:push
+
+# 3. Lancer les apps en local (hot reload)
+bun run dev
+```
+
+#### Option 2 : Production complète (tout en Docker)
+
+```bash
+# 1. Configurer l'environnement
+cp docker.env.example .env
+# Éditer .env avec vos valeurs
+
+# 2. Construire et démarrer
+docker-compose up -d --build
+
+# 3. Voir les logs
+docker-compose logs -f
+```
+
+### Services Docker
+
+| Service | Port | Description |
+|---------|------|-------------|
+| `db` | 5432 | PostgreSQL 16 |
+| `server` | 3000 | Backend API (Bun + Hono) |
+| `web` | 3001 | Frontend (Nginx) |
+
+📖 **Guide complet** : Voir [DOCKER.md](./DOCKER.md) pour toutes les commandes et le dépannage.
 
 ## Production
 

@@ -25,8 +25,8 @@ const calendars = await prisma.calendar.findMany({
 ### Variables d'environnement
 
 ```env
-# URL de la base de données SQLite
-DATABASE_URL="file:./local.db"
+# URL de la base de données PostgreSQL
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 ```
 
 ## Scripts
@@ -151,17 +151,21 @@ packages/db/
 └── prisma.config.ts       # Config Prisma
 ```
 
-### Adapter LibSQL
+### Adapter PostgreSQL
 
-Le client utilise l'adapter LibSQL pour SQLite :
+Le client utilise l'adapter PostgreSQL :
 
 ```typescript
-import { PrismaLibSql } from '@prisma/adapter-libsql';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../prisma/generated/client';
 
-const adapter = new PrismaLibSql({
-  url: process.env.DATABASE_URL ?? 'file:./dev.db'
-});
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error('DATABASE_URL environment variable is required');
+}
+
+const adapter = new PrismaPg({ connectionString });
 
 const prisma = new PrismaClient({ adapter });
 ```
@@ -229,7 +233,7 @@ export type { Calendar, Event, Attendee, Alarm } from '../prisma/generated/clien
 ## Dépendances
 
 - `@prisma/client` - Client Prisma
-- `@prisma/adapter-libsql` - Adapter pour SQLite/LibSQL
+- `@prisma/adapter-pg` - Adapter pour PostgreSQL
 
 ## Voir aussi
 
