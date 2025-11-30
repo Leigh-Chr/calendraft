@@ -239,3 +239,10 @@ pm2 logs calendraft-api
 
 Pour toute question ou problème, consultez le README.md principal ou ouvrez une issue.
 
+## Voir aussi
+
+- [README.md](README.md) - Vue d'ensemble et démarrage rapide
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Architecture des packages
+- [SECURITY.md](SECURITY.md) - Politique de sécurité
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Guide de contribution
+

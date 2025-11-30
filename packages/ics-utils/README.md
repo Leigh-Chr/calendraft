@@ -72,6 +72,11 @@ formatAlarmTrigger('before', 15, 'minutes')  // '-PT15M'
 - `EventInput` - Input pour génération
 - `GeneratorOptions` - Options du générateur
 
+## Voir aussi
+
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Architecture globale du projet
+- [@calendraft/core](../core/README.md) - Logique métier et types
+
 ## License
 
 MIT

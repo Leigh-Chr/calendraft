@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📚 Documentation
+    about: Consultez la documentation avant d'ouvrir une issue (README.md, ARCHITECTURE.md, DEPLOYMENT.md)
+

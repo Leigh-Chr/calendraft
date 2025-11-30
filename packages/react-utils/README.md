@@ -82,6 +82,11 @@ import { cn } from '@calendraft/react-utils';
 <div className={cn('px-4', isActive && 'bg-blue-500', className)} />
 ```
 
+## Voir aussi
+
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Architecture globale du projet
+- [@calendraft/core](../core/README.md) - Logique métier et types
+
 ## License
 
 MIT

@@ -97,6 +97,12 @@ buildRRule({ frequency: 'MONTHLY', count: 6 })
 // 'FREQ=MONTHLY;COUNT=6'
 ```
 
+## Voir aussi
+
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Architecture globale du projet
+- [@calendraft/schemas](../schemas/README.md) - Schémas de validation Zod
+- [@calendraft/ics-utils](../ics-utils/README.md) - Utilitaires ICS
+
 ## License
 
 MIT

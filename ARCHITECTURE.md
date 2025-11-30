@@ -1,33 +1,53 @@
 # Architecture Calendraft
 
+Ce document décrit l'architecture technique du projet et les relations entre les packages.
+
+## Vue d'ensemble
+
+Calendraft est un **monorepo** géré avec Turborepo, composé de :
+- **2 applications** : `apps/web` (frontend) et `apps/server` (backend)
+- **7 packages** partagés dans `packages/`
+
 ## Structure des packages
 
 ```
 packages/
-├── ics-utils/     # Parsing/génération ICS (aucune dépendance interne)
-├── core/          # Logique métier pure (dépend de date-fns uniquement)
-├── react-utils/   # Hooks et utilitaires React
+├── ics-utils/     # Parsing/génération ICS (0 dépendance interne)
+├── core/          # Logique métier pure (dépend de date-fns)
 ├── schemas/       # Schémas Zod partagés
-├── db/            # Couche données Prisma
-├── api/           # API tRPC
-└── auth/          # Authentification
+├── react-utils/   # Hooks et utilitaires React
+├── db/            # Client Prisma et schémas de base de données
+├── auth/          # Configuration Better-Auth
+└── api/           # Routers tRPC
 ```
 
 ## Diagramme de dépendances
 
 ```
-apps/web ─────┬─────────────────────────────────────┐
-              │                                     │
-              ▼                                     ▼
-        react-utils                               api
-              │                                     │
-              └──────────────┬──────────────────────┘
-                             │
-                             ▼
-                           core
-                             │
-                             ▼
-                        ics-utils  (0 dépendance interne)
+                        ┌─────────────┐
+                        │  apps/web   │
+                        └──────┬──────┘
+                               │
+              ┌────────────────┼────────────────┐
+              │                │                │
+              ▼                ▼                ▼
+        ┌───────────┐    ┌──────────┐    ┌──────────┐
+        │react-utils│    │ schemas  │    │   api    │◄─── apps/server
+        └─────┬─────┘    └────┬─────┘    └────┬─────┘
+              │               │               │
+              │               │    ┌──────────┼──────────┐
+              │               │    │          │          │
+              │               │    ▼          ▼          ▼
+              │               │  ┌────┐   ┌──────┐   ┌──────┐
+              │               │  │auth│   │  db  │   │ core │
+              │               │  └──┬─┘   └───┬──┘   └───┬──┘
+              │               │     │         │         │
+              └───────────────┴─────┴─────────┴─────────┘
+                                      │
+                                      ▼
+                              ┌─────────────┐
+                              │  ics-utils  │ (0 dépendance interne)
+                              └─────────────┘
 ```
 
 ## Packages externalisables
@@ -68,6 +88,26 @@ apps/web ─────┬─────────────────�
 3. **Pas d'over-engineering** - Une fonction par besoin, pas de converters inutiles
 4. **Tree-shakeable** - Imports granulaires possibles
 
+### `@calendraft/schemas`
+- **Événements** : `eventCreateSchema`, `eventUpdateSchema`, `eventFormDataSchema`
+- **Entités** : `attendeeSchema`, `alarmSchema`
+- **RFC 5545** : `rruleSchema`, `geoCoordinatesSchema`, `recurrenceIdSchema`
+- **Constantes** : `FIELD_LIMITS`
+
+### `@calendraft/db`
+- Client Prisma configuré avec adapter LibSQL
+- Modèles : `Calendar`, `Event`, `Attendee`, `Alarm`, `User`, `Session`
+
+### `@calendraft/auth`
+- Configuration Better-Auth avec adapter Prisma
+- Plugin Polar pour les paiements
+- Gestion des cookies sécurisés
+
+### `@calendraft/api`
+- `calendarRouter` : CRUD calendriers, import/export ICS, fusion
+- `eventRouter` : CRUD événements
+- `publicProcedure` / `protectedProcedure`
+
 ## Migration depuis apps/web
 
 ```typescript
@@ -78,3 +118,9 @@ import { FIELD_LIMITS } from '@/lib/field-limits';
 // Après
 import { parseTags, FIELD_LIMITS } from '@calendraft/core';
 ```
+
+## Voir aussi
+
+- [README.md](README.md) - Vue d'ensemble du projet
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Guide de déploiement
+- Documentation des packages dans `packages/*/README.md`

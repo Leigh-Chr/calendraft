@@ -1,5 +1,10 @@
 # Calendraft
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-1.3-black?logo=bun&logoColor=white)](https://bun.sh/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 **Calendraft** est une plateforme web conçue pour simplifier la gestion, la modification et la création de calendriers au format **.ics**.
 
 L'objectif est d'offrir une expérience moderne et intuitive permettant aux utilisateurs de travailler facilement avec des fichiers calendrier — sans outils complexes, sans configuration, et sans compétences techniques particulières.
@@ -110,6 +115,20 @@ Lancez l'application en mode développement :
 bun run dev
 ```
 
+Cela démarre :
+- Le serveur backend sur [http://localhost:3000](http://localhost:3000)
+- L'application web sur [http://localhost:3001](http://localhost:3001)
+
+Ou lancez-les séparément :
+
+```bash
+# Backend uniquement
+bun run dev:server
+
+# Frontend uniquement
+bun run dev:web
+```
+
 ## Production
 
 Pour déployer en production, consultez le guide complet : [DEPLOYMENT.md](./DEPLOYMENT.md)
@@ -141,23 +160,6 @@ Pour déployer en production, consultez le guide complet : [DEPLOYMENT.md](./DEP
 - Validation des inputs (taille max fichiers : 5MB)
 - Limitations utilisateurs anonymes : 5 calendriers, 100 événements/calendrier
 
-Cela démarre :
-- Le serveur backend sur [http://localhost:3000](http://localhost:3000)
-- L'application web sur [http://localhost:3001](http://localhost:3001)
-
-Ou lancez-les séparément :
-
-```bash
-# Backend uniquement
-bun run dev:server
-
-# Frontend uniquement
-bun run dev:web
-```
-
-
-
-
 
 
 
@@ -166,13 +168,16 @@ bun run dev:web
 ```
 calendraft/
 ├── apps/
-│   ├── web/         # Application frontend (React + TanStack Router)
-│   └── server/      # API backend (Hono, TRPC)
+│   ├── web/           # Application frontend (React + TanStack Router)
+│   └── server/        # Serveur API (Hono)
 ├── packages/
-│   ├── api/         # Logique métier / routers tRPC
-│   │   └── lib/     # Utilitaires ICS (parser & generator)
-│   ├── auth/        # Configuration Better-Auth
-│   └── db/          # Schémas Prisma (Calendar, Event, User)
+│   ├── api/           # Routers tRPC
+│   ├── auth/          # Configuration Better-Auth
+│   ├── core/          # Logique métier et types partagés
+│   ├── db/            # Client Prisma et schémas
+│   ├── ics-utils/     # Parsing et génération ICS
+│   ├── react-utils/   # Hooks et utilitaires React
+│   └── schemas/       # Schémas de validation Zod
 ```
 
 ## Guide d'utilisation
@@ -285,3 +290,33 @@ Une fois configuré, l'assistant IA pourra :
 - Corréler les erreurs avec le code source
 
 Pour plus d'informations : [github.com/getsentry/sentry-mcp](https://github.com/getsentry/sentry-mcp)
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [README.md](README.md) | Ce fichier - Vue d'ensemble et démarrage rapide |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Architecture des packages et diagramme de dépendances |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Guide complet de déploiement en production |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Guide de contribution au projet |
+| [SECURITY.md](SECURITY.md) | Politique de sécurité et signalement de vulnérabilités |
+
+### Documentation des packages
+
+| Package | Description |
+|---------|-------------|
+| [@calendraft/core](packages/core/README.md) | Logique métier et types partagés |
+| [@calendraft/ics-utils](packages/ics-utils/README.md) | Parsing et génération de fichiers ICS |
+| [@calendraft/react-utils](packages/react-utils/README.md) | Hooks et utilitaires React |
+| [@calendraft/api](packages/api/README.md) | API tRPC et routers |
+| [@calendraft/auth](packages/auth/README.md) | Configuration Better-Auth |
+| [@calendraft/db](packages/db/README.md) | Client Prisma et schémas DB |
+| [@calendraft/schemas](packages/schemas/README.md) | Schémas de validation Zod |
+
+## Contribuer
+
+Les contributions sont les bienvenues ! Consultez le [guide de contribution](CONTRIBUTING.md) pour commencer.
+
+## Licence
+
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
