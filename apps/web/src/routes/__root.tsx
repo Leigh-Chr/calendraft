@@ -33,7 +33,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				name: "theme-color",
-				content: "#0c0c0c",
+				content: "#18181b",
 			},
 		],
 		links: [
@@ -67,9 +67,11 @@ function RootComponent() {
 				storageKey="vite-ui-theme"
 			>
 				<ErrorBoundary>
-					<div className="grid h-svh grid-rows-[auto_1fr]">
+					<div className="flex min-h-svh flex-col">
 						<Header />
-						<Outlet />
+						<main className="flex-1">
+							<Outlet />
+						</main>
 					</div>
 				</ErrorBoundary>
 				<Toaster richColors />

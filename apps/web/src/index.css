@@ -1,17 +1,19 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-	--font-sans:
-		"Inter", "Geist", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif,
+		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--font-mono: "Geist Mono Variable", ui-monospace, monospace;
 }
 
 html,
 body {
-	@apply bg-background text-foreground;
+	@apply bg-background text-foreground antialiased;
 
 	@media (prefers-color-scheme: dark) {
 		color-scheme: dark;
@@ -19,92 +21,126 @@ body {
 }
 
 /* ============================================
-   VARIABLES DE THÈME - MODE CLAIR
+   CALENDRAFT - DESIGN SYSTEM
    ============================================
-   Modifiez ces valeurs pour personnaliser le thème.
-   Format: oklch(lightness chroma hue)
-   - Lightness: 0 (noir) à 1 (blanc)
-   - Chroma: 0 (gris) à 0.4 (couleur saturée)
-   - Hue: 0-360 (angle de la couleur)
-
-   Outils pour générer des thèmes:
-   - https://allshadcn.com/components/tweakcn/
-   - https://customizer.railly.dev/
-   - https://www.windpalette.com/shadcn
+   Palette moderne "Minimal Premium"
+   Inspirée de Linear, Vercel, Notion
+   
+   Accent principal : Indigo/Violet
+   Fonds : Neutres purs (blanc/noir)
    ============================================ */
+
 :root {
 	--radius: 0.625rem;
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.145 0 0);
+
+	/* Mode clair - Blanc pur et gris neutres */
+	--background: oklch(0.995 0 0);
+	--foreground: oklch(0.141 0.005 286);
+
 	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.145 0 0);
+	--card-foreground: oklch(0.141 0.005 286);
+
 	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.145 0 0);
-	--primary: oklch(0.205 0 0);
-	--primary-foreground: oklch(0.985 0 0);
-	--secondary: oklch(0.97 0 0);
-	--secondary-foreground: oklch(0.205 0 0);
-	--muted: oklch(0.97 0 0);
-	--muted-foreground: oklch(0.556 0 0);
-	--accent: oklch(0.97 0 0);
-	--accent-foreground: oklch(0.205 0 0);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.922 0 0);
-	--input: oklch(0.922 0 0);
-	--ring: oklch(0.708 0 0);
-	--chart-1: oklch(0.646 0.222 41.116);
-	--chart-2: oklch(0.6 0.118 184.704);
-	--chart-3: oklch(0.398 0.07 227.392);
-	--chart-4: oklch(0.828 0.189 84.429);
-	--chart-5: oklch(0.769 0.188 70.08);
+	--popover-foreground: oklch(0.141 0.005 286);
+
+	/* Accent primaire - Indigo */
+	--primary: oklch(0.55 0.22 270);
+	--primary-foreground: oklch(0.98 0.005 270);
+
+	/* Secondaire - Gris très léger */
+	--secondary: oklch(0.965 0.001 286);
+	--secondary-foreground: oklch(0.205 0.005 286);
+
+	/* Muted - Gris doux */
+	--muted: oklch(0.955 0.001 286);
+	--muted-foreground: oklch(0.45 0.01 286);
+
+	/* Accent */
+	--accent: oklch(0.955 0.001 286);
+	--accent-foreground: oklch(0.205 0.005 286);
+
+	/* Destructive */
+	--destructive: oklch(0.55 0.2 25);
+
+	/* Borders & inputs */
+	--border: oklch(0.915 0.002 286);
+	--input: oklch(0.915 0.002 286);
+	--ring: oklch(0.55 0.22 270);
+
+	/* Charts - Palette harmonieuse basée sur l'indigo */
+	--chart-1: oklch(0.55 0.22 270);
+	--chart-2: oklch(0.60 0.18 230);
+	--chart-3: oklch(0.65 0.15 300);
+	--chart-4: oklch(0.55 0.12 200);
+	--chart-5: oklch(0.50 0.15 320);
+
+	/* Sidebar */
 	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.145 0 0);
-	--sidebar-primary: oklch(0.205 0 0);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.97 0 0);
-	--sidebar-accent-foreground: oklch(0.205 0 0);
-	--sidebar-border: oklch(0.922 0 0);
-	--sidebar-ring: oklch(0.708 0 0);
+	--sidebar-foreground: oklch(0.141 0.005 286);
+	--sidebar-primary: oklch(0.55 0.22 270);
+	--sidebar-primary-foreground: oklch(0.98 0.005 270);
+	--sidebar-accent: oklch(0.955 0.001 286);
+	--sidebar-accent-foreground: oklch(0.205 0.005 286);
+	--sidebar-border: oklch(0.915 0.002 286);
+	--sidebar-ring: oklch(0.55 0.22 270);
 }
 
 /* ============================================
-   VARIABLES DE THÈME - MODE SOMBRE
-   ============================================
-   Même structure que le mode clair, adaptez les valeurs
-   pour le mode sombre.
+   MODE SOMBRE - Noir profond et neutre
    ============================================ */
 .dark {
-	--background: oklch(0.145 0 0);
-	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.205 0 0);
-	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.205 0 0);
-	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.922 0 0);
-	--primary-foreground: oklch(0.205 0 0);
-	--secondary: oklch(0.269 0 0);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.269 0 0);
-	--muted-foreground: oklch(0.708 0 0);
-	--accent: oklch(0.269 0 0);
-	--accent-foreground: oklch(0.985 0 0);
-	--destructive: oklch(0.704 0.191 22.216);
-	--border: oklch(1 0 0 / 10%);
-	--input: oklch(1 0 0 / 15%);
-	--ring: oklch(0.556 0 0);
-	--chart-1: oklch(0.488 0.243 264.376);
-	--chart-2: oklch(0.696 0.17 162.48);
-	--chart-3: oklch(0.769 0.188 70.08);
-	--chart-4: oklch(0.627 0.265 303.9);
-	--chart-5: oklch(0.645 0.246 16.439);
-	--sidebar: oklch(0.205 0 0);
-	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.488 0.243 264.376);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.269 0 0);
-	--sidebar-accent-foreground: oklch(0.985 0 0);
-	--sidebar-border: oklch(1 0 0 / 10%);
-	--sidebar-ring: oklch(0.556 0 0);
+	/* Fond principal - Noir profond sans teinte parasite */
+	--background: oklch(0.105 0.005 286);
+	--foreground: oklch(0.965 0.002 286);
+
+	/* Cards - Élévation subtile */
+	--card: oklch(0.135 0.005 286);
+	--card-foreground: oklch(0.965 0.002 286);
+
+	/* Popover */
+	--popover: oklch(0.135 0.005 286);
+	--popover-foreground: oklch(0.965 0.002 286);
+
+	/* Primary - Indigo plus lumineux en dark */
+	--primary: oklch(0.65 0.22 270);
+	--primary-foreground: oklch(0.15 0.03 270);
+
+	/* Secondary */
+	--secondary: oklch(0.185 0.005 286);
+	--secondary-foreground: oklch(0.965 0.002 286);
+
+	/* Muted */
+	--muted: oklch(0.205 0.005 286);
+	--muted-foreground: oklch(0.55 0.01 286);
+
+	/* Accent */
+	--accent: oklch(0.205 0.005 286);
+	--accent-foreground: oklch(0.965 0.002 286);
+
+	/* Destructive */
+	--destructive: oklch(0.60 0.2 25);
+
+	/* Borders */
+	--border: oklch(0.245 0.005 286);
+	--input: oklch(0.205 0.005 286);
+	--ring: oklch(0.65 0.22 270);
+
+	/* Charts */
+	--chart-1: oklch(0.65 0.22 270);
+	--chart-2: oklch(0.68 0.18 230);
+	--chart-3: oklch(0.70 0.15 300);
+	--chart-4: oklch(0.62 0.12 200);
+	--chart-5: oklch(0.58 0.15 320);
+
+	/* Sidebar */
+	--sidebar: oklch(0.12 0.005 286);
+	--sidebar-foreground: oklch(0.965 0.002 286);
+	--sidebar-primary: oklch(0.65 0.22 270);
+	--sidebar-primary-foreground: oklch(0.15 0.03 270);
+	--sidebar-accent: oklch(0.185 0.005 286);
+	--sidebar-accent-foreground: oklch(0.965 0.002 286);
+	--sidebar-border: oklch(0.245 0.005 286);
+	--sidebar-ring: oklch(0.65 0.22 270);
 }
 
 @theme inline {
@@ -152,4 +188,73 @@ body {
 	body {
 		@apply bg-background text-foreground;
 	}
+}
+
+/* ============================================
+   STYLES PERSONNALISÉS CALENDRAFT
+   ============================================ */
+
+/* Gradient signature - Dégradé indigo subtil */
+.gradient-brand {
+	background: linear-gradient(
+		135deg,
+		oklch(0.55 0.22 270),
+		oklch(0.60 0.20 290),
+		oklch(0.55 0.18 250)
+	);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+/* Step numbers en outline */
+.step-number {
+	font-family: var(--font-mono);
+	font-weight: 700;
+	-webkit-text-stroke: 2px var(--primary);
+	color: transparent;
+	opacity: 0.25;
+}
+
+/* Dot grid pattern pour le hero */
+.dot-grid {
+	background-image: radial-gradient(
+		circle at center,
+		var(--border) 1px,
+		transparent 1px
+	);
+	background-size: 24px 24px;
+}
+
+/* Glow effect pour les cards - utilise les CSS variables */
+.card-glow {
+	transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-glow:hover {
+	box-shadow:
+		0 0 0 1px var(--ring) / 0.15,
+		0 8px 24px oklch(0 0 0 / 0.08),
+		0 0 40px var(--ring) / 0.06;
+}
+
+.dark .card-glow:hover {
+	box-shadow:
+		0 0 0 1px var(--ring) / 0.25,
+		0 8px 24px oklch(0 0 0 / 0.3),
+		0 0 40px var(--ring) / 0.08;
+}
+
+/* Focus states pour les cards interactives */
+.card-glow:focus-visible {
+	outline: none;
+	box-shadow:
+		0 0 0 2px var(--background),
+		0 0 0 4px var(--ring);
+}
+
+/* Technical text styling (for .ics) */
+.text-technical {
+	font-family: var(--font-mono);
+	color: var(--primary);
 }
