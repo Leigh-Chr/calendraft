@@ -11,19 +11,6 @@ const ANONYMOUS_LIMITS = {
 } as const;
 
 /**
- * Middleware to require authentication (either session or anonymous ID)
- */
-export function requireAuth(ctx: Context) {
-	if (!ctx.userId) {
-		throw new TRPCError({
-			code: "UNAUTHORIZED",
-			message: "User ID required. Please authenticate or provide anonymous ID.",
-		});
-	}
-	return ctx;
-}
-
-/**
  * Build Prisma where clause for user ownership verification
  * Supports both authenticated and anonymous users
  */

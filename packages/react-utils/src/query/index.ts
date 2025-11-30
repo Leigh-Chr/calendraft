@@ -2,9 +2,4 @@
  * React Query utilities exports
  */
 
-export {
-	calendarKeys,
-	createQueryKeys,
-	eventKeys,
-	queryKeyUtils,
-} from "./query-keys";
+export { createQueryKeys, queryKeyUtils } from "./query-keys";

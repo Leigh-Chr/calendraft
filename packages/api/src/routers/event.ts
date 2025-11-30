@@ -2,7 +2,7 @@ import prisma from "@calendraft/db";
 import { eventCreateSchema, eventUpdateSchema } from "@calendraft/schemas";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
-import { publicProcedure, router } from "../index";
+import { authOrAnonProcedure, router } from "../index";
 import {
 	prepareAlarmData,
 	prepareAttendeeData,
@@ -160,7 +160,7 @@ async function updateEventRelations(
 }
 
 export const eventRouter = router({
-	list: publicProcedure
+	list: authOrAnonProcedure
 		.input(
 			z.object({
 				calendarId: z.string(),
@@ -173,13 +173,6 @@ export const eventRouter = router({
 			}),
 		)
 		.query(async ({ ctx, input }) => {
-			if (!ctx.userId) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User ID required",
-				});
-			}
-
 			// Verify calendar belongs to user
 			const calendar = await prisma.calendar.findFirst({
 				where: {
@@ -284,16 +277,9 @@ export const eventRouter = router({
 			};
 		}),
 
-	getById: publicProcedure
+	getById: authOrAnonProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
-			if (!ctx.userId) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User ID required",
-				});
-			}
-
 			const event = await prisma.event.findFirst({
 				where: { id: input.id },
 				include: {
@@ -334,16 +320,9 @@ export const eventRouter = router({
 			return event;
 		}),
 
-	create: publicProcedure
+	create: authOrAnonProcedure
 		.input(eventCreateSchema)
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.userId) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User ID required",
-				});
-			}
-
 			// Check event limit for anonymous users
 			await checkAnonymousEventLimit(ctx, input.calendarId);
 
@@ -458,16 +437,9 @@ export const eventRouter = router({
 			return event;
 		}),
 
-	update: publicProcedure
+	update: authOrAnonProcedure
 		.input(eventUpdateSchema)
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.userId) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User ID required",
-				});
-			}
-
 			// Verify access
 			const event = await verifyEventAccess(
 				input.id,
@@ -543,16 +515,9 @@ export const eventRouter = router({
 			});
 		}),
 
-	delete: publicProcedure
+	delete: authOrAnonProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.userId) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User ID required",
-				});
-			}
-
 			// Verify access
 			await verifyEventAccess(
 				input.id,
@@ -567,7 +532,7 @@ export const eventRouter = router({
 			return { success: true };
 		}),
 
-	duplicate: publicProcedure
+	duplicate: authOrAnonProcedure
 		.input(
 			z.object({
 				id: z.string(),
@@ -576,13 +541,6 @@ export const eventRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.userId) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User ID required",
-				});
-			}
-
 			// Verify access to source event
 			const sourceEvent = await prisma.event.findFirst({
 				where: { id: input.id },

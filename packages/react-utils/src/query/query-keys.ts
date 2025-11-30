@@ -1,12 +1,21 @@
 /**
  * Query key factory for React Query
  * Provides type-safe, consistent query key management
+ *
+ * Note: This is a generic utility for creating query keys.
+ * For Calendraft-specific query keys, see apps/web/src/lib/query-keys.ts
  */
 
 /**
  * Create a query key factory for a domain
  * @param domain - The domain name (e.g., "calendar", "event")
  * @returns Query key factory functions
+ *
+ * @example
+ * const userKeys = createQueryKeys("user");
+ * userKeys.all; // ["user"]
+ * userKeys.list(); // ["user", "list"]
+ * userKeys.detail("123"); // ["user", "detail", "123"]
  */
 export function createQueryKeys<T extends string>(domain: T) {
 	return {
@@ -18,16 +27,6 @@ export function createQueryKeys<T extends string>(domain: T) {
 		detail: (id: string) => [domain, "detail", id] as const,
 	};
 }
-
-/**
- * Default query keys for calendar domain
- */
-export const calendarKeys = createQueryKeys("calendar");
-
-/**
- * Default query keys for event domain
- */
-export const eventKeys = createQueryKeys("event");
 
 /**
  * Query key utilities

@@ -77,7 +77,7 @@ packages/
 
 ### `@calendraft/react-utils`
 - **Hooks**: `useDebounce`, `useLocalStorage`, `useIsMobile`, `usePrevious`, `useMounted`
-- **Query**: `createQueryKeys()`, `calendarKeys`, `eventKeys`
+- **Query**: `createQueryKeys()` - Factory générique pour query keys
 - **Error**: `getErrorMessage()`, `isNetworkError()`, `logErrorInDev()`
 - **Style**: `cn()` (Tailwind class merge)
 
@@ -87,6 +87,24 @@ packages/
 2. **Pure functions** - Pas d'effets de bord dans `core` et `ics-utils`
 3. **Pas d'over-engineering** - Une fonction par besoin, pas de converters inutiles
 4. **Tree-shakeable** - Imports granulaires possibles
+
+## Authentification
+
+L'application supporte deux modes d'utilisateurs :
+- **Authentifié** : Utilisateur avec compte (session Better-Auth)
+- **Anonyme** : ID unique stocké côté client (`anon-xxx`)
+
+Les procédures tRPC utilisent le pattern suivant :
+```typescript
+// Endpoints publics (health check, etc.)
+publicProcedure.query(...)
+
+// Endpoints nécessitant identification (session OU anonyme)
+authOrAnonProcedure.query(...)  // ctx.userId garanti
+
+// Endpoints nécessitant un compte (session uniquement)
+protectedProcedure.query(...)   // ctx.session garanti
+```
 
 ### `@calendraft/schemas`
 - **Événements** : `eventCreateSchema`, `eventUpdateSchema`, `eventFormDataSchema`
@@ -106,7 +124,10 @@ packages/
 ### `@calendraft/api`
 - `calendarRouter` : CRUD calendriers, import/export ICS, fusion
 - `eventRouter` : CRUD événements
-- `publicProcedure` / `protectedProcedure`
+- **Procédures tRPC** :
+  - `publicProcedure` : Endpoints vraiment publics (health check)
+  - `authOrAnonProcedure` : Requiert session OU ID anonyme (majorité des endpoints)
+  - `protectedProcedure` : Requiert session authentifiée uniquement
 
 ## Migration depuis apps/web
 

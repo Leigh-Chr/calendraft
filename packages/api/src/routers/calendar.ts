@@ -1,7 +1,7 @@
 import prisma from "@calendraft/db";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
-import { publicProcedure, router } from "../index";
+import { authOrAnonProcedure, router } from "../index";
 import {
 	parseAlarmAction,
 	parseAttendeeRole,
@@ -19,7 +19,6 @@ import {
 	buildOwnershipFilter,
 	checkAnonymousCalendarLimit,
 	getAnonymousUsage,
-	requireAuth,
 } from "../middleware";
 
 /**
@@ -154,9 +153,7 @@ async function createEventFromParsed(
 }
 
 export const calendarRouter = router({
-	list: publicProcedure.query(async ({ ctx }) => {
-		requireAuth(ctx);
-
+	list: authOrAnonProcedure.query(async ({ ctx }) => {
 		const calendars = await prisma.calendar.findMany({
 			where: buildOwnershipFilter(ctx),
 			include: {
@@ -193,11 +190,9 @@ export const calendarRouter = router({
 		}));
 	}),
 
-	getById: publicProcedure
+	getById: authOrAnonProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
-			requireAuth(ctx);
-
 			const calendar = await prisma.calendar.findFirst({
 				where: {
 					id: input.id,
@@ -229,7 +224,7 @@ export const calendarRouter = router({
 			return calendar;
 		}),
 
-	create: publicProcedure
+	create: authOrAnonProcedure
 		.input(
 			z.object({
 				name: z
@@ -246,7 +241,6 @@ export const calendarRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			requireAuth(ctx);
 			await checkAnonymousCalendarLimit(ctx);
 
 			const calendar = await prisma.calendar.create({
@@ -260,7 +254,7 @@ export const calendarRouter = router({
 			return calendar;
 		}),
 
-	update: publicProcedure
+	update: authOrAnonProcedure
 		.input(
 			z.object({
 				id: z.string(),
@@ -279,8 +273,6 @@ export const calendarRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			requireAuth(ctx);
-
 			const calendar = await prisma.calendar.findFirst({
 				where: {
 					id: input.id,
@@ -309,11 +301,9 @@ export const calendarRouter = router({
 			});
 		}),
 
-	delete: publicProcedure
+	delete: authOrAnonProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			requireAuth(ctx);
-
 			const calendar = await prisma.calendar.findFirst({
 				where: {
 					id: input.id,
@@ -335,7 +325,7 @@ export const calendarRouter = router({
 			return { success: true };
 		}),
 
-	importIcs: publicProcedure
+	importIcs: authOrAnonProcedure
 		.input(
 			z.object({
 				fileContent: z.string(),
@@ -343,8 +333,6 @@ export const calendarRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			requireAuth(ctx);
-
 			validateFileSize(input.fileContent);
 
 			const parseResult = parseIcsFile(input.fileContent);
@@ -380,11 +368,9 @@ export const calendarRouter = router({
 			};
 		}),
 
-	exportIcs: publicProcedure
+	exportIcs: authOrAnonProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
-			requireAuth(ctx);
-
 			const calendar = await prisma.calendar.findFirst({
 				where: {
 					id: input.id,
@@ -502,7 +488,7 @@ export const calendarRouter = router({
 			return { icsContent, calendarName: calendar.name };
 		}),
 
-	merge: publicProcedure
+	merge: authOrAnonProcedure
 		.input(
 			z.object({
 				calendarIds: z.array(z.string()).min(2),
@@ -511,8 +497,6 @@ export const calendarRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			requireAuth(ctx);
-
 			// Fetch all calendars
 			const calendars = await prisma.calendar.findMany({
 				where: {
@@ -578,11 +562,9 @@ export const calendarRouter = router({
 			};
 		}),
 
-	cleanDuplicates: publicProcedure
+	cleanDuplicates: authOrAnonProcedure
 		.input(z.object({ calendarId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			requireAuth(ctx);
-
 			// Verify calendar ownership
 			const calendar = await prisma.calendar.findFirst({
 				where: {
@@ -629,7 +611,7 @@ export const calendarRouter = router({
 			};
 		}),
 
-	importIcsIntoCalendar: publicProcedure
+	importIcsIntoCalendar: authOrAnonProcedure
 		.input(
 			z.object({
 				calendarId: z.string(),
@@ -638,8 +620,6 @@ export const calendarRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			requireAuth(ctx);
-
 			// Verify calendar ownership
 			const calendar = await prisma.calendar.findFirst({
 				where: {
@@ -709,8 +689,7 @@ export const calendarRouter = router({
 	 * Get usage statistics for the current user
 	 * Returns limits and current usage (useful for anonymous users)
 	 */
-	getUsage: publicProcedure.query(async ({ ctx }) => {
-		requireAuth(ctx);
+	getUsage: authOrAnonProcedure.query(async ({ ctx }) => {
 		const usage = await getAnonymousUsage(ctx);
 		return usage;
 	}),

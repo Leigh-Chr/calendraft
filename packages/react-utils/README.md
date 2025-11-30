@@ -46,17 +46,17 @@ const isMounted = useMounted();
 ## Query Keys
 
 ```typescript
-import { createQueryKeys, calendarKeys } from '@calendraft/react-utils';
+import { createQueryKeys } from '@calendraft/react-utils';
 
-// Clés pré-définies
-useQuery({ queryKey: calendarKeys.list() });
-useQuery({ queryKey: calendarKeys.detail(id) });
-
-// Factory personnalisée
+// Factory pour créer des query keys par domaine
 const userKeys = createQueryKeys('user');
 // userKeys.all        => ['user']
 // userKeys.list()     => ['user', 'list']
 // userKeys.detail(id) => ['user', 'detail', id]
+
+// Usage avec React Query
+useQuery({ queryKey: userKeys.list() });
+useQuery({ queryKey: userKeys.detail(id) });
 ```
 
 ## Gestion d'erreurs

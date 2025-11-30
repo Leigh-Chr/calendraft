@@ -35,12 +35,7 @@ export {
 	usePrevious,
 } from "./hooks";
 // Query utilities
-export {
-	calendarKeys,
-	createQueryKeys,
-	eventKeys,
-	queryKeyUtils,
-} from "./query";
+export { createQueryKeys, queryKeyUtils } from "./query";
 
 // Utility functions
 export { cn } from "./utils/cn";
