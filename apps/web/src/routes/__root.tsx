@@ -1,15 +1,17 @@
-import Header from "@/components/header";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
-import type { trpc } from "@/utils/trpc";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
+	createRootRouteWithContext,
 	HeadContent,
 	Outlet,
-	createRootRouteWithContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { ErrorBoundary } from "@/components/error-boundary";
+import Header from "@/components/header";
+import { PWAUpdatePrompt } from "@/components/pwa-update-prompt";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
+import type { trpc } from "@/utils/trpc";
 import "../index.css";
 
 export interface RouterAppContext {
@@ -22,17 +24,33 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 	head: () => ({
 		meta: [
 			{
-				title: "calendraft",
+				title: "Calendraft",
 			},
 			{
 				name: "description",
-				content: "calendraft is a web application",
+				content:
+					"Calendraft - Créez, gérez et partagez vos calendriers ICS avec facilité",
+			},
+			{
+				name: "theme-color",
+				content: "#0c0c0c",
 			},
 		],
 		links: [
 			{
 				rel: "icon",
 				href: "/favicon.ico",
+				sizes: "48x48",
+			},
+			{
+				rel: "icon",
+				href: "/pwa-192x192.png",
+				type: "image/png",
+				sizes: "192x192",
+			},
+			{
+				rel: "apple-touch-icon",
+				href: "/apple-touch-icon-180x180.png",
 			},
 		],
 	}),
@@ -48,11 +66,14 @@ function RootComponent() {
 				disableTransitionOnChange
 				storageKey="vite-ui-theme"
 			>
-				<div className="grid grid-rows-[auto_1fr] h-svh">
-					<Header />
-					<Outlet />
-				</div>
+				<ErrorBoundary>
+					<div className="grid h-svh grid-rows-[auto_1fr]">
+						<Header />
+						<Outlet />
+					</div>
+				</ErrorBoundary>
 				<Toaster richColors />
+				<PWAUpdatePrompt />
 			</ThemeProvider>
 			<TanStackRouterDevtools position="bottom-left" />
 			<ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />

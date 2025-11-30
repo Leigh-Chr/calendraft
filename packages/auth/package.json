@@ -1,32 +1,32 @@
 {
-  "name": "@calendraft/auth",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
-    },
-    "./*": {
-      "types": "./dist/*.d.ts",
-      "default": "./src/*.ts"
-    }
-  },
-  "type": "module",
-  "scripts": {
-    "build": "tsdown"
-  },
-  "devDependencies": {
-    "tsdown": "catalog:",
-    "@calendraft/config": "workspace:*"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "better-auth": "catalog:",
-    "@polar-sh/better-auth": "catalog:",
-    "@polar-sh/sdk": "^0.34.16",
-    "dotenv": "catalog:",
-    "zod": "catalog:",
-    "@calendraft/db": "workspace:*"
-  }
+	"name": "@calendraft/auth",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"types": "./dist/*.d.ts",
+			"default": "./src/*.ts"
+		}
+	},
+	"type": "module",
+	"scripts": {
+		"build": "tsdown"
+	},
+	"devDependencies": {
+		"tsdown": "catalog:",
+		"@calendraft/config": "workspace:*"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"better-auth": "catalog:",
+		"@polar-sh/better-auth": "catalog:",
+		"@polar-sh/sdk": "^0.41.5",
+		"dotenv": "catalog:",
+		"zod": "catalog:",
+		"@calendraft/db": "workspace:*"
+	}
 }

@@ -1,3 +1,4 @@
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -7,13 +8,12 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
-import { useNavigate } from "@tanstack/react-router";
 import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
-import { Link } from "@tanstack/react-router";
 
 export default function UserMenu() {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { data: session, isPending } = authClient.useSession();
 
 	if (isPending) {
@@ -23,7 +23,12 @@ export default function UserMenu() {
 	if (!session) {
 		return (
 			<Button variant="outline" asChild>
-				<Link to="/login">Sign In</Link>
+				<Link
+					to="/login"
+					search={{ mode: "signin", redirect: location.pathname }}
+				>
+					Se connecter
+				</Link>
 			</Button>
 		);
 	}
@@ -33,28 +38,26 @@ export default function UserMenu() {
 			<DropdownMenuTrigger asChild>
 				<Button variant="outline">{session.user.name}</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent className="bg-card">
-				<DropdownMenuLabel>My Account</DropdownMenuLabel>
+			<DropdownMenuContent>
+				<DropdownMenuLabel>Mon compte</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>{session.user.email}</DropdownMenuItem>
-				<DropdownMenuItem asChild>
-					<Button
-						variant="destructive"
-						className="w-full"
-						onClick={() => {
-							authClient.signOut({
-								fetchOptions: {
-									onSuccess: () => {
-										navigate({
-											to: "/",
-										});
-									},
+				<DropdownMenuItem disabled>{session.user.email}</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					onClick={() => {
+						authClient.signOut({
+							fetchOptions: {
+								onSuccess: () => {
+									navigate({
+										to: "/",
+									});
 								},
-							});
-						}}
-					>
-						Sign Out
-					</Button>
+							},
+						});
+					}}
+					className="text-destructive focus:text-destructive"
+				>
+					Se déconnecter
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

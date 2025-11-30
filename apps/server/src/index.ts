@@ -1,21 +1,78 @@
 import "dotenv/config";
-import { trpcServer } from "@hono/trpc-server";
 import { createContext } from "@calendraft/api/context";
 import { appRouter } from "@calendraft/api/routers/index";
 import { auth } from "@calendraft/auth";
+import { trpcServer } from "@hono/trpc-server";
+import * as Sentry from "@sentry/bun";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
+import { logger as honoLogger } from "hono/logger";
+import { z } from "zod";
+import { startCleanupJob } from "./jobs/cleanup";
+import { logger } from "./lib/logger";
+import { rateLimit } from "./middleware/rate-limit";
+import { securityHeaders } from "./middleware/security-headers";
+
+// Validate environment variables
+const envSchema = z.object({
+	NODE_ENV: z.enum(["development", "production", "test"]).optional(),
+	CORS_ORIGIN: z.string().min(1).optional(),
+	BETTER_AUTH_SECRET: z.string().min(1).optional(),
+	PORT: z.string().optional(),
+	SENTRY_DSN: z.string().optional(),
+});
+
+const env = envSchema.parse(process.env);
+
+// Initialize Sentry for error tracking and performance monitoring
+// Must be initialized before any other imports to ensure proper auto-instrumentation
+Sentry.init({
+	dsn: env.SENTRY_DSN,
+	environment: env.NODE_ENV || "development",
+	enabled: !!env.SENTRY_DSN,
+
+	// Adds request headers and IP for users
+	sendDefaultPii: true,
+
+	// Performance monitoring - adjust in production
+	tracesSampleRate: env.NODE_ENV === "production" ? 0.1 : 1.0,
+});
+
+// Check critical variables in production
+const isProduction = env.NODE_ENV === "production";
+if (isProduction) {
+	if (!env.CORS_ORIGIN) {
+		logger.error("CORS_ORIGIN is required in production");
+		process.exit(1);
+	}
+	if (env.CORS_ORIGIN === "*") {
+		logger.warn("CORS_ORIGIN is set to '*' in production. This is insecure.");
+	}
+	if (env.CORS_ORIGIN.includes("localhost")) {
+		logger.warn(
+			"CORS_ORIGIN contains 'localhost' in production. This may be incorrect.",
+		);
+	}
+}
 
 const app = new Hono();
 
-app.use(logger());
+// Use Hono's logger in development only
+if (!isProduction) {
+	app.use(honoLogger());
+}
+
+// Security headers
+app.use("/*", securityHeaders());
+
+// Rate limiting: 100 requests per minute for general routes
+app.use("/*", rateLimit(100, 60000));
 app.use(
 	"/*",
 	cors({
-		origin: process.env.CORS_ORIGIN || "",
+		origin: env.CORS_ORIGIN || "http://localhost:3001",
 		allowMethods: ["GET", "POST", "OPTIONS"],
-		allowHeaders: ["Content-Type", "Authorization"],
+		allowHeaders: ["Content-Type", "Authorization", "x-anonymous-id"],
 		credentials: true,
 	}),
 );
@@ -36,4 +93,55 @@ app.get("/", (c) => {
 	return c.text("OK");
 });
 
-export default app;
+// Health check endpoint with database verification
+app.get("/health", async (c) => {
+	try {
+		// Check database connection
+		const prisma = (await import("@calendraft/db")).default;
+		await prisma.$queryRaw`SELECT 1`;
+
+		return c.json(
+			{ status: "healthy", timestamp: new Date().toISOString() },
+			200,
+		);
+	} catch (error) {
+		logger.error("Health check failed", error);
+		Sentry.captureException(error);
+		return c.json(
+			{
+				status: "unhealthy",
+				error: "Database connection failed",
+				timestamp: new Date().toISOString(),
+			},
+			503,
+		);
+	}
+});
+
+// Global error handler for uncaught exceptions
+app.onError((err, c) => {
+	Sentry.captureException(err);
+	logger.error("Unhandled error", err);
+	return c.json(
+		{
+			error: "Internal Server Error",
+			timestamp: new Date().toISOString(),
+		},
+		500,
+	);
+});
+
+const port = Number(env.PORT) || 3000;
+
+// Start cleanup job for orphaned anonymous calendars
+// Only in production to avoid cleaning up during development
+if (isProduction) {
+	startCleanupJob();
+}
+
+export default {
+	port,
+	fetch: app.fetch,
+};
+
+logger.info(`Server starting on http://localhost:${port}`);

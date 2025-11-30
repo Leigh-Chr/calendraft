@@ -1,17 +1,21 @@
-import { authClient } from "@/lib/auth-client";
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
+import { authClient } from "@/lib/auth-client";
 import Loader from "./loader";
 import { Button } from "./ui/button";
+import { FormMessage } from "./ui/form-message";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
 export default function SignUpForm({
 	onSwitchToSignIn,
+	redirectTo,
 }: {
 	onSwitchToSignIn: () => void;
+	/** URL to redirect to after successful registration */
+	redirectTo?: string;
 }) {
 	const navigate = useNavigate({
 		from: "/",
@@ -33,10 +37,13 @@ export default function SignUpForm({
 				},
 				{
 					onSuccess: () => {
-						navigate({
-							to: "/dashboard",
-						});
-						toast.success("Sign up successful");
+						// Redirect to specified URL or default to dashboard
+						if (redirectTo) {
+							navigate({ to: redirectTo });
+						} else {
+							navigate({ to: "/dashboard" });
+						}
+						toast.success("Inscription réussie");
 					},
 					onError: (error) => {
 						toast.error(error.error.message || error.error.statusText);
@@ -46,9 +53,11 @@ export default function SignUpForm({
 		},
 		validators: {
 			onSubmit: z.object({
-				name: z.string().min(2, "Name must be at least 2 characters"),
-				email: z.email("Invalid email address"),
-				password: z.string().min(8, "Password must be at least 8 characters"),
+				name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+				email: z.email("Adresse email invalide"),
+				password: z
+					.string()
+					.min(8, "Le mot de passe doit contenir au moins 8 caractères"),
 			}),
 		},
 	});
@@ -58,8 +67,8 @@ export default function SignUpForm({
 	}
 
 	return (
-		<div className="mx-auto w-full mt-10 max-w-md p-6">
-			<h1 className="mb-6 text-center text-3xl font-bold">Create Account</h1>
+		<div className="mx-auto mt-10 w-full max-w-md p-6">
+			<h1 className="mb-6 text-center font-bold text-3xl">Créer un compte</h1>
 
 			<form
 				onSubmit={(e) => {
@@ -73,7 +82,7 @@ export default function SignUpForm({
 					<form.Field name="name">
 						{(field) => (
 							<div className="space-y-2">
-								<Label htmlFor={field.name}>Name</Label>
+								<Label htmlFor={field.name}>Nom</Label>
 								<Input
 									id={field.name}
 									name={field.name}
@@ -82,9 +91,9 @@ export default function SignUpForm({
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
+									<FormMessage key={error?.message}>
 										{error?.message}
-									</p>
+									</FormMessage>
 								))}
 							</div>
 						)}
@@ -105,9 +114,9 @@ export default function SignUpForm({
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
+									<FormMessage key={error?.message}>
 										{error?.message}
-									</p>
+									</FormMessage>
 								))}
 							</div>
 						)}
@@ -118,7 +127,7 @@ export default function SignUpForm({
 					<form.Field name="password">
 						{(field) => (
 							<div className="space-y-2">
-								<Label htmlFor={field.name}>Password</Label>
+								<Label htmlFor={field.name}>Mot de passe</Label>
 								<Input
 									id={field.name}
 									name={field.name}
@@ -128,9 +137,9 @@ export default function SignUpForm({
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p key={error?.message} className="text-red-500">
+									<FormMessage key={error?.message}>
 										{error?.message}
-									</p>
+									</FormMessage>
 								))}
 							</div>
 						)}
@@ -144,19 +153,15 @@ export default function SignUpForm({
 							className="w-full"
 							disabled={!state.canSubmit || state.isSubmitting}
 						>
-							{state.isSubmitting ? "Submitting..." : "Sign Up"}
+							{state.isSubmitting ? "Inscription en cours..." : "S'inscrire"}
 						</Button>
 					)}
 				</form.Subscribe>
 			</form>
 
 			<div className="mt-4 text-center">
-				<Button
-					variant="link"
-					onClick={onSwitchToSignIn}
-					className="text-indigo-600 hover:text-indigo-800"
-				>
-					Already have an account? Sign In
+				<Button variant="link" onClick={onSwitchToSignIn}>
+					Déjà un compte ? Se connecter
 				</Button>
 			</div>
 		</div>

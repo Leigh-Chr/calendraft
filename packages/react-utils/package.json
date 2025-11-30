@@ -1,0 +1,66 @@
+{
+	"name": "@calendraft/react-utils",
+	"version": "0.1.0",
+	"description": "React utilities and hooks for Calendraft applications",
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./hooks": {
+			"types": "./dist/hooks/index.d.ts",
+			"import": "./dist/hooks/index.js"
+		},
+		"./query": {
+			"types": "./dist/query/index.d.ts",
+			"import": "./dist/query/index.js"
+		},
+		"./error": {
+			"types": "./dist/error/index.d.ts",
+			"import": "./dist/error/index.js"
+		}
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"dev": "tsdown --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"keywords": [
+		"react",
+		"hooks",
+		"utilities",
+		"calendar"
+	],
+	"author": "",
+	"license": "MIT",
+	"dependencies": {
+		"clsx": "^2.1.1",
+		"tailwind-merge": "^3.4.0",
+		"usehooks-ts": "^3.1.1"
+	},
+	"peerDependencies": {
+		"react": ">=18.0.0",
+		"@tanstack/react-query": ">=5.0.0"
+	},
+	"devDependencies": {
+		"@calendraft/config": "workspace:*",
+		"@types/react": "^19.2.7",
+		"react": "^19.2.0",
+		"@tanstack/react-query": "^5.90.11",
+		"tsdown": "catalog:",
+		"typescript": "catalog:"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

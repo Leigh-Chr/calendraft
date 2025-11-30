@@ -37,7 +37,29 @@
 		"rules": {
 			"recommended": true,
 			"correctness": {
-				"useExhaustiveDependencies": "info"
+				"useExhaustiveDependencies": "error",
+				"useHookAtTopLevel": "error"
+			},
+			"suspicious": {
+				"noExplicitAny": "error",
+				"noArrayIndexKey": "warn",
+				"noAssignInExpressions": "error",
+				"noDoubleEquals": "error",
+				"noShadowRestrictedNames": "error"
+			},
+			"performance": {
+				"noAccumulatingSpread": "warn",
+				"noDelete": "error"
+			},
+			"complexity": {
+				"noExcessiveCognitiveComplexity": {
+					"level": "warn",
+					"options": {
+						"maxAllowedComplexity": 15
+					}
+				},
+				"noExcessiveNestedTestSuites": "warn",
+				"noForEach": "off"
 			},
 			"nursery": {
 				"useSortedClasses": {
@@ -58,7 +80,10 @@
 				"noUnusedTemplateLiteral": "error",
 				"useNumberNamespace": "error",
 				"noInferrableTypes": "error",
-				"noUselessElse": "error"
+				"noUselessElse": "error",
+				"noNegationElse": "error",
+				"useConst": "error",
+				"useTemplate": "error"
 			}
 		}
 	},

@@ -1,0 +1,63 @@
+{
+	"name": "@calendraft/core",
+	"version": "0.1.0",
+	"description": "Core domain logic and types for Calendraft calendar management",
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./types": {
+			"types": "./dist/types/index.d.ts",
+			"import": "./dist/types/index.js"
+		},
+		"./utils": {
+			"types": "./dist/utils/index.d.ts",
+			"import": "./dist/utils/index.js"
+		},
+		"./validation": {
+			"types": "./dist/validation/index.d.ts",
+			"import": "./dist/validation/index.js"
+		},
+		"./constants": {
+			"types": "./dist/constants/index.d.ts",
+			"import": "./dist/constants/index.js"
+		}
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"dev": "tsdown --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"keywords": [
+		"calendar",
+		"events",
+		"domain",
+		"core",
+		"validation"
+	],
+	"author": "",
+	"license": "MIT",
+	"dependencies": {
+		"date-fns": "^4.1.0",
+		"dequal": "^2.0.3"
+	},
+	"devDependencies": {
+		"@calendraft/config": "workspace:*",
+		"tsdown": "catalog:",
+		"typescript": "catalog:"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

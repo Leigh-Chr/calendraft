@@ -1,18 +1,48 @@
+import {
+	createFileRoute,
+	stripSearchParams,
+	useNavigate,
+} from "@tanstack/react-router";
+import { zodValidator } from "@tanstack/zod-adapter";
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { loginDefaults, loginSearchSchema } from "@/lib/search-params";
 
 export const Route = createFileRoute("/login")({
 	component: RouteComponent,
+	validateSearch: zodValidator(loginSearchSchema),
+	search: {
+		middlewares: [stripSearchParams(loginDefaults)],
+	},
 });
 
 function RouteComponent() {
-	const [showSignIn, setShowSignIn] = useState(false);
+	const search = Route.useSearch();
+	const navigate = useNavigate();
 
-	return showSignIn ? (
-		<SignInForm onSwitchToSignUp={() => setShowSignIn(false)} />
+	const handleSwitchToSignUp = () => {
+		navigate({
+			to: ".",
+			search: { ...search, mode: "signup" },
+		});
+	};
+
+	const handleSwitchToSignIn = () => {
+		navigate({
+			to: ".",
+			search: { ...search, mode: "signin" },
+		});
+	};
+
+	return search.mode === "signin" ? (
+		<SignInForm
+			onSwitchToSignUp={handleSwitchToSignUp}
+			redirectTo={search.redirect}
+		/>
 	) : (
-		<SignUpForm onSwitchToSignIn={() => setShowSignIn(true)} />
+		<SignUpForm
+			onSwitchToSignIn={handleSwitchToSignIn}
+			redirectTo={search.redirect}
+		/>
 	);
 }

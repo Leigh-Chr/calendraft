@@ -1,34 +1,37 @@
 {
-  "name": "@calendraft/api",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
-    },
-    "./*": {
-      "types": "./dist/*.d.ts",
-      "default": "./src/*.ts"
-    }
-  },
-  "type": "module",
-  "scripts": {
-    "build": "tsdown"
-  },
-  "devDependencies": {
-    "tsdown": "catalog:",
-    "@calendraft/config": "workspace:*"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "@trpc/server": "catalog:",
-    "@trpc/client": "catalog:",
-    "hono": "catalog:",
-    "@prisma/client": "catalog:",
-    "dotenv": "catalog:",
-    "zod": "catalog:",
-    "@calendraft/auth": "workspace:*",
-    "@calendraft/db": "workspace:*"
-  }
+	"name": "@calendraft/api",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"types": "./dist/*.d.ts",
+			"default": "./src/*.ts"
+		}
+	},
+	"type": "module",
+	"scripts": {
+		"build": "tsdown"
+	},
+	"devDependencies": {
+		"tsdown": "catalog:",
+		"@calendraft/config": "workspace:*"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"@calendraft/auth": "workspace:*",
+		"@calendraft/db": "workspace:*",
+		"@calendraft/schemas": "workspace:*",
+		"@prisma/client": "catalog:",
+		"@trpc/client": "catalog:",
+		"@trpc/server": "catalog:",
+		"@types/node": "^24.10.1",
+		"dotenv": "catalog:",
+		"hono": "catalog:",
+		"ical.js": "^2.2.1",
+		"zod": "catalog:"
+	}
 }

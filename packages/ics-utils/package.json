@@ -1,0 +1,70 @@
+{
+	"name": "@calendraft/ics-utils",
+	"version": "0.1.0",
+	"description": "Pure ICS/iCalendar utilities for parsing and generating calendar files (RFC 5545)",
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./date": {
+			"types": "./dist/date/index.d.ts",
+			"import": "./dist/date/index.js"
+		},
+		"./duration": {
+			"types": "./dist/duration/index.d.ts",
+			"import": "./dist/duration/index.js"
+		},
+		"./alarm": {
+			"types": "./dist/alarm/index.d.ts",
+			"import": "./dist/alarm/index.js"
+		},
+		"./parser": {
+			"types": "./dist/parser/index.d.ts",
+			"import": "./dist/parser/index.js"
+		},
+		"./generator": {
+			"types": "./dist/generator/index.d.ts",
+			"import": "./dist/generator/index.js"
+		}
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"dev": "tsdown --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"keywords": [
+		"ics",
+		"icalendar",
+		"calendar",
+		"rfc5545",
+		"vevent",
+		"valarm",
+		"parser",
+		"generator"
+	],
+	"author": "",
+	"license": "MIT",
+	"dependencies": {
+		"ical.js": "^2.2.1"
+	},
+	"devDependencies": {
+		"@calendraft/config": "workspace:*",
+		"tsdown": "catalog:",
+		"typescript": "catalog:"
+	},
+	"peerDependencies": {},
+	"publishConfig": {
+		"access": "public"
+	}
+}

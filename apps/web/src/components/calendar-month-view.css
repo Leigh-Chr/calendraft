@@ -1,0 +1,255 @@
+/* Styles personnalisés pour react-big-calendar alignés avec shadcn/ui */
+
+.rbc-calendar {
+	background: var(--background);
+	color: var(--foreground);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	font-family: var(--font-sans);
+}
+
+/* Toolbar (boutons de navigation) */
+.rbc-toolbar {
+	padding: 1rem;
+	border-bottom: 1px solid var(--border);
+	background: var(--card);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.rbc-toolbar button {
+	background: transparent;
+	border: 1px solid var(--input);
+	color: var(--foreground);
+	padding: 0.5rem 1rem;
+	border-radius: var(--radius);
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+}
+
+.rbc-toolbar button:hover {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.rbc-toolbar button:active,
+.rbc-toolbar button.rbc-active {
+	background: var(--primary);
+	color: var(--primary-foreground);
+	border-color: var(--primary);
+}
+
+.rbc-toolbar button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.rbc-toolbar-label {
+	font-weight: 600;
+	font-size: 1rem;
+	color: var(--foreground);
+}
+
+/* Header (jours de la semaine) */
+.rbc-header {
+	padding: 0.75rem 0.5rem;
+	border-bottom: 1px solid var(--border);
+	background: var(--muted);
+	color: var(--muted-foreground);
+	font-weight: 500;
+	font-size: 0.875rem;
+	text-align: center;
+}
+
+/* Cellules du calendrier */
+.rbc-month-view {
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	overflow: hidden;
+}
+
+.rbc-month-row {
+	border-bottom: 1px solid var(--border);
+}
+
+.rbc-month-row:last-child {
+	border-bottom: none;
+}
+
+.rbc-date-cell {
+	padding: 0.25rem;
+	text-align: right;
+	min-height: 3rem;
+}
+
+.rbc-date-cell > a {
+	color: var(--foreground);
+	text-decoration: none;
+	font-weight: 500;
+	padding: 0.25rem;
+	border-radius: calc(var(--radius) - 4px);
+	display: inline-block;
+	min-width: 1.5rem;
+	text-align: center;
+}
+
+.rbc-date-cell > a:hover {
+	background: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.rbc-off-range-bg {
+	background: var(--muted);
+	opacity: 0.3;
+}
+
+.rbc-off-range > a {
+	color: var(--muted-foreground);
+	opacity: 0.5;
+}
+
+.rbc-today {
+	background: var(--accent);
+}
+
+.rbc-today > a {
+	color: var(--accent-foreground);
+	font-weight: 600;
+}
+
+/* Événements */
+.rbc-event {
+	background: var(--primary);
+	color: var(--primary-foreground);
+	border: none;
+	border-radius: calc(var(--radius) - 4px);
+	padding: 0.125rem 0.375rem;
+	font-size: 0.75rem;
+	font-weight: 500;
+	cursor: pointer;
+	margin: 0.125rem 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.rbc-event:hover {
+	opacity: 0.9;
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rbc-event.rbc-selected {
+	background: var(--primary);
+	opacity: 0.8;
+}
+
+.rbc-event-label {
+	display: none;
+}
+
+.rbc-event-content {
+	font-size: 0.75rem;
+	line-height: 1.2;
+}
+
+/* Vue semaine/jour */
+.rbc-time-view {
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	overflow: hidden;
+}
+
+.rbc-time-header {
+	border-bottom: 1px solid var(--border);
+}
+
+.rbc-time-content {
+	border-top: 1px solid var(--border);
+}
+
+.rbc-time-slot {
+	border-top: 1px solid var(--border);
+}
+
+.rbc-time-slot:last-child {
+	border-bottom: none;
+}
+
+.rbc-timeslot-group {
+	border-bottom: 1px solid var(--border);
+}
+
+.rbc-day-slot .rbc-time-slot {
+	border-top: 1px solid var(--border);
+}
+
+.rbc-day-slot .rbc-time-slot:first-child {
+	border-top: none;
+}
+
+.rbc-current-time-indicator {
+	background: var(--primary);
+	height: 2px;
+}
+
+/* Scrollbar personnalisée */
+.rbc-time-content::-webkit-scrollbar {
+	width: 8px;
+}
+
+.rbc-time-content::-webkit-scrollbar-track {
+	background: var(--muted);
+}
+
+.rbc-time-content::-webkit-scrollbar-thumb {
+	background: var(--border);
+	border-radius: 4px;
+}
+
+.rbc-time-content::-webkit-scrollbar-thumb:hover {
+	background: var(--muted-foreground);
+}
+
+/* Popover/Modal */
+.rbc-overlay {
+	background: var(--popover);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	box-shadow:
+		0 4px 6px -1px rgba(0, 0, 0, 0.1),
+		0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	padding: 1rem;
+	color: var(--popover-foreground);
+}
+
+.rbc-overlay-header {
+	border-bottom: 1px solid var(--border);
+	padding-bottom: 0.5rem;
+	margin-bottom: 0.5rem;
+	font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.rbc-toolbar {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.rbc-toolbar button {
+		flex: 1;
+	}
+
+	.rbc-toolbar-label {
+		order: -1;
+		width: 100%;
+		text-align: center;
+		margin-bottom: 0.5rem;
+	}
+}

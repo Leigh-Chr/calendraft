@@ -1,0 +1,33 @@
+/* Styles personnalisés pour Sonner alignés avec shadcn/ui */
+
+/* Variables CSS pour Sonner */
+[data-sonner-toaster] {
+	--normal-bg: var(--popover);
+	--normal-text: var(--popover-foreground);
+	--normal-border: var(--border);
+	--border-radius: var(--radius);
+}
+
+/* Style général pour tous les toasts - utilise les variables inline définies dans le composant */
+[data-sonner-toast] {
+	border-radius: var(--radius);
+	font-family: var(--font-sans);
+}
+
+/* Personnalisation des couleurs avec richColors - les couleurs sont gérées par Sonner mais on s'assure que le style de base est cohérent */
+[data-sonner-toast][data-styled="true"] {
+	box-shadow:
+		0 4px 6px -1px rgba(0, 0, 0, 0.1),
+		0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Bouton de fermeture */
+[data-sonner-toast] button[aria-label="Close"] {
+	color: var(--muted-foreground);
+	border-radius: calc(var(--radius) - 2px);
+}
+
+[data-sonner-toast] button[aria-label="Close"]:hover {
+	color: var(--foreground);
+	background: var(--accent);
+}

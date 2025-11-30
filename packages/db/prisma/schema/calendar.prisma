@@ -1,0 +1,203 @@
+// Enums for type-safe values
+enum EventStatus {
+  CONFIRMED
+  TENTATIVE
+  CANCELLED
+}
+
+enum EventClass {
+  PUBLIC
+  PRIVATE
+  CONFIDENTIAL
+}
+
+enum EventTransparency {
+  OPAQUE
+  TRANSPARENT
+}
+
+enum AttendeeRole {
+  CHAIR
+  REQ_PARTICIPANT  // REQ-PARTICIPANT in RFC 5545
+  OPT_PARTICIPANT  // OPT-PARTICIPANT in RFC 5545
+  NON_PARTICIPANT  // NON-PARTICIPANT in RFC 5545
+}
+
+enum AttendeeStatus {
+  NEEDS_ACTION     // NEEDS-ACTION in RFC 5545
+  ACCEPTED
+  DECLINED
+  TENTATIVE
+  DELEGATED
+}
+
+enum AlarmAction {
+  DISPLAY
+  EMAIL
+  AUDIO
+}
+
+enum RecurrenceDateType {
+  RDATE  // Additional recurrence date
+  EXDATE // Exception date
+}
+
+model Calendar {
+  id        String   @id @default(uuid())
+  name      String
+  userId    String?  // User ID (authenticated) or anonymous ID (anon-xxx format). Null only if neither is available.
+  // Note: userId can be either a User.id (authenticated) or an anonymous ID (anon-xxx)
+  // We don't use a relation here because anonymous IDs don't exist in the User table
+  // For authenticated users, you can manually join with User table if needed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  events    Event[]
+
+  @@index([userId]) // Fast lookups for calendars by user
+  @@map("calendar")
+}
+
+model Event {
+  id          String    @id @default(uuid())
+  calendarId  String
+  calendar    Calendar  @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  title       String
+  startDate   DateTime
+  endDate     DateTime
+  description String?
+  location    String?
+  
+  // ICS Properties - Basic metadata (using enums for type safety)
+  status      EventStatus?         // CONFIRMED, TENTATIVE, CANCELLED
+  priority    Int?                 // 0-9 (0=undefined, 1=highest, 9=lowest)
+  url         String?              // URL to event
+  class       EventClass?          // PUBLIC, PRIVATE, CONFIDENTIAL
+  comment     String?              // Additional comments
+  contact     String?              // Contact information
+  sequence    Int      @default(0) // For updates
+  transp      EventTransparency?   // OPAQUE or TRANSPARENT (availability)
+  
+  // ICS Properties - Recurrence
+  rrule       String?  // Recurrence rule (RRULE)
+  
+  // ICS Properties - Geography
+  geoLatitude   Float?  // Latitude for GEO property
+  geoLongitude  Float?  // Longitude for GEO property
+  
+  // ICS Properties - Organizer
+  organizerName  String?  // GDPR: Personal data - Organizer name
+  organizerEmail String?  // GDPR: Personal data - Organizer email
+  
+  // ICS Properties - Additional (RFC 5545)
+  uid            String?  // RFC 5545: Unique identifier (unique per calendar, auto-generated if not provided on import)
+  dtstamp        DateTime? // RFC 5545: Timestamp of creation/modification (auto-generated, nullable for backward compatibility)
+  created        DateTime? // CREATED from ICS file (may differ from createdAt)
+  lastModified   DateTime? // LAST-MODIFIED from ICS file (may differ from updatedAt)
+  recurrenceId   String?  // RECURRENCE-ID for recurrence exceptions
+  relatedTo      String?  // RELATED-TO for event relationships
+  
+  // ICS Properties - Extensions (RFC 7986)
+  color          String?  // COLOR property (hex format like #FF0000)
+  
+  // Relations (normalized)
+  attendees        EventAttendee[]
+  alarms           EventAlarm[]
+  categories       EventCategory[]       // Normalized categories
+  resources        EventResource[]       // Normalized resources
+  recurrenceDates  RecurrenceDate[]      // Normalized RDATE/EXDATE
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Indexes for performance and constraints
+  @@unique([calendarId, uid]) // RFC 5545: UID must be unique within a calendar
+  @@index([calendarId]) // Fast lookups for events in a calendar
+  @@index([startDate]) // Fast sorting/filtering by date
+  @@index([endDate]) // Fast range queries
+  @@index([uid]) // Fast lookups by UID for validation
+  @@index([status]) // Fast filtering by status
+  @@map("event")
+}
+
+model EventAttendee {
+  id        String          @id @default(uuid())
+  eventId   String
+  event     Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name      String?         // GDPR: Personal data - Attendee name
+  email     String          // GDPR: Personal data - RFC 5545: Email is required for ATTENDEE
+  role      AttendeeRole?   // CHAIR, REQ-PARTICIPANT, OPT-PARTICIPANT, NON-PARTICIPANT
+  status    AttendeeStatus? // NEEDS-ACTION, ACCEPTED, DECLINED, TENTATIVE, DELEGATED
+  rsvp      Boolean         @default(false)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  
+  // Indexes for performance
+  @@index([eventId]) // Fast lookups for attendees of an event
+  @@index([email]) // Fast lookups by email for invitations
+  @@index([status]) // Fast filtering by RSVP status
+  @@map("event_attendee")
+}
+
+model EventAlarm {
+  id          String      @id @default(uuid())
+  eventId     String
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  trigger     String      // RFC 5545: TRIGGER is required (duration before event, e.g., "-PT15M", or absolute datetime)
+  action      AlarmAction // RFC 5545: ACTION is required - DISPLAY, EMAIL, AUDIO
+  summary     String?     // RFC 5545: Required for DISPLAY and EMAIL actions (DESCRIPTION for DISPLAY, SUMMARY for EMAIL)
+  description String?     // RFC 5545: Required for EMAIL action (DESCRIPTION)
+  duration    String?     // For repeated alarms (ISO 8601 duration)
+  repeat      Int?        // Number of repetitions (0-1000)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Indexes for performance
+  @@index([eventId]) // Fast lookups for alarms of an event
+  @@index([action]) // Fast filtering by alarm type
+  @@map("event_alarm")
+}
+
+// Normalized categories (instead of comma-separated string)
+model EventCategory {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category  String   // Category name (e.g., "Work", "Personal", "Sport")
+  createdAt DateTime @default(now())
+  
+  @@unique([eventId, category]) // Prevent duplicate categories for same event
+  @@index([eventId]) // Fast lookups for categories of an event
+  @@index([category]) // Fast filtering/searching by category
+  @@map("event_category")
+}
+
+// Normalized resources (instead of comma-separated string)
+model EventResource {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  resource  String   // Resource name (e.g., "Projector", "Conference Room A")
+  createdAt DateTime @default(now())
+  
+  @@unique([eventId, resource]) // Prevent duplicate resources for same event
+  @@index([eventId]) // Fast lookups for resources of an event
+  @@index([resource]) // Fast filtering/searching by resource
+  @@map("event_resource")
+}
+
+// Normalized recurrence dates (RDATE/EXDATE instead of JSON arrays)
+model RecurrenceDate {
+  id        String              @id @default(uuid())
+  eventId   String
+  event     Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  date      DateTime            // Recurrence or exception date
+  type      RecurrenceDateType  // RDATE or EXDATE
+  createdAt DateTime            @default(now())
+  
+  @@unique([eventId, date, type]) // Prevent duplicate dates for same event and type
+  @@index([eventId]) // Fast lookups for recurrence dates of an event
+  @@index([type]) // Fast filtering by RDATE vs EXDATE
+  @@index([date]) // Fast date-based queries
+  @@map("recurrence_date")
+}
+

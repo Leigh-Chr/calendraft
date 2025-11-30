@@ -1,11 +1,16 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated"
+  provider     = "prisma-client"
+  output       = "../generated"
   moduleFormat = "esm"
-  runtime = "bun"
+  runtime      = "bun"
 }
 
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+// Import other schema files
+// Note: Prisma doesn't support includes, all models must be in a single file or directory
+// The prisma.config.ts points to prisma/schema directory, so Prisma will read all .prisma files
+// This file acts as the main schema with generator/datasource config

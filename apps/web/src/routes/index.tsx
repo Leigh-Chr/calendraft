@@ -1,49 +1,69 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { trpc } from "@/utils/trpc";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Plus, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 
 export const Route = createFileRoute("/")({
 	component: HomeComponent,
 });
 
-const TITLE_TEXT = `
- ██████╗ ███████╗████████╗████████╗███████╗██████╗
- ██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
- ██████╔╝█████╗     ██║      ██║   █████╗  ██████╔╝
- ██╔══██╗██╔══╝     ██║      ██║   ██╔══╝  ██╔══██╗
- ██████╔╝███████╗   ██║      ██║   ███████╗██║  ██║
- ╚═════╝ ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝
-
- ████████╗    ███████╗████████╗ █████╗  ██████╗██╗  ██╗
- ╚══██╔══╝    ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-    ██║       ███████╗   ██║   ███████║██║     █████╔╝
-    ██║       ╚════██║   ██║   ██╔══██║██║     ██╔═██╗
-    ██║       ███████║   ██║   ██║  ██║╚██████╗██║  ██╗
-    ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
- `;
-
 function HomeComponent() {
-	const healthCheck = useQuery(trpc.healthCheck.queryOptions());
+	const navigate = useNavigate();
 
 	return (
-		<div className="container mx-auto max-w-3xl px-4 py-2">
-			<pre className="overflow-x-auto font-mono text-sm">{TITLE_TEXT}</pre>
-			<div className="grid gap-6">
-				<section className="rounded-lg border p-4">
-					<h2 className="mb-2 font-medium">API Status</h2>
-					<div className="flex items-center gap-2">
-						<div
-							className={`h-2 w-2 rounded-full ${healthCheck.data ? "bg-green-500" : "bg-red-500"}`}
-						/>
-						<span className="text-sm text-muted-foreground">
-							{healthCheck.isLoading
-								? "Checking..."
-								: healthCheck.data
-									? "Connected"
-									: "Disconnected"}
-						</span>
-					</div>
-				</section>
+		<div className="container mx-auto max-w-3xl px-4 py-10">
+			<div className="mb-8 text-center">
+				<h1 className="mb-2 font-bold text-4xl">Calendraft</h1>
+				<p className="text-muted-foreground">
+					Importez, éditez et réorganisez vos calendriers .ics facilement.
+				</p>
+			</div>
+
+			<div className="grid gap-4 md:grid-cols-2">
+				<Card
+					className="cursor-pointer transition-shadow hover:shadow-lg"
+					onClick={() => navigate({ to: "/calendars/import" })}
+				>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Upload className="h-5 w-5" />
+							Importer un fichier .ics
+						</CardTitle>
+						<CardDescription>
+							Importez un calendrier existant depuis votre appareil
+						</CardDescription>
+					</CardHeader>
+				</Card>
+
+				<Card
+					className="cursor-pointer transition-shadow hover:shadow-lg"
+					onClick={() => navigate({ to: "/calendars/new" })}
+				>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Plus className="h-5 w-5" />
+							Créer un calendrier
+						</CardTitle>
+						<CardDescription>
+							Créez un nouveau calendrier vide pour commencer
+						</CardDescription>
+					</CardHeader>
+				</Card>
+			</div>
+
+			<div className="mt-8">
+				<Button
+					variant="outline"
+					className="w-full"
+					onClick={() => navigate({ to: "/calendars" })}
+				>
+					Voir mes calendriers
+				</Button>
 			</div>
 		</div>
 	);

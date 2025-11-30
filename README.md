@@ -1,57 +1,159 @@
-# calendraft
+# Calendraft
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, Hono, TRPC, and more.
+**Calendraft** est une plateforme web conçue pour simplifier la gestion, la modification et la création de calendriers au format **.ics**.
 
-## Features
+L'objectif est d'offrir une expérience moderne et intuitive permettant aux utilisateurs de travailler facilement avec des fichiers calendrier — sans outils complexes, sans configuration, et sans compétences techniques particulières.
 
-- **TypeScript** - For type safety and improved developer experience
-- **TanStack Router** - File-based routing with full type safety
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **shadcn/ui** - Reusable UI components
-- **Hono** - Lightweight, performant server framework
-- **tRPC** - End-to-end type-safe APIs
-- **Bun** - Runtime environment
-- **Prisma** - TypeScript-first ORM
-- **SQLite/Turso** - Database engine
-- **Authentication** - Better-Auth
-- **Biome** - Linting and formatting
-- **Husky** - Git hooks for code quality
-- **PWA** - Progressive Web App support
-- **Turborepo** - Optimized monorepo build system
+## Fonctionnalités
+
+### Gestion de calendriers
+- **Import de fichiers .ics** - Importez vos calendriers depuis n'importe quelle source
+- **Import dans un calendrier existant** - Ajoutez des événements d'un fichier .ics à un calendrier existant
+- **Création de calendriers vides** - Créez de nouveaux calendriers pour organiser vos événements
+- **Fusion de calendriers** - Combinez plusieurs calendriers en un seul avec détection automatique des doublons
+- **Export .ics** - Exportez vos calendriers modifiés au format .ics compatible (Google Calendar, Apple Calendar, Outlook, etc.)
+- **Nettoyage de doublons** - Supprimez automatiquement les événements en double dans un calendrier
+
+### Visualisation et navigation
+- **Vue liste** - Affichez tous vos événements dans une liste avec tri et filtres
+- **Vue calendrier** - Visualisez vos événements dans une vue mensuelle interactive (react-big-calendar)
+- **Filtres par date** - Filtrez rapidement par : Aujourd'hui, Cette semaine, Ce mois, ou Tout
+- **Recherche** - Recherchez des événements par mot-clé dans le titre
+- **Tri** - Triez par date, nom ou durée
+
+### Gestion d'événements
+- **Création d'événements** - Ajoutez de nouveaux événements avec titre, dates, description et localisation
+- **Modification d'événements** - Éditez tous les détails d'un événement existant
+- **Suppression d'événements** - Supprimez des événements individuellement
+- **Création depuis la vue calendrier** - Cliquez sur un créneau pour créer un événement avec les dates pré-remplies
+
+### Authentification et stockage
+- **Mode anonyme** - Utilisez l'application sans créer de compte (données stockées localement dans le navigateur)
+- **Authentification** - Option de compte pour sauvegarder dans le cloud (Better-Auth)
+- **Synchronisation** - Les utilisateurs authentifiés peuvent accéder à leurs calendriers depuis n'importe quel appareil
+
+## Stack technique
+
+- **TypeScript** - Type safety end-to-end
+- **TanStack Router** - Routing avec type safety
+- **TailwindCSS** - UI moderne et responsive
+- **shadcn/ui** - Composants UI réutilisables
+- **Hono** - Framework serveur léger et performant
+- **tRPC** - APIs type-safe end-to-end
+- **Bun** - Runtime et gestionnaire de paquets
+- **Prisma** - ORM TypeScript-first
+- **SQLite** - Base de données
+- **Better-Auth** - Authentification
+- **Biome** - Linting et formatting
+- **PWA** - Support Progressive Web App
+- **Turborepo** - Monorepo optimisé
+- **Sentry** - Monitoring des erreurs et performances
 
 ## Getting Started
 
-First, install the dependencies:
+### Prérequis
+
+- [Bun](https://bun.sh) (version 1.3.1 ou supérieure)
+
+### Installation
+
+1. Clonez le repository et installez les dépendances :
 
 ```bash
 bun install
 ```
-## Database Setup
 
-This project uses SQLite with Prisma.
+### Configuration de la base de données
 
-1. Start the local SQLite database:
-```bash
-cd apps/server && bun run db:local
-```
+Ce projet utilise SQLite avec Prisma.
 
+1. Générez le client Prisma et poussez le schéma :
 
-2. Update your `.env` file in the `apps/server` directory with the appropriate connection details if needed.
-
-3. Generate the Prisma client and push the schema:
 ```bash
 bun run db:push
 ```
 
+2. (Optionnel) Ouvrez Prisma Studio pour visualiser la base de données :
 
-Then, run the development server:
+```bash
+bun run db:studio
+```
+
+### Configuration de l'environnement
+
+Créez un fichier `.env` dans `apps/server` si nécessaire (la plupart des configurations ont des valeurs par défaut) :
+
+```env
+# Port du serveur backend (défaut: 3000)
+PORT=3000
+
+# URL du frontend pour CORS (défaut: http://localhost:3001)
+CORS_ORIGIN=http://localhost:3001
+
+# Configuration Better-Auth (optionnel pour le mode anonyme)
+BETTER_AUTH_SECRET=your-secret-key
+BETTER_AUTH_URL=http://localhost:3000
+```
+
+Créez un fichier `.env` dans `apps/web` :
+
+```env
+# URL du serveur backend (défaut: http://localhost:3000)
+VITE_SERVER_URL=http://localhost:3000
+```
+
+### Démarrage
+
+Lancez l'application en mode développement :
 
 ```bash
 bun run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-The API is running at [http://localhost:3000](http://localhost:3000).
+## Production
+
+Pour déployer en production, consultez le guide complet : [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+### Checklist rapide production
+
+- [ ] Variables d'environnement configurées (voir `apps/server/.env.example`)
+- [ ] `CORS_ORIGIN` défini (obligatoire, ne pas utiliser `*`)
+- [ ] `BETTER_AUTH_SECRET` généré (min 32 caractères)
+- [ ] Base de données initialisée
+- [ ] Build effectué (`bun run build`)
+- [ ] Certificat SSL/TLS configuré
+- [ ] Health check accessible (`/health`)
+
+### Variables d'environnement critiques
+
+**Backend** (`apps/server/.env`) :
+- `CORS_ORIGIN` : URL du frontend (obligatoire en production)
+- `BETTER_AUTH_SECRET` : Clé secrète pour l'authentification (obligatoire)
+- `NODE_ENV=production` : Mode production
+
+**Frontend** (`apps/web/.env`) :
+- `VITE_SERVER_URL` : URL de l'API backend
+
+### Sécurité
+
+- Rate limiting : 100 requêtes/minute par IP
+- Headers de sécurité HTTP configurés automatiquement
+- Validation des inputs (taille max fichiers : 5MB)
+- Limitations utilisateurs anonymes : 5 calendriers, 100 événements/calendrier
+
+Cela démarre :
+- Le serveur backend sur [http://localhost:3000](http://localhost:3000)
+- L'application web sur [http://localhost:3001](http://localhost:3001)
+
+Ou lancez-les séparément :
+
+```bash
+# Backend uniquement
+bun run dev:server
+
+# Frontend uniquement
+bun run dev:web
+```
 
 
 
@@ -59,27 +161,127 @@ The API is running at [http://localhost:3000](http://localhost:3000).
 
 
 
-## Project Structure
+## Structure du projet
 
 ```
 calendraft/
 ├── apps/
-│   ├── web/         # Frontend application (React + TanStack Router)
-│   └── server/      # Backend API (Hono, TRPC)
+│   ├── web/         # Application frontend (React + TanStack Router)
+│   └── server/      # API backend (Hono, TRPC)
 ├── packages/
-│   ├── api/         # API layer / business logic
-│   ├── auth/        # Authentication configuration & logic
-│   └── db/          # Database schema & queries
+│   ├── api/         # Logique métier / routers tRPC
+│   │   └── lib/     # Utilitaires ICS (parser & generator)
+│   ├── auth/        # Configuration Better-Auth
+│   └── db/          # Schémas Prisma (Calendar, Event, User)
 ```
+
+## Guide d'utilisation
+
+### Mode anonyme (sans compte)
+
+1. Ouvrez l'application dans votre navigateur
+2. Un ID anonyme est automatiquement généré et stocké dans le localStorage
+3. Vos calendriers sont sauvegardés sur le serveur mais liés à votre ID anonyme
+4. Vous pouvez utiliser toutes les fonctionnalités sans créer de compte
+
+**⚠️ Important - Limitations du mode anonyme :**
+- Vos calendriers sont liés à votre navigateur via un ID anonyme stocké dans le localStorage
+- Si vous effacez les données du navigateur ou utilisez la navigation privée, vous perdrez l'accès à vos calendriers
+- Les calendriers anonymes non consultés depuis 60 jours sont automatiquement supprimés
+- Pour une sauvegarde permanente et un accès multi-appareils, créez un compte
+
+### Mode authentifié (avec compte)
+
+1. Créez un compte via la page de connexion
+2. Vos calendriers sont sauvegardés sur le serveur
+3. Vous pouvez accéder à vos calendriers depuis n'importe quel appareil
+
+### Workflow typique
+
+1. **Importer un calendrier** : Cliquez sur "Importer un fichier .ics" depuis la page d'accueil
+2. **Créer un calendrier vide** : Cliquez sur "Créer un calendrier" pour commencer de zéro
+3. **Ajouter des événements** : Dans la vue calendrier, cliquez sur "Ajouter un événement" ou cliquez directement sur un créneau dans la vue mois
+4. **Modifier/Supprimer** : Utilisez les boutons d'édition et de suppression dans la vue liste
+5. **Fusionner** : Sélectionnez plusieurs calendriers et fusionnez-les en un seul
+6. **Nettoyer** : Supprimez les doublons d'un calendrier avec le bouton "Nettoyer"
+7. **Exporter** : Téléchargez votre calendrier modifié au format .ics
 
 ## Available Scripts
 
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run dev:server`: Start only the server
-- `bun run check-types`: Check TypeScript types across all apps
-- `bun run db:push`: Push schema changes to database
-- `bun run db:studio`: Open database studio UI
-- `bun run check`: Run Biome formatting and linting
-- `cd apps/web && bun run generate-pwa-assets`: Generate PWA assets
+- `bun run dev` - Démarre toutes les applications en mode développement
+- `bun run build` - Compile toutes les applications pour la production
+- `bun run dev:web` - Démarre uniquement l'application web
+- `bun run dev:server` - Démarre uniquement le serveur backend
+- `bun run check-types` - Vérifie les types TypeScript dans toutes les applications
+- `bun run db:push` - Pousse les changements de schéma vers la base de données
+- `bun run db:studio` - Ouvre Prisma Studio pour visualiser la base de données
+- `bun run db:generate` - Génère le client Prisma
+- `bun run db:migrate` - Applique les migrations de base de données
+- `bun run check` - Exécute le formatage et le linting avec Biome
+- `cd apps/web && bun run generate-pwa-assets` - Génère les assets PWA
+
+## Dépannage
+
+### Le serveur backend ne démarre pas
+
+- Vérifiez que le port 3000 n'est pas déjà utilisé
+- Assurez-vous que la base de données est correctement configurée : `bun run db:push`
+- Vérifiez les logs dans le terminal pour les erreurs
+
+### Le frontend ne peut pas se connecter au backend
+
+- Vérifiez que `VITE_SERVER_URL` dans `apps/web/.env` pointe vers `http://localhost:3000`
+- Assurez-vous que le serveur backend est démarré (`bun run dev:server`)
+- Vérifiez la console du navigateur pour les erreurs CORS
+
+### Les données ne persistent pas (mode anonyme)
+
+- Vérifiez que le localStorage est activé dans votre navigateur
+- Les données sont stockées localement, elles ne seront pas disponibles sur un autre navigateur ou appareil
+- Pour la persistance multi-appareils, créez un compte
+
+### Erreurs de parsing ICS
+
+- Vérifiez que le fichier .ics est valide et conforme au format RFC 5545
+- Certains champs optionnels peuvent être ignorés, mais les dates de début et de fin sont requises
+
+## Sentry MCP (Model Context Protocol)
+
+Pour une intégration avancée avec des assistants IA (comme Cursor, Claude, etc.), vous pouvez ajouter le serveur MCP officiel de Sentry. Cela permet à l'IA d'accéder directement aux erreurs Sentry pour vous aider à les débugger.
+
+### Configuration du MCP Sentry
+
+Ajoutez cette configuration dans votre fichier de configuration MCP (par exemple `.cursor/mcp.json` ou équivalent) :
+
+```json
+{
+  "mcpServers": {
+    "sentry": {
+      "url": "https://mcp.sentry.dev/sse"
+    }
+  }
+}
+```
+
+Ou pour une configuration avec authentification :
+
+```json
+{
+  "mcpServers": {
+    "sentry": {
+      "command": "npx",
+      "args": ["-y", "@sentry/mcp-server-stdio"]
+    }
+  }
+}
+```
+
+### Fonctionnalités du MCP Sentry
+
+Une fois configuré, l'assistant IA pourra :
+- Lister les issues Sentry de votre projet
+- Analyser les stack traces et erreurs
+- Proposer des corrections basées sur les erreurs réelles
+- Corréler les erreurs avec le code source
+
+Pour plus d'informations : [github.com/getsentry/sentry-mcp](https://github.com/getsentry/sentry-mcp)

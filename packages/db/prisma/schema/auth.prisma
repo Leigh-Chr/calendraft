@@ -1,13 +1,15 @@
 model User {
   id            String    @id @map("_id")
-  name          String
-  email         String
+  name          String    // GDPR: Personal data
+  email         String    // GDPR: Personal data
   emailVerified Boolean
-  image         String?
+  image         String?   // GDPR: Personal data (profile picture URL)
   createdAt     DateTime
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+  // Note: Calendar.userId can reference User.id, but we don't use a relation
+  // because userId can also be an anonymous ID (anon-xxx format)
 
   @@unique([email])
   @@map("user")
@@ -16,44 +18,51 @@ model User {
 model Session {
   id        String   @id @map("_id")
   expiresAt DateTime
-  token     String
+  token     String   // Secure session token (UUID)
   createdAt DateTime
   updatedAt DateTime
-  ipAddress String?
-  userAgent String?
+  ipAddress String?  // GDPR: Personal data (user IP address for security audit)
+  userAgent String?  // GDPR: Personal data (browser fingerprint for security)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
+  @@index([userId]) // Fast lookups for user sessions
+  @@index([expiresAt]) // Efficient cleanup of expired sessions
   @@map("session")
 }
 
 model Account {
   id                    String    @id @map("_id")
-  accountId             String
-  providerId            String
+  accountId             String    // Provider account ID
+  providerId            String    // OAuth provider ID (e.g., 'google', 'github')
   userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
+  accessToken           String?   // OAuth access token (encrypted by provider)
+  refreshToken          String?   // OAuth refresh token (encrypted by provider)
+  idToken               String?   // OAuth ID token (JWT)
   accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
   scope                 String?
-  password              String?
+  password              String?   // Hashed password with bcrypt/argon2 - NEVER store plaintext
   createdAt             DateTime
   updatedAt             DateTime
 
+  @@unique([userId, providerId]) // One account per provider per user
+  @@index([userId]) // Fast lookups for user accounts
+  @@index([accountId, providerId]) // Fast OAuth provider lookups
   @@map("account")
 }
 
 model Verification {
   id         String    @id @map("_id")
-  identifier String
-  value      String
-  expiresAt  DateTime
+  identifier String    // Email or phone number to verify
+  value      String    // Verification code or token
+  expiresAt  DateTime  // Expiration timestamp
   createdAt  DateTime?
   updatedAt  DateTime?
 
+  @@index([identifier]) // Fast lookups for verification by identifier (email/phone)
+  @@index([expiresAt]) // Efficient cleanup of expired verifications
   @@map("verification")
 }
