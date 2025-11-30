@@ -58,7 +58,7 @@ export class ErrorBoundary extends Component<Props, State> {
 					<Card className="border-destructive/50 bg-destructive/5">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2 text-destructive">
-								<AlertCircle className="h-5 w-5" />
+								<AlertCircle className="h-5 w-5" aria-hidden="true" />
 								Une erreur est survenue
 							</CardTitle>
 							<CardDescription>

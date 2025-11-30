@@ -27,7 +27,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 
 	return (
 		<nav
-			aria-label="Breadcrumb"
+			aria-label="Fil d'Ariane"
 			className={cn("flex items-center space-x-2 text-sm", className)}
 		>
 			<Button
@@ -35,16 +35,19 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 				size="sm"
 				onClick={() => handleClick("/calendars")}
 				className="h-8 px-2"
-				aria-label="Accueil"
+				aria-label="Accueil - Mes calendriers"
 			>
-				<Home className="h-4 w-4" />
+				<Home className="h-4 w-4" aria-hidden="true" />
 			</Button>
 			{items.map((item, index) => (
 				<div
 					key={item.href || `${item.label}-${index}`}
 					className="flex items-center space-x-2"
 				>
-					<ChevronRight className="h-4 w-4 text-muted-foreground" />
+					<ChevronRight
+						className="h-4 w-4 text-muted-foreground"
+						aria-hidden="true"
+					/>
 					{item.href ? (
 						<Button
 							variant="ghost"

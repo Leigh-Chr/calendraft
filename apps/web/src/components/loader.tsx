@@ -14,12 +14,17 @@ export default function Loader({ className, size = "md" }: LoaderProps) {
 	};
 
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: role="status" is the correct ARIA pattern for loading indicators
 		<div
 			className={cn("flex h-full items-center justify-center pt-8", className)}
+			role="status"
+			aria-live="polite"
 		>
 			<Loader2
 				className={cn("animate-spin text-muted-foreground", sizeClasses[size])}
+				aria-hidden="true"
 			/>
+			<span className="sr-only">Chargement en cours...</span>
 		</div>
 	);
 }

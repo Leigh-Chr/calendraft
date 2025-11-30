@@ -374,9 +374,10 @@ function LandingPage() {
 							<Link
 								to="/"
 								className="mb-4 inline-flex items-center gap-2 font-semibold"
+								aria-label="Calendraft - Accueil"
 							>
 								<Calendar className="size-5 text-primary" aria-hidden="true" />
-								Calendraft
+								<span>Calendraft</span>
 							</Link>
 							<p className="text-muted-foreground text-sm leading-relaxed">
 								Gérez vos calendriers{" "}
@@ -384,10 +385,15 @@ function LandingPage() {
 							</p>
 						</div>
 
-						{/* Product */}
-						<div>
-							<h4 className="mb-4 font-medium text-sm">Produit</h4>
-							<ul className="space-y-2.5 text-muted-foreground text-sm">
+						{/* Product navigation */}
+						<nav aria-label="Liens produit">
+							<p className="mb-4 font-medium text-sm" id="footer-product">
+								Produit
+							</p>
+							<ul
+								className="space-y-2.5 text-muted-foreground text-sm"
+								aria-labelledby="footer-product"
+							>
 								<li>
 									<Link
 										to="/calendars"
@@ -413,12 +419,17 @@ function LandingPage() {
 									</Link>
 								</li>
 							</ul>
-						</div>
+						</nav>
 
-						{/* Account */}
-						<div>
-							<h4 className="mb-4 font-medium text-sm">Compte</h4>
-							<ul className="space-y-2.5 text-muted-foreground text-sm">
+						{/* Account navigation */}
+						<nav aria-label="Liens compte">
+							<p className="mb-4 font-medium text-sm" id="footer-account">
+								Compte
+							</p>
+							<ul
+								className="space-y-2.5 text-muted-foreground text-sm"
+								aria-labelledby="footer-account"
+							>
 								<li>
 									<Link
 										to="/login"
@@ -438,11 +449,11 @@ function LandingPage() {
 									</Link>
 								</li>
 							</ul>
-						</div>
+						</nav>
 
-						{/* Open Source */}
+						{/* Open Source info */}
 						<div>
-							<h4 className="mb-4 font-medium text-sm">Open Source</h4>
+							<p className="mb-4 font-medium text-sm">Open Source</p>
 							<p className="text-muted-foreground text-sm leading-relaxed">
 								Calendraft est open-source. Code bientôt disponible sur GitHub.
 							</p>
@@ -510,8 +521,13 @@ function StepCard({
 			className="fade-in slide-in-from-bottom-4 relative animate-in text-center"
 			style={{ animationDelay: `${delay}ms`, animationFillMode: "backwards" }}
 		>
-			{/* Step number with outline effect */}
-			<div className="step-number mb-4 text-6xl sm:text-7xl">{number}</div>
+			{/* Step number - decorative, hidden from screen readers */}
+			<div
+				className="step-number mb-4 text-6xl sm:text-7xl"
+				aria-hidden="true"
+			>
+				{number}
+			</div>
 			<h3 className="mb-2 font-semibold text-lg">{title}</h3>
 			<p className="text-muted-foreground text-sm leading-relaxed">
 				{description}

@@ -23,8 +23,9 @@ export default function Header() {
 				<Link
 					to="/"
 					className="flex items-center gap-2 rounded-md font-semibold text-lg transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+					aria-label="Calendraft - Accueil"
 				>
-					<Calendar className="size-5 text-primary" />
+					<Calendar className="size-5 text-primary" aria-hidden="true" />
 					<span>Calendraft</span>
 				</Link>
 

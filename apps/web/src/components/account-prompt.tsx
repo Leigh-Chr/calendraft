@@ -55,7 +55,7 @@ export function AccountPrompt({
 					<div className="flex items-start justify-between gap-4">
 						<div className="flex-1">
 							<div className="mb-2 flex items-center gap-2">
-								<UserPlus className="h-4 w-4 text-primary" />
+								<UserPlus className="h-4 w-4 text-primary" aria-hidden="true" />
 								<h3 className="font-semibold">Mode anonyme actif</h3>
 							</div>
 							<p className="text-muted-foreground text-sm">
@@ -108,7 +108,7 @@ export function AccountPrompt({
 		<Card className="mb-4 border-primary/20 bg-primary/5">
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
-					<UserPlus className="h-5 w-5 text-primary" />
+					<UserPlus className="h-5 w-5 text-primary" aria-hidden="true" />
 					Créez un compte gratuit
 				</CardTitle>
 				<CardDescription>
@@ -139,20 +139,29 @@ export function AccountPrompt({
 					</div>
 				)}
 
-				<div className="space-y-2">
-					<div className="flex items-start gap-2 text-sm">
-						<InfinityIcon className="mt-0.5 h-4 w-4 text-primary" />
+				<ul className="space-y-2" aria-label="Avantages d'un compte">
+					<li className="flex items-start gap-2 text-sm">
+						<InfinityIcon
+							className="mt-0.5 h-4 w-4 text-primary"
+							aria-hidden="true"
+						/>
 						<span>Limites illimitées</span>
-					</div>
-					<div className="flex items-start gap-2 text-sm">
-						<Sparkles className="mt-0.5 h-4 w-4 text-primary" />
+					</li>
+					<li className="flex items-start gap-2 text-sm">
+						<Sparkles
+							className="mt-0.5 h-4 w-4 text-primary"
+							aria-hidden="true"
+						/>
 						<span>Synchronisation multi-appareils</span>
-					</div>
-					<div className="flex items-start gap-2 text-sm">
-						<UserPlus className="mt-0.5 h-4 w-4 text-primary" />
+					</li>
+					<li className="flex items-start gap-2 text-sm">
+						<UserPlus
+							className="mt-0.5 h-4 w-4 text-primary"
+							aria-hidden="true"
+						/>
 						<span>Accès depuis n'importe où</span>
-					</div>
-				</div>
+					</li>
+				</ul>
 
 				<Button
 					className="w-full"
