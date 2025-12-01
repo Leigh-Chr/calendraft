@@ -25,3 +25,7 @@ docker-compose run --rm server bun run db:push
 
 echo "✅ Base de données initialisée avec succès!"
 
+
+
+
+
