@@ -19,6 +19,7 @@ import {
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { AccountPrompt } from "@/components/account-prompt";
+import { StaggerContainer, StaggerItem } from "@/components/page-transition";
 import { TourAlertDialog } from "@/components/tour";
 import {
 	AlertDialog,
@@ -258,24 +259,25 @@ function CalendarsListComponent() {
 					</CardContent>
 				</Card>
 			) : (
-				<div
+				<StaggerContainer
 					id={TOUR_STEP_IDS.CALENDAR_GRID}
 					className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
 				>
 					{calendars.map((calendar) => (
-						<CalendarCard
-							key={calendar.id}
-							calendar={calendar}
-							onOpen={() => navigate({ to: `/calendars/${calendar.id}` })}
-							onEdit={() =>
-								openEditDialog(calendar.id, calendar.name, calendar.color)
-							}
-							onDelete={() => openDeleteDialog(calendar.id, calendar.name)}
-							isDeleting={isDeleting}
-							isUpdating={isUpdating}
-						/>
+						<StaggerItem key={calendar.id}>
+							<CalendarCard
+								calendar={calendar}
+								onOpen={() => navigate({ to: `/calendars/${calendar.id}` })}
+								onEdit={() =>
+									openEditDialog(calendar.id, calendar.name, calendar.color)
+								}
+								onDelete={() => openDeleteDialog(calendar.id, calendar.name)}
+								isDeleting={isDeleting}
+								isUpdating={isUpdating}
+							/>
+						</StaggerItem>
 					))}
-				</div>
+				</StaggerContainer>
 			)}
 
 			{/* Delete Dialog */}

@@ -14,6 +14,7 @@ import {
 } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronRight } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -365,17 +366,19 @@ function EventsList({
 
 	return (
 		<div className="space-y-2">
-			{events.map((event) => (
-				<EventCard
-					key={event.id}
-					event={event}
-					calendarId={calendarId}
-					onDelete={onDelete}
-					onDuplicate={onDuplicate}
-					isDeleting={isDeleting}
-					isDuplicating={isDuplicating}
-				/>
-			))}
+			<AnimatePresence mode="popLayout">
+				{events.map((event) => (
+					<EventCard
+						key={event.id}
+						event={event}
+						calendarId={calendarId}
+						onDelete={onDelete}
+						onDuplicate={onDuplicate}
+						isDeleting={isDeleting}
+						isDuplicating={isDuplicating}
+					/>
+				))}
+			</AnimatePresence>
 		</div>
 	);
 }
