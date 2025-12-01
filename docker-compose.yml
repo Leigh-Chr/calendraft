@@ -3,6 +3,10 @@
 # Production-ready configuration with PostgreSQL
 # ===================================
 
+# Enable BuildKit for faster builds with cache mounts
+# Run with: DOCKER_BUILDKIT=1 docker-compose up --build -d
+# Or set in ~/.docker/daemon.json: { "features": { "buildkit": true } }
+
 services:
   # -----------------------------------
   # PostgreSQL Database

@@ -1,14 +1,15 @@
+# syntax=docker/dockerfile:1
 # ===================================
 # Calendraft Backend - Dockerfile
-# Multi-stage build for optimized production image
+# Optimized multi-stage build for production
 # ===================================
 
-# Stage 1: Install dependencies
-FROM oven/bun:1.3.1-alpine AS deps
+# Stage 1: Build
+FROM oven/bun:1.3.1-alpine AS builder
 
 WORKDIR /app
 
-# Copy all package files for workspace resolution
+# Copy package files first for better layer caching
 COPY package.json bun.lock ./
 COPY packages/config/package.json ./packages/config/
 COPY packages/core/package.json ./packages/core/
@@ -21,79 +22,89 @@ COPY packages/react-utils/package.json ./packages/react-utils/
 COPY apps/server/package.json ./apps/server/
 COPY apps/web/package.json ./apps/web/
 
-# Install dependencies
-RUN bun install
+# Install dependencies (cached until package files change)
+RUN bun install --frozen-lockfile
 
-# -----------------------------------
-# Stage 2: Build
-FROM oven/bun:1.3.1-alpine AS builder
-
-WORKDIR /app
-
-# Copy everything from deps
-COPY --from=deps /app/node_modules ./node_modules
-
-# Copy source code (including config package needed for tsconfig)
+# Copy source code
 COPY package.json bun.lock turbo.json ./
 COPY packages ./packages
 COPY apps/server ./apps/server
 
-# Create empty .env file for Prisma config (actual values come from runtime env)
+# Create empty .env for Prisma config
 RUN mkdir -p apps/server && touch apps/server/.env
 
-# Link workspace packages for Prisma to find @calendraft/config
+# Link workspace packages for build
 RUN mkdir -p node_modules/@calendraft && \
     ln -s /app/packages/config node_modules/@calendraft/config
 
 # Generate Prisma client
 RUN cd packages/db && bun x prisma generate
 
-# Build all packages and server
-RUN bun run build
+# Build server and ALL its dependencies
+RUN ./node_modules/.bin/turbo build --filter=server...
 
 # -----------------------------------
-# Stage 3: Production runtime
+# Stage 2: Production runtime
 FROM oven/bun:1.3.1-alpine AS runner
 
 WORKDIR /app
 
-# Create non-root user for security
+# Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 bunjs
 
-# Copy node_modules and packages (needed for runtime)
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
+# Copy package files for production install
+COPY package.json bun.lock ./
+COPY packages/config/package.json ./packages/config/
+COPY packages/core/package.json ./packages/core/
+COPY packages/schemas/package.json ./packages/schemas/
+COPY packages/db/package.json ./packages/db/
+COPY packages/auth/package.json ./packages/auth/
+COPY packages/api/package.json ./packages/api/
+COPY apps/server/package.json ./apps/server/
+# Include web package.json for workspace resolution (needed by bun)
+COPY apps/web/package.json ./apps/web/
+COPY packages/ics-utils/package.json ./packages/ics-utils/
+COPY packages/react-utils/package.json ./packages/react-utils/
 
-# Create workspace links for runtime module resolution
+# Install production dependencies (skip prepare scripts like husky)
+RUN bun install --frozen-lockfile --production --ignore-scripts
+
+# Copy config package (no dist, just tsconfig)
+COPY --from=builder /app/packages/config ./packages/config
+
+# Copy built packages needed by server (api -> auth, core, db, schemas)
+COPY --from=builder /app/packages/core/dist ./packages/core/dist
+COPY --from=builder /app/packages/schemas/dist ./packages/schemas/dist
+COPY --from=builder /app/packages/db/dist ./packages/db/dist
+COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
+COPY --from=builder /app/packages/db/prisma.config.ts ./packages/db/prisma.config.ts
+COPY --from=builder /app/packages/auth/dist ./packages/auth/dist
+COPY --from=builder /app/packages/api/dist ./packages/api/dist
+
+# Copy built server
+COPY --from=builder /app/apps/server/dist ./apps/server/dist
+
+# Create workspace links for packages used at runtime
 RUN mkdir -p node_modules/@calendraft && \
     ln -s /app/packages/config node_modules/@calendraft/config && \
     ln -s /app/packages/core node_modules/@calendraft/core && \
     ln -s /app/packages/schemas node_modules/@calendraft/schemas && \
-    ln -s /app/packages/ics-utils node_modules/@calendraft/ics-utils && \
     ln -s /app/packages/db node_modules/@calendraft/db && \
     ln -s /app/packages/auth node_modules/@calendraft/auth && \
     ln -s /app/packages/api node_modules/@calendraft/api
 
-# Copy built server
-COPY --from=builder /app/apps/server/dist ./apps/server/dist
-COPY --from=builder /app/apps/server/package.json ./apps/server/
-
-# Set ownership for non-root user
+# Set ownership
 RUN chown -R bunjs:nodejs /app
 
-# Set environment
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Switch to non-root user
 USER bunjs
-
 WORKDIR /app/apps/server
 
 EXPOSE 3000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
 

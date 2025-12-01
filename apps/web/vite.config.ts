@@ -95,7 +95,7 @@ export default defineConfig({
 			},
 			pwaAssets: { disabled: false, config: true },
 			devOptions: {
-				enabled: true,
+				enabled: process.env.NODE_ENV === "development",
 				suppressWarnings: true,
 				type: "module",
 			},
@@ -155,5 +155,38 @@ export default defineConfig({
 	},
 	build: {
 		sourcemap: true, // Required for Sentry source maps
+		rollupOptions: {
+			output: {
+				manualChunks: (id) => {
+					// Vendor chunk mapping: [patterns, chunkName]
+					const chunks: [string[], string][] = [
+						[["react-dom", "/react/"], "vendor-react"],
+						[["@tanstack/react-router"], "vendor-router"],
+						[["@tanstack/react-query"], "vendor-query"],
+						[["@tanstack/react-form", "@tanstack/zod-adapter"], "vendor-form"],
+						[["@trpc/"], "vendor-trpc"],
+						[["react-big-calendar", "/moment/"], "vendor-calendar"],
+						[["date-fns"], "vendor-date"],
+						[["@radix-ui/"], "vendor-radix"],
+						[["lucide-react"], "vendor-icons"],
+						[["/motion/"], "vendor-motion"],
+						[["@sentry/"], "vendor-sentry"],
+						[["better-auth", "@better-auth/"], "vendor-auth"],
+						[["/zod/", "/zod-to-json-schema/"], "vendor-zod"],
+						[["react-day-picker"], "vendor-datepicker"],
+						[["sonner"], "vendor-toast"],
+						[
+							["class-variance-authority", "clsx", "tailwind-merge"],
+							"vendor-css",
+						],
+					];
+					for (const [patterns, chunk] of chunks) {
+						if (patterns.some((p) => id.includes(p))) {
+							return chunk;
+						}
+					}
+				},
+			},
+		},
 	},
 });
