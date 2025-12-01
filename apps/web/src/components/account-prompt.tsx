@@ -1,12 +1,12 @@
 /**
  * Component to prompt anonymous users to create an account
- * Displays usage limits and benefits of creating an account
+ * Subtle, value-focused design that doesn't overwhelm
  */
 
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-// Using Card instead of Alert since Alert component doesn't exist
-import { Infinity as InfinityIcon, Sparkles, UserPlus } from "lucide-react";
+import { Cloud, Infinity as InfinityIcon, Smartphone, X } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -16,20 +16,24 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { useIsAuthenticated } from "@/hooks/use-storage";
+import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
 
 interface AccountPromptProps {
 	variant?: "banner" | "card";
 	showUsage?: boolean;
+	dismissible?: boolean;
 }
 
 export function AccountPrompt({
 	variant = "banner",
 	showUsage = true,
+	dismissible = true,
 }: AccountPromptProps) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const isAuthenticated = useIsAuthenticated();
+	const [isDismissed, setIsDismissed] = useState(false);
 
 	// Only show for anonymous users
 	const { data: usage } = useQuery({
@@ -37,8 +41,8 @@ export function AccountPrompt({
 		enabled: !isAuthenticated && showUsage,
 	});
 
-	if (isAuthenticated) {
-		return null; // Don't show for authenticated users
+	if (isAuthenticated || isDismissed) {
+		return null;
 	}
 
 	const isNearLimit =
@@ -48,133 +52,142 @@ export function AccountPrompt({
 				(count) => count >= usage.maxEventsPerCalendar * 0.8,
 			));
 
+	const handleSignup = () => {
+		navigate({
+			to: "/login",
+			search: { mode: "signup", redirect: location.pathname },
+		});
+	};
+
 	if (variant === "banner") {
 		return (
-			<Card className="mb-4 border-primary/20 bg-primary/5">
-				<CardContent className="pt-6">
-					<div className="flex items-start justify-between gap-4">
-						<div className="flex-1">
-							<div className="mb-2 flex items-center gap-2">
-								<UserPlus className="h-4 w-4 text-primary" aria-hidden="true" />
-								<h3 className="font-semibold">Mode anonyme actif</h3>
-							</div>
-							<p className="text-muted-foreground text-sm">
-								{usage ? (
-									<>
-										Vous utilisez {usage.calendarCount}/{usage.maxCalendars}{" "}
-										calendriers.
-										{isNearLimit && (
-											<span className="ml-2 font-semibold text-destructive">
-												Limite proche !
-											</span>
-										)}{" "}
-										<strong className="text-foreground">⚠️ Important :</strong>{" "}
-										Vos calendriers sont liés à ce navigateur. Si vous effacez
-										les données du navigateur ou utilisez la navigation privée,
-										vous perdrez l'accès à vos calendriers. Créez un compte pour
-										sauvegarder vos données de manière permanente.
-									</>
-								) : (
-									<>
-										<strong className="text-foreground">⚠️ Important :</strong>{" "}
-										En mode anonyme, vos calendriers sont liés à ce navigateur.
-										Si vous effacez les données du navigateur, vous perdrez
-										l'accès à vos calendriers. Créez un compte pour sauvegarder
-										vos données de manière permanente et accéder à vos
-										calendriers depuis n'importe quel appareil.
-									</>
-								)}
-							</p>
-						</div>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() =>
-								navigate({
-									to: "/login",
-									search: { mode: "signup", redirect: location.pathname },
-								})
-							}
-						>
-							Créer un compte
-						</Button>
+			<div
+				className={cn(
+					"mb-4 flex items-center justify-between gap-4 rounded-lg border px-4 py-3",
+					isNearLimit
+						? "border-amber-200 bg-amber-50 dark:border-amber-800/50 dark:bg-amber-900/10"
+						: "border-border bg-muted/30",
+				)}
+			>
+				<div className="flex items-center gap-3">
+					<div
+						className={cn(
+							"flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+							isNearLimit
+								? "bg-amber-100 dark:bg-amber-900/30"
+								: "bg-primary/10",
+						)}
+					>
+						<Cloud
+							className={cn(
+								"h-4 w-4",
+								isNearLimit
+									? "text-amber-600 dark:text-amber-400"
+									: "text-primary",
+							)}
+						/>
 					</div>
-				</CardContent>
-			</Card>
+					<div className="min-w-0">
+						<p className="font-medium text-sm">
+							{isNearLimit ? (
+								<>
+									Vous approchez de la limite ({usage?.calendarCount}/
+									{usage?.maxCalendars} calendriers)
+								</>
+							) : (
+								"Synchronisez vos calendriers sur tous vos appareils"
+							)}
+						</p>
+						<p className="text-muted-foreground text-xs">
+							{isNearLimit
+								? "Créez un compte gratuit pour des calendriers illimités"
+								: "Données sauvegardées dans le cloud, accessibles partout"}
+						</p>
+					</div>
+				</div>
+
+				<div className="flex shrink-0 items-center gap-2">
+					<Button size="sm" onClick={handleSignup}>
+						Créer un compte
+					</Button>
+					{dismissible && (
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-8 w-8 text-muted-foreground"
+							onClick={() => setIsDismissed(true)}
+							aria-label="Fermer"
+						>
+							<X className="h-4 w-4" />
+						</Button>
+					)}
+				</div>
+			</div>
 		);
 	}
 
+	// Card variant - more detailed
 	return (
-		<Card className="mb-4 border-primary/20 bg-primary/5">
-			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
-					<UserPlus className="h-5 w-5 text-primary" aria-hidden="true" />
-					Créez un compte gratuit
-				</CardTitle>
-				<CardDescription>
-					Débloquez toutes les fonctionnalités de Calendraft
-				</CardDescription>
+		<Card className="mb-4">
+			<CardHeader className="pb-3">
+				<div className="flex items-start justify-between">
+					<div>
+						<CardTitle className="text-lg">
+							Sauvegardez vos calendriers
+						</CardTitle>
+						<CardDescription>
+							Créez un compte gratuit pour ne jamais perdre vos données
+						</CardDescription>
+					</div>
+					{dismissible && (
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-8 w-8 shrink-0 text-muted-foreground"
+							onClick={() => setIsDismissed(true)}
+							aria-label="Fermer"
+						>
+							<X className="h-4 w-4" />
+						</Button>
+					)}
+				</div>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				{usage && (
-					<div className="rounded-lg border border-border bg-card p-3">
-						<p className="mb-2 font-medium text-sm">
-							Votre utilisation actuelle :
+				{/* Usage indicator - only if near limit */}
+				{isNearLimit && usage && (
+					<div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800/50 dark:bg-amber-900/10">
+						<p className="font-medium text-amber-700 text-sm dark:text-amber-400">
+							{usage.calendarCount}/{usage.maxCalendars} calendriers utilisés
 						</p>
-						<ul className="space-y-1 text-muted-foreground text-sm">
-							<li>
-								Calendriers : {usage.calendarCount}/{usage.maxCalendars}
-								{isNearLimit && (
-									<span className="ml-2 font-semibold text-destructive">
-										⚠️ Limite proche
-									</span>
-								)}
-							</li>
-							{Object.entries(usage.eventCounts).map(([calId, count]) => (
-								<li key={calId}>
-									Événements : {count}/{usage.maxEventsPerCalendar}
-								</li>
-							))}
-						</ul>
 					</div>
 				)}
 
-				<ul className="space-y-2" aria-label="Avantages d'un compte">
-					<li className="flex items-start gap-2 text-sm">
-						<InfinityIcon
-							className="mt-0.5 h-4 w-4 text-primary"
-							aria-hidden="true"
-						/>
-						<span>Limites illimitées</span>
-					</li>
-					<li className="flex items-start gap-2 text-sm">
-						<Sparkles
-							className="mt-0.5 h-4 w-4 text-primary"
-							aria-hidden="true"
-						/>
-						<span>Synchronisation multi-appareils</span>
-					</li>
-					<li className="flex items-start gap-2 text-sm">
-						<UserPlus
-							className="mt-0.5 h-4 w-4 text-primary"
-							aria-hidden="true"
-						/>
-						<span>Accès depuis n'importe où</span>
-					</li>
-				</ul>
+				{/* Benefits - compact grid */}
+				<div className="grid grid-cols-3 gap-3">
+					<BenefitItem icon={Cloud} label="Sauvegarde cloud" />
+					<BenefitItem icon={Smartphone} label="Multi-appareils" />
+					<BenefitItem icon={InfinityIcon} label="Illimité" />
+				</div>
 
-				<Button
-					className="w-full"
-					onClick={() =>
-						navigate({
-							to: "/login",
-							search: { mode: "signup", redirect: location.pathname },
-						})
-					}
-				>
+				<Button className="w-full" onClick={handleSignup}>
 					Créer un compte gratuit
 				</Button>
 			</CardContent>
 		</Card>
+	);
+}
+
+function BenefitItem({
+	icon: Icon,
+	label,
+}: {
+	icon: React.ComponentType<{ className?: string }>;
+	label: string;
+}) {
+	return (
+		<div className="flex flex-col items-center gap-1.5 rounded-lg bg-muted/50 p-3 text-center">
+			<Icon className="h-4 w-4 text-primary" />
+			<span className="text-muted-foreground text-xs">{label}</span>
+		</div>
 	);
 }

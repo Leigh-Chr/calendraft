@@ -1,6 +1,7 @@
 /**
  * Event details display component
  * Uses a data-driven approach to reduce cyclomatic complexity
+ * Updated with improved visual hierarchy
  */
 
 import React, { useMemo } from "react";
@@ -10,7 +11,6 @@ import {
 	CategoriesRow,
 	DateTimeRow,
 	DescriptionRow,
-	DurationRow,
 	LocationRow,
 	UrlRow,
 } from "./event-info-rows";
@@ -93,10 +93,14 @@ export const EventDetails = React.memo(function EventDetails({
 	}, [event]);
 
 	return (
-		<div className="space-y-1 text-muted-foreground text-sm">
+		<div className="space-y-2 text-sm">
+			{/* Primary info: Date/Time - most important */}
 			<DateTimeRow startDate={event.startDate} endDate={event.endDate} />
-			{optionalRows}
-			<DurationRow startDate={event.startDate} endDate={event.endDate} />
+
+			{/* Secondary info: location, categories, etc. */}
+			{optionalRows.length > 0 && (
+				<div className="space-y-1.5 text-muted-foreground">{optionalRows}</div>
+			)}
 		</div>
 	);
 });

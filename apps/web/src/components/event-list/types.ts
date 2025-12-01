@@ -15,6 +15,7 @@ export interface EventItem {
 	url?: string | null;
 	class?: string | null;
 	rrule?: string | null;
+	color?: string | null;
 	attendees?: Array<{ email: string; name?: string | null }>;
 	alarms?: Array<{ action: string; trigger: string }>;
 }

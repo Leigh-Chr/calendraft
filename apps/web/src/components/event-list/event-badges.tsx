@@ -1,82 +1,111 @@
 /**
  * Badge components for event display
+ * Refined with better visual hierarchy and subtle indicators
  */
 
+import { AlertCircle, Lock, Repeat } from "lucide-react";
 import React from "react";
+import { cn } from "@/lib/utils";
 import type { EventItem } from "./types";
 
 // ----- Constants -----
 
 const STATUS_CONFIG = {
 	CONFIRMED: {
-		className:
-			"bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+		dot: "bg-green-500",
 		label: "Confirmé",
+		show: false, // Don't show badge for confirmed (default state)
 	},
 	TENTATIVE: {
-		className:
-			"bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+		dot: "bg-amber-500",
 		label: "Tentatif",
+		show: true,
 	},
 	CANCELLED: {
-		className: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+		dot: "bg-red-500",
 		label: "Annulé",
+		show: true,
+		strikethrough: true,
 	},
 } as const;
 
-const CLASS_CONFIG: Record<string, string> = {
-	PUBLIC: "Public",
-	PRIVATE: "Privé",
-	CONFIDENTIAL: "Confidentiel",
-};
-
 // ----- Components -----
 
+/**
+ * Status indicator - now a subtle dot instead of loud badge
+ */
 export const StatusBadge = React.memo(function StatusBadge({
 	status,
 }: {
 	status: string | null | undefined;
 }) {
 	if (!status) return null;
-	const config =
-		STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ||
-		STATUS_CONFIG.CANCELLED;
+	const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG];
+	if (!config || !config.show) return null;
+
 	return (
 		<span
-			className={`rounded px-2 py-0.5 font-medium text-xs ${config.className}`}
+			className={cn(
+				"inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs",
+				status === "CANCELLED" &&
+					"bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+				status === "TENTATIVE" &&
+					"bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+			)}
 		>
+			<span className={cn("h-1.5 w-1.5 rounded-full", config.dot)} />
 			{config.label}
 		</span>
 	);
 });
 
+/**
+ * Privacy indicator - icon-based for compact display
+ */
 export const ClassBadge = React.memo(function ClassBadge({
 	classValue,
 }: {
 	classValue: string | null | undefined;
 }) {
-	if (!classValue) return null;
-	const label = CLASS_CONFIG[classValue] || "Confidentiel";
+	// Only show for non-public events
+	if (!classValue || classValue === "PUBLIC") return null;
+
 	return (
-		<span className="rounded bg-blue-100 px-2 py-0.5 font-medium text-blue-800 text-xs dark:bg-blue-900 dark:text-blue-200">
-			{label}
+		<span
+			className="inline-flex items-center gap-1 text-muted-foreground text-xs"
+			title={classValue === "PRIVATE" ? "Privé" : "Confidentiel"}
+		>
+			<Lock className="h-3 w-3" />
 		</span>
 	);
 });
 
+/**
+ * Priority indicator - only show high priority (1-4)
+ */
 export const PriorityBadge = React.memo(function PriorityBadge({
 	priority,
 }: {
 	priority: number | null | undefined;
 }) {
 	if (priority === null || priority === undefined || priority <= 0) return null;
+
+	// Only show for high priority (1-4)
+	if (priority > 4) return null;
+
 	return (
-		<span className="rounded bg-orange-100 px-2 py-0.5 font-medium text-orange-800 text-xs dark:bg-orange-900 dark:text-orange-200">
-			Priorité {priority}
+		<span
+			className="inline-flex items-center gap-1 text-amber-600 text-xs dark:text-amber-400"
+			title={`Priorité ${priority}`}
+		>
+			<AlertCircle className="h-3.5 w-3.5" />
 		</span>
 	);
 });
 
+/**
+ * Recurrence indicator - subtle icon
+ */
 export const RecurrenceBadge = React.memo(function RecurrenceBadge({
 	rrule,
 }: {
@@ -84,24 +113,81 @@ export const RecurrenceBadge = React.memo(function RecurrenceBadge({
 }) {
 	if (!rrule) return null;
 	return (
-		<span className="rounded bg-purple-100 px-2 py-0.5 font-medium text-purple-800 text-xs dark:bg-purple-900 dark:text-purple-200">
-			Récurrent
+		<span
+			className="inline-flex items-center text-muted-foreground"
+			title="Événement récurrent"
+		>
+			<Repeat className="h-3.5 w-3.5" />
 		</span>
 	);
 });
 
+/**
+ * Color indicator dot
+ */
+export const ColorDot = React.memo(function ColorDot({
+	color,
+	size = "md",
+}: {
+	color: string | null | undefined;
+	size?: "sm" | "md" | "lg";
+}) {
+	if (!color) return null;
+
+	const sizes = {
+		sm: "h-2 w-2",
+		md: "h-2.5 w-2.5",
+		lg: "h-3 w-3",
+	};
+
+	return (
+		<span
+			className={cn("shrink-0 rounded-full", sizes[size])}
+			style={{ backgroundColor: color }}
+		/>
+	);
+});
+
+/**
+ * Event header with title and inline indicators
+ * Improved visual hierarchy: title prominent, indicators subtle
+ */
 export const EventBadges = React.memo(function EventBadges({
 	event,
+	showColor = false,
 }: {
 	event: EventItem;
+	showColor?: boolean;
 }) {
+	const isCancelled = event.status === "CANCELLED";
+	const hasIndicators =
+		event.rrule || event.priority || (event.class && event.class !== "PUBLIC");
+
 	return (
-		<div className="mb-2 flex items-center gap-2">
-			<h3 className="font-semibold">{event.title}</h3>
-			<StatusBadge status={event.status} />
-			<PriorityBadge priority={event.priority} />
-			<ClassBadge classValue={event.class} />
-			<RecurrenceBadge rrule={event.rrule} />
+		<div className="mb-1.5 flex items-start gap-2">
+			{showColor && <ColorDot color={event.color} size="md" />}
+			<div className="min-w-0 flex-1">
+				<div className="flex flex-wrap items-center gap-2">
+					<h3
+						className={cn(
+							"font-semibold text-base leading-tight",
+							isCancelled && "text-muted-foreground line-through",
+						)}
+					>
+						{event.title}
+					</h3>
+					{/* Inline subtle indicators */}
+					{hasIndicators && (
+						<div className="flex items-center gap-1.5">
+							<RecurrenceBadge rrule={event.rrule} />
+							<PriorityBadge priority={event.priority} />
+							<ClassBadge classValue={event.class} />
+						</div>
+					)}
+				</div>
+				{/* Status badge on its own line if cancelled/tentative */}
+				<StatusBadge status={event.status} />
+			</div>
 		</div>
 	);
 });

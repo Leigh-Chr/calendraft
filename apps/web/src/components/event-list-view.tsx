@@ -1,6 +1,7 @@
 /**
  * Event list view component - Main container
  * Sub-components are located in ./event-list/
+ * Enhanced with date-based grouping for better readability
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,19 +9,23 @@ import {
 	endOfDay,
 	endOfMonth,
 	endOfWeek,
+	format,
+	isPast,
 	startOfDay,
 	startOfMonth,
 	startOfWeek,
 } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ChevronRight } from "lucide-react";
-import { AnimatePresence } from "motion/react";
+import { Calendar, ChevronRight } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { groupEventsByDate, normalizeDate } from "@/lib/date-utils";
 import { QUERY_KEYS } from "@/lib/query-keys";
 import { TOUR_STEP_IDS } from "@/lib/tour-constants";
+import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
 import { EventCard } from "./event-list/event-card";
 import { DateFilterButtons, SearchSortBar } from "./event-list/event-filters";
@@ -78,19 +83,18 @@ function useEventFilters(
 	useEffect(() => {
 		if (!initialFilters) return;
 
-		setFilters((prev) => {
-			const newDateFilter = initialFilters.dateFilter ?? "all";
-			const newSortBy = initialFilters.sortBy ?? "date";
-			const newKeyword = initialFilters.keyword ?? "";
+		const newDateFilter = initialFilters.dateFilter ?? "all";
+		const newSortBy = initialFilters.sortBy ?? "date";
+		const newKeyword = initialFilters.keyword ?? "";
 
+		setFilters((prev) => {
 			// Only update if values actually changed
-			if (
+			const unchanged =
 				prev.dateFilter === newDateFilter &&
 				prev.sortBy === newSortBy &&
-				prev.keyword === newKeyword
-			) {
-				return prev;
-			}
+				prev.keyword === newKeyword;
+
+			if (unchanged) return prev;
 
 			return {
 				...prev,
@@ -339,6 +343,70 @@ export function EventListView({
 
 // ----- Sub-components -----
 
+/**
+ * Date group header component
+ * Shows contextual date label with visual hierarchy
+ */
+function DateGroupHeader({
+	label,
+	date,
+	eventCount,
+}: {
+	label: string;
+	date: Date;
+	eventCount: number;
+}) {
+	const isDatePast = isPast(date) && label !== "Aujourd'hui";
+	const isToday = label === "Aujourd'hui";
+
+	return (
+		<motion.div
+			initial={{ opacity: 0, x: -10 }}
+			animate={{ opacity: 1, x: 0 }}
+			className={cn(
+				"sticky top-0 z-10 flex items-center gap-3 py-3",
+				"bg-gradient-to-r from-background via-background to-transparent",
+			)}
+		>
+			<div
+				className={cn(
+					"flex items-center gap-2",
+					isDatePast && "text-muted-foreground",
+				)}
+			>
+				<Calendar
+					className={cn(
+						"h-4 w-4",
+						isToday ? "text-primary" : "text-muted-foreground",
+					)}
+				/>
+				<span
+					className={cn(
+						"font-semibold text-sm",
+						isToday && "text-primary",
+						isDatePast && "text-muted-foreground",
+					)}
+				>
+					{label}
+				</span>
+				{!isToday && (
+					<span className="text-muted-foreground/60 text-xs">
+						{format(date, "d MMMM", { locale: fr })}
+					</span>
+				)}
+			</div>
+			<div className="h-px flex-1 bg-border" />
+			<span className="text-muted-foreground/60 text-xs">
+				{eventCount} événement{eventCount > 1 ? "s" : ""}
+			</span>
+		</motion.div>
+	);
+}
+
+/**
+ * Events list with date-based grouping
+ * Groups events by day with contextual headers
+ */
 function EventsList({
 	events,
 	calendarId,
@@ -354,6 +422,11 @@ function EventsList({
 	isDeleting: boolean;
 	isDuplicating: boolean;
 }) {
+	// Group events by date
+	const groupedEvents = useMemo(() => {
+		return groupEventsByDate(events);
+	}, [events]);
+
 	if (events.length === 0) {
 		return (
 			<Card>
@@ -365,19 +438,30 @@ function EventsList({
 	}
 
 	return (
-		<div className="space-y-2">
+		<div className="space-y-1">
 			<AnimatePresence mode="popLayout">
-				{events.map((event) => (
-					<EventCard
-						key={event.id}
-						event={event}
-						calendarId={calendarId}
-						onDelete={onDelete}
-						onDuplicate={onDuplicate}
-						isDeleting={isDeleting}
-						isDuplicating={isDuplicating}
-					/>
-				))}
+				{Array.from(groupedEvents.entries()).map(
+					([dateKey, { label, date, events: dayEvents }]) => (
+						<div key={dateKey} className="space-y-2">
+							<DateGroupHeader
+								label={label}
+								date={date}
+								eventCount={dayEvents.length}
+							/>
+							{dayEvents.map((event) => (
+								<EventCard
+									key={event.id}
+									event={event}
+									calendarId={calendarId}
+									onDelete={onDelete}
+									onDuplicate={onDuplicate}
+									isDeleting={isDeleting}
+									isDuplicating={isDuplicating}
+								/>
+							))}
+						</div>
+					),
+				)}
 			</AnimatePresence>
 		</div>
 	);

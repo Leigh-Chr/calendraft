@@ -39,7 +39,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { ColorIndicator, ColorPicker } from "@/components/ui/color-picker";
+import { ColorPicker } from "@/components/ui/color-picker";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -374,6 +374,27 @@ interface CalendarCardProps {
 	isUpdating: boolean;
 }
 
+/**
+ * Format date for calendar card preview
+ * Shows contextual labels: "Aujourd'hui", "Demain", or date
+ */
+function formatCardDate(date: string | Date): string {
+	const d = new Date(date);
+	const now = new Date();
+	const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+	const tomorrow = new Date(today);
+	tomorrow.setDate(tomorrow.getDate() + 1);
+	const eventDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+	if (eventDate.getTime() === today.getTime()) {
+		return "Auj.";
+	}
+	if (eventDate.getTime() === tomorrow.getTime()) {
+		return "Dem.";
+	}
+	return format(d, "d MMM", { locale: fr });
+}
+
 function CalendarCard({
 	calendar,
 	onOpen,
@@ -383,10 +404,16 @@ function CalendarCard({
 	isUpdating,
 }: CalendarCardProps) {
 	// Get upcoming events (up to 3)
+	const now = new Date();
 	const upcomingEvents =
-		calendar.events
-			?.filter((e) => new Date(e.startDate) >= new Date())
-			.slice(0, 3) || [];
+		calendar.events?.filter((e) => new Date(e.startDate) >= now).slice(0, 3) ||
+		[];
+
+	// Get the next event for highlight
+	const nextEvent = upcomingEvents[0];
+	const isNextEventToday =
+		nextEvent &&
+		new Date(nextEvent.startDate).toDateString() === now.toDateString();
 
 	return (
 		<Card
@@ -396,19 +423,30 @@ function CalendarCard({
 			)}
 			onClick={onOpen}
 		>
-			{/* Color bar at top */}
+			{/* Color accent - left border instead of top for more subtle look */}
 			<div
-				className="absolute inset-x-0 top-0 h-1.5 transition-all duration-200 group-hover:h-2"
+				className="absolute inset-y-0 left-0 w-1 transition-all duration-200 group-hover:w-1.5"
 				style={{ backgroundColor: calendar.color || "#6366f1" }}
 			/>
 
-			<CardHeader className="pt-5 pb-2">
+			<CardHeader className="pb-2 pl-5">
 				<div className="flex items-start justify-between">
-					<div className="flex items-center gap-2.5 pr-8">
-						<ColorIndicator color={calendar.color} size="md" />
-						<CardTitle className="line-clamp-1 text-lg">
+					<div className="min-w-0 flex-1 pr-8">
+						<CardTitle className="line-clamp-1 text-base">
 							{calendar.name}
 						</CardTitle>
+						<CardDescription className="mt-0.5 flex items-center gap-2">
+							<span>
+								{calendar.eventCount} événement
+								{calendar.eventCount !== 1 ? "s" : ""}
+							</span>
+							{isNextEventToday && (
+								<span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 font-medium text-primary text-xs">
+									<span className="h-1 w-1 animate-pulse rounded-full bg-primary" />
+									Aujourd'hui
+								</span>
+							)}
+						</CardDescription>
 					</div>
 
 					{/* Actions Menu */}
@@ -417,7 +455,7 @@ function CalendarCard({
 							<Button
 								variant="ghost"
 								size="icon"
-								className="absolute top-3 right-2 h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+								className="absolute top-2 right-2 h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
 							>
 								<MoreHorizontal className="h-4 w-4" />
 							</Button>
@@ -457,53 +495,50 @@ function CalendarCard({
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
-				<CardDescription className="flex items-center gap-1.5">
-					<span className="font-medium text-foreground">
-						{calendar.eventCount}
-					</span>{" "}
-					événement{calendar.eventCount !== 1 ? "s" : ""}
-				</CardDescription>
 			</CardHeader>
 
-			<CardContent className="pt-2">
-				{/* Upcoming events preview */}
+			<CardContent className="pt-0 pl-5">
+				{/* Upcoming events preview - improved layout */}
 				{upcomingEvents.length > 0 ? (
-					<div className="space-y-1.5">
-						{upcomingEvents.map((event) => (
-							<div
-								key={event.id}
-								className="flex items-center gap-2 text-muted-foreground text-xs"
-							>
-								<span
-									className="h-1.5 w-1.5 shrink-0 rounded-full"
-									style={{ backgroundColor: calendar.color || "#6366f1" }}
-								/>
-								<span className="shrink-0 font-medium text-foreground/80">
-									{format(new Date(event.startDate), "d MMM", { locale: fr })}
-								</span>
-								<span className="truncate">{event.title}</span>
-							</div>
-						))}
+					<div className="space-y-1">
+						{upcomingEvents.map((event, index) => {
+							const isToday =
+								new Date(event.startDate).toDateString() === now.toDateString();
+							return (
+								<div
+									key={event.id}
+									className={cn(
+										"flex items-center gap-2 text-xs",
+										index === 0 ? "text-foreground" : "text-muted-foreground",
+									)}
+								>
+									<span
+										className={cn(
+											"w-10 shrink-0 text-right font-medium",
+											isToday && "text-primary",
+										)}
+									>
+										{formatCardDate(event.startDate)}
+									</span>
+									<span
+										className="h-1 w-1 shrink-0 rounded-full"
+										style={{ backgroundColor: calendar.color || "#6366f1" }}
+									/>
+									<span className="truncate">{event.title}</span>
+								</div>
+							);
+						})}
+						{calendar.eventCount > 3 && (
+							<p className="mt-1 text-muted-foreground/60 text-xs">
+								+{calendar.eventCount - 3} autres
+							</p>
+						)}
 					</div>
 				) : (
-					<p className="text-muted-foreground/60 text-xs">
+					<p className="py-2 text-center text-muted-foreground/50 text-xs italic">
 						Aucun événement à venir
 					</p>
 				)}
-
-				{/* Open button on hover */}
-				<Button
-					variant="default"
-					size="sm"
-					className="mt-4 w-full opacity-0 transition-opacity group-hover:opacity-100"
-					onClick={(e) => {
-						e.stopPropagation();
-						onOpen();
-					}}
-				>
-					<ExternalLink className="mr-2 h-4 w-4" />
-					Ouvrir
-				</Button>
 			</CardContent>
 		</Card>
 	);
