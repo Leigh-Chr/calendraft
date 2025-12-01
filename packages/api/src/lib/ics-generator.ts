@@ -254,65 +254,70 @@ function generateOrganizer(event: EventData, lines: string[]): void {
 }
 
 /**
+ * Build attendee line parameters
+ */
+function buildAttendeeParams(
+	attendee: NonNullable<EventData["attendees"]>[0],
+): string[] {
+	const params: string[] = [];
+	if (attendee.name) params.push(`CN=${escapeIcsText(attendee.name)}`);
+	if (attendee.role) params.push(`ROLE=${attendee.role.toUpperCase()}`);
+	if (attendee.status) params.push(`PARTSTAT=${attendee.status.toUpperCase()}`);
+	if (attendee.rsvp) params.push("RSVP=TRUE");
+	return params;
+}
+
+/**
  * Generate attendees
  */
 function generateAttendees(event: EventData, lines: string[]): void {
-	if (event.attendees && event.attendees.length > 0) {
-		for (const attendee of event.attendees) {
-			let attendeeLine = "ATTENDEE";
-			if (attendee.name) {
-				attendeeLine += `;CN=${escapeIcsText(attendee.name)}`;
-			}
-			if (attendee.role) {
-				attendeeLine += `;ROLE=${attendee.role.toUpperCase()}`;
-			}
-			if (attendee.status) {
-				attendeeLine += `;PARTSTAT=${attendee.status.toUpperCase()}`;
-			}
-			if (attendee.rsvp) {
-				attendeeLine += ";RSVP=TRUE";
-			}
-			attendeeLine += `:mailto:${attendee.email}`;
-			lines.push(attendeeLine);
-		}
+	if (!event.attendees?.length) return;
+
+	for (const attendee of event.attendees) {
+		const params = buildAttendeeParams(attendee);
+		const paramsStr = params.length > 0 ? `;${params.join(";")}` : "";
+		lines.push(`ATTENDEE${paramsStr}:mailto:${attendee.email}`);
 	}
+}
+
+/**
+ * Build trigger line for alarm
+ */
+function buildAlarmTriggerLine(trigger: string): string {
+	const isAbsoluteTrigger = /^\d{8}T\d{6}/.test(trigger);
+	return isAbsoluteTrigger
+		? `TRIGGER;VALUE=DATE-TIME:${trigger}`
+		: `TRIGGER:${trigger}`;
+}
+
+/**
+ * Build alarm content lines (excluding BEGIN/END)
+ */
+function buildAlarmContentLines(
+	alarm: NonNullable<EventData["alarms"]>[0],
+): string[] {
+	const alarmLines: string[] = [
+		buildAlarmTriggerLine(alarm.trigger),
+		`ACTION:${alarm.action.toUpperCase()}`,
+	];
+	if (alarm.summary) alarmLines.push(`SUMMARY:${escapeIcsText(alarm.summary)}`);
+	if (alarm.description)
+		alarmLines.push(`DESCRIPTION:${escapeIcsText(alarm.description)}`);
+	if (alarm.duration) alarmLines.push(`DURATION:${alarm.duration}`);
+	if (alarm.repeat != null) alarmLines.push(`REPEAT:${alarm.repeat}`);
+	return alarmLines;
 }
 
 /**
  * Generate alarms (VALARM)
  */
 function generateAlarms(event: EventData, lines: string[]): void {
-	if (event.alarms && event.alarms.length > 0) {
-		for (const alarm of event.alarms) {
-			lines.push("BEGIN:VALARM");
+	if (!event.alarms?.length) return;
 
-			const isAbsoluteTrigger = /^\d{8}T\d{6}/.test(alarm.trigger);
-			if (isAbsoluteTrigger) {
-				lines.push(`TRIGGER;VALUE=DATE-TIME:${alarm.trigger}`);
-			} else {
-				lines.push(`TRIGGER:${alarm.trigger}`);
-			}
-
-			lines.push(`ACTION:${alarm.action.toUpperCase()}`);
-
-			if (alarm.summary) {
-				lines.push(`SUMMARY:${escapeIcsText(alarm.summary)}`);
-			}
-
-			if (alarm.description) {
-				lines.push(`DESCRIPTION:${escapeIcsText(alarm.description)}`);
-			}
-
-			if (alarm.duration) {
-				lines.push(`DURATION:${alarm.duration}`);
-			}
-
-			if (alarm.repeat !== null && alarm.repeat !== undefined) {
-				lines.push(`REPEAT:${alarm.repeat}`);
-			}
-
-			lines.push("END:VALARM");
-		}
+	for (const alarm of event.alarms) {
+		lines.push("BEGIN:VALARM");
+		lines.push(...buildAlarmContentLines(alarm));
+		lines.push("END:VALARM");
 	}
 }
 

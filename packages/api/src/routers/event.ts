@@ -54,6 +54,34 @@ async function verifyEventAccess(
 }
 
 /**
+ * Verify calendar access for duplication
+ */
+async function verifyCalendarAccess(
+	calendarId: string,
+	sessionUserId?: string,
+	anonymousId?: string,
+) {
+	const calendar = await prisma.calendar.findFirst({
+		where: {
+			id: calendarId,
+			OR: [
+				...(sessionUserId ? [{ userId: sessionUserId }] : []),
+				...(anonymousId ? [{ userId: anonymousId }] : []),
+			],
+		},
+	});
+
+	if (!calendar) {
+		throw new TRPCError({
+			code: "NOT_FOUND",
+			message: "Calendar not found or access denied",
+		});
+	}
+
+	return calendar;
+}
+
+/**
  * Validate UID uniqueness if being changed
  */
 async function validateUidChange(
@@ -542,8 +570,8 @@ export const eventRouter = router({
 		.input(
 			z.object({
 				id: z.string(),
-				targetCalendarId: z.string().optional(), // If not provided, duplicate in same calendar
-				dayOffset: z.number().int().optional().default(0), // Offset in days for the new event
+				targetCalendarId: z.string().optional(),
+				dayOffset: z.number().int().optional().default(0),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -561,56 +589,26 @@ export const eventRouter = router({
 			});
 
 			if (!sourceEvent) {
-				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Event not found",
-				});
+				throw new TRPCError({ code: "NOT_FOUND", message: "Event not found" });
 			}
 
-			// Verify calendar belongs to user
-			const sourceCalendar = await prisma.calendar.findFirst({
-				where: {
-					id: sourceEvent.calendarId,
-					OR: [
-						...(ctx.session?.user?.id ? [{ userId: ctx.session.user.id }] : []),
-						...(ctx.anonymousId ? [{ userId: ctx.anonymousId }] : []),
-					],
-				},
-			});
+			// Verify source calendar access
+			await verifyCalendarAccess(
+				sourceEvent.calendarId,
+				ctx.session?.user?.id,
+				ctx.anonymousId ?? undefined,
+			);
 
-			if (!sourceCalendar) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Access denied",
-				});
-			}
-
-			// Determine target calendar
+			// Determine and verify target calendar
 			const targetCalendarId = input.targetCalendarId || sourceEvent.calendarId;
-
-			// If target is different, verify access
 			if (targetCalendarId !== sourceEvent.calendarId) {
-				const targetCalendar = await prisma.calendar.findFirst({
-					where: {
-						id: targetCalendarId,
-						OR: [
-							...(ctx.session?.user?.id
-								? [{ userId: ctx.session.user.id }]
-								: []),
-							...(ctx.anonymousId ? [{ userId: ctx.anonymousId }] : []),
-						],
-					},
-				});
-
-				if (!targetCalendar) {
-					throw new TRPCError({
-						code: "NOT_FOUND",
-						message: "Target calendar not found",
-					});
-				}
+				await verifyCalendarAccess(
+					targetCalendarId,
+					ctx.session?.user?.id,
+					ctx.anonymousId ?? undefined,
+				);
 			}
 
-			// Check event limit for anonymous users
 			await checkAnonymousEventLimit(ctx, targetCalendarId);
 
 			// Calculate new dates with offset
@@ -618,7 +616,7 @@ export const eventRouter = router({
 			const newStartDate = new Date(sourceEvent.startDate.getTime() + offsetMs);
 			const newEndDate = new Date(sourceEvent.endDate.getTime() + offsetMs);
 
-			// Create duplicated event (without UID to generate a new one, and without recurrence-related fields)
+			// Create duplicated event
 			const duplicatedEvent = await prisma.event.create({
 				data: {
 					calendarId: targetCalendarId,
@@ -633,18 +631,15 @@ export const eventRouter = router({
 					class: sourceEvent.class,
 					comment: sourceEvent.comment,
 					contact: sourceEvent.contact,
-					sequence: 0, // Reset sequence for new event
+					sequence: 0,
 					transp: sourceEvent.transp,
-					// Don't copy rrule, recurrenceId, relatedTo for duplicates
 					geoLatitude: sourceEvent.geoLatitude,
 					geoLongitude: sourceEvent.geoLongitude,
 					organizerName: sourceEvent.organizerName,
 					organizerEmail: sourceEvent.organizerEmail,
-					// Generate new UID (null will be auto-handled)
 					uid: null,
 					dtstamp: new Date(),
 					color: sourceEvent.color,
-					// Duplicate relations
 					attendees:
 						sourceEvent.attendees.length > 0
 							? {

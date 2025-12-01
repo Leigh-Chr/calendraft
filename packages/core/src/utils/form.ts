@@ -16,6 +16,43 @@ import type { AlarmData, AttendeeData, EventFormData } from "../types/event";
 // ----- Initialization -----
 
 /**
+ * Default values for string fields
+ */
+const STRING_FIELD_DEFAULTS: Record<string, string> = {
+	title: "",
+	startDate: "",
+	endDate: "",
+	description: "",
+	location: "",
+	categories: "",
+	url: "",
+	resources: "",
+	comment: "",
+	contact: "",
+	rrule: "",
+	rdate: "",
+	exdate: "",
+	organizerName: "",
+	organizerEmail: "",
+	uid: "",
+	recurrenceId: "",
+	relatedTo: "",
+	color: "",
+};
+
+/**
+ * Get string value with fallback to default
+ */
+function getStringValue(
+	data: Partial<EventFormData>,
+	key: keyof EventFormData,
+): string {
+	const value = data[key];
+	if (typeof value === "string") return value;
+	return STRING_FIELD_DEFAULTS[key] ?? "";
+}
+
+/**
  * Initialize form data with default values
  * @param initialData - Partial initial data
  * @returns Complete EventFormData with defaults
@@ -26,32 +63,32 @@ export function initializeFormData(
 	const data = initialData || {};
 
 	return {
-		title: data.title || "",
-		startDate: data.startDate || "",
-		endDate: data.endDate || "",
-		description: data.description || "",
-		location: data.location || "",
+		title: getStringValue(data, "title"),
+		startDate: getStringValue(data, "startDate"),
+		endDate: getStringValue(data, "endDate"),
+		description: getStringValue(data, "description"),
+		location: getStringValue(data, "location"),
 		status: data.status,
 		priority: data.priority,
-		categories: data.categories || "",
-		url: data.url || "",
+		categories: getStringValue(data, "categories"),
+		url: getStringValue(data, "url"),
 		class: data.class,
-		resources: data.resources || "",
+		resources: getStringValue(data, "resources"),
 		transp: data.transp,
-		comment: data.comment || "",
-		contact: data.contact || "",
+		comment: getStringValue(data, "comment"),
+		contact: getStringValue(data, "contact"),
 		sequence: data.sequence ?? 0,
-		rrule: data.rrule || "",
-		rdate: data.rdate || "",
-		exdate: data.exdate || "",
+		rrule: getStringValue(data, "rrule"),
+		rdate: getStringValue(data, "rdate"),
+		exdate: getStringValue(data, "exdate"),
 		geoLatitude: data.geoLatitude,
 		geoLongitude: data.geoLongitude,
-		organizerName: data.organizerName || "",
-		organizerEmail: data.organizerEmail || "",
-		uid: data.uid || "",
-		recurrenceId: data.recurrenceId || "",
-		relatedTo: data.relatedTo || "",
-		color: data.color || "",
+		organizerName: getStringValue(data, "organizerName"),
+		organizerEmail: getStringValue(data, "organizerEmail"),
+		uid: getStringValue(data, "uid"),
+		recurrenceId: getStringValue(data, "recurrenceId"),
+		relatedTo: getStringValue(data, "relatedTo"),
+		color: getStringValue(data, "color"),
 		attendees: data.attendees || [],
 		alarms: data.alarms || [],
 	};
@@ -113,6 +150,20 @@ function transformAlarms(
 }
 
 /**
+ * Convert string to null if empty
+ */
+function toNullIfEmpty(value: string | undefined): string | null {
+	return value || null;
+}
+
+/**
+ * Convert number to null if undefined
+ */
+function toNullIfUndefined(value: number | undefined): number | null {
+	return value ?? null;
+}
+
+/**
  * Transform EventFormData to API format
  * @param data - Form data to transform
  * @param calendarId - Calendar ID (optional, for create operations)
@@ -126,36 +177,32 @@ export function transformEventFormData(
 		title: data.title,
 		startDate: new Date(data.startDate),
 		endDate: new Date(data.endDate),
-		description: data.description || null,
-		location: data.location || null,
-		status: data.status || null,
-		priority: data.priority ?? null,
-		categories: data.categories || null,
-		url: data.url || null,
-		class: data.class || null,
-		comment: data.comment || null,
-		contact: data.contact || null,
-		resources: data.resources || null,
-		sequence: data.sequence ?? null,
-		transp: data.transp || null,
-		rrule: data.rrule || null,
-		rdate: data.rdate || null,
-		exdate: data.exdate || null,
-		geoLatitude: data.geoLatitude ?? null,
-		geoLongitude: data.geoLongitude ?? null,
-		organizerName: data.organizerName || null,
-		organizerEmail: data.organizerEmail || null,
-		uid: data.uid || null,
-		recurrenceId: data.recurrenceId || null,
-		relatedTo: data.relatedTo || null,
-		color: data.color || null,
+		description: toNullIfEmpty(data.description),
+		location: toNullIfEmpty(data.location),
+		status: toNullIfEmpty(data.status),
+		priority: toNullIfUndefined(data.priority),
+		categories: toNullIfEmpty(data.categories),
+		url: toNullIfEmpty(data.url),
+		class: toNullIfEmpty(data.class),
+		comment: toNullIfEmpty(data.comment),
+		contact: toNullIfEmpty(data.contact),
+		resources: toNullIfEmpty(data.resources),
+		sequence: toNullIfUndefined(data.sequence),
+		transp: toNullIfEmpty(data.transp),
+		rrule: toNullIfEmpty(data.rrule),
+		rdate: toNullIfEmpty(data.rdate),
+		exdate: toNullIfEmpty(data.exdate),
+		geoLatitude: toNullIfUndefined(data.geoLatitude),
+		geoLongitude: toNullIfUndefined(data.geoLongitude),
+		organizerName: toNullIfEmpty(data.organizerName),
+		organizerEmail: toNullIfEmpty(data.organizerEmail),
+		uid: toNullIfEmpty(data.uid),
+		recurrenceId: toNullIfEmpty(data.recurrenceId),
+		relatedTo: toNullIfEmpty(data.relatedTo),
+		color: toNullIfEmpty(data.color),
 		attendees: transformAttendees(data.attendees),
 		alarms: transformAlarms(data.alarms),
 	};
 
-	if (calendarId) {
-		return { calendarId, ...result };
-	}
-
-	return result;
+	return calendarId ? { calendarId, ...result } : result;
 }

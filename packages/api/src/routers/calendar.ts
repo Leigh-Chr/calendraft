@@ -97,6 +97,45 @@ function convertAlarmsForCreate(
 }
 
 /**
+ * Helper to convert string or undefined to string or null
+ */
+function toStringOrNull(value: string | undefined): string | null {
+	return value || null;
+}
+
+/**
+ * Helper to convert number or undefined to number or null
+ */
+function toNumberOrNull(value: number | undefined): number | null {
+	return value ?? null;
+}
+
+/**
+ * Extract basic metadata fields from parsed event
+ */
+function extractBasicMetadata(parsedEvent: ParsedEvent) {
+	return {
+		description: toStringOrNull(parsedEvent.description),
+		location: toStringOrNull(parsedEvent.location),
+		url: toStringOrNull(parsedEvent.url),
+		comment: toStringOrNull(parsedEvent.comment),
+		contact: toStringOrNull(parsedEvent.contact),
+		rrule: toStringOrNull(parsedEvent.rrule),
+		color: toStringOrNull(parsedEvent.color),
+	};
+}
+
+/**
+ * Extract organizer fields from parsed event
+ */
+function extractOrganizerFields(parsedEvent: ParsedEvent) {
+	return {
+		organizerName: toStringOrNull(parsedEvent.organizerName),
+		organizerEmail: toStringOrNull(parsedEvent.organizerEmail),
+	};
+}
+
+/**
  * Prepare event data from parsed ICS event
  */
 function prepareEventDataFromParsed(
@@ -108,28 +147,21 @@ function prepareEventDataFromParsed(
 		title: parsedEvent.title,
 		startDate: parsedEvent.startDate,
 		endDate: parsedEvent.endDate,
-		description: parsedEvent.description || null,
-		location: parsedEvent.location || null,
+		...extractBasicMetadata(parsedEvent),
 		status: parseEventStatus(parsedEvent.status),
-		priority: parsedEvent.priority ?? null,
-		url: parsedEvent.url || null,
+		priority: toNumberOrNull(parsedEvent.priority),
 		class: parseEventClass(parsedEvent.class),
-		comment: parsedEvent.comment || null,
-		contact: parsedEvent.contact || null,
 		sequence: parsedEvent.sequence ?? 0,
 		transp: parseEventTransparency(parsedEvent.transp),
-		rrule: parsedEvent.rrule || null,
-		geoLatitude: parsedEvent.geoLatitude ?? null,
-		geoLongitude: parsedEvent.geoLongitude ?? null,
-		organizerName: parsedEvent.organizerName || null,
-		organizerEmail: parsedEvent.organizerEmail || null,
-		uid: parsedEvent.uid || null,
+		geoLatitude: toNumberOrNull(parsedEvent.geoLatitude),
+		geoLongitude: toNumberOrNull(parsedEvent.geoLongitude),
+		...extractOrganizerFields(parsedEvent),
+		uid: toStringOrNull(parsedEvent.uid),
 		dtstamp: parsedEvent.dtstamp || new Date(),
 		created: parsedEvent.created || null,
 		lastModified: parsedEvent.lastModified || null,
-		recurrenceId: parsedEvent.recurrenceId || null,
-		relatedTo: parsedEvent.relatedTo || null,
-		color: parsedEvent.color || null,
+		recurrenceId: toStringOrNull(parsedEvent.recurrenceId),
+		relatedTo: toStringOrNull(parsedEvent.relatedTo),
 		categories: prepareCategoriesData(parsedEvent.categories),
 		resources: prepareResourcesData(parsedEvent.resources),
 		recurrenceDates: prepareRecurrenceDatesData(

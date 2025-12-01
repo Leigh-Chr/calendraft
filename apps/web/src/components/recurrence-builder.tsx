@@ -54,6 +54,76 @@ const RECURRENCE_PRESETS = [
 	{ label: "Chaque année", rrule: "FREQ=YEARLY", icon: "🎂" },
 ] as const;
 
+// Day code to number mapping
+const DAY_CODE_MAP: Record<string, number> = {
+	SU: 0,
+	MO: 1,
+	TU: 2,
+	WE: 3,
+	TH: 4,
+	FR: 5,
+	SA: 6,
+};
+
+// Check if date should be included based on BYDAY config
+function shouldIncludeDate(
+	date: Date,
+	frequency: string,
+	byDay: string[] | undefined,
+): boolean {
+	if (frequency !== "WEEKLY" || !byDay?.length) return true;
+
+	const dayOfWeek = date.getDay();
+	const currentDayCode = Object.entries(DAY_CODE_MAP).find(
+		([, num]) => num === dayOfWeek,
+	)?.[0];
+
+	return byDay.includes(currentDayCode || "");
+}
+
+// Check if recurrence end condition is met
+function isEndConditionMet(
+	config: RecurrenceConfig,
+	dateCount: number,
+	currentDate: Date,
+): boolean {
+	if (config.endType === "count" && config.count && dateCount >= config.count) {
+		return true;
+	}
+	if (
+		config.endType === "until" &&
+		config.until &&
+		currentDate > config.until
+	) {
+		return true;
+	}
+	return false;
+}
+
+// Get next date based on frequency
+function getNextDate(
+	currentDate: Date,
+	frequency: string,
+	interval: number,
+	byDay: string[] | undefined,
+	shouldInclude: boolean,
+): Date {
+	switch (frequency) {
+		case "DAILY":
+			return addDays(currentDate, shouldInclude ? interval : 1);
+		case "WEEKLY":
+			return byDay?.length
+				? addDays(currentDate, 1)
+				: addWeeks(currentDate, interval);
+		case "MONTHLY":
+			return addMonths(currentDate, interval);
+		case "YEARLY":
+			return addYears(currentDate, interval);
+		default:
+			return addDays(currentDate, 1);
+	}
+}
+
 // Calculate next occurrences for preview
 function getNextOccurrences(
 	config: RecurrenceConfig,
@@ -65,69 +135,28 @@ function getNextOccurrences(
 	const dates: Date[] = [];
 	let currentDate = new Date(startDate);
 	const interval = config.interval || 1;
-	let iteration = 0;
-	const maxIterations = 100; // Safety limit
+	const maxIterations = 100;
 
-	while (dates.length < count && iteration < maxIterations) {
-		iteration++;
+	for (let i = 0; i < maxIterations && dates.length < count; i++) {
+		const shouldInclude = shouldIncludeDate(
+			currentDate,
+			config.frequency,
+			config.byDay,
+		);
 
-		// Check if this date should be included based on BYDAY
-		let shouldInclude = true;
-		if (config.frequency === "WEEKLY" && config.byDay?.length) {
-			const dayMap: Record<string, number> = {
-				SU: 0,
-				MO: 1,
-				TU: 2,
-				WE: 3,
-				TH: 4,
-				FR: 5,
-				SA: 6,
-			};
-			const currentDayCode = Object.entries(dayMap).find(
-				([_, num]) => num === currentDate.getDay(),
-			)?.[0];
-			shouldInclude = config.byDay.includes(currentDayCode || "");
-		}
-
-		// Check end conditions
-		if (
-			config.endType === "count" &&
-			config.count &&
-			dates.length >= config.count
-		) {
-			break;
-		}
-		if (
-			config.endType === "until" &&
-			config.until &&
-			currentDate > config.until
-		) {
-			break;
-		}
+		if (isEndConditionMet(config, dates.length, currentDate)) break;
 
 		if (shouldInclude && currentDate >= startDate) {
 			dates.push(new Date(currentDate));
 		}
 
-		// Move to next occurrence
-		switch (config.frequency) {
-			case "DAILY":
-				currentDate = addDays(currentDate, shouldInclude ? interval : 1);
-				break;
-			case "WEEKLY":
-				if (config.byDay?.length) {
-					currentDate = addDays(currentDate, 1);
-				} else {
-					currentDate = addWeeks(currentDate, interval);
-				}
-				break;
-			case "MONTHLY":
-				currentDate = addMonths(currentDate, interval);
-				break;
-			case "YEARLY":
-				currentDate = addYears(currentDate, interval);
-				break;
-		}
+		currentDate = getNextDate(
+			currentDate,
+			config.frequency,
+			interval,
+			config.byDay,
+			shouldInclude,
+		);
 	}
 
 	return dates.slice(0, count);
@@ -263,6 +292,459 @@ const MONTHS = [
 	{ value: 12, label: "Décembre" },
 ];
 
+// Supported RRULE keys that can be represented in the simple UI
+const SUPPORTED_RRULE_KEYS = [
+	"FREQ",
+	"INTERVAL",
+	"COUNT",
+	"UNTIL",
+	"BYDAY",
+	"BYMONTHDAY",
+	"BYMONTH",
+] as const;
+
+// Get interval label prefix
+function getIntervalPrefix(frequency: string | null): string {
+	return frequency === "WEEKLY" ? "Toutes les" : "Tous les";
+}
+
+// Get interval unit label
+function getIntervalUnit(frequency: string | null, interval: number): string {
+	const units: Record<string, string> = {
+		DAILY: `jour${interval > 1 ? "s" : ""}`,
+		WEEKLY: `semaine${interval > 1 ? "s" : ""}`,
+		MONTHLY: "mois",
+		YEARLY: `an${interval > 1 ? "s" : ""}`,
+	};
+	return frequency ? units[frequency] || "" : "";
+}
+
+// Get interval description
+function getIntervalDescription(
+	frequency: string | null,
+	interval: number,
+): string {
+	const descriptions: Record<string, string> = {
+		DAILY: `L'événement se répétera tous les ${interval} jour${interval > 1 ? "s" : ""}.`,
+		WEEKLY: `L'événement se répétera toutes les ${interval} semaine${interval > 1 ? "s" : ""}.`,
+		MONTHLY: `L'événement se répétera tous les ${interval} mois.`,
+		YEARLY: `L'événement se répétera tous les ${interval} an${interval > 1 ? "s" : ""}.`,
+	};
+	return frequency ? descriptions[frequency] || "" : "";
+}
+
+// Check if the current rrule can be fully represented in the simple UI
+function canFullyRepresent(rrule: string): boolean {
+	if (!rrule || !rrule.trim()) return true;
+	const parsed = parseRRULE(rrule);
+	if (!parsed) return false;
+
+	const parts = rrule.split(";");
+	return parts.every((part) => {
+		const [key] = part.split("=");
+		return (
+			!key ||
+			SUPPORTED_RRULE_KEYS.includes(
+				key as (typeof SUPPORTED_RRULE_KEYS)[number],
+			)
+		);
+	});
+}
+
+// Sub-component: Quick Presets Section
+function QuickPresetsSection({
+	onPresetClick,
+	disabled,
+}: {
+	onPresetClick: (preset: (typeof RECURRENCE_PRESETS)[number]) => void;
+	disabled: boolean;
+}) {
+	return (
+		<div className="space-y-2">
+			<div className="flex items-center gap-2 text-muted-foreground text-sm">
+				<Sparkles className="h-4 w-4" />
+				<span>Récurrences rapides</span>
+			</div>
+			<div className="flex flex-wrap gap-2">
+				{RECURRENCE_PRESETS.map((preset) => (
+					<Button
+						key={preset.label}
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={() => onPresetClick(preset)}
+						disabled={disabled}
+						className="h-8"
+					>
+						<span className="mr-1.5">{preset.icon}</span>
+						{preset.label}
+					</Button>
+				))}
+			</div>
+		</div>
+	);
+}
+
+// Sub-component: Complex Rule Warning
+function ComplexRuleWarning({
+	onRemove,
+	disabled,
+}: {
+	onRemove: () => void;
+	disabled: boolean;
+}) {
+	return (
+		<div className="rounded-md border border-orange-200 bg-orange-50 p-3 dark:border-orange-900 dark:bg-orange-950/20">
+			<div className="flex items-start gap-2">
+				<AlertCircle className="mt-0.5 h-4 w-4 text-orange-600 dark:text-orange-400" />
+				<div className="flex-1">
+					<p className="font-medium text-orange-800 text-sm dark:text-orange-200">
+						Règle de récurrence complexe détectée
+					</p>
+					<p className="mt-1 text-orange-700 text-xs dark:text-orange-300">
+						Cette règle de récurrence contient des paramètres avancés qui ne
+						peuvent pas être modifiés via l'interface simple. Pour la modifier,
+						vous devrez la supprimer et en créer une nouvelle.
+					</p>
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={onRemove}
+						disabled={disabled}
+						className="mt-2"
+					>
+						Supprimer cette règle
+					</Button>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+// Get byDay description
+function getByDayDescription(byDay: string[] | undefined): string {
+	if (!byDay || byDay.length === 0) {
+		return "Sélectionnez au moins un jour. Si aucun jour n'est sélectionné, l'événement se répétera le jour de la semaine de la date de début.";
+	}
+	const dayLabels = byDay.map(
+		(d) => DAYS_OF_WEEK.find((day) => day.value === d)?.label,
+	);
+	return `L'événement se répétera chaque ${dayLabels.join(", ")}.`;
+}
+
+// Get end type description
+function getEndTypeDescription(
+	endType: RecurrenceConfig["endType"],
+	count: number | undefined,
+	until: Date | undefined,
+): string {
+	if (endType === "never") {
+		return "L'événement se répétera indéfiniment.";
+	}
+	if (endType === "count" && count) {
+		return `L'événement se répétera ${count} fois au total.`;
+	}
+	if (endType === "until" && until) {
+		return `L'événement se répétera jusqu'au ${format(until, "PPP", { locale: fr })}.`;
+	}
+	if (endType === "until" && !until) {
+		return "Sélectionnez une date de fin pour la récurrence.";
+	}
+	return "";
+}
+
+// Sub-component: Interval Input
+function IntervalInput({
+	config,
+	onUpdate,
+	disabled,
+}: {
+	config: RecurrenceConfig;
+	onUpdate: (updates: Partial<RecurrenceConfig>) => void;
+	disabled: boolean;
+}) {
+	return (
+		<div className="space-y-2">
+			<Label htmlFor="recurrence-interval">Répéter</Label>
+			<div className="flex items-center gap-2">
+				<span className="whitespace-nowrap text-muted-foreground text-sm">
+					{getIntervalPrefix(config.frequency)}
+				</span>
+				<Input
+					id="recurrence-interval"
+					type="number"
+					min="1"
+					value={config.interval}
+					onChange={(e) =>
+						onUpdate({
+							interval: Math.max(1, Number.parseInt(e.target.value, 10) || 1),
+						})
+					}
+					disabled={disabled}
+					className="w-20"
+				/>
+				<span className="whitespace-nowrap text-muted-foreground text-sm">
+					{getIntervalUnit(config.frequency, config.interval)}
+				</span>
+			</div>
+			<p className="text-muted-foreground text-xs">
+				{getIntervalDescription(config.frequency, config.interval)}
+			</p>
+		</div>
+	);
+}
+
+// Sub-component: Weekly Days Selector
+function WeeklyDaysSelector({
+	byDay,
+	onToggle,
+	disabled,
+}: {
+	byDay: string[] | undefined;
+	onToggle: (day: string) => void;
+	disabled: boolean;
+}) {
+	return (
+		<div className="space-y-2">
+			<Label>Quels jours de la semaine ?</Label>
+			<div className="grid grid-cols-2 gap-2">
+				{DAYS_OF_WEEK.map((day) => (
+					<div key={day.value} className="flex items-center space-x-2">
+						<Checkbox
+							id={`day-${day.value}`}
+							checked={byDay?.includes(day.value) || false}
+							onCheckedChange={() => onToggle(day.value)}
+							disabled={disabled}
+						/>
+						<Label
+							htmlFor={`day-${day.value}`}
+							className="cursor-pointer font-normal text-sm"
+						>
+							{day.label}
+						</Label>
+					</div>
+				))}
+			</div>
+			<p className="text-muted-foreground text-xs">
+				{getByDayDescription(byDay)}
+			</p>
+		</div>
+	);
+}
+
+// Sub-component: Monthly Day Selector
+function MonthlyDaySelector({
+	byMonthDay,
+	onUpdate,
+	disabled,
+}: {
+	byMonthDay: number | undefined;
+	onUpdate: (updates: Partial<RecurrenceConfig>) => void;
+	disabled: boolean;
+}) {
+	return (
+		<div className="space-y-2">
+			<Label htmlFor="recurrence-month-day">Quel jour du mois ?</Label>
+			<Select
+				value={byMonthDay?.toString() || "none"}
+				onValueChange={(value) =>
+					onUpdate({
+						byMonthDay:
+							value === "none" ? undefined : Number.parseInt(value, 10),
+					})
+				}
+				disabled={disabled}
+			>
+				<SelectTrigger id="recurrence-month-day">
+					<SelectValue placeholder="Sélectionner un jour" />
+				</SelectTrigger>
+				<SelectContent>
+					<SelectItem value="none">Même jour que la date de début</SelectItem>
+					{Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+						<SelectItem key={day} value={day.toString()}>
+							Jour {day}
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
+			<p className="text-muted-foreground text-xs">
+				{byMonthDay
+					? `L'événement se répétera le ${byMonthDay} de chaque mois.`
+					: "L'événement se répétera le même jour du mois que la date de début."}
+			</p>
+		</div>
+	);
+}
+
+// Sub-component: Yearly Months Selector
+function YearlyMonthsSelector({
+	byMonth,
+	onToggle,
+	disabled,
+}: {
+	byMonth: number[] | undefined;
+	onToggle: (month: number) => void;
+	disabled: boolean;
+}) {
+	const monthLabels = byMonth
+		?.map((m) => MONTHS.find((month) => month.value === m)?.label)
+		.join(", ");
+
+	return (
+		<div className="space-y-2">
+			<Label>Quels mois ?</Label>
+			<div className="grid grid-cols-3 gap-2">
+				{MONTHS.map((month) => (
+					<div key={month.value} className="flex items-center space-x-2">
+						<Checkbox
+							id={`month-${month.value}`}
+							checked={byMonth?.includes(month.value) || false}
+							onCheckedChange={() => onToggle(month.value)}
+							disabled={disabled}
+						/>
+						<Label
+							htmlFor={`month-${month.value}`}
+							className="cursor-pointer font-normal text-sm"
+						>
+							{month.label}
+						</Label>
+					</div>
+				))}
+			</div>
+			<p className="text-muted-foreground text-xs">
+				{byMonth && byMonth.length > 0
+					? `L'événement se répétera en ${monthLabels}.`
+					: "Sélectionnez au moins un mois. Si aucun mois n'est sélectionné, l'événement se répétera le même mois que la date de début."}
+			</p>
+		</div>
+	);
+}
+
+// Sub-component: End Type Selector
+function EndTypeSelector({
+	config,
+	onUpdate,
+	disabled,
+}: {
+	config: RecurrenceConfig;
+	onUpdate: (updates: Partial<RecurrenceConfig>) => void;
+	disabled: boolean;
+}) {
+	return (
+		<div className="space-y-2">
+			<Label>Quand se termine la récurrence ?</Label>
+			<RadioGroup
+				value={config.endType}
+				onValueChange={(value: "never" | "count" | "until") =>
+					onUpdate({ endType: value, count: undefined, until: undefined })
+				}
+				disabled={disabled}
+			>
+				<div className="flex items-center space-x-2">
+					<RadioGroupItem value="never" id="end-never" />
+					<Label htmlFor="end-never" className="cursor-pointer font-normal">
+						Jamais (répétition infinie)
+					</Label>
+				</div>
+				<div className="flex flex-wrap items-center gap-2 space-x-2">
+					<RadioGroupItem value="count" id="end-count" />
+					<Label htmlFor="end-count" className="cursor-pointer font-normal">
+						Après
+					</Label>
+					{config.endType === "count" && (
+						<>
+							<Input
+								type="number"
+								min="1"
+								value={config.count || ""}
+								onChange={(e) =>
+									onUpdate({
+										count: Number.parseInt(e.target.value, 10) || undefined,
+									})
+								}
+								disabled={disabled}
+								className="w-20"
+								placeholder="10"
+							/>
+							<span className="text-muted-foreground text-sm">occurrences</span>
+						</>
+					)}
+				</div>
+				<div className="flex flex-wrap items-center gap-2 space-x-2">
+					<RadioGroupItem value="until" id="end-until" />
+					<Label htmlFor="end-until" className="cursor-pointer font-normal">
+						Jusqu'au
+					</Label>
+					{config.endType === "until" && (
+						<Popover>
+							<PopoverTrigger asChild>
+								<Button type="button" variant="outline" disabled={disabled}>
+									<CalendarIcon className="mr-2 h-4 w-4" />
+									{config.until
+										? format(config.until, "PPP", { locale: fr })
+										: "Sélectionner une date"}
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className="w-auto p-0" align="start">
+								<Calendar
+									mode="single"
+									selected={config.until}
+									onSelect={(date) => onUpdate({ until: date })}
+									disabled={disabled}
+									initialFocus
+								/>
+							</PopoverContent>
+						</Popover>
+					)}
+				</div>
+			</RadioGroup>
+			<p className="text-muted-foreground text-xs">
+				{getEndTypeDescription(config.endType, config.count, config.until)}
+			</p>
+		</div>
+	);
+}
+
+// Sub-component: Occurrences Preview
+function OccurrencesPreview({
+	occurrences,
+	showInfiniteHint,
+}: {
+	occurrences: Date[];
+	showInfiniteHint: boolean;
+}) {
+	if (occurrences.length === 0) return null;
+
+	return (
+		<div className="rounded-lg border bg-muted/30 p-4">
+			<p className="mb-3 flex items-center gap-2 font-medium text-sm">
+				<CalendarIcon className="h-4 w-4 text-primary" />
+				Prochaines occurrences
+			</p>
+			<div className="flex flex-wrap gap-2">
+				{occurrences.map((date, index) => (
+					<Badge
+						key={date.toISOString()}
+						variant="secondary"
+						className={cn(
+							"text-xs",
+							index === 0 && "bg-primary/10 text-primary",
+						)}
+					>
+						{format(date, "EEE d MMM", { locale: fr })}
+					</Badge>
+				))}
+			</div>
+			{showInfiniteHint && (
+				<p className="mt-2 text-muted-foreground text-xs">
+					Et ainsi de suite...
+				</p>
+			)}
+		</div>
+	);
+}
+
 export function RecurrenceBuilder({
 	rrule,
 	onChange,
@@ -353,129 +835,23 @@ export function RecurrenceBuilder({
 		updateConfig({ byMonth: updated.length > 0 ? updated : undefined });
 	};
 
-	// Supported RRULE keys that can be represented in the simple UI
-	const SUPPORTED_RRULE_KEYS = [
-		"FREQ",
-		"INTERVAL",
-		"COUNT",
-		"UNTIL",
-		"BYDAY",
-		"BYMONTHDAY",
-		"BYMONTH",
-	] as const;
-
-	// Get interval label prefix
-	const getIntervalPrefix = (frequency: string | null): string => {
-		return frequency === "WEEKLY" ? "Toutes les" : "Tous les";
-	};
-
-	// Get interval unit label
-	const getIntervalUnit = (
-		frequency: string | null,
-		interval: number,
-	): string => {
-		const units: Record<string, string> = {
-			DAILY: `jour${interval > 1 ? "s" : ""}`,
-			WEEKLY: `semaine${interval > 1 ? "s" : ""}`,
-			MONTHLY: "mois",
-			YEARLY: `an${interval > 1 ? "s" : ""}`,
-		};
-		return frequency ? units[frequency] || "" : "";
-	};
-
-	// Get interval description
-	const getIntervalDescription = (
-		frequency: string | null,
-		interval: number,
-	): string => {
-		const descriptions: Record<string, string> = {
-			DAILY: `L'événement se répétera tous les ${interval} jour${interval > 1 ? "s" : ""}.`,
-			WEEKLY: `L'événement se répétera toutes les ${interval} semaine${interval > 1 ? "s" : ""}.`,
-			MONTHLY: `L'événement se répétera tous les ${interval} mois.`,
-			YEARLY: `L'événement se répétera tous les ${interval} an${interval > 1 ? "s" : ""}.`,
-		};
-		return frequency ? descriptions[frequency] || "" : "";
-	};
-
-	// Check if the current rrule can be fully represented in the simple UI
-	const canFullyRepresent = (rrule: string): boolean => {
-		if (!rrule || !rrule.trim()) return true;
-		const parsed = parseRRULE(rrule);
-		if (!parsed) return false;
-
-		const parts = rrule.split(";");
-		for (const part of parts) {
-			const [key] = part.split("=");
-			if (
-				key &&
-				!SUPPORTED_RRULE_KEYS.includes(
-					key as (typeof SUPPORTED_RRULE_KEYS)[number],
-				)
-			) {
-				return false;
-			}
-		}
-		return true;
-	};
-
 	const isFullyRepresentable = canFullyRepresent(rrule);
 
 	return (
 		<div className="w-full space-y-4">
 			{/* Quick Presets */}
 			{!config.frequency && (
-				<div className="space-y-2">
-					<div className="flex items-center gap-2 text-muted-foreground text-sm">
-						<Sparkles className="h-4 w-4" />
-						<span>Récurrences rapides</span>
-					</div>
-					<div className="flex flex-wrap gap-2">
-						{RECURRENCE_PRESETS.map((preset) => (
-							<Button
-								key={preset.label}
-								type="button"
-								variant="outline"
-								size="sm"
-								onClick={() => handlePresetClick(preset)}
-								disabled={disabled}
-								className="h-8"
-							>
-								<span className="mr-1.5">{preset.icon}</span>
-								{preset.label}
-							</Button>
-						))}
-					</div>
-				</div>
+				<QuickPresetsSection
+					onPresetClick={handlePresetClick}
+					disabled={disabled}
+				/>
 			)}
 
 			{/* Warning if rrule exists but can't be fully represented */}
 			{rrule?.trim() && !isFullyRepresentable && (
-				<div className="rounded-md border border-orange-200 bg-orange-50 p-3 dark:border-orange-900 dark:bg-orange-950/20">
-					<div className="flex items-start gap-2">
-						<AlertCircle className="mt-0.5 h-4 w-4 text-orange-600 dark:text-orange-400" />
-						<div className="flex-1">
-							<p className="font-medium text-orange-800 text-sm dark:text-orange-200">
-								Règle de récurrence complexe détectée
-							</p>
-							<p className="mt-1 text-orange-700 text-xs dark:text-orange-300">
-								Cette règle de récurrence contient des paramètres avancés qui ne
-								peuvent pas être modifiés via l'interface simple. Pour la
-								modifier, vous devrez la supprimer et en créer une nouvelle.
-							</p>
-							<Button
-								type="button"
-								variant="outline"
-								size="sm"
-								onClick={() => onChange("")}
-								disabled={disabled}
-								className="mt-2"
-							>
-								Supprimer cette règle
-							</Button>
-						</div>
-					</div>
-				</div>
+				<ComplexRuleWarning onRemove={() => onChange("")} disabled={disabled} />
 			)}
+
 			{/* Fréquence */}
 			<div className="space-y-2">
 				<Label>Fréquence</Label>
@@ -509,268 +885,43 @@ export function RecurrenceBuilder({
 
 			{config.frequency && (
 				<>
-					{/* Intervalle */}
-					<div className="space-y-2">
-						<Label htmlFor="recurrence-interval">Répéter</Label>
-						<div className="flex items-center gap-2">
-							<span className="whitespace-nowrap text-muted-foreground text-sm">
-								{getIntervalPrefix(config.frequency)}
-							</span>
-							<Input
-								id="recurrence-interval"
-								type="number"
-								min="1"
-								value={config.interval}
-								onChange={(e) =>
-									updateConfig({
-										interval: Math.max(
-											1,
-											Number.parseInt(e.target.value, 10) || 1,
-										),
-									})
-								}
-								disabled={disabled}
-								className="w-20"
-							/>
-							<span className="whitespace-nowrap text-muted-foreground text-sm">
-								{getIntervalUnit(config.frequency, config.interval)}
-							</span>
-						</div>
-						<p className="text-muted-foreground text-xs">
-							{getIntervalDescription(config.frequency, config.interval)}
-						</p>
-					</div>
-
-					{/* Jours de la semaine (WEEKLY) */}
+					<IntervalInput
+						config={config}
+						onUpdate={updateConfig}
+						disabled={disabled}
+					/>
 					{config.frequency === "WEEKLY" && (
-						<div className="space-y-2">
-							<Label>Quels jours de la semaine ?</Label>
-							<div className="grid grid-cols-2 gap-2">
-								{DAYS_OF_WEEK.map((day) => (
-									<div key={day.value} className="flex items-center space-x-2">
-										<Checkbox
-											id={`day-${day.value}`}
-											checked={config.byDay?.includes(day.value) || false}
-											onCheckedChange={() => toggleByDay(day.value)}
-											disabled={disabled}
-										/>
-										<Label
-											htmlFor={`day-${day.value}`}
-											className="cursor-pointer font-normal text-sm"
-										>
-											{day.label}
-										</Label>
-									</div>
-								))}
-							</div>
-							<p className="text-muted-foreground text-xs">
-								{config.byDay && config.byDay.length > 0
-									? `L'événement se répétera chaque ${config.byDay.map((d) => DAYS_OF_WEEK.find((day) => day.value === d)?.label).join(", ")}.`
-									: "Sélectionnez au moins un jour. Si aucun jour n'est sélectionné, l'événement se répétera le jour de la semaine de la date de début."}
-							</p>
-						</div>
-					)}
-
-					{/* Jour du mois (MONTHLY) */}
-					{config.frequency === "MONTHLY" && (
-						<div className="space-y-2">
-							<Label htmlFor="recurrence-month-day">Quel jour du mois ?</Label>
-							<Select
-								value={config.byMonthDay?.toString() || "none"}
-								onValueChange={(value) =>
-									updateConfig({
-										byMonthDay:
-											value === "none" ? undefined : Number.parseInt(value, 10),
-									})
-								}
-								disabled={disabled}
-							>
-								<SelectTrigger id="recurrence-month-day">
-									<SelectValue placeholder="Sélectionner un jour" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="none">
-										Même jour que la date de début
-									</SelectItem>
-									{Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-										<SelectItem key={day} value={day.toString()}>
-											Jour {day}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<p className="text-muted-foreground text-xs">
-								{config.byMonthDay
-									? `L'événement se répétera le ${config.byMonthDay} de chaque mois.`
-									: "L'événement se répétera le même jour du mois que la date de début."}
-							</p>
-						</div>
-					)}
-
-					{/* Mois (YEARLY) */}
-					{config.frequency === "YEARLY" && (
-						<div className="space-y-2">
-							<Label>Quels mois ?</Label>
-							<div className="grid grid-cols-3 gap-2">
-								{MONTHS.map((month) => (
-									<div
-										key={month.value}
-										className="flex items-center space-x-2"
-									>
-										<Checkbox
-											id={`month-${month.value}`}
-											checked={config.byMonth?.includes(month.value) || false}
-											onCheckedChange={() => toggleByMonth(month.value)}
-											disabled={disabled}
-										/>
-										<Label
-											htmlFor={`month-${month.value}`}
-											className="cursor-pointer font-normal text-sm"
-										>
-											{month.label}
-										</Label>
-									</div>
-								))}
-							</div>
-							<p className="text-muted-foreground text-xs">
-								{config.byMonth && config.byMonth.length > 0
-									? `L'événement se répétera en ${config.byMonth.map((m) => MONTHS.find((month) => month.value === m)?.label).join(", ")}.`
-									: "Sélectionnez au moins un mois. Si aucun mois n'est sélectionné, l'événement se répétera le même mois que la date de début."}
-							</p>
-						</div>
-					)}
-
-					{/* Fin de récurrence */}
-					<div className="space-y-2">
-						<Label>Quand se termine la récurrence ?</Label>
-						<RadioGroup
-							value={config.endType}
-							onValueChange={(value: "never" | "count" | "until") =>
-								updateConfig({
-									endType: value,
-									count: undefined,
-									until: undefined,
-								})
-							}
+						<WeeklyDaysSelector
+							byDay={config.byDay}
+							onToggle={toggleByDay}
 							disabled={disabled}
-						>
-							<div className="flex items-center space-x-2">
-								<RadioGroupItem value="never" id="end-never" />
-								<Label
-									htmlFor="end-never"
-									className="cursor-pointer font-normal"
-								>
-									Jamais (répétition infinie)
-								</Label>
-							</div>
-							<div className="flex flex-wrap items-center gap-2 space-x-2">
-								<RadioGroupItem value="count" id="end-count" />
-								<Label
-									htmlFor="end-count"
-									className="cursor-pointer font-normal"
-								>
-									Après
-								</Label>
-								{config.endType === "count" && (
-									<>
-										<Input
-											type="number"
-											min="1"
-											value={config.count || ""}
-											onChange={(e) =>
-												updateConfig({
-													count:
-														Number.parseInt(e.target.value, 10) || undefined,
-												})
-											}
-											disabled={disabled}
-											className="w-20"
-											placeholder="10"
-										/>
-										<span className="text-muted-foreground text-sm">
-											occurrences
-										</span>
-									</>
-								)}
-							</div>
-							<div className="flex flex-wrap items-center gap-2 space-x-2">
-								<RadioGroupItem value="until" id="end-until" />
-								<Label
-									htmlFor="end-until"
-									className="cursor-pointer font-normal"
-								>
-									Jusqu'au
-								</Label>
-								{config.endType === "until" && (
-									<Popover>
-										<PopoverTrigger asChild>
-											<Button
-												type="button"
-												variant="outline"
-												disabled={disabled}
-											>
-												<CalendarIcon className="mr-2 h-4 w-4" />
-												{config.until
-													? format(config.until, "PPP", { locale: fr })
-													: "Sélectionner une date"}
-											</Button>
-										</PopoverTrigger>
-										<PopoverContent className="w-auto p-0" align="start">
-											<Calendar
-												mode="single"
-												selected={config.until}
-												onSelect={(date) => updateConfig({ until: date })}
-												disabled={disabled}
-												initialFocus
-											/>
-										</PopoverContent>
-									</Popover>
-								)}
-							</div>
-						</RadioGroup>
-						<p className="text-muted-foreground text-xs">
-							{config.endType === "never" &&
-								"L'événement se répétera indéfiniment."}
-							{config.endType === "count" &&
-								config.count &&
-								`L'événement se répétera ${config.count} fois au total.`}
-							{config.endType === "until" &&
-								config.until &&
-								`L'événement se répétera jusqu'au ${format(config.until, "PPP", { locale: fr })}.`}
-							{config.endType === "until" &&
-								!config.until &&
-								"Sélectionnez une date de fin pour la récurrence."}
-						</p>
-					</div>
-
-					{/* Preview of next occurrences */}
-					{nextOccurrences.length > 0 && (
-						<div className="rounded-lg border bg-muted/30 p-4">
-							<p className="mb-3 flex items-center gap-2 font-medium text-sm">
-								<CalendarIcon className="h-4 w-4 text-primary" />
-								Prochaines occurrences
-							</p>
-							<div className="flex flex-wrap gap-2">
-								{nextOccurrences.map((date, index) => (
-									<Badge
-										key={date.toISOString()}
-										variant="secondary"
-										className={cn(
-											"text-xs",
-											index === 0 && "bg-primary/10 text-primary",
-										)}
-									>
-										{format(date, "EEE d MMM", { locale: fr })}
-									</Badge>
-								))}
-							</div>
-							{config.endType === "never" && nextOccurrences.length === 5 && (
-								<p className="mt-2 text-muted-foreground text-xs">
-									Et ainsi de suite...
-								</p>
-							)}
-						</div>
+						/>
 					)}
+					{config.frequency === "MONTHLY" && (
+						<MonthlyDaySelector
+							byMonthDay={config.byMonthDay}
+							onUpdate={updateConfig}
+							disabled={disabled}
+						/>
+					)}
+					{config.frequency === "YEARLY" && (
+						<YearlyMonthsSelector
+							byMonth={config.byMonth}
+							onToggle={toggleByMonth}
+							disabled={disabled}
+						/>
+					)}
+					<EndTypeSelector
+						config={config}
+						onUpdate={updateConfig}
+						disabled={disabled}
+					/>
+					<OccurrencesPreview
+						occurrences={nextOccurrences}
+						showInfiniteHint={
+							config.endType === "never" && nextOccurrences.length === 5
+						}
+					/>
 				</>
 			)}
 		</div>

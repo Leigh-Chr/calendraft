@@ -130,72 +130,84 @@ function extractArrayProperty(value: unknown): string[] | undefined {
 }
 
 /**
+ * Parse RRULE value from various formats
+ */
+function parseRRuleValue(rruleValue: unknown): string | undefined {
+	if (!rruleValue) return undefined;
+
+	if (rruleValue instanceof ical.Recur) {
+		return rruleValue.toString();
+	}
+
+	if (typeof rruleValue === "object") {
+		try {
+			const recur = new ical.Recur(
+				rruleValue as unknown as Record<string, string | number>,
+			);
+			return recur.toString();
+		} catch {
+			return String(rruleValue);
+		}
+	}
+
+	return String(rruleValue);
+}
+
+/**
+ * Extract RRULE from vevent
+ */
+function extractRRule(vevent: ical.Component): string | undefined {
+	const rruleProp = vevent.getFirstProperty("rrule");
+	if (!rruleProp) return undefined;
+
+	return parseRRuleValue(rruleProp.getFirstValue());
+}
+
+/**
+ * Parse a date value that could be ical.Time or an array of ical.Time
+ */
+function parseDateValue(value: unknown): Date[] {
+	if (!value) return [];
+
+	if (value instanceof ical.Time) {
+		return [value.toJSDate()];
+	}
+
+	if (Array.isArray(value)) {
+		return value
+			.filter((dt): dt is ical.Time => dt instanceof ical.Time)
+			.map((dt) => dt.toJSDate());
+	}
+
+	return [];
+}
+
+/**
+ * Extract a list of dates from a property (RDATE or EXDATE)
+ */
+function extractDateList(
+	vevent: ical.Component,
+	propertyName: string,
+): Date[] | undefined {
+	const props = vevent.getAllProperties(propertyName);
+	const dates: Date[] = [];
+
+	for (const prop of props) {
+		const parsedDates = parseDateValue(prop.getFirstValue());
+		dates.push(...parsedDates);
+	}
+
+	return dates.length > 0 ? dates : undefined;
+}
+
+/**
  * Extract recurrence data (RRULE, RDATE, EXDATE)
  */
 function extractRecurrenceData(vevent: ical.Component) {
-	// Extract RRULE
-	const rruleProp = vevent.getFirstProperty("rrule");
-	let rrule: string | undefined;
-	if (rruleProp) {
-		const rruleValue = rruleProp.getFirstValue();
-		if (rruleValue) {
-			if (rruleValue instanceof ical.Recur) {
-				rrule = rruleValue.toString();
-			} else if (typeof rruleValue === "object") {
-				try {
-					const recur = new ical.Recur(
-						rruleValue as unknown as Record<string, string | number>,
-					);
-					rrule = recur.toString();
-				} catch {
-					rrule = String(rruleValue);
-				}
-			} else {
-				rrule = String(rruleValue);
-			}
-		}
-	}
-
-	// Extract RDATE
-	const rdateProps = vevent.getAllProperties("rdate");
-	const rdate: Date[] = [];
-	for (const rdateProp of rdateProps) {
-		const rdateValue = rdateProp.getFirstValue();
-		if (rdateValue) {
-			if (rdateValue instanceof ical.Time) {
-				rdate.push(rdateValue.toJSDate());
-			} else if (Array.isArray(rdateValue)) {
-				for (const dt of rdateValue) {
-					if (dt instanceof ical.Time) {
-						rdate.push(dt.toJSDate());
-					}
-				}
-			}
-		}
-	}
-
-	// Extract EXDATE
-	const exdateProps = vevent.getAllProperties("exdate");
-	const exdate: Date[] = [];
-	for (const exdateProp of exdateProps) {
-		const exdateValue = exdateProp.getFirstValue();
-		if (exdateValue) {
-			if (exdateValue instanceof ical.Time) {
-				exdate.push(exdateValue.toJSDate());
-			} else if (Array.isArray(exdateValue)) {
-				for (const dt of exdateValue) {
-					if (dt instanceof ical.Time) {
-						exdate.push(dt.toJSDate());
-					}
-				}
-			}
-		}
-	}
-
 	return {
-		rrule,
-		rdate: rdate.length > 0 ? rdate : undefined,
-		exdate: exdate.length > 0 ? exdate : undefined,
+		rrule: extractRRule(vevent),
+		rdate: extractDateList(vevent, "rdate"),
+		exdate: extractDateList(vevent, "exdate"),
 	};
 }
 
@@ -258,6 +270,59 @@ function extractOrganizer(vevent: ical.Component) {
 }
 
 /**
+ * Parse email and name from attendee value string
+ */
+function parseAttendeeEmailAndName(value: string): {
+	email: string | undefined;
+	name: string | undefined;
+} {
+	const match = value.match(/CN=([^:]+):mailto:(.+)/);
+	if (match?.[2]) {
+		return { name: match[1], email: match[2] };
+	}
+
+	if (value.startsWith("mailto:")) {
+		return { email: value.replace("mailto:", ""), name: undefined };
+	}
+
+	return { email: value, name: undefined };
+}
+
+/**
+ * Parse RSVP parameter value
+ */
+function parseRsvpParam(rsvpParam: unknown): boolean {
+	if (rsvpParam === null || rsvpParam === undefined) return false;
+	if (typeof rsvpParam === "boolean") return rsvpParam;
+	if (typeof rsvpParam === "string") return rsvpParam.toUpperCase() === "TRUE";
+	return false;
+}
+
+/**
+ * Parse a single attendee property
+ */
+function parseAttendeeProp(attendeeProp: ical.Property): ParsedAttendee | null {
+	const attendeeValue = attendeeProp.getFirstValue();
+	if (typeof attendeeValue !== "string") return null;
+
+	const { email, name: parsedName } = parseAttendeeEmailAndName(attendeeValue);
+	if (!email) return null;
+
+	const cnParam = attendeeProp.getParameter("cn");
+	const name = parsedName ?? (cnParam ? String(cnParam) : undefined);
+
+	const roleParam = attendeeProp.getParameter("role");
+	const role = roleParam ? String(roleParam) : undefined;
+
+	const partstatParam = attendeeProp.getParameter("partstat");
+	const status = partstatParam ? String(partstatParam) : undefined;
+
+	const rsvp = parseRsvpParam(attendeeProp.getParameter("rsvp"));
+
+	return { name, email, role, status, rsvp };
+}
+
+/**
  * Extract attendees
  */
 function extractAttendees(
@@ -270,45 +335,9 @@ function extractAttendees(
 
 	for (const attendeeProp of attendeeProps) {
 		try {
-			const attendeeValue = attendeeProp.getFirstValue();
-			if (typeof attendeeValue === "string") {
-				let email: string | undefined;
-				let name: string | undefined;
-
-				const match = attendeeValue.match(/CN=([^:]+):mailto:(.+)/);
-				if (match?.[2]) {
-					name = match[1];
-					email = match[2];
-				} else if (attendeeValue.startsWith("mailto:")) {
-					email = attendeeValue.replace("mailto:", "");
-				} else {
-					email = attendeeValue;
-				}
-
-				if (!email) continue;
-
-				const cnParam = attendeeProp.getParameter("cn");
-				if (cnParam && !name) {
-					name = String(cnParam);
-				}
-
-				const roleParam = attendeeProp.getParameter("role");
-				const role = roleParam ? String(roleParam) : undefined;
-
-				const partstatParam = attendeeProp.getParameter("partstat");
-				const status = partstatParam ? String(partstatParam) : undefined;
-
-				const rsvpParam = attendeeProp.getParameter("rsvp");
-				let rsvp = false;
-				if (rsvpParam !== null && rsvpParam !== undefined) {
-					if (typeof rsvpParam === "boolean") {
-						rsvp = rsvpParam;
-					} else if (typeof rsvpParam === "string") {
-						rsvp = rsvpParam.toUpperCase() === "TRUE";
-					}
-				}
-
-				attendees.push({ name, email, role, status, rsvp });
+			const attendee = parseAttendeeProp(attendeeProp);
+			if (attendee) {
+				attendees.push(attendee);
 			}
 		} catch (err) {
 			errors.push(
@@ -318,6 +347,61 @@ function extractAttendees(
 	}
 
 	return attendees;
+}
+
+/**
+ * Parse alarm trigger value from various formats
+ */
+function parseAlarmTrigger(triggerValue: unknown): string {
+	if (triggerValue instanceof ical.Duration) {
+		return triggerValue.toString();
+	}
+	if (typeof triggerValue === "string") {
+		return triggerValue;
+	}
+	if (triggerValue instanceof ical.Time) {
+		return triggerValue.toICALString();
+	}
+	return "";
+}
+
+/**
+ * Parse duration value from various formats
+ */
+function parseDurationValue(durationProp: unknown): string | undefined {
+	if (!durationProp) return undefined;
+	return durationProp instanceof ical.Duration
+		? durationProp.toString()
+		: String(durationProp);
+}
+
+/**
+ * Parse a single alarm component
+ */
+function parseAlarmComponent(alarmComp: ical.Component): ParsedAlarm | null {
+	const triggerProp = alarmComp.getFirstProperty("trigger");
+	const actionProp = alarmComp.getFirstPropertyValue("action");
+
+	if (!triggerProp || !actionProp) return null;
+
+	const trigger = parseAlarmTrigger(triggerProp.getFirstValue());
+	if (!trigger) return null;
+
+	const repeatProp = alarmComp.getFirstPropertyValue("repeat");
+
+	return {
+		trigger,
+		action: String(actionProp),
+		summary: alarmComp.getFirstPropertyValue("summary") as string | undefined,
+		description: alarmComp.getFirstPropertyValue("description") as
+			| string
+			| undefined,
+		duration: parseDurationValue(alarmComp.getFirstPropertyValue("duration")),
+		repeat:
+			repeatProp !== null && repeatProp !== undefined
+				? Number(repeatProp)
+				: undefined,
+	};
 }
 
 /**
@@ -333,53 +417,9 @@ function extractAlarms(
 
 	for (const alarmComp of alarmComponents) {
 		try {
-			const triggerProp = alarmComp.getFirstProperty("trigger");
-			const actionProp = alarmComp.getFirstPropertyValue("action");
-
-			if (!triggerProp || !actionProp) continue;
-
-			const triggerValue = triggerProp.getFirstValue();
-			let trigger = "";
-			if (triggerValue instanceof ical.Duration) {
-				trigger = triggerValue.toString();
-			} else if (typeof triggerValue === "string") {
-				trigger = triggerValue;
-			} else if (triggerValue instanceof ical.Time) {
-				trigger = triggerValue.toICALString();
-			}
-
-			const action = String(actionProp);
-			const alarmSummary = alarmComp.getFirstPropertyValue("summary") as
-				| string
-				| undefined;
-			const alarmDescription = alarmComp.getFirstPropertyValue("description") as
-				| string
-				| undefined;
-
-			const durationProp = alarmComp.getFirstPropertyValue("duration");
-			let duration: string | undefined;
-			if (durationProp) {
-				duration =
-					durationProp instanceof ical.Duration
-						? durationProp.toString()
-						: String(durationProp);
-			}
-
-			const repeatProp = alarmComp.getFirstPropertyValue("repeat");
-			const repeat =
-				repeatProp !== null && repeatProp !== undefined
-					? Number(repeatProp)
-					: undefined;
-
-			if (trigger && action) {
-				alarms.push({
-					trigger,
-					action,
-					summary: alarmSummary,
-					description: alarmDescription,
-					duration,
-					repeat,
-				});
+			const alarm = parseAlarmComponent(alarmComp);
+			if (alarm) {
+				alarms.push(alarm);
 			}
 		} catch (err) {
 			errors.push(
@@ -389,6 +429,106 @@ function extractAlarms(
 	}
 
 	return alarms;
+}
+
+/**
+ * Extract additional simple properties from vevent
+ */
+function extractSimpleProperties(vevent: ical.Component) {
+	return {
+		recurrenceId: vevent.getFirstPropertyValue("recurrence-id") as
+			| string
+			| undefined,
+		relatedTo: vevent.getFirstPropertyValue("related-to") as string | undefined,
+		color: vevent.getFirstPropertyValue("color") as string | undefined,
+		categories: extractArrayProperty(
+			vevent.getFirstPropertyValue("categories"),
+		),
+		resources: extractArrayProperty(vevent.getFirstPropertyValue("resources")),
+	};
+}
+
+/**
+ * Build a ParsedEvent from all extracted properties
+ */
+function buildParsedEvent(
+	summary: string,
+	uid: string | undefined,
+	dates: { startDate: Date; endDate: Date },
+	timestamps: ReturnType<typeof extractTimestamps>,
+	metadata: ReturnType<typeof extractBasicMetadata>,
+	recurrence: ReturnType<typeof extractRecurrenceData>,
+	geo: ReturnType<typeof extractGeolocation>,
+	organizer: ReturnType<typeof extractOrganizer>,
+	simpleProps: ReturnType<typeof extractSimpleProperties>,
+	attendees: ParsedAttendee[],
+	alarms: ParsedAlarm[],
+): ParsedEvent {
+	return {
+		title: summary,
+		startDate: dates.startDate,
+		endDate: dates.endDate,
+		description: metadata.description,
+		location: metadata.location,
+		status: metadata.status,
+		priority: metadata.priority,
+		categories: simpleProps.categories,
+		url: metadata.url,
+		class: metadata.classValue,
+		comment: metadata.comment,
+		contact: metadata.contact,
+		resources: simpleProps.resources,
+		sequence: metadata.sequence,
+		transp: metadata.transp,
+		rrule: recurrence.rrule,
+		rdate: recurrence.rdate,
+		exdate: recurrence.exdate,
+		geoLatitude: geo.geoLatitude,
+		geoLongitude: geo.geoLongitude,
+		organizerName: organizer.organizerName,
+		organizerEmail: organizer.organizerEmail,
+		uid,
+		dtstamp: timestamps.dtstamp,
+		created: timestamps.created,
+		lastModified: timestamps.lastModified,
+		recurrenceId: simpleProps.recurrenceId,
+		relatedTo: simpleProps.relatedTo,
+		color: simpleProps.color,
+		attendees: attendees.length > 0 ? attendees : undefined,
+		alarms: alarms.length > 0 ? alarms : undefined,
+	};
+}
+
+/**
+ * Parse a single vevent component into a ParsedEvent
+ */
+function parseVEvent(
+	vevent: ical.Component,
+	errors: string[],
+): ParsedEvent | null {
+	const event = new ical.Event(vevent);
+	const summary = event.summary || "Untitled Event";
+	const uid = vevent.getFirstPropertyValue("uid") as string | undefined;
+
+	const dates = extractEventDates(event, vevent);
+	if (!dates) {
+		errors.push(`Event "${summary}" is missing start or end date, skipping.`);
+		return null;
+	}
+
+	return buildParsedEvent(
+		summary,
+		uid,
+		dates,
+		extractTimestamps(vevent),
+		extractBasicMetadata(event, vevent),
+		extractRecurrenceData(vevent),
+		extractGeolocation(vevent),
+		extractOrganizer(vevent),
+		extractSimpleProperties(vevent),
+		extractAttendees(vevent, summary, errors),
+		extractAlarms(vevent, summary, errors),
+	);
 }
 
 /**
@@ -407,78 +547,10 @@ export function parseIcsFile(fileContent: string): ParseResult {
 
 		for (const vevent of vevents) {
 			try {
-				const event = new ical.Event(vevent);
-				const summary = event.summary || "Untitled Event";
-				const uid = vevent.getFirstPropertyValue("uid") as string | undefined;
-
-				// Extract dates
-				const dates = extractEventDates(event, vevent);
-				if (!dates) {
-					errors.push(
-						`Event "${summary}" is missing start or end date, skipping.`,
-					);
-					continue;
+				const parsedEvent = parseVEvent(vevent, errors);
+				if (parsedEvent) {
+					events.push(parsedEvent);
 				}
-
-				// Extract all properties using helper functions
-				const timestamps = extractTimestamps(vevent);
-				const metadata = extractBasicMetadata(event, vevent);
-				const recurrence = extractRecurrenceData(vevent);
-				const geo = extractGeolocation(vevent);
-				const organizer = extractOrganizer(vevent);
-				const attendees = extractAttendees(vevent, summary, errors);
-				const alarms = extractAlarms(vevent, summary, errors);
-
-				// Extract additional simple properties
-				const recurrenceId = vevent.getFirstPropertyValue("recurrence-id") as
-					| string
-					| undefined;
-				const relatedTo = vevent.getFirstPropertyValue("related-to") as
-					| string
-					| undefined;
-				const color = vevent.getFirstPropertyValue("color") as
-					| string
-					| undefined;
-
-				const categoriesProp = vevent.getFirstPropertyValue("categories");
-				const categories = extractArrayProperty(categoriesProp);
-
-				const resourcesProp = vevent.getFirstPropertyValue("resources");
-				const resources = extractArrayProperty(resourcesProp);
-
-				events.push({
-					title: summary,
-					startDate: dates.startDate,
-					endDate: dates.endDate,
-					description: metadata.description,
-					location: metadata.location,
-					status: metadata.status,
-					priority: metadata.priority,
-					categories,
-					url: metadata.url,
-					class: metadata.classValue,
-					comment: metadata.comment,
-					contact: metadata.contact,
-					resources,
-					sequence: metadata.sequence,
-					transp: metadata.transp,
-					rrule: recurrence.rrule,
-					rdate: recurrence.rdate,
-					exdate: recurrence.exdate,
-					geoLatitude: geo.geoLatitude,
-					geoLongitude: geo.geoLongitude,
-					organizerName: organizer.organizerName,
-					organizerEmail: organizer.organizerEmail,
-					uid,
-					dtstamp: timestamps.dtstamp,
-					created: timestamps.created,
-					lastModified: timestamps.lastModified,
-					recurrenceId,
-					relatedTo,
-					color,
-					attendees: attendees.length > 0 ? attendees : undefined,
-					alarms: alarms.length > 0 ? alarms : undefined,
-				});
 			} catch (error) {
 				errors.push(
 					`Failed to parse event: ${error instanceof Error ? error.message : String(error)}`,

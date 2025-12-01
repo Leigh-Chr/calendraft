@@ -141,16 +141,14 @@ export function validateAlarm(
 }
 
 /**
- * Validate event form data
+ * Validate required fields and their lengths
  */
-export function validateEventForm(data: EventFormData): ValidationResult {
+function validateRequiredFields(data: EventFormData): ValidationError[] {
 	const errors: ValidationError[] = [];
 
-	// Required fields
 	const titleError = validateRequired(data.title, "title");
 	if (titleError) errors.push(titleError);
 
-	// Length validations
 	const titleLengthError = validateLength(
 		data.title,
 		FIELD_LIMITS.TITLE,
@@ -172,7 +170,15 @@ export function validateEventForm(data: EventFormData): ValidationResult {
 	);
 	if (descriptionError) errors.push(descriptionError);
 
-	// Date validation
+	return errors;
+}
+
+/**
+ * Validate date fields
+ */
+function validateDateFields(data: EventFormData): ValidationError[] {
+	const errors: ValidationError[] = [];
+
 	if (!data.startDate) {
 		errors.push({
 			field: "startDate",
@@ -198,15 +204,19 @@ export function validateEventForm(data: EventFormData): ValidationResult {
 		}
 	}
 
-	// URL validation
+	return errors;
+}
+
+/**
+ * Validate optional format fields (URL, email, color, priority)
+ */
+function validateFormatFields(data: EventFormData): ValidationError[] {
+	const errors: ValidationError[] = [];
+
 	if (data.url && !isValidUrl(data.url)) {
-		errors.push({
-			field: "url",
-			message: "URL invalide",
-		});
+		errors.push({ field: "url", message: "URL invalide" });
 	}
 
-	// Email validations
 	if (data.organizerEmail && !isValidEmail(data.organizerEmail)) {
 		errors.push({
 			field: "organizerEmail",
@@ -214,7 +224,6 @@ export function validateEventForm(data: EventFormData): ValidationResult {
 		});
 	}
 
-	// Color validation
 	if (data.color && !isValidHexColor(data.color)) {
 		errors.push({
 			field: "color",
@@ -222,7 +231,6 @@ export function validateEventForm(data: EventFormData): ValidationResult {
 		});
 	}
 
-	// Priority validation
 	if (data.priority !== undefined && (data.priority < 0 || data.priority > 9)) {
 		errors.push({
 			field: "priority",
@@ -230,19 +238,40 @@ export function validateEventForm(data: EventFormData): ValidationResult {
 		});
 	}
 
-	// Validate attendees
-	if (data.attendees) {
-		data.attendees.forEach((attendee, index) => {
-			errors.push(...validateAttendee(attendee, index));
-		});
-	}
+	return errors;
+}
 
-	// Validate alarms
-	if (data.alarms) {
-		data.alarms.forEach((alarm, index) => {
-			errors.push(...validateAlarm(alarm, index));
-		});
-	}
+/**
+ * Validate all attendees
+ */
+function validateAllAttendees(
+	attendees: AttendeeData[] | undefined,
+): ValidationError[] {
+	if (!attendees) return [];
+	return attendees.flatMap((attendee, index) =>
+		validateAttendee(attendee, index),
+	);
+}
+
+/**
+ * Validate all alarms
+ */
+function validateAllAlarms(alarms: AlarmData[] | undefined): ValidationError[] {
+	if (!alarms) return [];
+	return alarms.flatMap((alarm, index) => validateAlarm(alarm, index));
+}
+
+/**
+ * Validate event form data
+ */
+export function validateEventForm(data: EventFormData): ValidationResult {
+	const errors: ValidationError[] = [
+		...validateRequiredFields(data),
+		...validateDateFields(data),
+		...validateFormatFields(data),
+		...validateAllAttendees(data.attendees),
+		...validateAllAlarms(data.alarms),
+	];
 
 	return {
 		valid: errors.length === 0,

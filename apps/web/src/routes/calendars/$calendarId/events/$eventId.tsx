@@ -31,6 +31,290 @@ import {
 import { QUERY_KEYS } from "@/lib/query-keys";
 import { trpc } from "@/utils/trpc";
 
+// Helper types for event data fields
+interface CategoryItem {
+	category: string;
+}
+interface ResourceItem {
+	resource: string;
+}
+interface RecurrenceDateItem {
+	type: string;
+	date: string | Date;
+}
+interface AttendeeItem {
+	name: string | null;
+	email: string;
+	role: string | null;
+	status: string | null;
+	rsvp: boolean;
+}
+interface AlarmItem {
+	trigger: string;
+	action: string;
+	summary: string | null;
+	description: string | null;
+	duration: string | null;
+	repeat: number | null;
+}
+
+/**
+ * Transform categories to comma-separated string
+ */
+function transformCategories(
+	categories: CategoryItem[] | string | null | undefined,
+): string {
+	if (Array.isArray(categories)) {
+		return categories.map((c) => c.category).join(",");
+	}
+	return typeof categories === "string" ? categories : "";
+}
+
+/**
+ * Transform resources to comma-separated string
+ */
+function transformResources(
+	resources: ResourceItem[] | string | null | undefined,
+): string {
+	if (Array.isArray(resources)) {
+		return resources.map((r) => r.resource).join(",");
+	}
+	return typeof resources === "string" ? resources : "";
+}
+
+/**
+ * Transform recurrence dates to JSON string
+ */
+function transformRecurrenceDates(
+	recurrenceDates: RecurrenceDateItem[] | null | undefined,
+	type: "RDATE" | "EXDATE",
+): string {
+	if (!Array.isArray(recurrenceDates)) return "";
+
+	const dates = recurrenceDates
+		.filter((rd) => rd.type === type)
+		.map((rd) => new Date(rd.date).toISOString());
+
+	return dates.length > 0 ? JSON.stringify(dates) : "";
+}
+
+/**
+ * Transform attendees from API format
+ */
+function transformAttendees(attendees: AttendeeItem[] | null | undefined) {
+	return attendees?.map((a) => ({
+		name: a.name || undefined,
+		email: a.email,
+		role: a.role || undefined,
+		status: a.status || undefined,
+		rsvp: a.rsvp ?? false,
+	}));
+}
+
+/**
+ * Transform alarms from API format
+ */
+function transformAlarms(alarms: AlarmItem[] | null | undefined) {
+	return alarms?.map((a) => ({
+		trigger: a.trigger,
+		action: a.action,
+		summary: a.summary || undefined,
+		description: a.description || undefined,
+		duration: a.duration || undefined,
+		repeat: a.repeat ?? undefined,
+	}));
+}
+
+// Event data type from API (simplified for transformation)
+interface EventDataForTransform {
+	title: string;
+	startDate: string | Date;
+	endDate: string | Date;
+	description: string | null;
+	location: string | null;
+	status: string | null;
+	priority: number | null;
+	categories: CategoryItem[] | null;
+	url: string | null;
+	class: string | null;
+	comment: string | null;
+	contact: string | null;
+	resources: ResourceItem[] | null;
+	sequence: number | null;
+	transp: string | null;
+	rrule: string | null;
+	recurrenceDates: RecurrenceDateItem[] | null;
+	geoLatitude: number | null;
+	geoLongitude: number | null;
+	organizerName: string | null;
+	organizerEmail: string | null;
+	uid: string | null;
+	recurrenceId: string | null;
+	relatedTo: string | null;
+	color: string | null;
+	attendees: AttendeeItem[] | null;
+	alarms: AlarmItem[] | null;
+}
+
+// Helper: Convert nullable string to empty string
+const str = (value: string | null | undefined): string => value ?? "";
+
+// Helper: Convert nullable value to undefined
+function opt<T>(value: T | null | undefined): T | undefined {
+	return value ?? undefined;
+}
+
+/**
+ * Transform basic event fields
+ */
+function transformBasicFields(event: EventDataForTransform) {
+	return {
+		title: event.title,
+		startDate: format(new Date(event.startDate), "yyyy-MM-dd'T'HH:mm"),
+		endDate: format(new Date(event.endDate), "yyyy-MM-dd'T'HH:mm"),
+		description: str(event.description),
+		location: str(event.location),
+		url: str(event.url),
+		comment: str(event.comment),
+		contact: str(event.contact),
+	};
+}
+
+/**
+ * Transform optional enum/number fields
+ */
+function transformOptionalFields(event: EventDataForTransform) {
+	return {
+		status: opt(event.status),
+		priority: opt(event.priority),
+		class: opt(event.class),
+		transp: opt(event.transp),
+		sequence: event.sequence ?? 0,
+		geoLatitude: opt(event.geoLatitude),
+		geoLongitude: opt(event.geoLongitude),
+	};
+}
+
+/**
+ * Transform organizer and id fields
+ */
+function transformOrganizerFields(event: EventDataForTransform) {
+	return {
+		organizerName: str(event.organizerName),
+		organizerEmail: str(event.organizerEmail),
+		uid: str(event.uid),
+		recurrenceId: str(event.recurrenceId),
+		relatedTo: str(event.relatedTo),
+		color: str(event.color),
+	};
+}
+
+/**
+ * Transform event data from API to form data
+ */
+function transformEventToFormData(
+	event: EventDataForTransform,
+): Partial<EventFormData> {
+	return {
+		...transformBasicFields(event),
+		...transformOptionalFields(event),
+		...transformOrganizerFields(event),
+		categories: transformCategories(event.categories),
+		resources: transformResources(event.resources),
+		rrule: str(event.rrule),
+		rdate: transformRecurrenceDates(event.recurrenceDates, "RDATE"),
+		exdate: transformRecurrenceDates(event.recurrenceDates, "EXDATE"),
+		attendees: transformAttendees(event.attendees),
+		alarms: transformAlarms(event.alarms),
+	};
+}
+
+/**
+ * Loading state component
+ */
+function LoadingState() {
+	return (
+		<div className="container mx-auto max-w-2xl px-4 py-10">
+			<div className="text-center">Chargement...</div>
+		</div>
+	);
+}
+
+/**
+ * Not found state component
+ */
+function NotFoundState() {
+	return (
+		<div className="container mx-auto max-w-2xl px-4 py-10">
+			<div className="text-center">Événement non trouvé</div>
+		</div>
+	);
+}
+
+/**
+ * Duplicate Dialog Component
+ */
+function DuplicateDialog({
+	open,
+	onOpenChange,
+	dayOffset,
+	onDayOffsetChange,
+	onDuplicate,
+	isPending,
+}: {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	dayOffset: number;
+	onDayOffsetChange: (offset: number) => void;
+	onDuplicate: () => void;
+	isPending: boolean;
+}) {
+	return (
+		<AlertDialog open={open} onOpenChange={onOpenChange}>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Dupliquer l'événement</AlertDialogTitle>
+					<AlertDialogDescription>
+						Créez une copie de cet événement. Vous pouvez décaler les dates si
+						nécessaire.
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<div className="space-y-4 py-4">
+					<div className="space-y-2">
+						<Label htmlFor="day-offset">Décalage en jours</Label>
+						<Input
+							id="day-offset"
+							type="number"
+							value={dayOffset}
+							onChange={(e) =>
+								onDayOffsetChange(Number.parseInt(e.target.value, 10) || 0)
+							}
+							placeholder="0"
+						/>
+						<p className="text-muted-foreground text-xs">
+							0 = même date, 7 = une semaine plus tard, -7 = une semaine plus
+							tôt
+						</p>
+					</div>
+				</div>
+				<AlertDialogFooter>
+					<AlertDialogCancel>Annuler</AlertDialogCancel>
+					<AlertDialogAction onClick={onDuplicate} disabled={isPending}>
+						{isPending ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								Duplication...
+							</>
+						) : (
+							"Dupliquer"
+						)}
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
+	);
+}
+
 export const Route = createFileRoute("/calendars/$calendarId/events/$eventId")({
 	component: EditEventComponent,
 	head: () => ({
@@ -125,97 +409,14 @@ function EditEventComponent() {
 	};
 
 	if (isLoading) {
-		return (
-			<div className="container mx-auto max-w-2xl px-4 py-10">
-				<div className="text-center">Chargement...</div>
-			</div>
-		);
+		return <LoadingState />;
 	}
 
 	if (!event) {
-		return (
-			<div className="container mx-auto max-w-2xl px-4 py-10">
-				<div className="text-center">Événement non trouvé</div>
-			</div>
-		);
+		return <NotFoundState />;
 	}
 
-	// Transform normalized categories and resources to comma-separated strings
-	const categoriesStr = Array.isArray(event.categories)
-		? event.categories.map((c) => c.category).join(",")
-		: typeof event.categories === "string"
-			? event.categories
-			: "";
-
-	const resourcesStr = Array.isArray(event.resources)
-		? event.resources.map((r) => r.resource).join(",")
-		: typeof event.resources === "string"
-			? event.resources
-			: "";
-
-	// Transform normalized recurrence dates to JSON strings
-	const rdates = Array.isArray(event.recurrenceDates)
-		? event.recurrenceDates
-				.filter((rd) => rd.type === "RDATE")
-				.map((rd) => rd.date)
-		: [];
-	const exdates = Array.isArray(event.recurrenceDates)
-		? event.recurrenceDates
-				.filter((rd) => rd.type === "EXDATE")
-				.map((rd) => rd.date)
-		: [];
-	const rdateStr =
-		rdates.length > 0
-			? JSON.stringify(rdates.map((d) => new Date(d).toISOString()))
-			: "";
-	const exdateStr =
-		exdates.length > 0
-			? JSON.stringify(exdates.map((d) => new Date(d).toISOString()))
-			: "";
-
-	const initialData: Partial<EventFormData> = {
-		title: event.title,
-		startDate: format(new Date(event.startDate), "yyyy-MM-dd'T'HH:mm"),
-		endDate: format(new Date(event.endDate), "yyyy-MM-dd'T'HH:mm"),
-		description: event.description || "",
-		location: event.location || "",
-		status: event.status || undefined,
-		priority: event.priority ?? undefined,
-		categories: categoriesStr,
-		url: event.url || "",
-		class: event.class || undefined,
-		comment: event.comment || "",
-		contact: event.contact || "",
-		resources: resourcesStr,
-		sequence: event.sequence ?? 0,
-		transp: event.transp || undefined,
-		rrule: event.rrule || "",
-		rdate: rdateStr,
-		exdate: exdateStr,
-		geoLatitude: event.geoLatitude ?? undefined,
-		geoLongitude: event.geoLongitude ?? undefined,
-		organizerName: event.organizerName || "",
-		organizerEmail: event.organizerEmail || "",
-		uid: event.uid || "",
-		recurrenceId: event.recurrenceId || "",
-		relatedTo: event.relatedTo || "",
-		color: event.color || "",
-		attendees: event.attendees?.map((a) => ({
-			name: a.name || undefined,
-			email: a.email,
-			role: a.role || undefined,
-			status: a.status || undefined,
-			rsvp: a.rsvp ?? false,
-		})),
-		alarms: event.alarms?.map((a) => ({
-			trigger: a.trigger,
-			action: a.action,
-			summary: a.summary || undefined,
-			description: a.description || undefined,
-			duration: a.duration || undefined,
-			repeat: a.repeat ?? undefined,
-		})),
-	};
+	const initialData = transformEventToFormData(event);
 
 	return (
 		<div className="container mx-auto max-w-4xl space-y-4 px-4 py-10">
@@ -248,55 +449,14 @@ function EditEventComponent() {
 				initialValidationErrors={serverValidationErrors}
 			/>
 
-			{/* Duplicate Dialog */}
-			<AlertDialog
+			<DuplicateDialog
 				open={duplicateDialogOpen}
 				onOpenChange={setDuplicateDialogOpen}
-			>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Dupliquer l'événement</AlertDialogTitle>
-						<AlertDialogDescription>
-							Créez une copie de cet événement. Vous pouvez décaler les dates si
-							nécessaire.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<div className="space-y-4 py-4">
-						<div className="space-y-2">
-							<Label htmlFor="day-offset">Décalage en jours</Label>
-							<Input
-								id="day-offset"
-								type="number"
-								value={dayOffset}
-								onChange={(e) =>
-									setDayOffset(Number.parseInt(e.target.value, 10) || 0)
-								}
-								placeholder="0"
-							/>
-							<p className="text-muted-foreground text-xs">
-								0 = même date, 7 = une semaine plus tard, -7 = une semaine plus
-								tôt
-							</p>
-						</div>
-					</div>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Annuler</AlertDialogCancel>
-						<AlertDialogAction
-							onClick={handleDuplicate}
-							disabled={duplicateMutation.isPending}
-						>
-							{duplicateMutation.isPending ? (
-								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Duplication...
-								</>
-							) : (
-								"Dupliquer"
-							)}
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+				dayOffset={dayOffset}
+				onDayOffsetChange={setDayOffset}
+				onDuplicate={handleDuplicate}
+				isPending={duplicateMutation.isPending}
+			/>
 		</div>
 	);
 }
