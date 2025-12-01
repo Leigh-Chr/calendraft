@@ -28,7 +28,6 @@ export function formatDuration(
 			return `PT${numValue}H`;
 		case "seconds":
 			return `PT${numValue}S`;
-		case "minutes":
 		default:
 			return `PT${numValue}M`;
 	}

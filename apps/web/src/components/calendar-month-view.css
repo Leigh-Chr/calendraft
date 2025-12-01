@@ -235,6 +235,103 @@
 	font-weight: 600;
 }
 
+/* Drag and Drop styles */
+.rbc-addons-dnd .rbc-event {
+	transition: all 0.15s ease;
+}
+
+.rbc-addons-dnd .rbc-event:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.rbc-addons-dnd-dragging {
+	opacity: 0.7;
+}
+
+/* Higher specificity to override default styles without !important */
+.rbc-addons-dnd .rbc-addons-dnd-drag-preview,
+.rbc-calendar .rbc-addons-dnd-drag-preview {
+	opacity: 0.5;
+	border: 2px dashed var(--primary);
+	background: var(--primary);
+}
+
+.rbc-addons-dnd .rbc-addons-dnd-over,
+.rbc-calendar .rbc-addons-dnd-over {
+	background: var(--accent);
+}
+
+.rbc-addons-dnd .rbc-row-segment {
+	transition: opacity 0.15s ease;
+}
+
+.rbc-addons-dnd-resizable {
+	position: relative;
+}
+
+.rbc-addons-dnd-resize-ns-icon,
+.rbc-addons-dnd-resize-ew-icon {
+	display: none;
+}
+
+.rbc-addons-dnd .rbc-addons-dnd-resize-ns-anchor,
+.rbc-addons-dnd .rbc-addons-dnd-resize-ew-anchor {
+	cursor: ns-resize;
+	width: 100%;
+	position: absolute;
+	height: 10px;
+}
+
+.rbc-addons-dnd .rbc-addons-dnd-resize-ns-anchor:first-child {
+	top: 0;
+}
+
+.rbc-addons-dnd .rbc-addons-dnd-resize-ns-anchor:last-child {
+	bottom: 0;
+}
+
+/* Slot selection highlight */
+.rbc-slot-selection {
+	background: var(--primary);
+	opacity: 0.2;
+	border-radius: calc(var(--radius) - 4px);
+}
+
+/* Show more popup */
+.rbc-overlay {
+	z-index: 50;
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+.rbc-overlay .rbc-event {
+	margin: 0.25rem 0;
+}
+
+/* Current time indicator */
+.rbc-current-time-indicator {
+	background: var(--destructive);
+	height: 2px;
+	z-index: 10;
+}
+
+.rbc-current-time-indicator::before {
+	content: "";
+	position: absolute;
+	left: -4px;
+	top: -3px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--destructive);
+}
+
+/* Event colors - ensure text is readable */
+.rbc-event {
+	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
 	.rbc-toolbar {

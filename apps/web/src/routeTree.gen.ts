@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuccessRouteImport } from './routes/success'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CalendarsRouteImport } from './routes/calendars'
@@ -25,6 +26,11 @@ import { Route as CalendarsCalendarIdEventsEventIdRouteImport } from './routes/c
 const SuccessRoute = SuccessRouteImport.update({
   id: '/success',
   path: '/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/calendars': typeof CalendarsRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/success': typeof SuccessRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
   '/calendars/import': typeof CalendarsImportRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/calendars': typeof CalendarsRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/success': typeof SuccessRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
   '/calendars/import': typeof CalendarsImportRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/calendars': typeof CalendarsRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/success': typeof SuccessRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
   '/calendars/import': typeof CalendarsImportRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/calendars'
     | '/dashboard'
     | '/login'
+    | '/pricing'
     | '/success'
     | '/calendars/$calendarId'
     | '/calendars/import'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/calendars'
     | '/dashboard'
     | '/login'
+    | '/pricing'
     | '/success'
     | '/calendars/$calendarId'
     | '/calendars/import'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/calendars'
     | '/dashboard'
     | '/login'
+    | '/pricing'
     | '/success'
     | '/calendars/$calendarId'
     | '/calendars/import'
@@ -179,6 +191,7 @@ export interface RootRouteChildren {
   CalendarsRoute: typeof CalendarsRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
+  PricingRoute: typeof PricingRoute
   SuccessRoute: typeof SuccessRoute
 }
 
@@ -189,6 +202,13 @@ declare module '@tanstack/react-router' {
       path: '/success'
       fullPath: '/success'
       preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -309,6 +329,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarsRoute: CalendarsRouteWithChildren,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
+  PricingRoute: PricingRoute,
   SuccessRoute: SuccessRoute,
 }
 export const routeTree = rootRouteImport

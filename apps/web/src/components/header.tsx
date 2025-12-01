@@ -25,7 +25,10 @@ export default function Header() {
 	const { startTour, setIsTourCompleted } = useTour();
 	const isLandingPage = location.pathname === "/";
 
-	const appLinks = [{ to: "/calendars", label: "Mes calendriers" }] as const;
+	const appLinks = [
+		{ to: "/calendars", label: "Mes calendriers" },
+		{ to: "/pricing", label: "Tarifs" },
+	] as const;
 
 	const handleRestartTour = () => {
 		resetTourCompletion();
@@ -59,6 +62,12 @@ export default function Header() {
 								Mes calendriers
 							</Link>
 							<Link
+								to="/pricing"
+								className="rounded-sm font-medium text-muted-foreground text-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+							>
+								Tarifs
+							</Link>
+							<Link
 								to="/login"
 								search={{ mode: "signin" }}
 								className="rounded-sm font-medium text-muted-foreground text-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -84,6 +93,9 @@ export default function Header() {
 									</DropdownMenuItem>
 									<DropdownMenuItem asChild>
 										<Link to="/calendars/import">Importer un .ics</Link>
+									</DropdownMenuItem>
+									<DropdownMenuItem asChild>
+										<Link to="/pricing">Tarifs</Link>
 									</DropdownMenuItem>
 									<DropdownMenuSeparator />
 									<DropdownMenuItem asChild>

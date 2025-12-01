@@ -91,7 +91,9 @@ function extractEventDates(
 				} else if (typeof durationProp === "string") {
 					duration = ical.Duration.fromString(durationProp);
 				} else {
-					duration = new ical.Duration(durationProp as Record<string, number>);
+					duration = new ical.Duration(
+						durationProp as unknown as Record<string, number>,
+					);
 				}
 				endDate = new Date(startDate.getTime() + duration.toSeconds() * 1000);
 			} catch {
@@ -201,7 +203,7 @@ function extractRecurrenceData(vevent: ical.Component) {
 			} else if (typeof rruleValue === "object") {
 				try {
 					const recur = new ical.Recur(
-						rruleValue as Record<string, string | number>,
+						rruleValue as unknown as Record<string, string | number>,
 					);
 					rrule = recur.toString();
 				} catch {

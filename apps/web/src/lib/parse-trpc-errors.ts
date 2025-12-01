@@ -3,7 +3,6 @@
  */
 
 import type { ValidationErrors } from "@calendraft/schemas";
-import type { TRPCClientErrorLike } from "@trpc/client";
 
 interface ZodErrorIssue {
 	code: string;
@@ -12,11 +11,17 @@ interface ZodErrorIssue {
 }
 
 /**
+ * TRPC client error interface
+ */
+interface TRPCClientError {
+	message: string;
+	data?: unknown;
+}
+
+/**
  * Check if error is a TRPC client error
  */
-export function isTRPCClientError(
-	error: unknown,
-): error is TRPCClientErrorLike<unknown> {
+export function isTRPCClientError(error: unknown): error is TRPCClientError {
 	return (
 		error !== null &&
 		typeof error === "object" &&
@@ -119,7 +124,7 @@ function handleTopLevelError(
  * @returns ValidationErrors object or null if error cannot be parsed
  */
 export function parseTrpcValidationErrors(
-	error: TRPCClientErrorLike<unknown>,
+	error: TRPCClientError,
 ): ValidationErrors | null {
 	const message = error.message;
 	if (!message) return null;

@@ -8,6 +8,7 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+  subscription  Subscription?
   // Note: Calendar.userId can reference User.id, but we don't use a relation
   // because userId can also be an anonymous ID (anon-xxx format)
 

@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { FileDropZone } from "@/components/file-drop-zone";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -45,11 +46,7 @@ function ImportCalendarComponent() {
 	const navigate = useNavigate();
 	const [file, setFile] = useState<File | null>(null);
 	const [calendarName, setCalendarName] = useState("");
-	const [preview, setPreview] = useState<{
-		eventCount: number;
-		dateRange: string;
-		warnings: string[];
-	} | null>(null);
+	const [eventCount, setEventCount] = useState(0);
 
 	const importMutation = useMutation(
 		trpc.calendar.importIcs.mutationOptions({
@@ -67,61 +64,20 @@ function ImportCalendarComponent() {
 		}),
 	);
 
-	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const selectedFile = e.target.files?.[0];
-		if (!selectedFile) return;
-
-		if (!selectedFile.name.endsWith(".ics")) {
-			toast.error("Le fichier doit être au format .ics");
-			return;
-		}
-
-		// Validate file size (5MB max)
-		const maxSizeBytes = 5 * 1024 * 1024; // 5MB
-		if (selectedFile.size > maxSizeBytes) {
-			toast.error(
-				`Fichier trop volumineux. Taille maximale autorisée : 5MB. Taille actuelle : ${(selectedFile.size / 1024 / 1024).toFixed(2)}MB`,
-			);
-			return;
-		}
-
+	const handleFileSelect = (selectedFile: File) => {
 		setFile(selectedFile);
+		// Suggest calendar name from file name
+		const suggestedName = selectedFile.name
+			.replace(/\.ics$/i, "")
+			.replace(/[-_]/g, " ")
+			.replace(/\b\w/g, (l) => l.toUpperCase());
+		if (!calendarName) {
+			setCalendarName(suggestedName);
+		}
+	};
 
-		// Read and preview file
-		const reader = new FileReader();
-		reader.onload = async (event) => {
-			const content = event.target?.result as string;
-			try {
-				// Parse to get preview (we'll use a simple approach)
-				const lines = content.split("\n");
-				const events = lines.filter((line) =>
-					line.trim().startsWith("BEGIN:VEVENT"),
-				).length;
-
-				// Try to extract date range (simplified)
-				const dtstartLines = lines.filter((line) =>
-					line.trim().startsWith("DTSTART"),
-				);
-				const dtendLines = lines.filter((line) =>
-					line.trim().startsWith("DTEND"),
-				);
-
-				let dateRange = "Non disponible";
-				if (dtstartLines.length > 0 && dtendLines.length > 0) {
-					// Extract first and last dates (simplified)
-					dateRange = `${events} événement(s) détecté(s)`;
-				}
-
-				setPreview({
-					eventCount: events,
-					dateRange,
-					warnings: [],
-				});
-			} catch (_error) {
-				toast.error("Erreur lors de la lecture du fichier");
-			}
-		};
-		reader.readAsText(selectedFile);
+	const handlePreviewParsed = (events: Array<{ title: string }>) => {
+		setEventCount(events.length);
 	};
 
 	const handleImport = async () => {
@@ -130,15 +86,11 @@ function ImportCalendarComponent() {
 			return;
 		}
 
-		const reader = new FileReader();
-		reader.onload = async (event) => {
-			const content = event.target?.result as string;
-			importMutation.mutate({
-				fileContent: content,
-				name: calendarName || undefined,
-			});
-		};
-		reader.readAsText(file);
+		const content = await file.text();
+		importMutation.mutate({
+			fileContent: content,
+			name: calendarName || undefined,
+		});
 	};
 
 	return (
@@ -150,50 +102,37 @@ function ImportCalendarComponent() {
 						Importer un calendrier .ics
 					</CardTitle>
 					<CardDescription>
-						Importez un fichier calendrier depuis votre appareil
+						Importez un fichier calendrier depuis votre appareil. Compatible
+						avec Google Calendar, Apple Calendar, Outlook et tous les formats
+						iCalendar.
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="file">Fichier .ics</Label>
-						<Input
-							id="file"
-							type="file"
-							accept=".ics"
-							onChange={handleFileChange}
-							disabled={importMutation.isPending}
-						/>
-					</div>
+				<CardContent className="space-y-6">
+					{/* Drop Zone */}
+					<FileDropZone
+						onFileSelect={handleFileSelect}
+						onPreviewParsed={handlePreviewParsed}
+						disabled={importMutation.isPending}
+					/>
 
+					{/* Calendar Name */}
 					{file && (
 						<div className="space-y-2">
-							<Label htmlFor="name">Nom du calendrier (optionnel)</Label>
+							<Label htmlFor="name">Nom du calendrier</Label>
 							<Input
 								id="name"
 								value={calendarName}
 								onChange={(e) => setCalendarName(e.target.value)}
-								placeholder={`Calendrier importé - ${new Date().toLocaleDateString()}`}
+								placeholder="Mon calendrier importé"
 								disabled={importMutation.isPending}
 							/>
-						</div>
-					)}
-
-					{preview && (
-						<div className="rounded-lg border p-4">
-							<h3 className="mb-2 font-medium">Aperçu</h3>
-							<p className="text-muted-foreground text-sm">
-								{preview.eventCount} événement(s) détecté(s)
+							<p className="text-muted-foreground text-xs">
+								Laissez vide pour utiliser le nom du fichier
 							</p>
-							{preview.warnings.length > 0 && (
-								<div className="mt-2 rounded-md border border-destructive/20 bg-destructive/5 p-2 text-destructive text-sm">
-									{preview.warnings.map((warning) => (
-										<p key={warning}>{warning}</p>
-									))}
-								</div>
-							)}
 						</div>
 					)}
 
+					{/* Actions */}
 					<div className="flex gap-2">
 						<Button
 							onClick={handleImport}
@@ -206,12 +145,15 @@ function ImportCalendarComponent() {
 									Import en cours...
 								</>
 							) : (
-								"Importer"
+								<>
+									Importer
+									{eventCount > 0 && ` (${eventCount} événements)`}
+								</>
 							)}
 						</Button>
 						<Button
 							variant="outline"
-							onClick={() => navigate({ to: "/" })}
+							onClick={() => navigate({ to: "/calendars" })}
 							disabled={importMutation.isPending}
 						>
 							Annuler

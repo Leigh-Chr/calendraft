@@ -6,13 +6,14 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Breadcrumb } from "@/components/breadcrumb";
 import {
 	type EventFormData,
 	EventFormExtended,
 } from "@/components/event-form-extended";
+import { TemplateSelector } from "@/components/template-selector";
 import { transformEventFormDataToAPI } from "@/lib/event-form-transform";
 import {
 	getFirstValidationError,
@@ -46,6 +47,18 @@ function NewEventComponent() {
 		ValidationErrors | undefined
 	>();
 
+	// Template data state - when a template is selected, this overrides search params
+	const [templateData, setTemplateData] = useState<{
+		title: string;
+		startDate: string;
+		endDate: string;
+		description?: string;
+		location?: string;
+		categories?: string;
+		rrule?: string;
+		color?: string;
+	} | null>(null);
+
 	const createMutation = useMutation(
 		trpc.event.create.mutationOptions({
 			onSuccess: () => {
@@ -77,8 +90,36 @@ function NewEventComponent() {
 		createMutation.mutate(transformEventFormDataToAPI(data, calendarId));
 	};
 
-	const initialData =
-		search?.start && search?.end
+	const handleTemplateSelect = useCallback(
+		(data: {
+			title: string;
+			startDate: string;
+			endDate: string;
+			description?: string;
+			location?: string;
+			categories?: string;
+			rrule?: string;
+			color?: string;
+		}) => {
+			setTemplateData(data);
+			toast.success(`Modèle "${data.title}" appliqué`);
+		},
+		[],
+	);
+
+	// Build initial data from template or search params
+	const initialData = templateData
+		? {
+				title: templateData.title,
+				startDate: templateData.startDate,
+				endDate: templateData.endDate,
+				description: templateData.description || "",
+				location: templateData.location || "",
+				categories: templateData.categories || "",
+				rrule: templateData.rrule || "",
+				color: templateData.color || "",
+			}
+		: search?.start && search?.end
 			? {
 					startDate: search.start,
 					endDate: search.end,
@@ -90,7 +131,7 @@ function NewEventComponent() {
 	});
 
 	return (
-		<div className="container mx-auto max-w-4xl space-y-4 px-4 py-10">
+		<div className="container mx-auto max-w-4xl space-y-6 px-4 py-10">
 			<Breadcrumb
 				items={[
 					{
@@ -101,7 +142,11 @@ function NewEventComponent() {
 				]}
 			/>
 
+			{/* Template selector - only show if no template is selected yet */}
+			{!templateData && <TemplateSelector onSelect={handleTemplateSelect} />}
+
 			<EventFormExtended
+				key={templateData ? templateData.title : "default"}
 				mode="create"
 				initialData={initialData}
 				onSubmit={handleSubmit}

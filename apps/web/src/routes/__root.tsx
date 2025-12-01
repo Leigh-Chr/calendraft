@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { GlobalFeatures } from "@/components/global-features";
 import Header from "@/components/header";
 import { PWAUpdatePrompt } from "@/components/pwa-update-prompt";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -148,6 +149,7 @@ function RootComponent() {
 					</ErrorBoundary>
 					<Toaster richColors />
 					<PWAUpdatePrompt />
+					<GlobalFeatures />
 				</TourProvider>
 			</ThemeProvider>
 			<TanStackRouterDevtools position="bottom-left" />

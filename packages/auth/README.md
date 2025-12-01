@@ -107,7 +107,7 @@ await authClient.polar.customerPortal();
 
 ### Adapter Prisma
 
-Utilise l'adapter Prisma pour Better-Auth avec SQLite :
+Utilise l'adapter Prisma pour Better-Auth avec PostgreSQL :
 
 ```typescript
 prismaAdapter(prisma, {

@@ -412,10 +412,16 @@ export const eventRouter = router({
 			// Create event with normalized relations
 			const event = await prisma.event.create({
 				data: {
-					...eventData,
+					// Required fields first
+					title: input.title,
+					startDate: input.startDate,
+					endDate: input.endDate,
 					calendarId: input.calendarId,
 					// RFC 5545: DTSTAMP is required for all VEVENT - set to current time if not provided
 					dtstamp: new Date(),
+					// Other fields from prepareEventData
+					...eventData,
+					// Nested relations
 					attendees: prepareAttendeeData(input.attendees),
 					alarms: prepareAlarmData(input.alarms),
 					categories: prepareCategoriesData(input.categories),

@@ -10,6 +10,7 @@ import {
 import type { EventFormData } from "../event-form-types";
 
 describe("transformEventFormDataToAPI", () => {
+	const testCalendarId = "test-calendar-123";
 	const baseFormData: EventFormData = {
 		title: "Test Event",
 		startDate: "2025-01-15T10:00",
@@ -18,7 +19,7 @@ describe("transformEventFormDataToAPI", () => {
 
 	describe("basic transformation", () => {
 		it("should transform required fields", () => {
-			const result = transformEventFormDataToAPI(baseFormData);
+			const result = transformEventFormDataToAPI(baseFormData, testCalendarId);
 			expect(result.title).toBe("Test Event");
 			expect(result.startDate).toBeInstanceOf(Date);
 			expect(result.endDate).toBeInstanceOf(Date);
@@ -32,18 +33,18 @@ describe("transformEventFormDataToAPI", () => {
 
 		it("should include optional location", () => {
 			const formData = { ...baseFormData, location: "Meeting Room A" };
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.location).toBe("Meeting Room A");
 		});
 
 		it("should include optional description", () => {
 			const formData = { ...baseFormData, description: "Important meeting" };
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.description).toBe("Important meeting");
 		});
 
 		it("should exclude undefined optional fields", () => {
-			const result = transformEventFormDataToAPI(baseFormData);
+			const result = transformEventFormDataToAPI(baseFormData, testCalendarId);
 			expect(result.location).toBeUndefined();
 			expect(result.description).toBeUndefined();
 			expect(result.url).toBeUndefined();
@@ -53,13 +54,13 @@ describe("transformEventFormDataToAPI", () => {
 	describe("status transformation", () => {
 		it("should include valid status", () => {
 			const formData = { ...baseFormData, status: "CONFIRMED" as const };
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.status).toBe("CONFIRMED");
 		});
 
 		it("should exclude invalid status", () => {
 			const formData = { ...baseFormData, status: "INVALID" as never };
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.status).toBeUndefined();
 		});
 	});
@@ -71,7 +72,7 @@ describe("transformEventFormDataToAPI", () => {
 				organizerName: "John Doe",
 				organizerEmail: "john@example.com",
 			};
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.organizerName).toBe("John Doe");
 			expect(result.organizerEmail).toBe("john@example.com");
 		});
@@ -81,13 +82,13 @@ describe("transformEventFormDataToAPI", () => {
 				...baseFormData,
 				organizerEmail: "john@example.com",
 			};
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.organizerName).toBeUndefined();
 			expect(result.organizerEmail).toBe("john@example.com");
 		});
 
 		it("should exclude organizer if both are undefined", () => {
-			const result = transformEventFormDataToAPI(baseFormData);
+			const result = transformEventFormDataToAPI(baseFormData, testCalendarId);
 			expect(result.organizerName).toBeUndefined();
 			expect(result.organizerEmail).toBeUndefined();
 		});
@@ -101,18 +102,18 @@ describe("transformEventFormDataToAPI", () => {
 					{
 						email: "attendee1@example.com",
 						name: "Alice",
-						role: "REQ-PARTICIPANT",
+						role: "REQ_PARTICIPANT",
 						status: "ACCEPTED",
 						rsvp: true,
 					},
 				],
 			};
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.attendees).toEqual([
 				{
 					email: "attendee1@example.com",
 					name: "Alice",
-					role: "REQ-PARTICIPANT",
+					role: "REQ_PARTICIPANT",
 					status: "ACCEPTED",
 					rsvp: true,
 				},
@@ -128,7 +129,7 @@ describe("transformEventFormDataToAPI", () => {
 					},
 				],
 			};
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.attendees).toEqual([
 				{
 					email: "attendee1@example.com",
@@ -153,14 +154,14 @@ describe("transformEventFormDataToAPI", () => {
 					},
 				],
 			};
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.attendees).toHaveLength(2);
 			expect(result.attendees?.[0].email).toBe("attendee1@example.com");
 		});
 
 		it("should include empty attendees array", () => {
 			const formData = { ...baseFormData, attendees: [] };
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.attendees).toEqual([]);
 		});
 	});
@@ -180,7 +181,7 @@ describe("transformEventFormDataToAPI", () => {
 					},
 				],
 			};
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.alarms).toEqual([
 				{
 					action: "DISPLAY",
@@ -195,7 +196,7 @@ describe("transformEventFormDataToAPI", () => {
 
 		it("should include empty alarms array", () => {
 			const formData = { ...baseFormData, alarms: [] };
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.alarms).toEqual([]);
 		});
 	});
@@ -208,7 +209,7 @@ describe("transformEventFormDataToAPI", () => {
 				description: "",
 				url: "",
 			};
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.location).toBeUndefined();
 			expect(result.description).toBeUndefined();
 			expect(result.url).toBeUndefined();
@@ -220,7 +221,7 @@ describe("transformEventFormDataToAPI", () => {
 				location: null as never,
 				description: null as never,
 			};
-			const result = transformEventFormDataToAPI(formData);
+			const result = transformEventFormDataToAPI(formData, testCalendarId);
 			expect(result.location).toBeUndefined();
 			expect(result.description).toBeUndefined();
 		});
@@ -228,6 +229,7 @@ describe("transformEventFormDataToAPI", () => {
 });
 
 describe("transformEventFormDataForUpdate", () => {
+	const testCalendarId = "test-calendar-123";
 	const baseFormData: EventFormData = {
 		title: "Updated Event",
 		startDate: "2025-01-15T10:00",
@@ -275,7 +277,7 @@ describe("transformEventFormDataForUpdate", () => {
 			organizerEmail: "jane@example.com",
 			attendees: [{ email: "test@example.com", name: "Test" }],
 		};
-		const createResult = transformEventFormDataToAPI(formData);
+		const createResult = transformEventFormDataToAPI(formData, testCalendarId);
 		const updateResult = transformEventFormDataForUpdate(formData);
 		expect(updateResult.organizerName).toBe(createResult.organizerName);
 		expect(updateResult.organizerEmail).toBe(createResult.organizerEmail);

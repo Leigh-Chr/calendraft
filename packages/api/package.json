@@ -23,6 +23,7 @@
 	},
 	"dependencies": {
 		"@calendraft/auth": "workspace:*",
+		"@calendraft/core": "workspace:*",
 		"@calendraft/db": "workspace:*",
 		"@calendraft/schemas": "workspace:*",
 		"@prisma/client": "catalog:",

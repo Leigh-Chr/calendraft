@@ -1,7 +1,8 @@
-import { format } from "date-fns";
+import { addDays, addMonths, addWeeks, addYears, format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { AlertCircle, CalendarIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { AlertCircle, CalendarIcon, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,6 +21,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 export interface RecurrenceConfig {
 	frequency: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY" | null;
@@ -37,6 +39,98 @@ interface RecurrenceBuilderProps {
 	onChange: (rrule: string) => void;
 	disabled?: boolean;
 	startDate?: Date; // For preview
+}
+
+// Presets for quick selection
+const RECURRENCE_PRESETS = [
+	{ label: "Quotidien", rrule: "FREQ=DAILY", icon: "📅" },
+	{ label: "Chaque semaine", rrule: "FREQ=WEEKLY", icon: "📆" },
+	{ label: "Chaque mois", rrule: "FREQ=MONTHLY", icon: "🗓️" },
+	{
+		label: "Jours ouvrés",
+		rrule: "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+		icon: "💼",
+	},
+	{ label: "Chaque année", rrule: "FREQ=YEARLY", icon: "🎂" },
+] as const;
+
+// Calculate next occurrences for preview
+function getNextOccurrences(
+	config: RecurrenceConfig,
+	startDate: Date,
+	count: number,
+): Date[] {
+	if (!config.frequency) return [];
+
+	const dates: Date[] = [];
+	let currentDate = new Date(startDate);
+	const interval = config.interval || 1;
+	let iteration = 0;
+	const maxIterations = 100; // Safety limit
+
+	while (dates.length < count && iteration < maxIterations) {
+		iteration++;
+
+		// Check if this date should be included based on BYDAY
+		let shouldInclude = true;
+		if (config.frequency === "WEEKLY" && config.byDay?.length) {
+			const dayMap: Record<string, number> = {
+				SU: 0,
+				MO: 1,
+				TU: 2,
+				WE: 3,
+				TH: 4,
+				FR: 5,
+				SA: 6,
+			};
+			const currentDayCode = Object.entries(dayMap).find(
+				([_, num]) => num === currentDate.getDay(),
+			)?.[0];
+			shouldInclude = config.byDay.includes(currentDayCode || "");
+		}
+
+		// Check end conditions
+		if (
+			config.endType === "count" &&
+			config.count &&
+			dates.length >= config.count
+		) {
+			break;
+		}
+		if (
+			config.endType === "until" &&
+			config.until &&
+			currentDate > config.until
+		) {
+			break;
+		}
+
+		if (shouldInclude && currentDate >= startDate) {
+			dates.push(new Date(currentDate));
+		}
+
+		// Move to next occurrence
+		switch (config.frequency) {
+			case "DAILY":
+				currentDate = addDays(currentDate, shouldInclude ? interval : 1);
+				break;
+			case "WEEKLY":
+				if (config.byDay?.length) {
+					currentDate = addDays(currentDate, 1);
+				} else {
+					currentDate = addWeeks(currentDate, interval);
+				}
+				break;
+			case "MONTHLY":
+				currentDate = addMonths(currentDate, interval);
+				break;
+			case "YEARLY":
+				currentDate = addYears(currentDate, interval);
+				break;
+		}
+	}
+
+	return dates.slice(0, count);
 }
 
 // Format date to ICS format (YYYYMMDDTHHmmssZ)
@@ -173,7 +267,7 @@ export function RecurrenceBuilder({
 	rrule,
 	onChange,
 	disabled = false,
-	startDate: _startDate,
+	startDate: startDateProp,
 }: RecurrenceBuilderProps) {
 	const [config, setConfig] = useState<RecurrenceConfig>(() => {
 		const parsed = parseRRULE(rrule);
@@ -185,6 +279,15 @@ export function RecurrenceBuilder({
 			}
 		);
 	});
+
+	// Use provided start date or default to now
+	const startDate = useMemo(() => startDateProp || new Date(), [startDateProp]);
+
+	// Calculate next occurrences for preview
+	const nextOccurrences = useMemo(
+		() => getNextOccurrences(config, startDate, 5),
+		[config, startDate],
+	);
 
 	// Store the latest onChange callback in a ref to avoid dependency issues
 	const onChangeRef = useRef(onChange);
@@ -228,6 +331,10 @@ export function RecurrenceBuilder({
 
 	const updateConfig = (updates: Partial<RecurrenceConfig>) => {
 		setConfig({ ...config, ...updates });
+	};
+
+	const handlePresetClick = (preset: (typeof RECURRENCE_PRESETS)[number]) => {
+		onChange(preset.rrule);
 	};
 
 	const toggleByDay = (day: string) => {
@@ -315,6 +422,32 @@ export function RecurrenceBuilder({
 
 	return (
 		<div className="w-full space-y-4">
+			{/* Quick Presets */}
+			{!config.frequency && (
+				<div className="space-y-2">
+					<div className="flex items-center gap-2 text-muted-foreground text-sm">
+						<Sparkles className="h-4 w-4" />
+						<span>Récurrences rapides</span>
+					</div>
+					<div className="flex flex-wrap gap-2">
+						{RECURRENCE_PRESETS.map((preset) => (
+							<Button
+								key={preset.label}
+								type="button"
+								variant="outline"
+								size="sm"
+								onClick={() => handlePresetClick(preset)}
+								disabled={disabled}
+								className="h-8"
+							>
+								<span className="mr-1.5">{preset.icon}</span>
+								{preset.label}
+							</Button>
+						))}
+					</div>
+				</div>
+			)}
+
 			{/* Warning if rrule exists but can't be fully represented */}
 			{rrule?.trim() && !isFullyRepresentable && (
 				<div className="rounded-md border border-orange-200 bg-orange-50 p-3 dark:border-orange-900 dark:bg-orange-950/20">
@@ -609,6 +742,35 @@ export function RecurrenceBuilder({
 								"Sélectionnez une date de fin pour la récurrence."}
 						</p>
 					</div>
+
+					{/* Preview of next occurrences */}
+					{nextOccurrences.length > 0 && (
+						<div className="rounded-lg border bg-muted/30 p-4">
+							<p className="mb-3 flex items-center gap-2 font-medium text-sm">
+								<CalendarIcon className="h-4 w-4 text-primary" />
+								Prochaines occurrences
+							</p>
+							<div className="flex flex-wrap gap-2">
+								{nextOccurrences.map((date, index) => (
+									<Badge
+										key={date.toISOString()}
+										variant="secondary"
+										className={cn(
+											"text-xs",
+											index === 0 && "bg-primary/10 text-primary",
+										)}
+									>
+										{format(date, "EEE d MMM", { locale: fr })}
+									</Badge>
+								))}
+							</div>
+							{config.endType === "never" && nextOccurrences.length === 5 && (
+								<p className="mt-2 text-muted-foreground text-xs">
+									Et ainsi de suite...
+								</p>
+							)}
+						</div>
+					)}
 				</>
 			)}
 		</div>

@@ -5,11 +5,14 @@ import {
 	useLocation,
 	useNavigate,
 } from "@tanstack/react-router";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import {
 	Calendar,
 	Edit,
 	ExternalLink,
 	FileUp,
+	MoreHorizontal,
 	Plus,
 	Trash2,
 } from "lucide-react";
@@ -36,8 +39,16 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { ColorIndicator, ColorPicker } from "@/components/ui/color-picker";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCalendraftTour } from "@/hooks/use-calendraft-tour";
 import {
 	useCalendars,
@@ -45,6 +56,7 @@ import {
 	useUpdateCalendar,
 } from "@/hooks/use-storage";
 import { TOUR_STEP_IDS } from "@/lib/tour-constants";
+import { cn } from "@/lib/utils";
 
 const BASE_URL = "https://calendraft.app";
 
@@ -167,14 +179,33 @@ function CalendarsListComponent() {
 
 	if (isLoading) {
 		return (
-			<div className="container mx-auto max-w-4xl px-4 py-10">
-				<div className="text-center">Chargement...</div>
+			<div className="container mx-auto max-w-5xl px-4 py-10">
+				<div className="mb-6 flex items-center justify-between">
+					<Skeleton className="h-9 w-48" />
+					<div className="flex gap-2">
+						<Skeleton className="h-10 w-40" />
+						<Skeleton className="h-10 w-28" />
+					</div>
+				</div>
+				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+					{[1, 2, 3].map((i) => (
+						<Card key={i}>
+							<CardHeader className="pb-3">
+								<Skeleton className="h-5 w-32" />
+								<Skeleton className="h-4 w-24" />
+							</CardHeader>
+							<CardContent>
+								<Skeleton className="h-9 w-full" />
+							</CardContent>
+						</Card>
+					))}
+				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="container mx-auto max-w-4xl px-4 py-10">
+		<div className="container mx-auto max-w-5xl px-4 py-10">
 			{/* Tour dialog */}
 			<TourAlertDialog isOpen={tourOpen} setIsOpen={setTourOpen} />
 
@@ -201,14 +232,29 @@ function CalendarsListComponent() {
 
 			{calendars.length === 0 ? (
 				<Card id={TOUR_STEP_IDS.CALENDAR_GRID}>
-					<CardContent className="py-10 text-center">
-						<Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-						<p className="mb-4 text-muted-foreground">
-							Vous n'avez pas encore de calendriers
+					<CardContent className="py-16 text-center">
+						<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+							<Calendar className="h-8 w-8 text-muted-foreground" />
+						</div>
+						<h3 className="mb-2 font-semibold text-lg">
+							Aucun calendrier pour le moment
+						</h3>
+						<p className="mb-6 text-muted-foreground">
+							Créez votre premier calendrier ou importez un fichier .ics
+							existant.
 						</p>
-						<Button onClick={() => navigate({ to: "/" })}>
-							Créer votre premier calendrier
-						</Button>
+						<div className="flex justify-center gap-3">
+							<Button onClick={() => navigate({ to: "/calendars/new" })}>
+								<Plus className="mr-2 h-4 w-4" />
+								Créer un calendrier
+							</Button>
+							<Button variant="outline" asChild>
+								<Link to="/calendars/import">
+									<FileUp className="mr-2 h-4 w-4" />
+									Importer un .ics
+								</Link>
+							</Button>
+						</div>
 					</CardContent>
 				</Card>
 			) : (
@@ -217,49 +263,17 @@ function CalendarsListComponent() {
 					className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
 				>
 					{calendars.map((calendar) => (
-						<Card key={calendar.id}>
-							<CardHeader>
-								<CardTitle className="line-clamp-1 flex items-center gap-2">
-									<ColorIndicator color={calendar.color} size="md" />
-									{calendar.name}
-								</CardTitle>
-								<CardDescription>
-									{calendar.eventCount} événement
-									{calendar.eventCount !== 1 ? "s" : ""}
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="flex gap-2">
-								<Button
-									variant="default"
-									size="sm"
-									className="flex-1"
-									onClick={() => navigate({ to: `/calendars/${calendar.id}` })}
-								>
-									<ExternalLink className="mr-2 h-4 w-4" />
-									Ouvrir
-								</Button>
-								<Button
-									variant="outline"
-									size="icon"
-									onClick={() =>
-										openEditDialog(calendar.id, calendar.name, calendar.color)
-									}
-									disabled={isUpdating}
-									title="Modifier"
-								>
-									<Edit className="h-4 w-4" />
-								</Button>
-								<Button
-									variant="outline"
-									size="icon"
-									onClick={() => openDeleteDialog(calendar.id, calendar.name)}
-									disabled={isDeleting}
-									title="Supprimer"
-								>
-									<Trash2 className="h-4 w-4" />
-								</Button>
-							</CardContent>
-						</Card>
+						<CalendarCard
+							key={calendar.id}
+							calendar={calendar}
+							onOpen={() => navigate({ to: `/calendars/${calendar.id}` })}
+							onEdit={() =>
+								openEditDialog(calendar.id, calendar.name, calendar.color)
+							}
+							onDelete={() => openDeleteDialog(calendar.id, calendar.name)}
+							isDeleting={isDeleting}
+							isUpdating={isUpdating}
+						/>
 					))}
 				</div>
 			)}
@@ -275,13 +289,18 @@ function CalendarsListComponent() {
 						<AlertDialogDescription>
 							Êtes-vous sûr de vouloir supprimer "
 							{dialog?.type === "delete" ? dialog.calendar.name : ""}" ? Cette
-							action est irréversible.
+							action est irréversible et supprimera tous les événements
+							associés.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>Annuler</AlertDialogCancel>
-						<AlertDialogAction onClick={confirmDelete} disabled={isDeleting}>
-							Supprimer
+						<AlertDialogAction
+							onClick={confirmDelete}
+							disabled={isDeleting}
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						>
+							{isDeleting ? "Suppression..." : "Supprimer"}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
@@ -324,11 +343,166 @@ function CalendarsListComponent() {
 					<AlertDialogFooter>
 						<AlertDialogCancel>Annuler</AlertDialogCancel>
 						<AlertDialogAction onClick={confirmEdit} disabled={isUpdating}>
-							Enregistrer
+							{isUpdating ? "Enregistrement..." : "Enregistrer"}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
 		</div>
+	);
+}
+
+// Improved Calendar Card Component
+interface CalendarCardProps {
+	calendar: {
+		id: string;
+		name: string;
+		eventCount: number;
+		color?: string | null;
+		events?: Array<{
+			id: string;
+			title: string;
+			startDate: string | Date;
+		}>;
+	};
+	onOpen: () => void;
+	onEdit: () => void;
+	onDelete: () => void;
+	isDeleting: boolean;
+	isUpdating: boolean;
+}
+
+function CalendarCard({
+	calendar,
+	onOpen,
+	onEdit,
+	onDelete,
+	isDeleting,
+	isUpdating,
+}: CalendarCardProps) {
+	// Get upcoming events (up to 3)
+	const upcomingEvents =
+		calendar.events
+			?.filter((e) => new Date(e.startDate) >= new Date())
+			.slice(0, 3) || [];
+
+	return (
+		<Card
+			className={cn(
+				"group relative cursor-pointer overflow-hidden transition-all duration-200",
+				"hover:border-primary/30 hover:shadow-lg",
+			)}
+			onClick={onOpen}
+		>
+			{/* Color bar at top */}
+			<div
+				className="absolute inset-x-0 top-0 h-1.5 transition-all duration-200 group-hover:h-2"
+				style={{ backgroundColor: calendar.color || "#6366f1" }}
+			/>
+
+			<CardHeader className="pt-5 pb-2">
+				<div className="flex items-start justify-between">
+					<div className="flex items-center gap-2.5 pr-8">
+						<ColorIndicator color={calendar.color} size="md" />
+						<CardTitle className="line-clamp-1 text-lg">
+							{calendar.name}
+						</CardTitle>
+					</div>
+
+					{/* Actions Menu */}
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="absolute top-3 right-2 h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+							>
+								<MoreHorizontal className="h-4 w-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem
+								onClick={(e) => {
+									e.stopPropagation();
+									onOpen();
+								}}
+							>
+								<ExternalLink className="mr-2 h-4 w-4" />
+								Ouvrir
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								onClick={(e) => {
+									e.stopPropagation();
+									onEdit();
+								}}
+								disabled={isUpdating}
+							>
+								<Edit className="mr-2 h-4 w-4" />
+								Modifier
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem
+								onClick={(e) => {
+									e.stopPropagation();
+									onDelete();
+								}}
+								disabled={isDeleting}
+								className="text-destructive focus:text-destructive"
+							>
+								<Trash2 className="mr-2 h-4 w-4" />
+								Supprimer
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
+				<CardDescription className="flex items-center gap-1.5">
+					<span className="font-medium text-foreground">
+						{calendar.eventCount}
+					</span>{" "}
+					événement{calendar.eventCount !== 1 ? "s" : ""}
+				</CardDescription>
+			</CardHeader>
+
+			<CardContent className="pt-2">
+				{/* Upcoming events preview */}
+				{upcomingEvents.length > 0 ? (
+					<div className="space-y-1.5">
+						{upcomingEvents.map((event) => (
+							<div
+								key={event.id}
+								className="flex items-center gap-2 text-muted-foreground text-xs"
+							>
+								<span
+									className="h-1.5 w-1.5 shrink-0 rounded-full"
+									style={{ backgroundColor: calendar.color || "#6366f1" }}
+								/>
+								<span className="shrink-0 font-medium text-foreground/80">
+									{format(new Date(event.startDate), "d MMM", { locale: fr })}
+								</span>
+								<span className="truncate">{event.title}</span>
+							</div>
+						))}
+					</div>
+				) : (
+					<p className="text-muted-foreground/60 text-xs">
+						Aucun événement à venir
+					</p>
+				)}
+
+				{/* Open button on hover */}
+				<Button
+					variant="default"
+					size="sm"
+					className="mt-4 w-full opacity-0 transition-opacity group-hover:opacity-100"
+					onClick={(e) => {
+						e.stopPropagation();
+						onOpen();
+					}}
+				>
+					<ExternalLink className="mr-2 h-4 w-4" />
+					Ouvrir
+				</Button>
+			</CardContent>
+		</Card>
 	);
 }

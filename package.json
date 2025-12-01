@@ -1,6 +1,7 @@
 {
 	"name": "calendraft",
 	"private": true,
+	"license": "AGPL-3.0",
 	"type": "module",
 	"workspaces": {
 		"packages": [

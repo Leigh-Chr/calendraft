@@ -297,13 +297,13 @@ export function AttendeesSection({
 											<SelectItem value="CHAIR">
 												Président (anime la réunion)
 											</SelectItem>
-											<SelectItem value="REQ-PARTICIPANT">
+											<SelectItem value="REQ_PARTICIPANT">
 												Requis (doit être présent)
 											</SelectItem>
-											<SelectItem value="OPT-PARTICIPANT">
+											<SelectItem value="OPT_PARTICIPANT">
 												Optionnel (peut être présent)
 											</SelectItem>
-											<SelectItem value="NON-PARTICIPANT">
+											<SelectItem value="NON_PARTICIPANT">
 												Non participant (observateur)
 											</SelectItem>
 										</SelectContent>
@@ -332,7 +332,7 @@ export function AttendeesSection({
 										</SelectTrigger>
 										<SelectContent>
 											<SelectItem value="none">Non défini</SelectItem>
-											<SelectItem value="NEEDS-ACTION">
+											<SelectItem value="NEEDS_ACTION">
 												Action requise (en attente de réponse)
 											</SelectItem>
 											<SelectItem value="ACCEPTED">

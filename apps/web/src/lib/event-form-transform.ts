@@ -130,14 +130,14 @@ function transformBasicFields(data: EventFormData) {
 }
 
 /**
- * Transform EventFormData to API create/update format
+ * Transform EventFormData to API create format
  * @param data - Form data to transform
- * @param calendarId - Calendar ID (only for create)
+ * @param calendarId - Calendar ID (required for create)
  * @returns Transformed data ready for API
  */
 export function transformEventFormDataToAPI(
 	data: EventFormData,
-	calendarId?: string,
+	calendarId: string,
 ) {
 	const base = {
 		...transformBasicFields(data),
@@ -145,12 +145,7 @@ export function transformEventFormDataToAPI(
 		alarms: transformAlarms(data.alarms),
 	};
 
-	// Add calendarId for create operations
-	if (calendarId) {
-		return { calendarId, ...base };
-	}
-
-	return base;
+	return { calendarId, ...base };
 }
 
 /**

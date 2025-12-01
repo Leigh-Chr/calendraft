@@ -19,7 +19,11 @@ function setTrimmedString(
 /**
  * Helper to set a value as-is
  */
-function setValue(data: EventDataRecord, key: string, value: unknown): void {
+function setValue(
+	data: EventDataRecord,
+	key: string,
+	value: string | number | Date | null | undefined,
+): void {
 	if (value !== undefined) {
 		data[key] = value;
 	}
@@ -108,11 +112,24 @@ export function prepareEventData(input: EventInput): EventDataRecord {
 	return data;
 }
 
+type AttendeeRole =
+	| "CHAIR"
+	| "REQ_PARTICIPANT"
+	| "OPT_PARTICIPANT"
+	| "NON_PARTICIPANT";
+type AttendeeStatus =
+	| "NEEDS_ACTION"
+	| "ACCEPTED"
+	| "DECLINED"
+	| "TENTATIVE"
+	| "DELEGATED";
+type AlarmAction = "DISPLAY" | "EMAIL" | "AUDIO";
+
 type AttendeeCreateData = {
 	name: string | null;
 	email: string;
-	role: string | null;
-	status: string | null;
+	role: AttendeeRole | null;
+	status: AttendeeStatus | null;
 	rsvp: boolean;
 };
 
@@ -136,8 +153,8 @@ export function prepareAttendeeData(
 		create: attendees.map((a) => ({
 			name: a.name?.trim() || null,
 			email: a.email.trim(),
-			role: a.role || null,
-			status: a.status || null,
+			role: parseAttendeeRole(a.role),
+			status: parseAttendeeStatus(a.status),
 			rsvp: a.rsvp ?? false,
 		})),
 	};
@@ -145,7 +162,7 @@ export function prepareAttendeeData(
 
 type AlarmCreateData = {
 	trigger: string;
-	action: string;
+	action: AlarmAction;
 	summary: string | null;
 	description: string | null;
 	duration: string | null;
@@ -172,7 +189,7 @@ export function prepareAlarmData(
 	return {
 		create: alarms.map((a) => ({
 			trigger: a.trigger,
-			action: a.action,
+			action: parseAlarmAction(a.action) || "DISPLAY",
 			summary: a.summary?.trim() || null,
 			description: a.description?.trim() || null,
 			duration: a.duration || null,

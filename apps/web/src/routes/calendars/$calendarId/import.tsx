@@ -3,6 +3,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Breadcrumb } from "@/components/breadcrumb";
+import { FileDropZone } from "@/components/file-drop-zone";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -12,7 +14,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/utils/trpc";
 
@@ -30,12 +31,8 @@ function ImportIntoCalendarComponent() {
 	const { calendarId } = Route.useParams();
 	const navigate = useNavigate();
 	const [file, setFile] = useState<File | null>(null);
-	const [removeDuplicates, setRemoveDuplicates] = useState(false);
-	const [preview, setPreview] = useState<{
-		eventCount: number;
-		dateRange: string;
-		warnings: string[];
-	} | null>(null);
+	const [removeDuplicates, setRemoveDuplicates] = useState(true);
+	const [eventCount, setEventCount] = useState(0);
 
 	// Fetch calendar to display its name
 	const { data: calendar } = useQuery({
@@ -62,61 +59,12 @@ function ImportIntoCalendarComponent() {
 		}),
 	);
 
-	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const selectedFile = e.target.files?.[0];
-		if (!selectedFile) return;
-
-		if (!selectedFile.name.endsWith(".ics")) {
-			toast.error("Le fichier doit être au format .ics");
-			return;
-		}
-
-		// Validate file size (5MB max)
-		const maxSizeBytes = 5 * 1024 * 1024; // 5MB
-		if (selectedFile.size > maxSizeBytes) {
-			toast.error(
-				`Fichier trop volumineux. Taille maximale autorisée : 5MB. Taille actuelle : ${(selectedFile.size / 1024 / 1024).toFixed(2)}MB`,
-			);
-			return;
-		}
-
+	const handleFileSelect = (selectedFile: File) => {
 		setFile(selectedFile);
+	};
 
-		// Read and preview file
-		const reader = new FileReader();
-		reader.onload = async (event) => {
-			const content = event.target?.result as string;
-			try {
-				// Parse to get preview (we'll use a simple approach)
-				const lines = content.split("\n");
-				const events = lines.filter((line) =>
-					line.trim().startsWith("BEGIN:VEVENT"),
-				).length;
-
-				// Try to extract date range (simplified)
-				const dtstartLines = lines.filter((line) =>
-					line.trim().startsWith("DTSTART"),
-				);
-				const dtendLines = lines.filter((line) =>
-					line.trim().startsWith("DTEND"),
-				);
-
-				let dateRange = "Non disponible";
-				if (dtstartLines.length > 0 && dtendLines.length > 0) {
-					// Extract first and last dates (simplified)
-					dateRange = `${events} événement(s) détecté(s)`;
-				}
-
-				setPreview({
-					eventCount: events,
-					dateRange,
-					warnings: [],
-				});
-			} catch (_error) {
-				toast.error("Erreur lors de la lecture du fichier");
-			}
-		};
-		reader.readAsText(selectedFile);
+	const handlePreviewParsed = (events: Array<{ title: string }>) => {
+		setEventCount(events.length);
 	};
 
 	const handleImport = async () => {
@@ -125,42 +73,49 @@ function ImportIntoCalendarComponent() {
 			return;
 		}
 
-		const reader = new FileReader();
-		reader.onload = async (event) => {
-			const content = event.target?.result as string;
-			importMutation.mutate({
-				calendarId,
-				fileContent: content,
-				removeDuplicates,
-			});
-		};
-		reader.readAsText(file);
+		const content = await file.text();
+		importMutation.mutate({
+			calendarId,
+			fileContent: content,
+			removeDuplicates,
+		});
 	};
 
 	return (
 		<div className="container mx-auto max-w-2xl px-4 py-10">
-			<Card>
+			<Breadcrumb
+				items={[
+					{ label: "Calendriers", href: "/calendars" },
+					{
+						label: calendar?.name || "Calendrier",
+						href: `/calendars/${calendarId}`,
+					},
+					{ label: "Importer" },
+				]}
+			/>
+
+			<Card className="mt-6">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Upload className="h-5 w-5" />
-						Importer des événements dans {calendar?.name || "..."}
+						Importer des événements
 					</CardTitle>
 					<CardDescription>
-						Les événements du fichier .ics seront ajoutés à ce calendrier
+						Ajoutez des événements d'un fichier .ics à{" "}
+						<span className="font-medium text-foreground">
+							{calendar?.name || "ce calendrier"}
+						</span>
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="file">Fichier .ics</Label>
-						<Input
-							id="file"
-							type="file"
-							accept=".ics"
-							onChange={handleFileChange}
-							disabled={importMutation.isPending}
-						/>
-					</div>
+				<CardContent className="space-y-6">
+					{/* Drop Zone */}
+					<FileDropZone
+						onFileSelect={handleFileSelect}
+						onPreviewParsed={handlePreviewParsed}
+						disabled={importMutation.isPending}
+					/>
 
+					{/* Options */}
 					{file && (
 						<div className="flex items-center space-x-2">
 							<Checkbox
@@ -175,28 +130,25 @@ function ImportIntoCalendarComponent() {
 								htmlFor="remove-duplicates"
 								className="cursor-pointer font-normal text-sm"
 							>
-								Supprimer automatiquement les doublons (même titre et mêmes
-								horaires)
+								Ignorer les doublons (même titre et mêmes horaires)
 							</Label>
 						</div>
 					)}
 
-					{preview && (
-						<div className="rounded-lg border p-4">
-							<h3 className="mb-2 font-medium">Aperçu</h3>
-							<p className="text-muted-foreground text-sm">
-								{preview.eventCount} événement(s) détecté(s)
+					{/* Info Card */}
+					{file && eventCount > 0 && (
+						<div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+							<p className="text-sm">
+								<span className="font-medium">{eventCount}</span> événement
+								{eventCount !== 1 ? "s" : ""} sera
+								{eventCount !== 1 ? "ont" : ""} ajouté
+								{eventCount !== 1 ? "s" : ""} à{" "}
+								<span className="font-medium">{calendar?.name}</span>.
 							</p>
-							{preview.warnings.length > 0 && (
-								<div className="mt-2 rounded-md border border-destructive/20 bg-destructive/5 p-2 text-destructive text-sm">
-									{preview.warnings.map((warning) => (
-										<p key={warning}>{warning}</p>
-									))}
-								</div>
-							)}
 						</div>
 					)}
 
+					{/* Actions */}
 					<div className="flex gap-2">
 						<Button
 							onClick={handleImport}
@@ -209,7 +161,10 @@ function ImportIntoCalendarComponent() {
 									Import en cours...
 								</>
 							) : (
-								"Importer"
+								<>
+									Importer
+									{eventCount > 0 && ` (${eventCount} événements)`}
+								</>
 							)}
 						</Button>
 						<Button

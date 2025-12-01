@@ -16,28 +16,15 @@ export const Route = createFileRoute("/login")({
 	search: {
 		middlewares: [stripSearchParams(loginDefaults)],
 	},
-	head: ({ search }) => ({
+	head: () => ({
 		meta: [
-			{
-				title:
-					search.mode === "signin"
-						? "Connexion - Calendraft"
-						: "Créer un compte - Calendraft",
-			},
+			{ title: "Connexion - Calendraft" },
 			{
 				name: "description",
 				content:
-					search.mode === "signin"
-						? "Connectez-vous à votre compte Calendraft pour accéder à vos calendriers synchronisés."
-						: "Créez un compte Calendraft gratuit pour synchroniser vos calendriers sur tous vos appareils.",
+					"Connectez-vous ou créez un compte Calendraft pour accéder à vos calendriers synchronisés.",
 			},
-			{
-				property: "og:title",
-				content:
-					search.mode === "signin"
-						? "Connexion - Calendraft"
-						: "Créer un compte - Calendraft",
-			},
+			{ property: "og:title", content: "Connexion - Calendraft" },
 			{ property: "og:url", content: `${BASE_URL}/login` },
 		],
 		links: [{ rel: "canonical", href: `${BASE_URL}/login` }],

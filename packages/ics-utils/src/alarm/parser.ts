@@ -124,7 +124,6 @@ export function formatAlarmTrigger(
 			return `${prefix}P${value}D`;
 		case "hours":
 			return `${prefix}PT${value}H`;
-		case "minutes":
 		default:
 			return `${prefix}PT${value}M`;
 	}

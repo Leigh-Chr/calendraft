@@ -20,16 +20,18 @@ export type EventClass = (typeof EVENT_CLASS_VALUES)[number];
 export const EVENT_TRANSP_VALUES = ["OPAQUE", "TRANSPARENT"] as const;
 export type EventTransp = (typeof EVENT_TRANSP_VALUES)[number];
 
+// Note: These use underscores to match Prisma enum (RFC 5545 uses hyphens)
 export const ATTENDEE_ROLE_VALUES = [
 	"CHAIR",
-	"REQ-PARTICIPANT",
-	"OPT-PARTICIPANT",
-	"NON-PARTICIPANT",
+	"REQ_PARTICIPANT",
+	"OPT_PARTICIPANT",
+	"NON_PARTICIPANT",
 ] as const;
 export type AttendeeRole = (typeof ATTENDEE_ROLE_VALUES)[number];
 
+// Note: These use underscores to match Prisma enum (RFC 5545 uses hyphens)
 export const ATTENDEE_STATUS_VALUES = [
-	"NEEDS-ACTION",
+	"NEEDS_ACTION",
 	"ACCEPTED",
 	"DECLINED",
 	"TENTATIVE",
