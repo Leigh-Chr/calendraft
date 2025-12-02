@@ -38,11 +38,11 @@ export default function SignUpForm({
 				},
 				{
 					onSuccess: () => {
-						// Redirect to specified URL or default to dashboard
+						// Redirect to specified URL or default to calendars list
 						if (redirectTo) {
 							navigate({ to: redirectTo });
 						} else {
-							navigate({ to: "/dashboard" });
+							navigate({ to: "/calendars" });
 						}
 						toast.success("Inscription réussie");
 					},

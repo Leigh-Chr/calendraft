@@ -93,12 +93,12 @@ export function useUpdateCalendar() {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.all });
 				toast.success("Calendrier mis à jour");
 			},
-			onError: (error: unknown) => {
-				const message =
-					error && typeof error === "object" && "message" in error
-						? String(error.message)
-						: "Failed to update calendar";
-				toast.error(message);
+			onError: (error) => {
+				handleTRPCError(error, {
+					fallbackTitle: "Erreur lors de la mise à jour",
+					fallbackDescription:
+						"Impossible de mettre à jour le calendrier. Veuillez réessayer.",
+				});
 			},
 		}),
 	);
@@ -121,12 +121,12 @@ export function useDeleteCalendar() {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
 				toast.success("Calendrier supprimé");
 			},
-			onError: (error: unknown) => {
-				const message =
-					error && typeof error === "object" && "message" in error
-						? String(error.message)
-						: "Failed to delete calendar";
-				toast.error(message);
+			onError: (error) => {
+				handleTRPCError(error, {
+					fallbackTitle: "Erreur lors de la suppression",
+					fallbackDescription:
+						"Impossible de supprimer le calendrier. Veuillez réessayer.",
+				});
 			},
 		}),
 	);

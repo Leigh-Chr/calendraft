@@ -1,14 +1,19 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { format, parseISO, startOfMonth } from "date-fns";
+import {
+	format,
+	getDay,
+	parse,
+	parseISO,
+	startOfMonth,
+	startOfWeek,
+} from "date-fns";
 import { fr } from "date-fns/locale";
-import moment from "moment";
-import "moment/locale/fr";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	Calendar,
+	dateFnsLocalizer,
 	type EventProps,
-	momentLocalizer,
 	type View,
 } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
@@ -26,9 +31,18 @@ import { trpc } from "@/utils/trpc";
 import { QuickCreateEvent, useQuickCreate } from "./quick-create-event";
 import "./calendar-month-view.css";
 
-// Configure moment locale
-moment.locale("fr");
-const localizer = momentLocalizer(moment);
+// Configure date-fns localizer for react-big-calendar
+const locales = {
+	"fr-FR": fr,
+};
+
+const localizer = dateFnsLocalizer({
+	format,
+	parse,
+	startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }), // Monday
+	getDay,
+	locales,
+});
 
 // Type for calendar events
 interface CalendarEvent {
@@ -330,6 +344,7 @@ export function CalendarView({
 		>
 			<DnDCalendar
 				localizer={localizer}
+				culture="fr-FR"
 				events={calendarEvents}
 				startAccessor="start"
 				endAccessor="end"

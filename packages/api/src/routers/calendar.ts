@@ -249,7 +249,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendar not found",
+					message: "Calendrier non trouvé",
 				});
 			}
 
@@ -322,7 +322,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendar not found",
+					message: "Calendrier non trouvé",
 				});
 			}
 
@@ -353,7 +353,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendar not found",
+					message: "Calendrier non trouvé",
 				});
 			}
 
@@ -379,7 +379,7 @@ export const calendarRouter = router({
 			if (parseResult.errors.length > 0 && parseResult.events.length === 0) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: `Failed to parse ICS file: ${parseResult.errors.join(", ")}`,
+					message: `Impossible de parser le fichier ICS : ${parseResult.errors.join(", ")}`,
 				});
 			}
 
@@ -471,7 +471,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendar not found",
+					message: "Calendrier non trouvé",
 				});
 			}
 
@@ -590,7 +590,7 @@ export const calendarRouter = router({
 			if (calendars.length !== input.calendarIds.length) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "One or more calendars not found",
+					message: "Un ou plusieurs calendriers non trouvés",
 				});
 			}
 
@@ -654,7 +654,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendar not found",
+					message: "Calendrier non trouvé",
 				});
 			}
 
@@ -703,7 +703,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendar not found",
+					message: "Calendrier non trouvé",
 				});
 			}
 
@@ -714,7 +714,7 @@ export const calendarRouter = router({
 			if (parseResult.errors.length > 0 && parseResult.events.length === 0) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: `Failed to parse ICS file: ${parseResult.errors.join(", ")}`,
+					message: `Impossible de parser le fichier ICS : ${parseResult.errors.join(", ")}`,
 				});
 			}
 

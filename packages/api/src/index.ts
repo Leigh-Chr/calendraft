@@ -37,7 +37,8 @@ export const authOrAnonProcedure = t.procedure.use(({ ctx, next }) => {
 	if (!ctx.userId) {
 		throw new TRPCError({
 			code: "UNAUTHORIZED",
-			message: "User ID required. Please authenticate or provide anonymous ID.",
+			message:
+				"Identifiant utilisateur requis. Veuillez vous connecter ou fournir un identifiant anonyme.",
 			cause: "No userId (neither session nor anonymous ID)",
 		});
 	}
@@ -58,7 +59,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 	if (!ctx.session) {
 		throw new TRPCError({
 			code: "UNAUTHORIZED",
-			message: "Authentication required",
+			message: "Authentification requise",
 			cause: "No session",
 		});
 	}

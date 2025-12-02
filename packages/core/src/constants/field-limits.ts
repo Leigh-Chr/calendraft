@@ -1,6 +1,8 @@
 /**
  * Field length limits for validation and security
  * Prevents excessively long inputs and potential attacks
+ *
+ * IMPORTANT: Keep in sync with @calendraft/schemas/src/field-limits.ts
  */
 
 export const FIELD_LIMITS = {
@@ -14,13 +16,14 @@ export const FIELD_LIMITS = {
 	UID: 255,
 
 	// Organizer and attendee
-	NAME: 255,
-	EMAIL: 254, // RFC 5321 maximum
+	NAME: 200,
+	EMAIL: 200, // RFC 5321 maximum is 254, but we use 200 for consistency
 
 	// Alarm fields
 	ALARM_SUMMARY: 255,
 	ALARM_DESCRIPTION: 1000,
 	ALARM_DURATION: 50,
+	ALARM_TRIGGER: 100,
 
 	// Recurrence
 	RRULE: 500,
@@ -28,10 +31,14 @@ export const FIELD_LIMITS = {
 	// Categories and tags
 	CATEGORY: 100,
 	TAG: 100,
+	CATEGORIES_STRING: 500, // Comma-separated categories
+	RESOURCES_STRING: 500, // Comma-separated resources
 
 	// Other text fields
 	COMMENT: 1000,
 	CONTACT: 500,
+	RECURRENCE_ID: 500,
+	RELATED_TO: 500,
 
 	// Color
 	COLOR: 7, // #RRGGBB

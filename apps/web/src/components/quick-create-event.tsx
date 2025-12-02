@@ -32,7 +32,6 @@ interface QuickCreateEventProps {
 	endDate: Date;
 	onClose: () => void;
 	onOpenFullForm: (data: { title: string; start: Date; end: Date }) => void;
-	position?: { x: number; y: number };
 	isOpen: boolean;
 }
 

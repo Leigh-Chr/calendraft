@@ -204,6 +204,7 @@ export function templateToFormData(
 	categories?: string;
 	rrule?: string;
 	color?: string;
+	alarms?: Array<{ trigger: string; action: string }>;
 } {
 	const { startDate, endDate } = getTemplateDates(template, baseDate);
 
@@ -216,5 +217,9 @@ export function templateToFormData(
 		categories: template.categories,
 		rrule: template.rrule,
 		color: template.color,
+		// Include alarm from template if defined
+		alarms: template.alarm
+			? [{ trigger: template.alarm, action: "DISPLAY" }]
+			: undefined,
 	};
 }

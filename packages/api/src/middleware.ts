@@ -141,7 +141,7 @@ export async function checkAnonymousEventLimit(
 	if (!calendar) {
 		throw new TRPCError({
 			code: "NOT_FOUND",
-			message: "Calendar not found",
+			message: "Calendrier non trouvé",
 		});
 	}
 

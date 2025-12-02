@@ -29,7 +29,7 @@ async function verifyEventAccess(
 	if (!event) {
 		throw new TRPCError({
 			code: "NOT_FOUND",
-			message: "Event not found",
+			message: "Événement non trouvé",
 		});
 	}
 
@@ -46,7 +46,7 @@ async function verifyEventAccess(
 	if (!calendar) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
-			message: "Access denied",
+			message: "Accès refusé",
 		});
 	}
 
@@ -74,7 +74,7 @@ async function verifyCalendarAccess(
 	if (!calendar) {
 		throw new TRPCError({
 			code: "NOT_FOUND",
-			message: "Calendar not found or access denied",
+			message: "Calendrier non trouvé ou accès refusé",
 		});
 	}
 
@@ -215,7 +215,7 @@ export const eventRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendar not found",
+					message: "Calendrier non trouvé",
 				});
 			}
 
@@ -323,7 +323,7 @@ export const eventRouter = router({
 			if (!event) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Event not found",
+					message: "Événement non trouvé",
 				});
 			}
 
@@ -341,7 +341,7 @@ export const eventRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Access denied",
+					message: "Accès refusé",
 				});
 			}
 
@@ -368,7 +368,7 @@ export const eventRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendar not found",
+					message: "Calendrier non trouvé",
 				});
 			}
 
@@ -589,7 +589,10 @@ export const eventRouter = router({
 			});
 
 			if (!sourceEvent) {
-				throw new TRPCError({ code: "NOT_FOUND", message: "Event not found" });
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Événement non trouvé",
+				});
 			}
 
 			// Verify source calendar access
