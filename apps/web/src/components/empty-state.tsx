@@ -49,17 +49,24 @@ export function EmptyState({
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.4 }}
 			className={cn(
-				"flex flex-col items-center justify-center py-16 text-center",
+				"relative flex flex-col items-center justify-center py-16 text-center",
 				className,
 			)}
 		>
+			{/* Subtle background glow */}
+			<div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+				<div className="h-48 w-48 rounded-full bg-primary/5 blur-3xl" />
+			</div>
+
 			{icon && (
 				<motion.div
 					initial={{ scale: 0.8 }}
 					animate={{ scale: 1 }}
 					transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-					className="mb-6"
+					className="relative mb-6"
 				>
+					{/* Decorative ring */}
+					<div className="absolute inset-0 scale-150 rounded-full border border-primary/10" />
 					{icon}
 				</motion.div>
 			)}
@@ -68,7 +75,7 @@ export function EmptyState({
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ delay: 0.2 }}
-				className="mb-2 font-semibold text-lg"
+				className="relative mb-2 font-semibold text-lg"
 			>
 				{title}
 			</motion.h3>
@@ -78,7 +85,7 @@ export function EmptyState({
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
 					transition={{ delay: 0.3 }}
-					className="mb-6 max-w-md text-muted-foreground"
+					className="relative mb-6 max-w-md text-muted-foreground"
 				>
 					{description}
 				</motion.p>
@@ -89,12 +96,13 @@ export function EmptyState({
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
 					transition={{ delay: 0.4 }}
-					className="flex flex-wrap justify-center gap-3"
+					className="relative flex flex-wrap justify-center gap-3"
 				>
 					{action && (
 						<Button
 							onClick={action.onClick}
 							variant={action.variant || "default"}
+							className="interactive-glow"
 						>
 							{action.icon}
 							{action.label}
@@ -115,7 +123,7 @@ export function EmptyState({
 }
 
 /**
- * Illustration: Empty Calendar
+ * Illustration: Empty Calendar - Enhanced with primary color accents
  */
 export function EmptyCalendarIllustration({
 	className,
@@ -124,34 +132,58 @@ export function EmptyCalendarIllustration({
 }) {
 	return (
 		<svg
-			className={cn("h-32 w-32 text-muted-foreground/30", className)}
+			className={cn("h-32 w-32", className)}
 			viewBox="0 0 128 128"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 			role="img"
 			aria-label="Calendrier vide"
 		>
+			{/* Background glow */}
+			<circle cx="64" cy="68" r="40" className="fill-primary/5" />
+
+			{/* Calendar frame */}
 			<rect
 				x="16"
 				y="24"
 				width="96"
 				height="88"
 				rx="8"
-				stroke="currentColor"
+				className="stroke-muted-foreground/30"
 				strokeWidth="4"
 			/>
-			<path d="M16 48H112" stroke="currentColor" strokeWidth="4" />
-			<rect x="32" y="16" width="8" height="16" rx="2" fill="currentColor" />
-			<rect x="88" y="16" width="8" height="16" rx="2" fill="currentColor" />
-			{/* Calendar grid */}
+			<path
+				d="M16 48H112"
+				className="stroke-muted-foreground/30"
+				strokeWidth="4"
+			/>
+
+			{/* Calendar hooks - with primary accent */}
+			<rect
+				x="32"
+				y="16"
+				width="8"
+				height="16"
+				rx="2"
+				className="fill-primary/60"
+			/>
+			<rect
+				x="88"
+				y="16"
+				width="8"
+				height="16"
+				rx="2"
+				className="fill-primary/60"
+			/>
+
+			{/* Calendar grid - with gradient colors */}
 			<rect
 				x="28"
 				y="60"
 				width="16"
 				height="16"
 				rx="2"
-				fill="currentColor"
-				opacity="0.2"
+				className="fill-primary/20"
 			/>
 			<rect
 				x="56"
@@ -159,8 +191,7 @@ export function EmptyCalendarIllustration({
 				width="16"
 				height="16"
 				rx="2"
-				fill="currentColor"
-				opacity="0.2"
+				className="fill-chart-2/20"
 			/>
 			<rect
 				x="84"
@@ -168,8 +199,7 @@ export function EmptyCalendarIllustration({
 				width="16"
 				height="16"
 				rx="2"
-				fill="currentColor"
-				opacity="0.2"
+				className="fill-muted-foreground/10"
 			/>
 			<rect
 				x="28"
@@ -177,8 +207,7 @@ export function EmptyCalendarIllustration({
 				width="16"
 				height="16"
 				rx="2"
-				fill="currentColor"
-				opacity="0.2"
+				className="fill-muted-foreground/10"
 			/>
 			<rect
 				x="56"
@@ -186,9 +215,11 @@ export function EmptyCalendarIllustration({
 				width="16"
 				height="16"
 				rx="2"
-				fill="currentColor"
-				opacity="0.2"
+				className="fill-primary/15"
 			/>
+
+			{/* Decorative dot */}
+			<circle cx="92" cy="92" r="4" className="fill-primary/40" />
 		</svg>
 	);
 }

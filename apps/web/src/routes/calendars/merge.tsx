@@ -119,106 +119,115 @@ function MergeCalendarsComponent() {
 	};
 
 	return (
-		<div className="container mx-auto max-w-2xl px-4 py-10">
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<Merge className="h-5 w-5" />
-						Fusionner des calendriers
-					</CardTitle>
-					<CardDescription>
-						Combinez plusieurs calendriers en un seul
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-4">
-					<div className="space-y-2">
-						<Label>Sélectionnez les calendriers à fusionner (minimum 2)</Label>
-						<div className="max-h-64 space-y-2 overflow-y-auto rounded-md border p-4">
-							{calendars.length === 0 ? (
-								<p className="text-muted-foreground text-sm">
-									Aucun calendrier disponible
-								</p>
-							) : (
-								calendars.map((calendar) => (
-									<div
-										key={calendar.id}
-										className="flex items-center space-x-2 rounded-md border p-2 hover:bg-accent"
-									>
-										<Checkbox
-											id={calendar.id}
-											checked={selectedIds.has(calendar.id)}
-											onCheckedChange={() => handleToggle(calendar.id)}
-										/>
-										<label
-											htmlFor={calendar.id}
-											className="flex-1 cursor-pointer text-sm"
+		<div className="relative min-h-[calc(100vh-4rem)]">
+			{/* Subtle background */}
+			<div className="-z-10 pointer-events-none absolute inset-0">
+				<div className="gradient-mesh absolute inset-0 opacity-30" />
+			</div>
+
+			<div className="container mx-auto max-w-2xl px-4 py-10">
+				<Card className="card-glow">
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Merge className="h-5 w-5" />
+							Fusionner des calendriers
+						</CardTitle>
+						<CardDescription>
+							Combinez plusieurs calendriers en un seul
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<div className="space-y-2">
+							<Label>
+								Sélectionnez les calendriers à fusionner (minimum 2)
+							</Label>
+							<div className="max-h-64 space-y-2 overflow-y-auto rounded-md border p-4">
+								{calendars.length === 0 ? (
+									<p className="text-muted-foreground text-sm">
+										Aucun calendrier disponible
+									</p>
+								) : (
+									calendars.map((calendar) => (
+										<div
+											key={calendar.id}
+											className="flex items-center space-x-2 rounded-md border p-2 hover:bg-accent"
 										>
-											{calendar.name} ({calendar.eventCount} événement
-											{calendar.eventCount !== 1 ? "s" : ""})
-										</label>
-									</div>
-								))
-							)}
+											<Checkbox
+												id={calendar.id}
+												checked={selectedIds.has(calendar.id)}
+												onCheckedChange={() => handleToggle(calendar.id)}
+											/>
+											<label
+												htmlFor={calendar.id}
+												className="flex-1 cursor-pointer text-sm"
+											>
+												{calendar.name} ({calendar.eventCount} événement
+												{calendar.eventCount !== 1 ? "s" : ""})
+											</label>
+										</div>
+									))
+								)}
+							</div>
 						</div>
-					</div>
 
-					<div className="space-y-2">
-						<Label htmlFor="mergedName">Nom du calendrier fusionné</Label>
-						<Input
-							id="mergedName"
-							value={mergedName}
-							onChange={(e) => setMergedName(e.target.value)}
-							placeholder="Calendrier fusionné"
-							disabled={mergeMutation.isPending}
-						/>
-					</div>
+						<div className="space-y-2">
+							<Label htmlFor="mergedName">Nom du calendrier fusionné</Label>
+							<Input
+								id="mergedName"
+								value={mergedName}
+								onChange={(e) => setMergedName(e.target.value)}
+								placeholder="Calendrier fusionné"
+								disabled={mergeMutation.isPending}
+							/>
+						</div>
 
-					<div className="flex items-center space-x-2">
-						<Checkbox
-							id="removeDuplicates"
-							checked={removeDuplicates}
-							onCheckedChange={(checked) =>
-								setRemoveDuplicates(checked === true)
-							}
-							disabled={mergeMutation.isPending}
-						/>
-						<label
-							htmlFor="removeDuplicates"
-							className="cursor-pointer text-sm"
-						>
-							Supprimer les doublons (même titre + mêmes horaires)
-						</label>
-					</div>
+						<div className="flex items-center space-x-2">
+							<Checkbox
+								id="removeDuplicates"
+								checked={removeDuplicates}
+								onCheckedChange={(checked) =>
+									setRemoveDuplicates(checked === true)
+								}
+								disabled={mergeMutation.isPending}
+							/>
+							<label
+								htmlFor="removeDuplicates"
+								className="cursor-pointer text-sm"
+							>
+								Supprimer les doublons (même titre + mêmes horaires)
+							</label>
+						</div>
 
-					<div className="flex gap-2">
-						<Button
-							onClick={handleMerge}
-							disabled={
-								selectedIds.size < 2 ||
-								!mergedName.trim() ||
-								mergeMutation.isPending
-							}
-							className="flex-1"
-						>
-							{mergeMutation.isPending ? (
-								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Fusion en cours...
-								</>
-							) : (
-								"Fusionner"
-							)}
-						</Button>
-						<Button
-							variant="outline"
-							onClick={() => navigate({ to: "/calendars" })}
-							disabled={mergeMutation.isPending}
-						>
-							Annuler
-						</Button>
-					</div>
-				</CardContent>
-			</Card>
+						<div className="flex gap-2">
+							<Button
+								onClick={handleMerge}
+								disabled={
+									selectedIds.size < 2 ||
+									!mergedName.trim() ||
+									mergeMutation.isPending
+								}
+								className="interactive-glow flex-1"
+							>
+								{mergeMutation.isPending ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										Fusion en cours...
+									</>
+								) : (
+									"Fusionner"
+								)}
+							</Button>
+							<Button
+								variant="outline"
+								onClick={() => navigate({ to: "/calendars" })}
+								disabled={mergeMutation.isPending}
+							>
+								Annuler
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
 		</div>
 	);
 }

@@ -162,147 +162,168 @@ function CalendarViewComponent() {
 
 	if (isLoading) {
 		return (
-			<div className="container mx-auto max-w-6xl px-4 py-10">
-				<div className="text-center">Chargement...</div>
+			<div className="relative min-h-[calc(100vh-4rem)]">
+				<div className="-z-10 pointer-events-none absolute inset-0">
+					<div className="gradient-mesh absolute inset-0 opacity-30" />
+				</div>
+				<div className="container mx-auto max-w-6xl px-4 py-10">
+					<div className="text-center text-muted-foreground">Chargement...</div>
+				</div>
 			</div>
 		);
 	}
 
 	if (!calendar) {
 		return (
-			<div className="container mx-auto max-w-6xl px-4 py-10">
-				<div className="text-center">Calendrier non trouvé</div>
+			<div className="relative min-h-[calc(100vh-4rem)]">
+				<div className="-z-10 pointer-events-none absolute inset-0">
+					<div className="gradient-mesh absolute inset-0 opacity-30" />
+				</div>
+				<div className="container mx-auto max-w-6xl px-4 py-10">
+					<div className="text-center text-muted-foreground">
+						Calendrier non trouvé
+					</div>
+				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="container mx-auto max-w-6xl px-4 py-10">
-			<AccountPrompt variant="banner" />
+		<div className="relative min-h-[calc(100vh-4rem)]">
+			{/* Subtle background */}
+			<div className="-z-10 pointer-events-none absolute inset-0">
+				<div className="gradient-mesh absolute inset-0 opacity-25" />
+			</div>
 
-			<div className="mb-6 flex items-center justify-between">
-				<div>
-					<h1 className="font-bold text-3xl">{calendar.name}</h1>
-					<p className="text-muted-foreground">{eventCount} événement(s)</p>
-				</div>
-				<div className="flex gap-2">
-					<Button
-						id={TOUR_STEP_IDS.ADD_EVENT_BUTTON}
-						variant="outline"
-						size="sm"
-						onClick={() =>
-							navigate({ to: `/calendars/${calendarId}/events/new` })
-						}
-					>
-						<Plus className="mr-2 h-4 w-4" />
-						Ajouter un événement
-					</Button>
-					<div id={TOUR_STEP_IDS.ACTION_BUTTONS} className="flex gap-2">
+			<div className="container mx-auto max-w-6xl px-4 py-10">
+				<AccountPrompt variant="banner" />
+
+				<div className="mb-6 flex items-center justify-between">
+					<div>
+						<h1 className="font-bold text-3xl">{calendar.name}</h1>
+						<p className="text-muted-foreground">{eventCount} événement(s)</p>
+					</div>
+					<div className="flex gap-2">
 						<Button
+							id={TOUR_STEP_IDS.ADD_EVENT_BUTTON}
 							variant="outline"
 							size="sm"
 							onClick={() =>
-								navigate({ to: `/calendars/${calendarId}/import` })
+								navigate({ to: `/calendars/${calendarId}/events/new` })
 							}
 						>
-							<Upload className="mr-2 h-4 w-4" />
-							Importer
+							<Plus className="mr-2 h-4 w-4" />
+							Ajouter un événement
 						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setCleanDialogOpen(true)}
-						>
-							<Sparkles className="mr-2 h-4 w-4" />
-							Nettoyer
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() =>
-								navigate({
-									to: "/calendars/merge",
-									search: { selected: calendarId },
-								})
-							}
-						>
-							<Merge className="mr-2 h-4 w-4" />
-							Fusionner
-						</Button>
-						<Button variant="outline" size="sm" onClick={handleExport}>
-							<Download className="mr-2 h-4 w-4" />
-							Exporter
-						</Button>
+						<div id={TOUR_STEP_IDS.ACTION_BUTTONS} className="flex gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() =>
+									navigate({ to: `/calendars/${calendarId}/import` })
+								}
+							>
+								<Upload className="mr-2 h-4 w-4" />
+								Importer
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setCleanDialogOpen(true)}
+							>
+								<Sparkles className="mr-2 h-4 w-4" />
+								Nettoyer
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() =>
+									navigate({
+										to: "/calendars/merge",
+										search: { selected: calendarId },
+									})
+								}
+							>
+								<Merge className="mr-2 h-4 w-4" />
+								Fusionner
+							</Button>
+							<Button variant="outline" size="sm" onClick={handleExport}>
+								<Download className="mr-2 h-4 w-4" />
+								Exporter
+							</Button>
+						</div>
 					</div>
 				</div>
+
+				<div id={TOUR_STEP_IDS.VIEW_TOGGLE} className="mb-4 flex gap-2">
+					<Button
+						variant={viewMode === "list" ? "default" : "outline"}
+						size="sm"
+						onClick={() => updateSearch({ view: "list" })}
+					>
+						<List className="mr-2 h-4 w-4" />
+						Liste
+					</Button>
+					<Button
+						variant={viewMode === "calendar" ? "default" : "outline"}
+						size="sm"
+						onClick={() => updateSearch({ view: "calendar" })}
+					>
+						<CalendarIcon className="mr-2 h-4 w-4" />
+						Calendrier
+					</Button>
+				</div>
+
+				{viewMode === "list" ? (
+					<EventListView
+						calendarId={calendarId}
+						events={normalizedEvents}
+						initialFilters={{
+							dateFilter: search.dateFilter,
+							sortBy: search.sortBy,
+							keyword: search.q || "",
+						}}
+						onFiltersChange={(filters) => {
+							updateSearch({
+								dateFilter: filters.dateFilter,
+								sortBy: filters.sortBy,
+								q: filters.keyword,
+							});
+						}}
+					/>
+				) : (
+					<CalendarMonthView
+						calendarId={calendarId}
+						events={normalizedEvents}
+						calendarColor={calendar.color}
+						initialDate={search.date}
+						onDateChange={(date) => updateSearch({ date })}
+					/>
+				)}
+
+				<AlertDialog open={cleanDialogOpen} onOpenChange={setCleanDialogOpen}>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle>Nettoyer les doublons</AlertDialogTitle>
+							<AlertDialogDescription>
+								Cela supprimera tous les événements en double (même titre et
+								mêmes horaires). Cette action est irréversible. Continuer ?
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogFooter>
+							<AlertDialogCancel>Annuler</AlertDialogCancel>
+							<AlertDialogAction
+								onClick={handleCleanDuplicates}
+								disabled={cleanDuplicatesMutation.isPending}
+							>
+								{cleanDuplicatesMutation.isPending
+									? "Nettoyage..."
+									: "Nettoyer"}
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
 			</div>
-
-			<div id={TOUR_STEP_IDS.VIEW_TOGGLE} className="mb-4 flex gap-2">
-				<Button
-					variant={viewMode === "list" ? "default" : "outline"}
-					size="sm"
-					onClick={() => updateSearch({ view: "list" })}
-				>
-					<List className="mr-2 h-4 w-4" />
-					Liste
-				</Button>
-				<Button
-					variant={viewMode === "calendar" ? "default" : "outline"}
-					size="sm"
-					onClick={() => updateSearch({ view: "calendar" })}
-				>
-					<CalendarIcon className="mr-2 h-4 w-4" />
-					Calendrier
-				</Button>
-			</div>
-
-			{viewMode === "list" ? (
-				<EventListView
-					calendarId={calendarId}
-					events={normalizedEvents}
-					initialFilters={{
-						dateFilter: search.dateFilter,
-						sortBy: search.sortBy,
-						keyword: search.q || "",
-					}}
-					onFiltersChange={(filters) => {
-						updateSearch({
-							dateFilter: filters.dateFilter,
-							sortBy: filters.sortBy,
-							q: filters.keyword,
-						});
-					}}
-				/>
-			) : (
-				<CalendarMonthView
-					calendarId={calendarId}
-					events={normalizedEvents}
-					calendarColor={calendar.color}
-					initialDate={search.date}
-					onDateChange={(date) => updateSearch({ date })}
-				/>
-			)}
-
-			<AlertDialog open={cleanDialogOpen} onOpenChange={setCleanDialogOpen}>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Nettoyer les doublons</AlertDialogTitle>
-						<AlertDialogDescription>
-							Cela supprimera tous les événements en double (même titre et mêmes
-							horaires). Cette action est irréversible. Continuer ?
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Annuler</AlertDialogCancel>
-						<AlertDialogAction
-							onClick={handleCleanDuplicates}
-							disabled={cleanDuplicatesMutation.isPending}
-						>
-							{cleanDuplicatesMutation.isPending ? "Nettoyage..." : "Nettoyer"}
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
 		</div>
 	);
 }

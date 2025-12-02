@@ -180,176 +180,189 @@ function CalendarsListComponent() {
 
 	if (isLoading) {
 		return (
-			<div className="container mx-auto max-w-5xl px-4 py-10">
-				<div className="mb-6 flex items-center justify-between">
-					<Skeleton className="h-9 w-48" />
-					<div className="flex gap-2">
-						<Skeleton className="h-10 w-40" />
-						<Skeleton className="h-10 w-28" />
-					</div>
+			<div className="relative min-h-[calc(100vh-4rem)]">
+				<div className="-z-10 pointer-events-none absolute inset-0">
+					<div className="gradient-mesh absolute inset-0 opacity-30" />
 				</div>
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-					{[1, 2, 3].map((i) => (
-						<Card key={i}>
-							<CardHeader className="pb-3">
-								<Skeleton className="h-5 w-32" />
-								<Skeleton className="h-4 w-24" />
-							</CardHeader>
-							<CardContent>
-								<Skeleton className="h-9 w-full" />
-							</CardContent>
-						</Card>
-					))}
+				<div className="container mx-auto max-w-5xl px-4 py-10">
+					<div className="mb-6 flex items-center justify-between">
+						<Skeleton className="h-9 w-48" />
+						<div className="flex gap-2">
+							<Skeleton className="h-10 w-40" />
+							<Skeleton className="h-10 w-28" />
+						</div>
+					</div>
+					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+						{[1, 2, 3].map((i) => (
+							<Card key={i} className="shimmer">
+								<CardHeader className="pb-3">
+									<Skeleton className="h-5 w-32" />
+									<Skeleton className="h-4 w-24" />
+								</CardHeader>
+								<CardContent>
+									<Skeleton className="h-9 w-full" />
+								</CardContent>
+							</Card>
+						))}
+					</div>
 				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="container mx-auto max-w-5xl px-4 py-10">
-			{/* Tour dialog */}
-			<TourAlertDialog isOpen={tourOpen} setIsOpen={setTourOpen} />
-
-			<div className="mb-6 flex items-center justify-between">
-				<h1 className="font-bold text-3xl">Mes calendriers</h1>
-				<div className="flex items-center gap-2">
-					<Button
-						id={TOUR_STEP_IDS.NEW_CALENDAR_BUTTON}
-						onClick={() => navigate({ to: "/calendars/new" })}
-					>
-						<Plus className="mr-2 h-4 w-4" />
-						Nouveau calendrier
-					</Button>
-					<Button id={TOUR_STEP_IDS.IMPORT_BUTTON} variant="outline" asChild>
-						<Link to="/calendars/import">
-							<FileUp className="mr-2 h-4 w-4" />
-							Importer
-						</Link>
-					</Button>
-				</div>
+		<div className="relative min-h-[calc(100vh-4rem)]">
+			{/* Subtle background pattern */}
+			<div className="-z-10 pointer-events-none absolute inset-0">
+				<div className="gradient-mesh absolute inset-0 opacity-30" />
+				<div className="cross-grid absolute inset-0 opacity-20 [mask-image:linear-gradient(to_bottom,#000_0%,transparent_50%)]" />
 			</div>
 
-			<AccountPrompt variant="banner" />
+			<div className="container mx-auto max-w-5xl px-4 py-10">
+				{/* Tour dialog */}
+				<TourAlertDialog isOpen={tourOpen} setIsOpen={setTourOpen} />
 
-			{calendars.length === 0 ? (
-				<Card id={TOUR_STEP_IDS.CALENDAR_GRID}>
-					<CardContent className="py-16 text-center">
-						<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-							<Calendar className="h-8 w-8 text-muted-foreground" />
-						</div>
-						<h3 className="mb-2 font-semibold text-lg">
-							Aucun calendrier pour le moment
-						</h3>
-						<p className="mb-6 text-muted-foreground">
-							Créez votre premier calendrier ou importez un fichier .ics
-							existant.
-						</p>
-						<div className="flex justify-center gap-3">
-							<Button onClick={() => navigate({ to: "/calendars/new" })}>
-								<Plus className="mr-2 h-4 w-4" />
-								Créer un calendrier
-							</Button>
-							<Button variant="outline" asChild>
-								<Link to="/calendars/import">
-									<FileUp className="mr-2 h-4 w-4" />
-									Importer un .ics
-								</Link>
-							</Button>
-						</div>
-					</CardContent>
-				</Card>
-			) : (
-				<StaggerContainer
-					id={TOUR_STEP_IDS.CALENDAR_GRID}
-					className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-				>
-					{calendars.map((calendar) => (
-						<StaggerItem key={calendar.id}>
-							<CalendarCard
-								calendar={calendar}
-								onOpen={() => navigate({ to: `/calendars/${calendar.id}` })}
-								onEdit={() =>
-									openEditDialog(calendar.id, calendar.name, calendar.color)
-								}
-								onDelete={() => openDeleteDialog(calendar.id, calendar.name)}
-								isDeleting={isDeleting}
-								isUpdating={isUpdating}
-							/>
-						</StaggerItem>
-					))}
-				</StaggerContainer>
-			)}
-
-			{/* Delete Dialog */}
-			<AlertDialog
-				open={dialog?.type === "delete"}
-				onOpenChange={(open) => !open && closeDialog()}
-			>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Supprimer le calendrier</AlertDialogTitle>
-						<AlertDialogDescription>
-							Êtes-vous sûr de vouloir supprimer "
-							{dialog?.type === "delete" ? dialog.calendar.name : ""}" ? Cette
-							action est irréversible et supprimera tous les événements
-							associés.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Annuler</AlertDialogCancel>
-						<AlertDialogAction
-							onClick={confirmDelete}
-							disabled={isDeleting}
-							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+				<div className="mb-6 flex items-center justify-between">
+					<h1 className="font-bold text-3xl">Mes calendriers</h1>
+					<div className="flex items-center gap-2">
+						<Button
+							id={TOUR_STEP_IDS.NEW_CALENDAR_BUTTON}
+							onClick={() => navigate({ to: "/calendars/new" })}
 						>
-							{isDeleting ? "Suppression..." : "Supprimer"}
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+							<Plus className="mr-2 h-4 w-4" />
+							Nouveau calendrier
+						</Button>
+						<Button id={TOUR_STEP_IDS.IMPORT_BUTTON} variant="outline" asChild>
+							<Link to="/calendars/import">
+								<FileUp className="mr-2 h-4 w-4" />
+								Importer
+							</Link>
+						</Button>
+					</div>
+				</div>
 
-			{/* Edit Dialog */}
-			<AlertDialog
-				open={dialog?.type === "edit"}
-				onOpenChange={(open) => !open && closeDialog()}
-			>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Modifier le calendrier</AlertDialogTitle>
-						<AlertDialogDescription>
-							Modifiez les paramètres du calendrier "
-							{dialog?.type === "edit" ? dialog.calendar.name : ""}"
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<div className="space-y-4 py-4">
-						<div className="space-y-2">
-							<Label htmlFor="calendar-name">Nom</Label>
-							<Input
-								id="calendar-name"
-								value={dialog?.type === "edit" ? dialog.newName : ""}
-								onChange={(e) => handleEditNameChange(e.target.value)}
-								placeholder="Nom du calendrier"
-								onKeyDown={(e) => {
-									if (e.key === "Enter") {
-										confirmEdit();
+				<AccountPrompt variant="banner" />
+
+				{calendars.length === 0 ? (
+					<Card id={TOUR_STEP_IDS.CALENDAR_GRID}>
+						<CardContent className="py-16 text-center">
+							<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+								<Calendar className="h-8 w-8 text-muted-foreground" />
+							</div>
+							<h3 className="mb-2 font-semibold text-lg">
+								Aucun calendrier pour le moment
+							</h3>
+							<p className="mb-6 text-muted-foreground">
+								Créez votre premier calendrier ou importez un fichier .ics
+								existant.
+							</p>
+							<div className="flex justify-center gap-3">
+								<Button onClick={() => navigate({ to: "/calendars/new" })}>
+									<Plus className="mr-2 h-4 w-4" />
+									Créer un calendrier
+								</Button>
+								<Button variant="outline" asChild>
+									<Link to="/calendars/import">
+										<FileUp className="mr-2 h-4 w-4" />
+										Importer un .ics
+									</Link>
+								</Button>
+							</div>
+						</CardContent>
+					</Card>
+				) : (
+					<StaggerContainer
+						id={TOUR_STEP_IDS.CALENDAR_GRID}
+						className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+					>
+						{calendars.map((calendar) => (
+							<StaggerItem key={calendar.id}>
+								<CalendarCard
+									calendar={calendar}
+									onOpen={() => navigate({ to: `/calendars/${calendar.id}` })}
+									onEdit={() =>
+										openEditDialog(calendar.id, calendar.name, calendar.color)
 									}
-								}}
+									onDelete={() => openDeleteDialog(calendar.id, calendar.name)}
+									isDeleting={isDeleting}
+									isUpdating={isUpdating}
+								/>
+							</StaggerItem>
+						))}
+					</StaggerContainer>
+				)}
+
+				{/* Delete Dialog */}
+				<AlertDialog
+					open={dialog?.type === "delete"}
+					onOpenChange={(open) => !open && closeDialog()}
+				>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle>Supprimer le calendrier</AlertDialogTitle>
+							<AlertDialogDescription>
+								Êtes-vous sûr de vouloir supprimer "
+								{dialog?.type === "delete" ? dialog.calendar.name : ""}" ? Cette
+								action est irréversible et supprimera tous les événements
+								associés.
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogFooter>
+							<AlertDialogCancel>Annuler</AlertDialogCancel>
+							<AlertDialogAction
+								onClick={confirmDelete}
+								disabled={isDeleting}
+								className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+							>
+								{isDeleting ? "Suppression..." : "Supprimer"}
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
+
+				{/* Edit Dialog */}
+				<AlertDialog
+					open={dialog?.type === "edit"}
+					onOpenChange={(open) => !open && closeDialog()}
+				>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle>Modifier le calendrier</AlertDialogTitle>
+							<AlertDialogDescription>
+								Modifiez les paramètres du calendrier "
+								{dialog?.type === "edit" ? dialog.calendar.name : ""}"
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<div className="space-y-4 py-4">
+							<div className="space-y-2">
+								<Label htmlFor="calendar-name">Nom</Label>
+								<Input
+									id="calendar-name"
+									value={dialog?.type === "edit" ? dialog.newName : ""}
+									onChange={(e) => handleEditNameChange(e.target.value)}
+									placeholder="Nom du calendrier"
+									onKeyDown={(e) => {
+										if (e.key === "Enter") {
+											confirmEdit();
+										}
+									}}
+								/>
+							</div>
+							<ColorPicker
+								value={dialog?.type === "edit" ? dialog.newColor : null}
+								onChange={handleEditColorChange}
+								label="Couleur"
 							/>
 						</div>
-						<ColorPicker
-							value={dialog?.type === "edit" ? dialog.newColor : null}
-							onChange={handleEditColorChange}
-							label="Couleur"
-						/>
-					</div>
-					<AlertDialogFooter>
-						<AlertDialogCancel>Annuler</AlertDialogCancel>
-						<AlertDialogAction onClick={confirmEdit} disabled={isUpdating}>
-							{isUpdating ? "Enregistrement..." : "Enregistrer"}
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+						<AlertDialogFooter>
+							<AlertDialogCancel>Annuler</AlertDialogCancel>
+							<AlertDialogAction onClick={confirmEdit} disabled={isUpdating}>
+								{isUpdating ? "Enregistrement..." : "Enregistrer"}
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
+			</div>
 		</div>
 	);
 }

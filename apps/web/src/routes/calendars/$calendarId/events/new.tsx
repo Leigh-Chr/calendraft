@@ -131,31 +131,38 @@ function NewEventComponent() {
 	});
 
 	return (
-		<div className="container mx-auto max-w-4xl space-y-6 px-4 py-10">
-			<Breadcrumb
-				items={[
-					{
-						label: calendar?.name || "Calendrier",
-						href: `/calendars/${calendarId}`,
-					},
-					{ label: "Nouvel événement" },
-				]}
-			/>
+		<div className="relative min-h-[calc(100vh-4rem)]">
+			{/* Subtle background */}
+			<div className="-z-10 pointer-events-none absolute inset-0">
+				<div className="gradient-mesh absolute inset-0 opacity-25" />
+			</div>
 
-			{/* Template selector - only show if no template is selected yet */}
-			{!templateData && <TemplateSelector onSelect={handleTemplateSelect} />}
+			<div className="container mx-auto max-w-4xl space-y-6 px-4 py-10">
+				<Breadcrumb
+					items={[
+						{
+							label: calendar?.name || "Calendrier",
+							href: `/calendars/${calendarId}`,
+						},
+						{ label: "Nouvel événement" },
+					]}
+				/>
 
-			<EventFormExtended
-				key={templateData ? templateData.title : "default"}
-				mode="create"
-				initialData={initialData}
-				onSubmit={handleSubmit}
-				onCancel={() => navigate({ to: `/calendars/${calendarId}` })}
-				isSubmitting={createMutation.isPending}
-				calendarId={calendarId}
-				showAllSections={false}
-				initialValidationErrors={serverValidationErrors}
-			/>
+				{/* Template selector - only show if no template is selected yet */}
+				{!templateData && <TemplateSelector onSelect={handleTemplateSelect} />}
+
+				<EventFormExtended
+					key={templateData ? templateData.title : "default"}
+					mode="create"
+					initialData={initialData}
+					onSubmit={handleSubmit}
+					onCancel={() => navigate({ to: `/calendars/${calendarId}` })}
+					isSubmitting={createMutation.isPending}
+					calendarId={calendarId}
+					showAllSections={false}
+					initialValidationErrors={serverValidationErrors}
+				/>
+			</div>
 		</div>
 	);
 }

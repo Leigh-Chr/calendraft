@@ -298,26 +298,38 @@ function RouteComponent() {
 	const isFree = planType === "FREE";
 
 	return (
-		<div className="container mx-auto max-w-6xl px-4 py-10">
-			<h1 className="mb-6 font-bold text-3xl">Tableau de bord</h1>
-
-			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-				<PlanCard
-					planType={planType}
-					subscription={subscription}
-					isPro={isPro}
-					isPersonal={isPersonal}
-					isFree={isFree}
-					onManageSubscription={handleManageSubscription}
-				/>
-				<UsageCard usage={usage} />
-				<ProfileCard
-					userName={session.data?.user.name}
-					userEmail={session.data?.user.email}
-				/>
+		<div className="relative min-h-[calc(100vh-4rem)]">
+			{/* Subtle background */}
+			<div className="-z-10 pointer-events-none absolute inset-0">
+				<div className="gradient-mesh absolute inset-0 opacity-40" />
 			</div>
 
-			{isFree && <UpgradePrompt />}
+			<div className="container mx-auto max-w-6xl px-4 py-10">
+				<div className="mb-8">
+					<h1 className="mb-2 font-bold text-3xl">Tableau de bord</h1>
+					<p className="text-muted-foreground">
+						Bonjour {session.data?.user.name?.split(" ")[0] || "là"} 👋
+					</p>
+				</div>
+
+				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+					<PlanCard
+						planType={planType}
+						subscription={subscription}
+						isPro={isPro}
+						isPersonal={isPersonal}
+						isFree={isFree}
+						onManageSubscription={handleManageSubscription}
+					/>
+					<UsageCard usage={usage} />
+					<ProfileCard
+						userName={session.data?.user.name}
+						userEmail={session.data?.user.email}
+					/>
+				</div>
+
+				{isFree && <UpgradePrompt />}
+			</div>
 		</div>
 	);
 }

@@ -195,57 +195,255 @@ body {
    STYLES PERSONNALISÉS CALENDRAFT
    ============================================ */
 
-/* Gradient signature - Dégradé indigo subtil */
+/* ============================================
+   TEXTURES & ATMOSPHÈRE
+   ============================================ */
+
+/* Noise grain overlay - texture subtile */
+.noise-overlay {
+	position: relative;
+}
+
+.noise-overlay::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	opacity: 0.025;
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+	z-index: 1;
+}
+
+.dark .noise-overlay::before {
+	opacity: 0.04;
+}
+
+/* Dot grid pattern amélioré - plus visible et dynamique */
+.dot-grid {
+	background-image:
+		radial-gradient(circle at center, var(--primary) 0.5px, transparent 0.5px),
+		radial-gradient(circle at center, var(--border) 1px, transparent 1px);
+	background-size:
+		32px 32px,
+		32px 32px;
+	background-position:
+		0 0,
+		16px 16px;
+}
+
+.dark .dot-grid {
+	background-image:
+		radial-gradient(circle at center, var(--primary) 0.5px, transparent 0.5px),
+		radial-gradient(circle at center, oklch(0.3 0.01 270) 1px, transparent 1px);
+}
+
+/* Cross grid pattern - alternative géométrique */
+.cross-grid {
+	background-image:
+		linear-gradient(var(--border) 1px, transparent 1px),
+		linear-gradient(90deg, var(--border) 1px, transparent 1px);
+	background-size: 40px 40px;
+}
+
+/* Gradient mesh - effet atmosphérique profond */
+.gradient-mesh {
+	background:
+		radial-gradient(
+			ellipse 80% 50% at 20% 40%,
+			oklch(0.55 0.15 270 / 0.12),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 60% 40% at 80% 60%,
+			oklch(0.6 0.12 290 / 0.08),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 50% 30% at 50% 90%,
+			oklch(0.5 0.1 250 / 0.06),
+			transparent 50%
+		);
+}
+
+.dark .gradient-mesh {
+	background:
+		radial-gradient(
+			ellipse 80% 50% at 20% 40%,
+			oklch(0.55 0.2 270 / 0.15),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 60% 40% at 80% 60%,
+			oklch(0.6 0.15 290 / 0.1),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 50% 30% at 50% 90%,
+			oklch(0.5 0.12 250 / 0.08),
+			transparent 50%
+		);
+}
+
+/* Aurora effect - pour les sections hero */
+.aurora {
+	background:
+		radial-gradient(
+			ellipse 100% 100% at 50% 0%,
+			oklch(0.55 0.18 270 / 0.15),
+			transparent 60%
+		),
+		radial-gradient(
+			ellipse 80% 60% at 30% 20%,
+			oklch(0.6 0.14 230 / 0.1),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 60% 50% at 70% 30%,
+			oklch(0.58 0.16 290 / 0.08),
+			transparent 50%
+		);
+}
+
+.dark .aurora {
+	background:
+		radial-gradient(
+			ellipse 100% 100% at 50% 0%,
+			oklch(0.5 0.2 270 / 0.2),
+			transparent 60%
+		),
+		radial-gradient(
+			ellipse 80% 60% at 30% 20%,
+			oklch(0.55 0.16 230 / 0.12),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 60% 50% at 70% 30%,
+			oklch(0.52 0.18 290 / 0.1),
+			transparent 50%
+		);
+}
+
+/* Gradient signature - Dégradé indigo amélioré */
 .gradient-brand {
 	background: linear-gradient(
 		135deg,
 		oklch(0.55 0.22 270),
-		oklch(0.6 0.2 290),
+		oklch(0.62 0.2 285),
 		oklch(0.55 0.18 250)
 	);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
+	animation: gradient-shift 8s ease-in-out infinite;
+	background-size: 200% 200%;
 }
 
-/* Step numbers en outline */
+@keyframes gradient-shift {
+	0%,
+	100% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+}
+
+/* ============================================
+   ÉLÉMENTS DE MARQUE
+   ============================================ */
+
+/* Step numbers en outline - améliorés */
 .step-number {
 	font-family: var(--font-mono);
 	font-weight: 700;
 	-webkit-text-stroke: 2px var(--primary);
 	color: transparent;
-	opacity: 0.25;
+	opacity: 0.2;
+	transition: opacity 0.3s ease;
 }
 
-/* Dot grid pattern pour le hero */
-.dot-grid {
-	background-image: radial-gradient(
-		circle at center,
-		var(--border) 1px,
-		transparent 1px
+.group:hover .step-number {
+	opacity: 0.35;
+}
+
+/* Header gradient border */
+.header-glow {
+	position: relative;
+}
+
+.header-glow::after {
+	content: "";
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 60%;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		var(--primary) 20%,
+		var(--primary) 80%,
+		transparent
 	);
-	background-size: 24px 24px;
+	opacity: 0.4;
+	transition:
+		opacity 0.3s ease,
+		width 0.3s ease;
 }
 
-/* Glow effect pour les cards - utilise les CSS variables */
+.dark .header-glow::after {
+	opacity: 0.5;
+}
+
+/* Logo animation */
+.logo-animated {
+	transition: transform 0.3s ease;
+}
+
+.logo-animated:hover {
+	transform: scale(1.05);
+}
+
+.logo-animated:hover .logo-icon {
+	animation: logo-pulse 0.6s ease;
+}
+
+@keyframes logo-pulse {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.15);
+	}
+}
+
+/* ============================================
+   CARDS & COMPOSANTS
+   ============================================ */
+
+/* Glow effect pour les cards - amélioré */
 .card-glow {
 	transition:
 		box-shadow 0.3s ease,
-		border-color 0.3s ease;
+		border-color 0.3s ease,
+		transform 0.2s ease;
 }
 
 .card-glow:hover {
+	transform: translateY(-2px);
 	box-shadow:
 		0 0 0 1px var(--ring) / 0.15,
-		0 8px 24px oklch(0 0 0 / 0.08),
-		0 0 40px var(--ring) / 0.06;
+		0 10px 30px oklch(0 0 0 / 0.1),
+		0 0 50px var(--ring) / 0.08;
 }
 
 .dark .card-glow:hover {
 	box-shadow:
-		0 0 0 1px var(--ring) / 0.25,
-		0 8px 24px oklch(0 0 0 / 0.3),
-		0 0 40px var(--ring) / 0.08;
+		0 0 0 1px var(--ring) / 0.3,
+		0 10px 30px oklch(0 0 0 / 0.4),
+		0 0 50px var(--ring) / 0.12;
 }
 
 /* Focus states pour les cards interactives */
@@ -256,8 +454,130 @@ body {
 		0 0 0 4px var(--ring);
 }
 
+/* Card avec bordure gradient */
+.card-gradient-border {
+	position: relative;
+	background: var(--card);
+	border-radius: var(--radius);
+}
+
+.card-gradient-border::before {
+	content: "";
+	position: absolute;
+	inset: -1px;
+	border-radius: calc(var(--radius) + 1px);
+	padding: 1px;
+	background: linear-gradient(
+		135deg,
+		oklch(0.55 0.15 270 / 0.3),
+		oklch(0.6 0.12 290 / 0.2),
+		oklch(0.55 0.1 250 / 0.1)
+	);
+	-webkit-mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
+	mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
+	-webkit-mask-composite: xor;
+	mask-composite: exclude;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.card-gradient-border:hover::before {
+	opacity: 1;
+}
+
+/* Section divider avec gradient */
+.section-divider {
+	position: relative;
+	border-top: 1px solid var(--border);
+}
+
+.section-divider::before {
+	content: "";
+	position: absolute;
+	top: -1px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 200px;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, var(--primary), transparent);
+	opacity: 0.5;
+}
+
+/* ============================================
+   UTILITAIRES
+   ============================================ */
+
 /* Technical text styling (for .ics) */
 .text-technical {
 	font-family: var(--font-mono);
 	color: var(--primary);
+	letter-spacing: -0.02em;
+}
+
+/* Shimmer effect pour loading states */
+.shimmer {
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		oklch(0.9 0.01 270 / 0.5) 50%,
+		transparent 100%
+	);
+	background-size: 200% 100%;
+	animation: shimmer 1.5s infinite;
+}
+
+.dark .shimmer {
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		oklch(0.3 0.02 270 / 0.5) 50%,
+		transparent 100%
+	);
+	background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+/* Subtle glow pour les éléments interactifs */
+.interactive-glow {
+	transition: box-shadow 0.3s ease;
+}
+
+.interactive-glow:hover {
+	box-shadow: 0 0 20px oklch(0.55 0.2 270 / 0.15);
+}
+
+.dark .interactive-glow:hover {
+	box-shadow: 0 0 25px oklch(0.6 0.22 270 / 0.2);
+}
+
+/* Floating animation pour les éléments décoratifs */
+@keyframes float {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+.float {
+	animation: float 6s ease-in-out infinite;
+}
+
+.float-delayed {
+	animation: float 6s ease-in-out infinite 2s;
 }

@@ -117,105 +117,115 @@ function PricingPage() {
 	};
 
 	return (
-		<div className="container mx-auto px-4 py-12 sm:py-20">
-			{/* Header */}
-			<div className="mx-auto mb-16 max-w-3xl text-center">
-				<div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm">
-					<Sparkles className="size-4 text-primary" aria-hidden="true" />
-					<span className="text-foreground/80">Plans flexibles</span>
+		<div className="relative min-h-[calc(100vh-4rem)] overflow-hidden">
+			{/* Background effects */}
+			<div className="-z-10 pointer-events-none absolute inset-0">
+				<div className="gradient-mesh absolute inset-0 opacity-60" />
+				<div className="dot-grid absolute inset-0 opacity-30 [mask-image:radial-gradient(ellipse_80%_50%_at_50%_20%,#000_50%,transparent_100%)]" />
+			</div>
+
+			<div className="container mx-auto px-4 py-12 sm:py-20">
+				{/* Header */}
+				<div className="mx-auto mb-16 max-w-3xl text-center">
+					<div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm">
+						<Sparkles className="size-4 text-primary" aria-hidden="true" />
+						<span className="text-foreground/80">Plans flexibles</span>
+					</div>
+					<h1 className="mb-4 font-bold text-4xl tracking-tight sm:text-5xl">
+						Choisissez votre plan
+					</h1>
+					<p className="text-lg text-muted-foreground">
+						Commencez gratuitement, ou passez à un plan payant pour débloquer
+						plus de fonctionnalités.
+					</p>
 				</div>
-				<h1 className="mb-4 font-bold text-4xl tracking-tight sm:text-5xl">
-					Choisissez votre plan
-				</h1>
-				<p className="text-lg text-muted-foreground">
-					Commencez gratuitement, ou passez à un plan payant pour débloquer plus
-					de fonctionnalités.
-				</p>
-			</div>
 
-			{/* Pricing Cards */}
-			<div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
-				{plans.map((plan) => (
-					<Card
-						key={plan.slug}
-						className={`relative flex flex-col ${
-							plan.highlighted ? "border-2 border-primary shadow-lg" : "border"
-						}`}
-					>
-						{plan.highlighted && (
-							<div className="-top-3 -translate-x-1/2 absolute left-1/2">
-								<span className="rounded-full bg-primary px-3 py-1 font-medium text-primary-foreground text-xs">
-									Populaire
-								</span>
-							</div>
-						)}
-						<CardHeader>
-							<CardTitle className="text-2xl">{plan.name}</CardTitle>
-							<CardDescription>{plan.description}</CardDescription>
-							<div className="mt-4">
-								<span className="font-bold text-4xl">
-									{plan.price === "0" ? "Gratuit" : `€${plan.price}`}
-								</span>
-								{plan.price !== "0" && (
-									<span className="text-muted-foreground text-sm">
-										/{plan.period}
+				{/* Pricing Cards */}
+				<div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
+					{plans.map((plan) => (
+						<Card
+							key={plan.slug}
+							className={`card-glow relative flex flex-col transition-all duration-200 ${
+								plan.highlighted
+									? "border-2 border-primary shadow-lg shadow-primary/10"
+									: "border hover:border-primary/30"
+							}`}
+						>
+							{plan.highlighted && (
+								<div className="-top-3 -translate-x-1/2 absolute left-1/2">
+									<span className="rounded-full bg-primary px-3 py-1 font-medium text-primary-foreground text-xs">
+										Populaire
 									</span>
-								)}
-							</div>
-						</CardHeader>
-						<CardContent className="flex-1">
-							<ul className="space-y-3">
-								{plan.features.map((feature) => (
-									<li key={feature} className="flex items-start gap-3">
-										<Check
-											className="mt-0.5 size-5 shrink-0 text-primary"
-											aria-hidden="true"
-										/>
-										<span className="text-sm">{feature}</span>
-									</li>
-								))}
-							</ul>
-						</CardContent>
-						<CardFooter>
-							{(() => {
-								const { ctaAction, ctaLink } = plan;
-								if (ctaAction) {
-									return (
-										<Button
-											className="w-full"
-											variant={plan.highlighted ? "default" : "outline"}
-											size="lg"
-											onClick={() => handleCheckout(ctaAction)}
-										>
-											{plan.cta}
-										</Button>
-									);
-								}
-								if (ctaLink) {
-									return (
-										<Button
-											className="w-full"
-											variant="outline"
-											size="lg"
-											asChild
-										>
-											<Link to={ctaLink}>{plan.cta}</Link>
-										</Button>
-									);
-								}
-								return null;
-							})()}
-						</CardFooter>
-					</Card>
-				))}
-			</div>
+								</div>
+							)}
+							<CardHeader>
+								<CardTitle className="text-2xl">{plan.name}</CardTitle>
+								<CardDescription>{plan.description}</CardDescription>
+								<div className="mt-4">
+									<span className="font-bold text-4xl">
+										{plan.price === "0" ? "Gratuit" : `€${plan.price}`}
+									</span>
+									{plan.price !== "0" && (
+										<span className="text-muted-foreground text-sm">
+											/{plan.period}
+										</span>
+									)}
+								</div>
+							</CardHeader>
+							<CardContent className="flex-1">
+								<ul className="space-y-3">
+									{plan.features.map((feature) => (
+										<li key={feature} className="flex items-start gap-3">
+											<Check
+												className="mt-0.5 size-5 shrink-0 text-primary"
+												aria-hidden="true"
+											/>
+											<span className="text-sm">{feature}</span>
+										</li>
+									))}
+								</ul>
+							</CardContent>
+							<CardFooter>
+								{(() => {
+									const { ctaAction, ctaLink } = plan;
+									if (ctaAction) {
+										return (
+											<Button
+												className="w-full"
+												variant={plan.highlighted ? "default" : "outline"}
+												size="lg"
+												onClick={() => handleCheckout(ctaAction)}
+											>
+												{plan.cta}
+											</Button>
+										);
+									}
+									if (ctaLink) {
+										return (
+											<Button
+												className="w-full"
+												variant="outline"
+												size="lg"
+												asChild
+											>
+												<Link to={ctaLink}>{plan.cta}</Link>
+											</Button>
+										);
+									}
+									return null;
+								})()}
+							</CardFooter>
+						</Card>
+					))}
+				</div>
 
-			{/* FAQ or additional info */}
-			<div className="mx-auto mt-16 max-w-3xl text-center">
-				<p className="text-muted-foreground text-sm">
-					Tous les plans incluent l'accès à toutes les fonctionnalités de base.
-					Vous pouvez annuler votre abonnement à tout moment.
-				</p>
+				{/* FAQ or additional info */}
+				<div className="mx-auto mt-16 max-w-3xl text-center">
+					<p className="text-muted-foreground text-sm">
+						Tous les plans incluent l'accès à toutes les fonctionnalités de
+						base. Vous pouvez annuler votre abonnement à tout moment.
+					</p>
+				</div>
 			</div>
 		</div>
 	);

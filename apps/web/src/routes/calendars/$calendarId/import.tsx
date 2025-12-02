@@ -82,101 +82,108 @@ function ImportIntoCalendarComponent() {
 	};
 
 	return (
-		<div className="container mx-auto max-w-2xl px-4 py-10">
-			<Breadcrumb
-				items={[
-					{ label: "Calendriers", href: "/calendars" },
-					{
-						label: calendar?.name || "Calendrier",
-						href: `/calendars/${calendarId}`,
-					},
-					{ label: "Importer" },
-				]}
-			/>
+		<div className="relative min-h-[calc(100vh-4rem)]">
+			{/* Subtle background */}
+			<div className="-z-10 pointer-events-none absolute inset-0">
+				<div className="gradient-mesh absolute inset-0 opacity-30" />
+			</div>
 
-			<Card className="mt-6">
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<Upload className="h-5 w-5" />
-						Importer des événements
-					</CardTitle>
-					<CardDescription>
-						Ajoutez des événements d'un fichier .ics à{" "}
-						<span className="font-medium text-foreground">
-							{calendar?.name || "ce calendrier"}
-						</span>
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-6">
-					{/* Drop Zone */}
-					<FileDropZone
-						onFileSelect={handleFileSelect}
-						onPreviewParsed={handlePreviewParsed}
-						disabled={importMutation.isPending}
-					/>
+			<div className="container mx-auto max-w-2xl px-4 py-10">
+				<Breadcrumb
+					items={[
+						{ label: "Calendriers", href: "/calendars" },
+						{
+							label: calendar?.name || "Calendrier",
+							href: `/calendars/${calendarId}`,
+						},
+						{ label: "Importer" },
+					]}
+				/>
 
-					{/* Options */}
-					{file && (
-						<div className="flex items-center space-x-2">
-							<Checkbox
-								id="remove-duplicates"
-								checked={removeDuplicates}
-								onCheckedChange={(checked) =>
-									setRemoveDuplicates(checked as boolean)
-								}
-								disabled={importMutation.isPending}
-							/>
-							<Label
-								htmlFor="remove-duplicates"
-								className="cursor-pointer font-normal text-sm"
-							>
-								Ignorer les doublons (même titre et mêmes horaires)
-							</Label>
-						</div>
-					)}
-
-					{/* Info Card */}
-					{file && eventCount > 0 && (
-						<div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-							<p className="text-sm">
-								<span className="font-medium">{eventCount}</span> événement
-								{eventCount !== 1 ? "s" : ""} sera
-								{eventCount !== 1 ? "ont" : ""} ajouté
-								{eventCount !== 1 ? "s" : ""} à{" "}
-								<span className="font-medium">{calendar?.name}</span>.
-							</p>
-						</div>
-					)}
-
-					{/* Actions */}
-					<div className="flex gap-2">
-						<Button
-							onClick={handleImport}
-							disabled={!file || importMutation.isPending}
-							className="flex-1"
-						>
-							{importMutation.isPending ? (
-								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Import en cours...
-								</>
-							) : (
-								<>
-									Importer
-									{eventCount > 0 && ` (${eventCount} événements)`}
-								</>
-							)}
-						</Button>
-						<Button
-							variant="outline"
-							onClick={() => navigate({ to: `/calendars/${calendarId}` })}
+				<Card className="card-glow mt-6">
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Upload className="h-5 w-5" />
+							Importer des événements
+						</CardTitle>
+						<CardDescription>
+							Ajoutez des événements d'un fichier .ics à{" "}
+							<span className="font-medium text-foreground">
+								{calendar?.name || "ce calendrier"}
+							</span>
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-6">
+						{/* Drop Zone */}
+						<FileDropZone
+							onFileSelect={handleFileSelect}
+							onPreviewParsed={handlePreviewParsed}
 							disabled={importMutation.isPending}
-						>
-							Annuler
-						</Button>
-					</div>
-				</CardContent>
-			</Card>
+						/>
+
+						{/* Options */}
+						{file && (
+							<div className="flex items-center space-x-2">
+								<Checkbox
+									id="remove-duplicates"
+									checked={removeDuplicates}
+									onCheckedChange={(checked) =>
+										setRemoveDuplicates(checked as boolean)
+									}
+									disabled={importMutation.isPending}
+								/>
+								<Label
+									htmlFor="remove-duplicates"
+									className="cursor-pointer font-normal text-sm"
+								>
+									Ignorer les doublons (même titre et mêmes horaires)
+								</Label>
+							</div>
+						)}
+
+						{/* Info Card */}
+						{file && eventCount > 0 && (
+							<div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+								<p className="text-sm">
+									<span className="font-medium">{eventCount}</span> événement
+									{eventCount !== 1 ? "s" : ""} sera
+									{eventCount !== 1 ? "ont" : ""} ajouté
+									{eventCount !== 1 ? "s" : ""} à{" "}
+									<span className="font-medium">{calendar?.name}</span>.
+								</p>
+							</div>
+						)}
+
+						{/* Actions */}
+						<div className="flex gap-2">
+							<Button
+								onClick={handleImport}
+								disabled={!file || importMutation.isPending}
+								className="interactive-glow flex-1"
+							>
+								{importMutation.isPending ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										Import en cours...
+									</>
+								) : (
+									<>
+										Importer
+										{eventCount > 0 && ` (${eventCount} événements)`}
+									</>
+								)}
+							</Button>
+							<Button
+								variant="outline"
+								onClick={() => navigate({ to: `/calendars/${calendarId}` })}
+								disabled={importMutation.isPending}
+							>
+								Annuler
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
 		</div>
 	);
 }

@@ -105,81 +105,88 @@ function NewCalendarComponent() {
 	};
 
 	return (
-		<div className="container mx-auto max-w-2xl px-4 py-10">
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<Plus className="h-5 w-5" />
-						Créer un nouveau calendrier
-					</CardTitle>
-					<CardDescription>
-						Créez un calendrier vide pour commencer à ajouter des événements
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-4">
-					{isOffline && (
-						<div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-destructive text-sm">
-							<AlertCircle className="h-4 w-4" />
-							<span>
-								Le serveur backend n'est pas accessible. Vérifiez qu'il est
-								démarré.
-							</span>
+		<div className="relative min-h-[calc(100vh-4rem)]">
+			{/* Subtle background */}
+			<div className="-z-10 pointer-events-none absolute inset-0">
+				<div className="gradient-mesh absolute inset-0 opacity-30" />
+			</div>
+
+			<div className="container mx-auto max-w-2xl px-4 py-10">
+				<Card className="card-glow">
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Plus className="h-5 w-5" />
+							Créer un nouveau calendrier
+						</CardTitle>
+						<CardDescription>
+							Créez un calendrier vide pour commencer à ajouter des événements
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						{isOffline && (
+							<div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-destructive text-sm">
+								<AlertCircle className="h-4 w-4" />
+								<span>
+									Le serveur backend n'est pas accessible. Vérifiez qu'il est
+									démarré.
+								</span>
+							</div>
+						)}
+						{isChecking && (
+							<div className="flex items-center gap-2 rounded-lg border p-3 text-muted-foreground text-sm">
+								<Loader2 className="h-4 w-4 animate-spin" />
+								<span>Vérification de la connexion au serveur...</span>
+							</div>
+						)}
+						<div className="space-y-2">
+							<Label htmlFor="name">Nom du calendrier</Label>
+							<Input
+								id="name"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+								placeholder="Mon calendrier"
+								onKeyDown={(e) => {
+									if (e.key === "Enter") {
+										handleCreate();
+									}
+								}}
+								disabled={isCreating}
+							/>
 						</div>
-					)}
-					{isChecking && (
-						<div className="flex items-center gap-2 rounded-lg border p-3 text-muted-foreground text-sm">
-							<Loader2 className="h-4 w-4 animate-spin" />
-							<span>Vérification de la connexion au serveur...</span>
-						</div>
-					)}
-					<div className="space-y-2">
-						<Label htmlFor="name">Nom du calendrier</Label>
-						<Input
-							id="name"
-							value={name}
-							onChange={(e) => setName(e.target.value)}
-							placeholder="Mon calendrier"
-							onKeyDown={(e) => {
-								if (e.key === "Enter") {
-									handleCreate();
-								}
-							}}
+
+						<ColorPicker
+							value={color}
+							onChange={setColor}
 							disabled={isCreating}
+							label="Couleur du calendrier"
 						/>
-					</div>
 
-					<ColorPicker
-						value={color}
-						onChange={setColor}
-						disabled={isCreating}
-						label="Couleur du calendrier"
-					/>
-
-					<div className="flex gap-2">
-						<Button
-							onClick={handleCreate}
-							disabled={!name.trim() || isCreating}
-							className="flex-1"
-						>
-							{isCreating ? (
-								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Création...
-								</>
-							) : (
-								"Créer"
-							)}
-						</Button>
-						<Button
-							variant="outline"
-							onClick={() => navigate({ to: "/" })}
-							disabled={isCreating}
-						>
-							Annuler
-						</Button>
-					</div>
-				</CardContent>
-			</Card>
+						<div className="flex gap-2">
+							<Button
+								onClick={handleCreate}
+								disabled={!name.trim() || isCreating}
+								className="interactive-glow flex-1"
+							>
+								{isCreating ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										Création...
+									</>
+								) : (
+									"Créer"
+								)}
+							</Button>
+							<Button
+								variant="outline"
+								onClick={() => navigate({ to: "/" })}
+								disabled={isCreating}
+							>
+								Annuler
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
 		</div>
 	);
 }

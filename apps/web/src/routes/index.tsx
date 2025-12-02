@@ -56,12 +56,18 @@ function LandingPage() {
 				className="relative isolate overflow-hidden"
 				aria-labelledby="hero-heading"
 			>
-				{/* Background effects */}
+				{/* Background effects - Enhanced */}
 				<div className="-z-10 pointer-events-none absolute inset-0">
-					{/* Dot grid pattern */}
-					<div className="dot-grid absolute inset-0 opacity-40 [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
-					{/* Gradient orb */}
-					<div className="-translate-x-1/2 -z-10 absolute top-0 left-1/2 h-[500px] w-[800px] rounded-full bg-primary/5 blur-[100px]" />
+					{/* Aurora gradient mesh */}
+					<div className="aurora absolute inset-0" />
+					{/* Dot grid pattern - improved */}
+					<div className="dot-grid absolute inset-0 opacity-50 [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_60%,transparent_100%)]" />
+					{/* Primary gradient orb */}
+					<div className="-translate-x-1/2 absolute top-0 left-1/2 h-[600px] w-[900px] rounded-full bg-primary/8 blur-[120px]" />
+					{/* Secondary accent orb */}
+					<div className="absolute top-20 left-[20%] h-[300px] w-[300px] rounded-full bg-chart-3/10 blur-[80px]" />
+					{/* Noise texture overlay */}
+					<div className="noise-overlay absolute inset-0" />
 				</div>
 
 				<div className="container mx-auto px-4 py-24 sm:py-32">
@@ -137,9 +143,14 @@ function LandingPage() {
 
 			{/* Features Section - Bento Grid */}
 			<section
-				className="border-t bg-muted/30"
+				className="section-divider relative overflow-hidden bg-muted/30"
 				aria-labelledby="features-heading"
 			>
+				{/* Subtle background pattern */}
+				<div className="-z-10 pointer-events-none absolute inset-0">
+					<div className="cross-grid absolute inset-0 opacity-30" />
+					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent" />
+				</div>
 				<div className="container mx-auto px-4 py-20 sm:py-28">
 					<div className="mx-auto mb-16 max-w-2xl text-center">
 						<h2
@@ -196,7 +207,14 @@ function LandingPage() {
 			</section>
 
 			{/* How it works Section */}
-			<section className="border-t" aria-labelledby="how-it-works-heading">
+			<section
+				className="section-divider relative"
+				aria-labelledby="how-it-works-heading"
+			>
+				{/* Subtle gradient mesh */}
+				<div className="-z-10 pointer-events-none absolute inset-0">
+					<div className="gradient-mesh absolute inset-0 opacity-50" />
+				</div>
 				<div className="container mx-auto px-4 py-20 sm:py-28">
 					<div className="mx-auto mb-16 max-w-2xl text-center">
 						<h2
@@ -235,9 +253,15 @@ function LandingPage() {
 
 			{/* Anonymous vs Account Section */}
 			<section
-				className="border-t bg-muted/30"
+				className="section-divider relative overflow-hidden bg-muted/30"
 				aria-label="Options d'utilisation"
 			>
+				{/* Background elements */}
+				<div className="-z-10 pointer-events-none absolute inset-0">
+					<div className="cross-grid absolute inset-0 opacity-20" />
+					<div className="absolute top-1/2 left-1/4 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[100px]" />
+					<div className="absolute right-1/4 bottom-0 h-[300px] w-[300px] rounded-full bg-chart-2/5 blur-[80px]" />
+				</div>
 				<div className="container mx-auto px-4 py-20 sm:py-28">
 					<div className="mx-auto max-w-4xl">
 						<div className="grid gap-6 md:grid-cols-2">
@@ -326,12 +350,14 @@ function LandingPage() {
 
 			{/* Final CTA Section */}
 			<section
-				className="relative overflow-hidden border-t"
+				className="section-divider relative overflow-hidden"
 				aria-labelledby="cta-heading"
 			>
-				{/* Background glow */}
+				{/* Enhanced background effects */}
 				<div className="-z-10 pointer-events-none absolute inset-0">
-					<div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 h-[300px] w-[500px] rounded-full bg-primary/5 blur-[80px]" />
+					<div className="aurora absolute inset-0 opacity-70" />
+					<div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 h-[400px] w-[600px] rounded-full bg-primary/10 blur-[100px]" />
+					<div className="dot-grid absolute inset-0 opacity-30 [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_40%,transparent_100%)]" />
 				</div>
 
 				<div className="container mx-auto px-4 py-20 sm:py-28">
@@ -366,7 +392,11 @@ function LandingPage() {
 			</section>
 
 			{/* Footer */}
-			<footer className="border-t bg-muted/30">
+			<footer className="section-divider relative overflow-hidden bg-muted/30">
+				{/* Subtle background */}
+				<div className="-z-10 pointer-events-none absolute inset-0">
+					<div className="cross-grid absolute inset-0 opacity-20" />
+				</div>
 				<div className="container mx-auto px-4 py-12">
 					<div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
 						{/* Brand */}
@@ -475,32 +505,32 @@ function LandingPage() {
 	);
 }
 
-function BentoCard({
-	icon: Icon,
-	title,
-	description,
-	delay = 0,
-}: {
+interface CardProps {
 	icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
 	title: string;
 	description: string;
 	delay?: number;
-}) {
+}
+
+function BentoCard({ icon: Icon, title, description, delay = 0 }: CardProps) {
 	return (
 		<article
-			className="group card-glow fade-in slide-in-from-bottom-4 relative animate-in overflow-hidden rounded-xl border bg-card p-6 transition-[border-color,box-shadow] duration-200 hover:border-primary/30"
+			className="card-gradient-border group card-glow fade-in slide-in-from-bottom-4 relative animate-in overflow-hidden rounded-xl border bg-card p-6 transition-all duration-200 hover:border-primary/30"
 			style={{ animationDelay: `${delay}ms`, animationFillMode: "backwards" }}
 		>
-			<div className="mb-4 inline-flex size-10 items-center justify-center rounded-lg bg-muted transition-colors duration-200 group-hover:bg-primary/10">
-				<Icon
-					className="size-5 text-muted-foreground transition-colors duration-200 group-hover:text-primary"
-					aria-hidden
-				/>
+			<div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+			<div className="relative">
+				<div className="mb-4 inline-flex size-10 items-center justify-center rounded-lg bg-muted transition-all duration-200 group-hover:bg-primary/10 group-hover:shadow-lg group-hover:shadow-primary/10">
+					<Icon
+						className="size-5 text-muted-foreground transition-colors duration-200 group-hover:text-primary"
+						aria-hidden
+					/>
+				</div>
+				<h3 className="mb-2 font-semibold">{title}</h3>
+				<p className="text-muted-foreground text-sm leading-relaxed">
+					{description}
+				</p>
 			</div>
-			<h3 className="mb-2 font-semibold">{title}</h3>
-			<p className="text-muted-foreground text-sm leading-relaxed">
-				{description}
-			</p>
 		</article>
 	);
 }
@@ -518,13 +548,16 @@ function StepCard({
 }) {
 	return (
 		<div
-			className="fade-in slide-in-from-bottom-4 relative animate-in text-center"
+			className="group fade-in slide-in-from-bottom-4 relative animate-in text-center"
 			style={{ animationDelay: `${delay}ms`, animationFillMode: "backwards" }}
 		>
-			{/* Step number - decorative, hidden from screen readers */}
-			<div className="step-number mb-4 text-6xl sm:text-7xl" aria-hidden="true">
+			<div
+				className="step-number mb-4 text-6xl transition-all duration-300 group-hover:scale-105 sm:text-7xl"
+				aria-hidden="true"
+			>
 				{number}
 			</div>
+			<div className="mx-auto mb-4 h-1 w-12 rounded-full bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
 			<h3 className="mb-2 font-semibold text-lg">{title}</h3>
 			<p className="text-muted-foreground text-sm leading-relaxed">
 				{description}

@@ -37,15 +37,23 @@ export default function Header() {
 	};
 
 	return (
-		<header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
+		<header className="header-glow sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
 			<div className="container flex items-center justify-between px-4 py-3">
 				<Link
 					to="/"
-					className="flex items-center gap-2 rounded-md font-semibold text-lg transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+					className="logo-animated group flex items-center gap-2.5 rounded-md font-semibold text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 					aria-label="Calendraft - Accueil"
 				>
-					<Calendar className="size-5 text-primary" aria-hidden="true" />
-					<span>Calendraft</span>
+					<div className="relative">
+						<Calendar
+							className="logo-icon size-5 text-primary"
+							aria-hidden="true"
+						/>
+						<div className="absolute inset-0 rounded-full bg-primary/20 opacity-0 blur-md transition-opacity group-hover:opacity-100" />
+					</div>
+					<span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+						Calendraft
+					</span>
 				</Link>
 
 				{isLandingPage ? (

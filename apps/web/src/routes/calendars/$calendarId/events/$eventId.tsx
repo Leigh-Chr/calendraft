@@ -419,44 +419,51 @@ function EditEventComponent() {
 	const initialData = transformEventToFormData(event);
 
 	return (
-		<div className="container mx-auto max-w-4xl space-y-4 px-4 py-10">
-			<div className="flex items-center justify-between">
-				<Breadcrumb
-					items={[
-						{
-							label: calendar?.name || "Calendrier",
-							href: `/calendars/${calendarId}`,
-						},
-						{ label: event?.title || "Événement" },
-					]}
-				/>
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={() => setDuplicateDialogOpen(true)}
-				>
-					<Copy className="mr-2 h-4 w-4" />
-					Dupliquer
-				</Button>
+		<div className="relative min-h-[calc(100vh-4rem)]">
+			{/* Subtle background */}
+			<div className="-z-10 pointer-events-none absolute inset-0">
+				<div className="gradient-mesh absolute inset-0 opacity-25" />
 			</div>
-			<EventFormExtended
-				mode="edit"
-				initialData={initialData}
-				onSubmit={handleSubmit}
-				onCancel={() => navigate({ to: `/calendars/${calendarId}` })}
-				isSubmitting={updateMutation.isPending}
-				calendarId={calendarId}
-				initialValidationErrors={serverValidationErrors}
-			/>
 
-			<DuplicateDialog
-				open={duplicateDialogOpen}
-				onOpenChange={setDuplicateDialogOpen}
-				dayOffset={dayOffset}
-				onDayOffsetChange={setDayOffset}
-				onDuplicate={handleDuplicate}
-				isPending={duplicateMutation.isPending}
-			/>
+			<div className="container mx-auto max-w-4xl space-y-4 px-4 py-10">
+				<div className="flex items-center justify-between">
+					<Breadcrumb
+						items={[
+							{
+								label: calendar?.name || "Calendrier",
+								href: `/calendars/${calendarId}`,
+							},
+							{ label: event?.title || "Événement" },
+						]}
+					/>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => setDuplicateDialogOpen(true)}
+					>
+						<Copy className="mr-2 h-4 w-4" />
+						Dupliquer
+					</Button>
+				</div>
+				<EventFormExtended
+					mode="edit"
+					initialData={initialData}
+					onSubmit={handleSubmit}
+					onCancel={() => navigate({ to: `/calendars/${calendarId}` })}
+					isSubmitting={updateMutation.isPending}
+					calendarId={calendarId}
+					initialValidationErrors={serverValidationErrors}
+				/>
+
+				<DuplicateDialog
+					open={duplicateDialogOpen}
+					onOpenChange={setDuplicateDialogOpen}
+					dayOffset={dayOffset}
+					onDayOffsetChange={setDayOffset}
+					onDuplicate={handleDuplicate}
+					isPending={duplicateMutation.isPending}
+				/>
+			</div>
 		</div>
 	);
 }
