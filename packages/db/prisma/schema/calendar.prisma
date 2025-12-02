@@ -50,6 +50,8 @@ model Calendar {
   // Note: userId can be either a User.id (authenticated) or an anonymous ID (anon-xxx)
   // We don't use a relation here because anonymous IDs don't exist in the User table
   // For authenticated users, you can manually join with User table if needed
+  sourceUrl String?  // URL from which the calendar was imported (for subscription/refresh feature)
+  lastSyncedAt DateTime? // Last time the calendar was synced from sourceUrl
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   events    Event[]

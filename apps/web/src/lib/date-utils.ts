@@ -238,7 +238,7 @@ export function groupEventsByDate<T extends { startDate: Date | string }>(
 		if (!groups.has(dateKey)) {
 			groups.set(dateKey, { label, date, events: [] });
 		}
-		groups.get(dateKey)!.events.push(event);
+		groups.get(dateKey)?.events.push(event);
 	}
 
 	return groups;

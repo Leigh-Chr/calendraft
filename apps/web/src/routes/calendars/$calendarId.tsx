@@ -8,19 +8,26 @@ import {
 } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import {
+	CalendarDays,
 	Calendar as CalendarIcon,
+	CalendarRange,
 	Download,
+	Link2,
 	List,
+	Loader2,
 	Merge,
 	Plus,
+	RefreshCw,
 	Sparkles,
 	Upload,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AccountPrompt } from "@/components/account-prompt";
-import { CalendarMonthView } from "@/components/calendar-month-view";
+import { CalendarView } from "@/components/calendar-month-view";
 import { EventListView } from "@/components/event-list-view";
+import { ExportCalendarDialog } from "@/components/export-calendar-dialog";
+import { ShareCalendarDialog } from "@/components/share-calendar-dialog";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -35,12 +42,13 @@ import { Button } from "@/components/ui/button";
 import { useCalendar } from "@/hooks/use-storage";
 import { normalizeDate } from "@/lib/date-utils";
 import { QUERY_KEYS } from "@/lib/query-keys";
+import type { CalendarSubView } from "@/lib/search-params";
 import {
 	calendarViewDefaults,
 	calendarViewSearchSchema,
 } from "@/lib/search-params";
 import { TOUR_STEP_IDS } from "@/lib/tour-constants";
-import { trpc, trpcClient } from "@/utils/trpc";
+import { trpc } from "@/utils/trpc";
 
 export const Route = createFileRoute("/calendars/$calendarId")({
 	component: CalendarViewComponent,
@@ -63,6 +71,8 @@ function CalendarViewComponent() {
 	const location = useLocation();
 	const queryClient = useQueryClient();
 	const [cleanDialogOpen, setCleanDialogOpen] = useState(false);
+	const [shareDialogOpen, setShareDialogOpen] = useState(false);
+	const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
 	// URL-driven view mode
 	const viewMode = search.view;
@@ -122,32 +132,39 @@ function CalendarViewComponent() {
 		}),
 	);
 
-	const handleExport = useCallback(async () => {
-		try {
-			const data = await trpcClient.calendar.exportIcs.query({
-				id: calendarId,
-			});
-			// Download the ICS file
-			const blob = new Blob([data.icsContent], { type: "text/calendar" });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = `${data.calendarName}.ics`;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
-			toast.success("Calendrier exporté avec succès");
-		} catch (error: unknown) {
-			const message =
-				error instanceof Error ? error.message : "Erreur lors de l'export";
-			toast.error(message);
-		}
-	}, [calendarId]);
+	const refreshFromUrlMutation = useMutation(
+		trpc.calendar.refreshFromUrl.mutationOptions({
+			onSuccess: (data) => {
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.calendar.byId(calendarId),
+				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
+				toast.success(
+					`Calendrier actualisé ! ${data.importedEvents} nouveau(x) événement(s), ${data.skippedDuplicates} doublon(s) ignoré(s).`,
+				);
+			},
+			onError: (error: unknown) => {
+				const message =
+					error instanceof Error
+						? error.message
+						: "Erreur lors de l'actualisation";
+				toast.error(message);
+			},
+		}),
+	);
 
 	const handleCleanDuplicates = useCallback(() => {
 		cleanDuplicatesMutation.mutate({ calendarId });
 	}, [cleanDuplicatesMutation, calendarId]);
+
+	const handleRefreshFromUrl = useCallback(() => {
+		refreshFromUrlMutation.mutate({
+			calendarId,
+			replaceAll: false,
+			skipDuplicates: true,
+		});
+	}, [refreshFromUrlMutation, calendarId]);
 
 	// Check if we're on a child route (like /events/new or /import)
 	// If so, render the child route via Outlet
@@ -226,6 +243,23 @@ function CalendarViewComponent() {
 								<Upload className="mr-2 h-4 w-4" />
 								Importer
 							</Button>
+							{/* Refresh button - only shown for calendars with a source URL */}
+							{calendar.sourceUrl && (
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={handleRefreshFromUrl}
+									disabled={refreshFromUrlMutation.isPending}
+									title={`Actualiser depuis ${calendar.sourceUrl}`}
+								>
+									{refreshFromUrlMutation.isPending ? (
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									) : (
+										<RefreshCw className="mr-2 h-4 w-4" />
+									)}
+									Actualiser
+								</Button>
+							)}
 							<Button
 								variant="outline"
 								size="sm"
@@ -247,31 +281,87 @@ function CalendarViewComponent() {
 								<Merge className="mr-2 h-4 w-4" />
 								Fusionner
 							</Button>
-							<Button variant="outline" size="sm" onClick={handleExport}>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setExportDialogOpen(true)}
+							>
 								<Download className="mr-2 h-4 w-4" />
 								Exporter
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setShareDialogOpen(true)}
+							>
+								<Link2 className="mr-2 h-4 w-4" />
+								Partager
 							</Button>
 						</div>
 					</div>
 				</div>
 
-				<div id={TOUR_STEP_IDS.VIEW_TOGGLE} className="mb-4 flex gap-2">
-					<Button
-						variant={viewMode === "list" ? "default" : "outline"}
-						size="sm"
-						onClick={() => updateSearch({ view: "list" })}
-					>
-						<List className="mr-2 h-4 w-4" />
-						Liste
-					</Button>
-					<Button
-						variant={viewMode === "calendar" ? "default" : "outline"}
-						size="sm"
-						onClick={() => updateSearch({ view: "calendar" })}
-					>
-						<CalendarIcon className="mr-2 h-4 w-4" />
-						Calendrier
-					</Button>
+				<div
+					id={TOUR_STEP_IDS.VIEW_TOGGLE}
+					className="mb-4 flex items-center gap-2"
+				>
+					{/* Main view toggle: List vs Calendar */}
+					<div className="flex gap-1 rounded-lg border bg-muted/50 p-1">
+						<Button
+							variant={viewMode === "list" ? "default" : "ghost"}
+							size="sm"
+							className="h-8"
+							onClick={() => updateSearch({ view: "list" })}
+						>
+							<List className="mr-2 h-4 w-4" />
+							Liste
+						</Button>
+						<Button
+							variant={viewMode === "calendar" ? "default" : "ghost"}
+							size="sm"
+							className="h-8"
+							onClick={() => updateSearch({ view: "calendar" })}
+						>
+							<CalendarIcon className="mr-2 h-4 w-4" />
+							Calendrier
+						</Button>
+					</div>
+
+					{/* Calendar sub-view toggle: Month / Week / Day */}
+					{viewMode === "calendar" && (
+						<div className="flex gap-1 rounded-lg border bg-muted/50 p-1">
+							<Button
+								variant={search.calendarView === "month" ? "default" : "ghost"}
+								size="sm"
+								className="h-8"
+								onClick={() => updateSearch({ calendarView: "month" })}
+								title="Vue mois"
+							>
+								<CalendarIcon className="h-4 w-4" />
+								<span className="ml-2 hidden sm:inline">Mois</span>
+							</Button>
+							<Button
+								variant={search.calendarView === "week" ? "default" : "ghost"}
+								size="sm"
+								className="h-8"
+								onClick={() => updateSearch({ calendarView: "week" })}
+								title="Vue semaine"
+							>
+								<CalendarRange className="h-4 w-4" />
+								<span className="ml-2 hidden sm:inline">Semaine</span>
+							</Button>
+							<Button
+								variant={search.calendarView === "day" ? "default" : "ghost"}
+								size="sm"
+								className="h-8"
+								onClick={() => updateSearch({ calendarView: "day" })}
+								title="Vue jour"
+							>
+								<CalendarDays className="h-4 w-4" />
+								<span className="ml-2 hidden sm:inline">Jour</span>
+							</Button>
+						</div>
+					)}
 				</div>
 
 				{viewMode === "list" ? (
@@ -292,12 +382,16 @@ function CalendarViewComponent() {
 						}}
 					/>
 				) : (
-					<CalendarMonthView
+					<CalendarView
 						calendarId={calendarId}
 						events={normalizedEvents}
 						calendarColor={calendar.color}
 						initialDate={search.date}
 						onDateChange={(date) => updateSearch({ date })}
+						initialView={search.calendarView}
+						onViewChange={(view) =>
+							updateSearch({ calendarView: view as CalendarSubView })
+						}
 					/>
 				)}
 
@@ -323,6 +417,20 @@ function CalendarViewComponent() {
 						</AlertDialogFooter>
 					</AlertDialogContent>
 				</AlertDialog>
+
+				<ShareCalendarDialog
+					calendarId={calendarId}
+					calendarName={calendar.name}
+					open={shareDialogOpen}
+					onOpenChange={setShareDialogOpen}
+				/>
+
+				<ExportCalendarDialog
+					calendarId={calendarId}
+					calendarName={calendar.name}
+					open={exportDialogOpen}
+					onOpenChange={setExportDialogOpen}
+				/>
 			</div>
 		</div>
 	);

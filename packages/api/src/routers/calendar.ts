@@ -3,6 +3,11 @@ import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { authOrAnonProcedure, router } from "../index";
 import {
+	deduplicateEvents,
+	findDuplicatesAgainstExisting,
+	getDuplicateIds,
+} from "../lib/duplicate-detection";
+import {
 	parseAlarmAction,
 	parseAttendeeRole,
 	parseAttendeeStatus,
@@ -217,6 +222,8 @@ export const calendarRouter = router({
 			name: cal.name,
 			color: cal.color,
 			eventCount: cal._count.events,
+			sourceUrl: cal.sourceUrl,
+			lastSyncedAt: cal.lastSyncedAt,
 			createdAt: cal.createdAt,
 			updatedAt: cal.updatedAt,
 		}));
@@ -401,8 +408,47 @@ export const calendarRouter = router({
 		}),
 
 	exportIcs: authOrAnonProcedure
-		.input(z.object({ id: z.string() }))
+		.input(
+			z.object({
+				id: z.string(),
+				/** Optional date range filter */
+				dateFrom: z.string().datetime().optional(),
+				dateTo: z.string().datetime().optional(),
+				/** Optional categories filter (events must have at least one of these categories) */
+				categories: z.array(z.string()).optional(),
+				/** Optional include only future events */
+				futureOnly: z.boolean().optional(),
+			}),
+		)
 		.query(async ({ ctx, input }) => {
+			// Build event filter
+			const eventWhere: {
+				startDate?: { gte?: Date; lte?: Date };
+				categories?: { some: { category: { in: string[] } } };
+			} = {};
+
+			// Date range filter
+			if (input.dateFrom || input.dateTo || input.futureOnly) {
+				eventWhere.startDate = {};
+				if (input.futureOnly) {
+					eventWhere.startDate.gte = new Date();
+				} else if (input.dateFrom) {
+					eventWhere.startDate.gte = new Date(input.dateFrom);
+				}
+				if (input.dateTo) {
+					eventWhere.startDate.lte = new Date(input.dateTo);
+				}
+			}
+
+			// Categories filter
+			if (input.categories && input.categories.length > 0) {
+				eventWhere.categories = {
+					some: {
+						category: { in: input.categories },
+					},
+				};
+			}
+
 			const calendar = await prisma.calendar.findFirst({
 				where: {
 					id: input.id,
@@ -410,6 +456,7 @@ export const calendarRouter = router({
 				},
 				include: {
 					events: {
+						where: Object.keys(eventWhere).length > 0 ? eventWhere : undefined,
 						include: {
 							attendees: true,
 							alarms: true,
@@ -550,19 +597,15 @@ export const calendarRouter = router({
 			// Collect all events
 			const allEvents = calendars.flatMap((cal) => cal.events);
 
-			// Remove duplicates if requested
+			// Remove duplicates if requested using enhanced detection
 			let eventsToMerge = allEvents;
 			if (input.removeDuplicates) {
-				const seen = new Set<string>();
-				eventsToMerge = allEvents.filter((event) => {
-					// Create a key: title + startDate + endDate
-					const key = `${event.title}|${event.startDate.toISOString()}|${event.endDate.toISOString()}`;
-					if (seen.has(key)) {
-						return false;
-					}
-					seen.add(key);
-					return true;
+				const { unique } = deduplicateEvents(allEvents, {
+					useUid: true,
+					useTitle: true,
+					dateTolerance: 60000, // 1 minute tolerance
 				});
+				eventsToMerge = unique;
 			}
 
 			// Create merged calendar
@@ -615,18 +658,12 @@ export const calendarRouter = router({
 				});
 			}
 
-			// Detect duplicates
-			const seen = new Set<string>();
-			const duplicateIds: string[] = [];
-
-			for (const event of calendar.events) {
-				const key = `${event.title}|${event.startDate.toISOString()}|${event.endDate.toISOString()}`;
-				if (seen.has(key)) {
-					duplicateIds.push(event.id);
-				} else {
-					seen.add(key);
-				}
-			}
+			// Detect duplicates using enhanced detection
+			const duplicateIds = getDuplicateIds(calendar.events, {
+				useUid: true,
+				useTitle: true,
+				dateTolerance: 60000, // 1 minute tolerance
+			});
 
 			// Delete duplicates
 			if (duplicateIds.length > 0) {
@@ -681,26 +718,48 @@ export const calendarRouter = router({
 				});
 			}
 
-			// Filter duplicates if requested
+			// Filter duplicates if requested using enhanced detection
 			let eventsToImport = parseResult.events;
 			let skippedDuplicates = 0;
 
 			if (input.removeDuplicates) {
-				const existingKeys = new Set(
-					calendar.events.map(
-						(event) =>
-							`${event.title}|${event.startDate.toISOString()}|${event.endDate.toISOString()}`,
-					),
+				// Adapt parsed events to the duplicate check interface
+				const newEventsForCheck = parseResult.events.map((e, idx) => ({
+					id: `new-${idx}`,
+					uid: e.uid,
+					title: e.title,
+					startDate: e.startDate,
+					endDate: e.endDate,
+					location: e.location,
+				}));
+
+				const existingEventsForCheck = calendar.events.map((e) => ({
+					id: e.id,
+					uid: e.uid,
+					title: e.title,
+					startDate: e.startDate,
+					endDate: e.endDate,
+					location: e.location,
+				}));
+
+				const { unique, duplicates } = findDuplicatesAgainstExisting(
+					newEventsForCheck,
+					existingEventsForCheck,
+					{
+						useUid: true,
+						useTitle: true,
+						dateTolerance: 60000, // 1 minute tolerance
+					},
 				);
 
-				eventsToImport = parseResult.events.filter((event) => {
-					const key = `${event.title}|${event.startDate.toISOString()}|${event.endDate.toISOString()}`;
-					if (existingKeys.has(key)) {
-						skippedDuplicates++;
-						return false;
-					}
-					return true;
-				});
+				// Map back to original events
+				const uniqueIndices = new Set(
+					unique.map((e) => Number.parseInt(e.id.replace("new-", ""), 10)),
+				);
+				eventsToImport = parseResult.events.filter((_, idx) =>
+					uniqueIndices.has(idx),
+				);
+				skippedDuplicates = duplicates.length;
 			}
 
 			// Create events
@@ -713,6 +772,227 @@ export const calendarRouter = router({
 			return {
 				importedEvents: eventsToImport.length,
 				skippedDuplicates,
+				warnings: parseResult.errors,
+			};
+		}),
+
+	/**
+	 * Import a calendar from a URL
+	 * Creates a new calendar with the sourceUrl stored for future refresh
+	 */
+	importFromUrl: authOrAnonProcedure
+		.input(
+			z.object({
+				url: z.string().url("URL invalide"),
+				name: z.string().optional(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			await checkAnonymousCalendarLimit(ctx);
+
+			// Fetch the ICS content from the URL
+			let icsContent: string;
+			try {
+				const response = await fetch(input.url, {
+					headers: {
+						Accept: "text/calendar, application/calendar+xml, */*",
+						"User-Agent": "Calendraft/1.0",
+					},
+					signal: AbortSignal.timeout(30000), // 30 second timeout
+				});
+
+				if (!response.ok) {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: `Impossible de récupérer le calendrier: ${response.status} ${response.statusText}`,
+					});
+				}
+
+				icsContent = await response.text();
+			} catch (error) {
+				if (error instanceof TRPCError) throw error;
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: `Erreur lors de la récupération du calendrier: ${error instanceof Error ? error.message : "Erreur inconnue"}`,
+				});
+			}
+
+			validateFileSize(icsContent);
+			const parseResult = parseIcsFile(icsContent);
+
+			if (parseResult.errors.length > 0 && parseResult.events.length === 0) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: `Impossible de parser le fichier ICS: ${parseResult.errors.join(", ")}`,
+				});
+			}
+
+			// Create calendar with sourceUrl
+			const calendar = await prisma.calendar.create({
+				data: {
+					name:
+						input.name ||
+						`Calendrier importé - ${new Date().toLocaleDateString("fr-FR")}`,
+					userId: ctx.session?.user?.id || ctx.anonymousId || null,
+					sourceUrl: input.url,
+					lastSyncedAt: new Date(),
+				},
+			});
+
+			// Create events
+			if (parseResult.events.length > 0) {
+				for (const parsedEvent of parseResult.events) {
+					await createEventFromParsed(calendar.id, parsedEvent);
+				}
+			}
+
+			return {
+				calendar,
+				importedEvents: parseResult.events.length,
+				warnings: parseResult.errors,
+			};
+		}),
+
+	/**
+	 * Refresh a calendar from its source URL
+	 * Re-imports all events, optionally removing old events first
+	 */
+	refreshFromUrl: authOrAnonProcedure
+		.input(
+			z.object({
+				calendarId: z.string(),
+				/** If true, removes all existing events before importing */
+				replaceAll: z.boolean().default(false),
+				/** If true, skips events that already exist (based on UID or title+dates) */
+				skipDuplicates: z.boolean().default(true),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			// Find the calendar
+			const calendar = await prisma.calendar.findFirst({
+				where: {
+					id: input.calendarId,
+					...buildOwnershipFilter(ctx),
+				},
+				include: { events: true },
+			});
+
+			if (!calendar) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Calendrier non trouvé",
+				});
+			}
+
+			if (!calendar.sourceUrl) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message:
+						"Ce calendrier n'a pas d'URL source. Il ne peut pas être actualisé.",
+				});
+			}
+
+			// Fetch the ICS content
+			let icsContent: string;
+			try {
+				const response = await fetch(calendar.sourceUrl, {
+					headers: {
+						Accept: "text/calendar, application/calendar+xml, */*",
+						"User-Agent": "Calendraft/1.0",
+					},
+					signal: AbortSignal.timeout(30000),
+				});
+
+				if (!response.ok) {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: `Impossible de récupérer le calendrier: ${response.status} ${response.statusText}`,
+					});
+				}
+
+				icsContent = await response.text();
+			} catch (error) {
+				if (error instanceof TRPCError) throw error;
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: `Erreur lors de la récupération du calendrier: ${error instanceof Error ? error.message : "Erreur inconnue"}`,
+				});
+			}
+
+			validateFileSize(icsContent);
+			const parseResult = parseIcsFile(icsContent);
+
+			if (parseResult.errors.length > 0 && parseResult.events.length === 0) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: `Impossible de parser le fichier ICS: ${parseResult.errors.join(", ")}`,
+				});
+			}
+
+			let deletedCount = 0;
+			let importedCount = 0;
+			let skippedCount = 0;
+
+			// Delete all existing events if replaceAll
+			if (input.replaceAll) {
+				const deleteResult = await prisma.event.deleteMany({
+					where: { calendarId: input.calendarId },
+				});
+				deletedCount = deleteResult.count;
+			}
+
+			// Filter duplicates if not replacing all
+			let eventsToImport = parseResult.events;
+			if (!input.replaceAll && input.skipDuplicates) {
+				const newEventsForCheck = parseResult.events.map((e, idx) => ({
+					id: `new-${idx}`,
+					uid: e.uid,
+					title: e.title,
+					startDate: e.startDate,
+					endDate: e.endDate,
+					location: e.location,
+				}));
+
+				const existingEventsForCheck = calendar.events.map((e) => ({
+					id: e.id,
+					uid: e.uid,
+					title: e.title,
+					startDate: e.startDate,
+					endDate: e.endDate,
+					location: e.location,
+				}));
+
+				const { unique, duplicates } = findDuplicatesAgainstExisting(
+					newEventsForCheck,
+					existingEventsForCheck,
+					{ useUid: true, useTitle: true, dateTolerance: 60000 },
+				);
+
+				const uniqueIndices = new Set(
+					unique.map((e) => Number.parseInt(e.id.replace("new-", ""), 10)),
+				);
+				eventsToImport = parseResult.events.filter((_, idx) =>
+					uniqueIndices.has(idx),
+				);
+				skippedCount = duplicates.length;
+			}
+
+			// Create events
+			for (const parsedEvent of eventsToImport) {
+				await createEventFromParsed(input.calendarId, parsedEvent);
+				importedCount++;
+			}
+
+			// Update lastSyncedAt
+			await prisma.calendar.update({
+				where: { id: input.calendarId },
+				data: { lastSyncedAt: new Date() },
+			});
+
+			return {
+				importedEvents: importedCount,
+				deletedEvents: deletedCount,
+				skippedDuplicates: skippedCount,
 				warnings: parseResult.errors,
 			};
 		}),

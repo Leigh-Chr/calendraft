@@ -693,4 +693,154 @@ export const eventRouter = router({
 
 			return duplicatedEvent;
 		}),
+
+	/**
+	 * Bulk delete multiple events
+	 */
+	bulkDelete: authOrAnonProcedure
+		.input(
+			z.object({
+				eventIds: z.array(z.string()).min(1).max(100),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			// Get all events and verify they belong to calendars the user owns
+			const events = await prisma.event.findMany({
+				where: { id: { in: input.eventIds } },
+				include: { calendar: true },
+			});
+
+			if (events.length === 0) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Aucun événement trouvé",
+				});
+			}
+
+			// Get unique calendar IDs
+			const calendarIds = [...new Set(events.map((e) => e.calendarId))];
+
+			// Verify access to all calendars
+			const accessibleCalendars = await prisma.calendar.findMany({
+				where: {
+					id: { in: calendarIds },
+					OR: [
+						...(ctx.session?.user?.id ? [{ userId: ctx.session.user.id }] : []),
+						...(ctx.anonymousId ? [{ userId: ctx.anonymousId }] : []),
+					],
+				},
+			});
+
+			const accessibleCalendarIds = new Set(
+				accessibleCalendars.map((c) => c.id),
+			);
+
+			// Filter to only events the user has access to
+			const accessibleEventIds = events
+				.filter((e) => accessibleCalendarIds.has(e.calendarId))
+				.map((e) => e.id);
+
+			if (accessibleEventIds.length === 0) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Vous n'avez pas accès à ces événements",
+				});
+			}
+
+			// Delete accessible events
+			const result = await prisma.event.deleteMany({
+				where: { id: { in: accessibleEventIds } },
+			});
+
+			return {
+				deletedCount: result.count,
+				requestedCount: input.eventIds.length,
+			};
+		}),
+
+	/**
+	 * Bulk move events to another calendar
+	 */
+	bulkMove: authOrAnonProcedure
+		.input(
+			z.object({
+				eventIds: z.array(z.string()).min(1).max(100),
+				targetCalendarId: z.string(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			// Verify access to target calendar
+			const targetCalendar = await prisma.calendar.findFirst({
+				where: {
+					id: input.targetCalendarId,
+					OR: [
+						...(ctx.session?.user?.id ? [{ userId: ctx.session.user.id }] : []),
+						...(ctx.anonymousId ? [{ userId: ctx.anonymousId }] : []),
+					],
+				},
+			});
+
+			if (!targetCalendar) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Calendrier de destination non trouvé",
+				});
+			}
+
+			// Get all events
+			const events = await prisma.event.findMany({
+				where: { id: { in: input.eventIds } },
+				include: { calendar: true },
+			});
+
+			if (events.length === 0) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Aucun événement trouvé",
+				});
+			}
+
+			// Get source calendar IDs
+			const sourceCalendarIds = [...new Set(events.map((e) => e.calendarId))];
+
+			// Verify access to all source calendars
+			const accessibleCalendars = await prisma.calendar.findMany({
+				where: {
+					id: { in: sourceCalendarIds },
+					OR: [
+						...(ctx.session?.user?.id ? [{ userId: ctx.session.user.id }] : []),
+						...(ctx.anonymousId ? [{ userId: ctx.anonymousId }] : []),
+					],
+				},
+			});
+
+			const accessibleCalendarIds = new Set(
+				accessibleCalendars.map((c) => c.id),
+			);
+
+			// Filter to only events the user has access to
+			const accessibleEventIds = events
+				.filter((e) => accessibleCalendarIds.has(e.calendarId))
+				.map((e) => e.id);
+
+			if (accessibleEventIds.length === 0) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Vous n'avez pas accès à ces événements",
+				});
+			}
+
+			// Move events to target calendar
+			const result = await prisma.event.updateMany({
+				where: { id: { in: accessibleEventIds } },
+				data: { calendarId: input.targetCalendarId },
+			});
+
+			return {
+				movedCount: result.count,
+				requestedCount: input.eventIds.length,
+				targetCalendarId: input.targetCalendarId,
+				targetCalendarName: targetCalendar.name,
+			};
+		}),
 });

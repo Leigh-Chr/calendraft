@@ -1,6 +1,7 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
 import { calendarRouter } from "./calendar";
 import { eventRouter } from "./event";
+import { shareRouter } from "./share";
 import { userRouter } from "./user";
 
 export const appRouter = router({
@@ -15,6 +16,7 @@ export const appRouter = router({
 	}),
 	calendar: calendarRouter,
 	event: eventRouter,
+	share: shareRouter,
 	user: userRouter,
 });
 export type AppRouter = typeof appRouter;

@@ -163,18 +163,37 @@
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	overflow: hidden;
+	background: var(--background);
 }
 
 .rbc-time-header {
 	border-bottom: 1px solid var(--border);
+	background: var(--card);
+}
+
+.rbc-time-header-content {
+	border-left: 1px solid var(--border);
+}
+
+.rbc-time-header-gutter {
+	background: var(--muted);
+}
+
+.rbc-allday-cell {
+	background: var(--card);
 }
 
 .rbc-time-content {
 	border-top: 1px solid var(--border);
 }
 
+.rbc-time-gutter {
+	background: var(--muted);
+}
+
 .rbc-time-slot {
 	border-top: 1px solid var(--border);
+	min-height: 1.5rem;
 }
 
 .rbc-time-slot:last-child {
@@ -185,17 +204,80 @@
 	border-bottom: 1px solid var(--border);
 }
 
+.rbc-day-slot {
+	border-left: 1px solid var(--border);
+}
+
+.rbc-day-slot:first-child {
+	border-left: none;
+}
+
 .rbc-day-slot .rbc-time-slot {
-	border-top: 1px solid var(--border);
+	border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
 }
 
 .rbc-day-slot .rbc-time-slot:first-child {
 	border-top: none;
 }
 
+/* Events in week/day view */
+.rbc-day-slot .rbc-event {
+	border: none;
+	border-left: 3px solid var(--primary);
+	border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0;
+	padding: 0.25rem 0.5rem;
+	font-size: 0.75rem;
+	min-height: 1.5rem;
+}
+
+.rbc-day-slot .rbc-event-label {
+	display: block;
+	font-size: 0.65rem;
+	opacity: 0.8;
+	margin-bottom: 0.125rem;
+}
+
+.rbc-day-slot .rbc-event-content {
+	font-weight: 500;
+	white-space: normal;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+/* Time gutter labels */
+.rbc-label {
+	font-size: 0.75rem;
+	color: var(--muted-foreground);
+	padding: 0.25rem 0.5rem;
+}
+
 .rbc-current-time-indicator {
 	background: var(--primary);
 	height: 2px;
+}
+
+/* Today column highlight in week view */
+.rbc-time-view .rbc-today {
+	background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* All-day events section */
+.rbc-row-bg {
+	background: var(--background);
+}
+
+.rbc-day-bg {
+	background: transparent;
+}
+
+.rbc-day-bg.rbc-today {
+	background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.rbc-day-bg + .rbc-day-bg {
+	border-left: 1px solid var(--border);
 }
 
 /* Scrollbar personnalisée */

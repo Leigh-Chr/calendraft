@@ -22,6 +22,16 @@ export const QUERY_KEYS = {
 		byId: (id: string) => [["event", "getById"], { id }] as const,
 	},
 
+	// Share link queries
+	share: {
+		all: [["share"]] as const,
+		byCalendar: (calendarId: string) =>
+			[["share", "list"], { calendarId }] as const,
+		byToken: (token: string) => [["share", "getByToken"], { token }] as const,
+		infoByToken: (token: string) =>
+			[["share", "getInfoByToken"], { token }] as const,
+	},
+
 	// Auth queries
 	auth: {
 		session: [["auth", "session"]] as const,

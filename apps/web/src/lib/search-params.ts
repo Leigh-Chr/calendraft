@@ -24,6 +24,10 @@ import { z } from "zod";
 export const calendarViewModes = ["list", "calendar"] as const;
 export type CalendarViewMode = (typeof calendarViewModes)[number];
 
+/** Sub-views within the calendar mode (react-big-calendar views) */
+export const calendarSubViews = ["month", "week", "day"] as const;
+export type CalendarSubView = (typeof calendarSubViews)[number];
+
 export const calendarDateFilters = ["all", "today", "week", "month"] as const;
 export type CalendarDateFilter = (typeof calendarDateFilters)[number];
 
@@ -33,6 +37,8 @@ export type CalendarSortBy = (typeof calendarSortOptions)[number];
 export const calendarViewSearchSchema = z.object({
 	/** View mode: list or calendar */
 	view: fallback(z.enum(calendarViewModes), "list").default("list"),
+	/** Sub-view within calendar mode: month, week, or day */
+	calendarView: fallback(z.enum(calendarSubViews), "month").default("month"),
 	/** Date filter preset */
 	dateFilter: fallback(z.enum(calendarDateFilters), "all").default("all"),
 	/** Sort by field */
@@ -52,6 +58,7 @@ export type CalendarViewSearch = z.infer<typeof calendarViewSearchSchema>;
 /** Default values for calendar view - used by stripSearchParams */
 export const calendarViewDefaults: CalendarViewSearch = {
 	view: "list",
+	calendarView: "month",
 	dateFilter: "all",
 	sortBy: "date",
 	q: "",

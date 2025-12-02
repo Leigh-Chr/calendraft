@@ -1,0 +1,24 @@
+// Share links for public calendar access
+// Allows users to share calendars via public links without requiring authentication
+
+model CalendarShareLink {
+  id          String    @id @default(uuid())
+  calendarId  String
+  token       String    @unique // Random token for the share URL
+  name        String?   // Optional friendly name for the link (e.g., "Work team", "Family")
+  isActive    Boolean   @default(true) // Can be disabled without deleting
+  expiresAt   DateTime? // Optional expiration date
+  accessCount Int       @default(0) // Track how many times the link was accessed
+  lastAccessedAt DateTime? // When the link was last accessed
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Note: We don't use a relation to Calendar here to avoid issues
+  // with anonymous calendars. The calendarId is validated in the API layer.
+
+  @@index([calendarId]) // Fast lookups for share links of a calendar
+  @@index([token]) // Fast lookups by token for public access
+  @@index([isActive]) // Filter active links
+  @@map("calendar_share_link")
+}
+

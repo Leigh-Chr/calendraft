@@ -16,17 +16,18 @@ import {
 	startOfWeek,
 } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar, ChevronRight } from "lucide-react";
+import { Calendar, CheckSquare, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { groupEventsByDate, normalizeDate } from "@/lib/date-utils";
+import { groupEventsByDate } from "@/lib/date-utils";
 import { QUERY_KEYS } from "@/lib/query-keys";
 import { TOUR_STEP_IDS } from "@/lib/tour-constants";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
+import { BulkActionsBar } from "./event-list/bulk-actions-bar";
 import { EventCard } from "./event-list/event-card";
 import { DateFilterButtons, SearchSortBar } from "./event-list/event-filters";
 import {
@@ -280,6 +281,10 @@ export function EventListView({
 	const { handleDelete, isDeleting } = useDeleteEvent(calendarId);
 	const { handleDuplicate, isDuplicating } = useDuplicateEvent(calendarId);
 
+	// Selection mode state
+	const [selectionMode, setSelectionMode] = useState(false);
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
 	// Query with filter state
 	const eventsQuery = useQuery({
 		...trpc.event.list.queryOptions({
@@ -306,13 +311,57 @@ export function EventListView({
 		}
 	}, [nextCursor, updateFilters]);
 
+	// Selection handlers
+	const handleToggleSelect = useCallback((id: string) => {
+		setSelectedIds((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) {
+				next.delete(id);
+			} else {
+				next.add(id);
+			}
+			return next;
+		});
+	}, []);
+
+	const handleSelectAll = useCallback(() => {
+		setSelectedIds(new Set(events.map((e) => e.id)));
+	}, [events]);
+
+	const handleDeselectAll = useCallback(() => {
+		setSelectedIds(new Set());
+	}, []);
+
+	const handleExitSelectionMode = useCallback(() => {
+		setSelectionMode(false);
+		setSelectedIds(new Set());
+	}, []);
+
+	const handleEnterSelectionMode = useCallback(() => {
+		setSelectionMode(true);
+	}, []);
+
 	return (
 		<div className="space-y-4">
-			<DateFilterButtons
-				id={TOUR_STEP_IDS.DATE_FILTERS}
-				currentFilter={filters.dateFilter}
-				onFilterChange={handleDateFilterChange}
-			/>
+			<div className="flex flex-wrap items-center gap-2">
+				<DateFilterButtons
+					id={TOUR_STEP_IDS.DATE_FILTERS}
+					currentFilter={filters.dateFilter}
+					onFilterChange={handleDateFilterChange}
+				/>
+				{/* Selection mode toggle */}
+				{events.length > 0 && !selectionMode && (
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleEnterSelectionMode}
+						className="ml-auto"
+					>
+						<CheckSquare className="mr-2 h-4 w-4" />
+						Sélectionner
+					</Button>
+				)}
+			</div>
 
 			<SearchSortBar
 				id={TOUR_STEP_IDS.SEARCH_BAR}
@@ -322,6 +371,21 @@ export function EventListView({
 				onSortChange={(sortBy) => updateFilterWithReset({ sortBy })}
 			/>
 
+			{/* Bulk actions bar */}
+			<AnimatePresence>
+				{selectionMode && (
+					<BulkActionsBar
+						selectedCount={selectedIds.size}
+						totalCount={events.length}
+						currentCalendarId={calendarId}
+						selectedIds={selectedIds}
+						onSelectAll={handleSelectAll}
+						onDeselectAll={handleDeselectAll}
+						onExitSelectionMode={handleExitSelectionMode}
+					/>
+				)}
+			</AnimatePresence>
+
 			<EventsList
 				events={events}
 				calendarId={calendarId}
@@ -329,6 +393,9 @@ export function EventListView({
 				onDuplicate={handleDuplicate}
 				isDeleting={isDeleting}
 				isDuplicating={isDuplicating}
+				selectionMode={selectionMode}
+				selectedIds={selectedIds}
+				onToggleSelect={handleToggleSelect}
 			/>
 
 			{nextCursor && (
@@ -414,6 +481,9 @@ function EventsList({
 	onDuplicate,
 	isDeleting,
 	isDuplicating,
+	selectionMode = false,
+	selectedIds,
+	onToggleSelect,
 }: {
 	events: EventItem[];
 	calendarId: string;
@@ -421,6 +491,9 @@ function EventsList({
 	onDuplicate: (id: string) => void;
 	isDeleting: boolean;
 	isDuplicating: boolean;
+	selectionMode?: boolean;
+	selectedIds?: Set<string>;
+	onToggleSelect?: (id: string) => void;
 }) {
 	// Group events by date
 	const groupedEvents = useMemo(() => {
@@ -457,6 +530,9 @@ function EventsList({
 									onDuplicate={onDuplicate}
 									isDeleting={isDeleting}
 									isDuplicating={isDuplicating}
+									selectionMode={selectionMode}
+									isSelected={selectedIds?.has(event.id)}
+									onToggleSelect={onToggleSelect}
 								/>
 							))}
 						</div>

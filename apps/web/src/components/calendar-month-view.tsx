@@ -4,7 +4,7 @@ import { format, parseISO, startOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import moment from "moment";
 import "moment/locale/fr";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	Calendar,
 	type EventProps,
@@ -53,7 +53,7 @@ interface RBCEvent {
 // Create typed drag and drop calendar
 const DnDCalendar = withDragAndDrop<RBCEvent>(Calendar<RBCEvent>);
 
-interface CalendarMonthViewProps {
+interface CalendarViewProps {
 	calendarId: string;
 	events: CalendarEvent[];
 	/** Calendar color (used as default for events without their own color) */
@@ -62,6 +62,10 @@ interface CalendarMonthViewProps {
 	initialDate?: string;
 	/** Callback when the viewed date changes */
 	onDateChange?: (date: string) => void;
+	/** Initial view mode (month, week, day) */
+	initialView?: View;
+	/** Callback when the view mode changes */
+	onViewChange?: (view: View) => void;
 }
 
 // Custom event component with hover preview
@@ -135,13 +139,19 @@ function EventWithHover({
 	);
 }
 
-export function CalendarMonthView({
+/**
+ * CalendarView - Calendar visualization component with month, week, and day views
+ * Supports drag & drop, event resizing, and quick create
+ */
+export function CalendarView({
 	calendarId,
 	events,
 	calendarColor,
 	initialDate,
 	onDateChange,
-}: CalendarMonthViewProps) {
+	initialView = "month",
+	onViewChange,
+}: CalendarViewProps) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const quickCreate = useQuickCreate();
@@ -159,7 +169,14 @@ export function CalendarMonthView({
 	}, [initialDate]);
 
 	const [currentDate, setCurrentDate] = useState<Date>(defaultDate);
-	const [currentView, setCurrentView] = useState<View>("month");
+	const [currentView, setCurrentView] = useState<View>(initialView);
+
+	// Sync view with URL when initialView changes
+	useEffect(() => {
+		if (initialView !== currentView) {
+			setCurrentView(initialView);
+		}
+	}, [initialView, currentView]);
 
 	// Update event mutation (for drag & drop)
 	const updateEventMutation = useMutation(
@@ -233,9 +250,13 @@ export function CalendarMonthView({
 		[onDateChange],
 	);
 
-	const handleViewChange = useCallback((view: View) => {
-		setCurrentView(view);
-	}, []);
+	const handleViewChange = useCallback(
+		(view: View) => {
+			setCurrentView(view);
+			onViewChange?.(view);
+		},
+		[onViewChange],
+	);
 
 	// Handle event drop (drag & drop move)
 	const handleEventDrop = useCallback(
@@ -362,3 +383,9 @@ export function CalendarMonthView({
 		</div>
 	);
 }
+
+/**
+ * @deprecated Use CalendarView instead
+ * Backwards-compatible alias for CalendarView
+ */
+export const CalendarMonthView = CalendarView;

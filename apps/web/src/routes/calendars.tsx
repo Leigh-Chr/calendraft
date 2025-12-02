@@ -12,6 +12,7 @@ import {
 	Edit,
 	ExternalLink,
 	FileUp,
+	Globe,
 	MoreHorizontal,
 	Plus,
 	Trash2,
@@ -374,6 +375,8 @@ interface CalendarCardProps {
 		name: string;
 		eventCount: number;
 		color?: string | null;
+		sourceUrl?: string | null;
+		lastSyncedAt?: string | Date | null;
 		events?: Array<{
 			id: string;
 			title: string;
@@ -453,6 +456,15 @@ function CalendarCard({
 								{calendar.eventCount} événement
 								{calendar.eventCount !== 1 ? "s" : ""}
 							</span>
+							{calendar.sourceUrl && (
+								<span
+									className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-1.5 py-0.5 font-medium text-blue-600 text-xs dark:text-blue-400"
+									title={`Abonné à ${calendar.sourceUrl}`}
+								>
+									<Globe className="h-3 w-3" />
+									Abonné
+								</span>
+							)}
 							{isNextEventToday && (
 								<span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 font-medium text-primary text-xs">
 									<span className="h-1 w-1 animate-pulse rounded-full bg-primary" />
