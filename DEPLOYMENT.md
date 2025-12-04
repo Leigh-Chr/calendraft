@@ -305,11 +305,43 @@ pm2 logs calendraft-api
 
 ## Sécurité
 
-- ✅ Rate limiting activé (100 req/min par IP)
-- ✅ Headers de sécurité HTTP configurés
-- ✅ Validation des inputs (taille max fichiers, longueurs)
-- ✅ CORS configuré correctement
-- ✅ Variables d'environnement sécurisées
+### Protections actives
+
+- ✅ Rate limiting : 100 req/min général, 10 req/min pour auth
+- ✅ Protection SSRF pour imports d'URL externes
+- ✅ Content Security Policy (frontend et backend)
+- ✅ Headers de sécurité HTTP (X-Frame-Options, X-Content-Type-Options, etc.)
+- ✅ Validation des inputs avec Zod
+- ✅ IDs anonymes haute entropie (192 bits)
+- ✅ Limite de 10 liens de partage par calendrier
+- ✅ Logging des événements de sécurité
+- ✅ Sentry configuré sans PII
+
+### Checklist de sécurité production
+
+Avant de mettre en production, vérifiez :
+
+- [ ] `NODE_ENV=production`
+- [ ] `CORS_ORIGIN` défini explicitement (pas de `*`)
+- [ ] `CORS_ORIGIN` ne contient pas `localhost`
+- [ ] `BETTER_AUTH_SECRET` généré avec 32+ caractères (`openssl rand -base64 32`)
+- [ ] HTTPS activé avec certificat valide
+- [ ] Proxy inverse configuré (nginx/Caddy) avec headers X-Forwarded-*
+- [ ] Variables d'environnement non commitées
+- [ ] Backup automatique de la base de données
+- [ ] Monitoring des logs configuré
+- [ ] Alertes sur erreurs critiques (Sentry ou autre)
+
+### Rotation des secrets
+
+Il est recommandé de faire une rotation périodique :
+
+| Secret | Fréquence | Méthode |
+|--------|-----------|---------|
+| `BETTER_AUTH_SECRET` | 6 mois | `openssl rand -base64 32` |
+| `POSTGRES_PASSWORD` | 6 mois | Modifier dans `.env` et redéployer |
+
+**Note** : La rotation de `BETTER_AUTH_SECRET` invalidera toutes les sessions existantes.
 
 ## Troubleshooting
 

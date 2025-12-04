@@ -16,6 +16,7 @@ function generateShareToken(): string {
 export const shareRouter = router({
 	/**
 	 * Create a new share link for a calendar
+	 * Limited to 10 share links per calendar to prevent abuse
 	 */
 	create: authOrAnonProcedure
 		.input(
@@ -38,6 +39,20 @@ export const shareRouter = router({
 				throw new TRPCError({
 					code: "NOT_FOUND",
 					message: "Calendrier non trouvé",
+				});
+			}
+
+			// Count existing share links for this calendar
+			const shareLinkCount = await prisma.calendarShareLink.count({
+				where: { calendarId: input.calendarId },
+			});
+
+			// Limit to 10 share links per calendar
+			const MAX_SHARE_LINKS_PER_CALENDAR = 10;
+			if (shareLinkCount >= MAX_SHARE_LINKS_PER_CALENDAR) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: `Limite atteinte : vous ne pouvez créer que ${MAX_SHARE_LINKS_PER_CALENDAR} liens de partage par calendrier. Supprimez un lien existant pour en créer un nouveau.`,
 				});
 			}
 

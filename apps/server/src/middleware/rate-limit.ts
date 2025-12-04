@@ -4,6 +4,7 @@
  */
 
 import type { Context } from "hono";
+import { logSecurityEvent } from "../lib/logger";
 
 type RateLimitStore = Map<string, { count: number; resetAt: number }>;
 
@@ -90,8 +91,13 @@ function checkRateLimit(
  * Rate limit middleware for Hono
  * @param maxRequests - Maximum requests allowed per window
  * @param windowMs - Time window in milliseconds (default: 60000 = 1 minute)
+ * @param keyPrefix - Optional prefix for the rate limit key (to have separate limits)
  */
-export function rateLimit(maxRequests: number, windowMs = 60000) {
+export function rateLimit(
+	maxRequests: number,
+	windowMs = 60000,
+	keyPrefix = "",
+) {
 	return async (c: Context, next: () => Promise<void>) => {
 		const ip = getClientIP(c.req.raw);
 
@@ -100,10 +106,21 @@ export function rateLimit(maxRequests: number, windowMs = 60000) {
 			return next();
 		}
 
-		const result = checkRateLimit(ip, maxRequests, windowMs);
+		const key = keyPrefix ? `${keyPrefix}:${ip}` : ip;
+		const result = checkRateLimit(key, maxRequests, windowMs);
 
 		if (!result.allowed) {
 			const retryAfter = Math.ceil((result.resetAt - Date.now()) / 1000);
+
+			// Log security event
+			logSecurityEvent("rate_limit_exceeded", {
+				ip,
+				path: c.req.path,
+				reason: keyPrefix
+					? `${keyPrefix} rate limit exceeded`
+					: "General rate limit exceeded",
+			});
+
 			return c.json(
 				{
 					error: "Too Many Requests",
@@ -127,4 +144,20 @@ export function rateLimit(maxRequests: number, windowMs = 60000) {
 
 		return next();
 	};
+}
+
+/**
+ * Strict rate limit for authentication endpoints
+ * 10 attempts per minute (to prevent brute force attacks)
+ */
+export function authRateLimit() {
+	return rateLimit(10, 60000, "auth");
+}
+
+/**
+ * Very strict rate limit for signup
+ * 5 signups per minute per IP (to prevent abuse)
+ */
+export function signupRateLimit() {
+	return rateLimit(5, 60000, "signup");
 }

@@ -12,7 +12,7 @@ La sécurité de Calendraft est prise très au sérieux. Si vous découvrez une 
 
 ### Comment signaler
 
-**⚠️ Ne créez PAS d'issue publique pour les vulnérabilités de sécurité.**
+**Ne créez PAS d'issue publique pour les vulnérabilités de sécurité.**
 
 1. **Par email** : Contactez le mainteneur du projet (voir profil GitHub)
 2. **Via GitHub** : Utilisez la fonctionnalité "Report a vulnerability" si disponible dans l'onglet Security
@@ -38,14 +38,35 @@ La sécurité de Calendraft est prise très au sérieux. Si vous découvrez une 
 
 - Authentification via [Better-Auth](https://better-auth.com/)
 - Cookies sécurisés (HttpOnly, Secure, SameSite)
-- Support des utilisateurs anonymes avec ID unique
+- Support des utilisateurs anonymes avec ID unique haute entropie (192 bits)
+- Validation serveur des IDs anonymes (protection contre l'injection)
+
+### Protection SSRF (Server-Side Request Forgery)
+
+L'importation d'URL externes est protégée contre les attaques SSRF :
+
+- Blocage des adresses IP privées (10.x, 172.16-31.x, 192.168.x, 127.x)
+- Blocage des endpoints metadata cloud (169.254.169.254, metadata.google, etc.)
+- Blocage de localhost et variantes
+- Validation du protocole (HTTP/HTTPS uniquement)
+
+### Rate Limiting
+
+Protection contre les attaques par force brute et déni de service :
+
+| Route | Limite | Fenêtre |
+|-------|--------|---------|
+| Général (`/*`) | 100 requêtes | 1 minute |
+| Authentification (`/api/auth/*`) | 10 requêtes | 1 minute |
+
+Les événements de rate limiting sont loggés pour audit.
 
 ### Protection des API
 
-- Rate limiting : 100 requêtes/minute par IP
 - Validation des entrées avec schémas Zod
 - Taille maximale des fichiers : 5 MB
 - CORS configuré strictement (pas de wildcard `*` en production)
+- Limite de 10 liens de partage par calendrier
 
 ### Headers de sécurité HTTP
 
@@ -56,7 +77,27 @@ X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
 X-XSS-Protection: 1; mode=block
 Referrer-Policy: strict-origin-when-cross-origin
-Content-Security-Policy: default-src 'self'; ...
+Permissions-Policy: geolocation=(), microphone=(), camera=()
+Strict-Transport-Security: max-age=31536000; includeSubDomains (HTTPS uniquement)
+```
+
+### Content Security Policy (CSP)
+
+**Frontend** (via meta tag) :
+```
+default-src 'self';
+script-src 'self' 'unsafe-inline';
+style-src 'self' 'unsafe-inline';
+img-src 'self' data: blob: https:;
+connect-src 'self' https://*.sentry.io;
+frame-ancestors 'none';
+```
+
+**Backend** (API) :
+```
+default-src 'none';
+frame-ancestors 'none';
+base-uri 'none';
 ```
 
 ### Données utilisateur
@@ -64,6 +105,7 @@ Content-Security-Policy: default-src 'self'; ...
 - Les données des utilisateurs anonymes sont automatiquement supprimées après 60 jours d'inactivité
 - Les mots de passe sont hashés avec des algorithmes sécurisés
 - Les sessions expirent automatiquement
+- Sentry configuré pour ne pas collecter de données personnelles (PII)
 
 ### Limitations utilisateurs
 
@@ -79,6 +121,13 @@ Pour prévenir les abus, des limites sont appliquées à tous les utilisateurs :
 - Maximum 2 000 événements par calendrier
 - Pas de suppression automatique
 
+### Logging de sécurité
+
+Les événements de sécurité suivants sont loggés :
+- Dépassement de rate limit
+- Tentatives d'accès bloquées
+- Tentatives SSRF bloquées
+
 ## Bonnes pratiques de déploiement
 
 Consultez [DEPLOYMENT.md](DEPLOYMENT.md) pour les recommandations de sécurité en production :
@@ -88,6 +137,16 @@ Consultez [DEPLOYMENT.md](DEPLOYMENT.md) pour les recommandations de sécurité 
 - [ ] `BETTER_AUTH_SECRET` généré de manière sécurisée (min 32 caractères)
 - [ ] Variables d'environnement non commitées dans le repo
 - [ ] `NODE_ENV=production` en production
+- [ ] Proxy inverse configuré (nginx, Caddy) avec headers de sécurité supplémentaires
+
+### Rotation des secrets
+
+Il est recommandé de faire une rotation des secrets suivants périodiquement :
+
+| Secret | Fréquence recommandée |
+|--------|----------------------|
+| `BETTER_AUTH_SECRET` | Tous les 6 mois |
+| `DATABASE_URL` (mot de passe) | Tous les 6 mois |
 
 ## Dépendances
 
@@ -95,15 +154,16 @@ Les dépendances sont régulièrement mises à jour pour inclure les correctifs 
 
 - `bun audit` pour scanner les vulnérabilités connues
 - Dependabot (si configuré) pour les mises à jour automatiques
+- Hono >= 4.10.3 (correctifs de sécurité critiques)
 
 ## Scope
 
 Cette politique couvre :
 
-- ✅ L'application web Calendraft
-- ✅ L'API backend
-- ✅ Les packages internes (`@calendraft/*`)
-- ❌ Les déploiements tiers ou forks
+- L'application web Calendraft
+- L'API backend
+- Les packages internes (`@calendraft/*`)
+- Les déploiements tiers ou forks ne sont pas couverts
 
 ## Reconnaissance
 
@@ -111,5 +171,4 @@ Nous remercions les chercheurs en sécurité qui contribuent à la sécurité de
 
 ---
 
-Merci de nous aider à garder Calendraft sécurisé ! 🔒
-
+Merci de nous aider à garder Calendraft sécurisé !

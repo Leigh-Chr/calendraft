@@ -15,6 +15,13 @@ export function securityHeaders() {
 		// Permissions-Policy (formerly Feature-Policy)
 		c.header("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
 
+		// Content-Security-Policy for API responses
+		// Minimal CSP for API - no scripts, styles, or frames needed
+		c.header(
+			"Content-Security-Policy",
+			"default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+		);
+
 		// Strict-Transport-Security only in production with HTTPS
 		// Check x-forwarded-proto header for proxy-aware HTTPS detection
 		const isProduction = process.env.NODE_ENV === "production";

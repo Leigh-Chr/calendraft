@@ -20,6 +20,7 @@ import {
 } from "../lib/event-helpers";
 import type { ParsedEvent } from "../lib/ics-parser";
 import { parseIcsFile } from "../lib/ics-parser";
+import { assertValidExternalUrl } from "../lib/url-validator";
 import {
 	buildOwnershipFilter,
 	checkAnonymousCalendarLimit,
@@ -790,6 +791,9 @@ export const calendarRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			await checkAnonymousCalendarLimit(ctx);
 
+			// Validate URL against SSRF attacks
+			assertValidExternalUrl(input.url);
+
 			// Fetch the ICS content from the URL
 			let icsContent: string;
 			try {
@@ -891,6 +895,9 @@ export const calendarRouter = router({
 						"Ce calendrier n'a pas d'URL source. Il ne peut pas être actualisé.",
 				});
 			}
+
+			// Validate URL against SSRF attacks (re-validate even from DB)
+			assertValidExternalUrl(calendar.sourceUrl);
 
 			// Fetch the ICS content
 			let icsContent: string;

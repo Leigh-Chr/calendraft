@@ -6,12 +6,13 @@ import { trpcServer } from "@hono/trpc-server";
 import * as Sentry from "@sentry/bun";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { csrf } from "hono/csrf";
 import { logger as honoLogger } from "hono/logger";
+import { secureHeaders } from "hono/secure-headers";
 import { z } from "zod";
 import { startCleanupJob } from "./jobs/cleanup";
 import { logger } from "./lib/logger";
-import { rateLimit } from "./middleware/rate-limit";
-import { securityHeaders } from "./middleware/security-headers";
+import { authRateLimit, rateLimit } from "./middleware/rate-limit";
 
 // Validate environment variables
 const envSchema = z.object({
@@ -31,11 +32,32 @@ Sentry.init({
 	environment: env.NODE_ENV || "development",
 	enabled: !!env.SENTRY_DSN,
 
-	// Adds request headers and IP for users
-	sendDefaultPii: true,
+	// Disable PII collection by default for privacy
+	sendDefaultPii: false,
 
 	// Performance monitoring - adjust in production
 	tracesSampleRate: env.NODE_ENV === "production" ? 0.1 : 1.0,
+
+	// Filter sensitive data before sending to Sentry
+	beforeSend(event) {
+		// Remove any sensitive headers
+		if (event.request?.headers) {
+			const headers = event.request.headers as Record<
+				string,
+				string | undefined
+			>;
+			headers["authorization"] = undefined;
+			headers["cookie"] = undefined;
+			headers["x-anonymous-id"] = undefined;
+		}
+
+		// Remove any cookies from request
+		if (event.request?.cookies) {
+			event.request.cookies = {};
+		}
+
+		return event;
+	},
 });
 
 // Check critical variables in production
@@ -62,11 +84,37 @@ if (!isProduction) {
 	app.use(honoLogger());
 }
 
-// Security headers
-app.use("/*", securityHeaders());
+// Security headers - using Hono's built-in secure headers middleware
+app.use(
+	"/*",
+	secureHeaders({
+		// X-Frame-Options
+		xFrameOptions: "DENY",
+		// X-Content-Type-Options
+		xContentTypeOptions: "nosniff",
+		// Referrer-Policy
+		referrerPolicy: "strict-origin-when-cross-origin",
+		// Strict-Transport-Security (only sent over HTTPS)
+		strictTransportSecurity: "max-age=31536000; includeSubDomains",
+		// Permissions-Policy
+		permissionsPolicy: {
+			geolocation: [],
+			microphone: [],
+			camera: [],
+		},
+		// Content-Security-Policy for API
+		contentSecurityPolicy: {
+			defaultSrc: ["'none'"],
+			frameAncestors: ["'none'"],
+			baseUri: ["'none'"],
+		},
+	}),
+);
 
 // Rate limiting: 100 requests per minute for general routes
 app.use("/*", rateLimit(100, 60000));
+
+// CORS configuration
 app.use(
 	"/*",
 	cors({
@@ -77,6 +125,17 @@ app.use(
 	}),
 );
 
+// CSRF protection for state-changing requests
+// Uses Origin and Sec-Fetch-Site header validation
+app.use(
+	"/*",
+	csrf({
+		origin: env.CORS_ORIGIN || "http://localhost:3001",
+	}),
+);
+
+// Strict rate limiting for auth endpoints (10 requests/minute)
+app.use("/api/auth/*", authRateLimit());
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.use(
