@@ -65,12 +65,19 @@ Content-Security-Policy: default-src 'self'; ...
 - Les mots de passe sont hashés avec des algorithmes sécurisés
 - Les sessions expirent automatiquement
 
-### Limitations utilisateurs anonymes
+### Limitations utilisateurs
 
-Pour prévenir les abus :
-- Maximum 10 calendriers par utilisateur anonyme
+Pour prévenir les abus, des limites sont appliquées à tous les utilisateurs :
+
+**Utilisateurs anonymes :**
+- Maximum 10 calendriers
 - Maximum 500 événements par calendrier
 - Suppression automatique après 60 jours d'inactivité
+
+**Utilisateurs authentifiés :**
+- Maximum 100 calendriers
+- Maximum 2 000 événements par calendrier
+- Pas de suppression automatique
 
 ## Bonnes pratiques de déploiement
 

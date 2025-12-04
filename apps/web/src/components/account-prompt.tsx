@@ -5,7 +5,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { Cloud, Infinity as InfinityIcon, Smartphone, X } from "lucide-react";
+import { Calendar, Cloud, Smartphone, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -100,7 +100,7 @@ export function AccountPrompt({
 						</p>
 						<p className="text-muted-foreground text-xs">
 							{isNearLimit
-								? "Créez un compte gratuit pour des calendriers illimités"
+								? "Créez un compte gratuit pour jusqu'à 100 calendriers"
 								: "Données sauvegardées dans le cloud, accessibles partout"}
 						</p>
 					</div>
@@ -166,7 +166,7 @@ export function AccountPrompt({
 				<div className="grid grid-cols-3 gap-3">
 					<BenefitItem icon={Cloud} label="Sauvegarde cloud" />
 					<BenefitItem icon={Smartphone} label="Multi-appareils" />
-					<BenefitItem icon={InfinityIcon} label="Illimité" />
+					<BenefitItem icon={Calendar} label="100 calendriers" />
 				</div>
 
 				<Button className="w-full" onClick={handleSignup}>

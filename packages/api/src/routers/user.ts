@@ -5,7 +5,7 @@ import { getUserUsage } from "../middleware";
 export const userRouter = router({
 	/**
 	 * Get current user's usage information
-	 * All authenticated users have unlimited access
+	 * Authenticated users have generous limits (100 calendars, 2000 events)
 	 */
 	getUsage: protectedProcedure.query(async ({ ctx }) => {
 		const usage = await getUserUsage(ctx);

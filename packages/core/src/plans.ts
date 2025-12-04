@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 /**
  * @calendraft/core
- * User limits - Anonymous users have limits, authenticated users have none
+ * User limits - Both anonymous and authenticated users have limits
+ * Authenticated users have generous limits, anonymous users have stricter ones
  */
 
 /**
@@ -12,7 +13,17 @@ export const ANONYMOUS_LIMITS = {
 	eventsPerCalendar: 500,
 } as const;
 
+/**
+ * Limits applied to authenticated users
+ * Generous limits to cover 99.9% of legitimate use cases
+ */
+export const AUTHENTICATED_LIMITS = {
+	calendars: 100,
+	eventsPerCalendar: 2000,
+} as const;
+
 export type AnonymousLimits = typeof ANONYMOUS_LIMITS;
+export type AuthenticatedLimits = typeof AUTHENTICATED_LIMITS;
 
 /**
  * Check if a user is authenticated (has a session)
@@ -31,8 +42,10 @@ export function hasReachedCalendarLimit(
 	isAuth: boolean,
 	currentCount: number,
 ): boolean {
-	if (isAuth) return false; // Authenticated users have no limits
-	return currentCount >= ANONYMOUS_LIMITS.calendars;
+	const limit = isAuth
+		? AUTHENTICATED_LIMITS.calendars
+		: ANONYMOUS_LIMITS.calendars;
+	return currentCount >= limit;
 }
 
 /**
@@ -43,22 +56,24 @@ export function hasReachedEventLimit(
 	isAuth: boolean,
 	currentCount: number,
 ): boolean {
-	if (isAuth) return false; // Authenticated users have no limits
-	return currentCount >= ANONYMOUS_LIMITS.eventsPerCalendar;
+	const limit = isAuth
+		? AUTHENTICATED_LIMITS.eventsPerCalendar
+		: ANONYMOUS_LIMITS.eventsPerCalendar;
+	return currentCount >= limit;
 }
 
 /**
  * Get the maximum number of calendars for a user
- * Returns -1 for unlimited (authenticated users)
  */
 export function getMaxCalendars(isAuth: boolean): number {
-	return isAuth ? -1 : ANONYMOUS_LIMITS.calendars;
+	return isAuth ? AUTHENTICATED_LIMITS.calendars : ANONYMOUS_LIMITS.calendars;
 }
 
 /**
  * Get the maximum number of events per calendar for a user
- * Returns -1 for unlimited (authenticated users)
  */
 export function getMaxEventsPerCalendar(isAuth: boolean): number {
-	return isAuth ? -1 : ANONYMOUS_LIMITS.eventsPerCalendar;
+	return isAuth
+		? AUTHENTICATED_LIMITS.eventsPerCalendar
+		: ANONYMOUS_LIMITS.eventsPerCalendar;
 }

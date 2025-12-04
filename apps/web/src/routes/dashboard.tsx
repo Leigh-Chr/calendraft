@@ -10,6 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
 
@@ -60,20 +61,22 @@ function UsageCard({ usage }: { usage: UsageInfo | null | undefined }) {
 	);
 }
 
-// Sub-component: Usage Details
+// Sub-component: Usage Details with progress bar
 function UsageDetails({ usage }: { usage: UsageInfo }) {
+	const calendarPercentage = Math.round(
+		(usage.calendarCount / usage.maxCalendars) * 100,
+	);
+
 	return (
 		<>
 			<div className="space-y-2">
 				<div className="flex items-center justify-between text-sm">
 					<span className="text-muted-foreground">Calendriers</span>
 					<span className="font-medium">
-						{usage.calendarCount}
-						{usage.maxCalendars === -1
-							? " / Illimité"
-							: ` / ${usage.maxCalendars}`}
+						{usage.calendarCount} / {usage.maxCalendars}
 					</span>
 				</div>
+				<Progress value={calendarPercentage} className="h-2" />
 			</div>
 			<div className="space-y-2">
 				<div className="flex items-center justify-between text-sm">
@@ -81,9 +84,7 @@ function UsageDetails({ usage }: { usage: UsageInfo }) {
 						Événements par calendrier
 					</span>
 					<span className="font-medium">
-						{usage.maxEventsPerCalendar === -1
-							? "Illimité"
-							: `Max ${usage.maxEventsPerCalendar}`}
+						Max {usage.maxEventsPerCalendar.toLocaleString("fr-FR")}
 					</span>
 				</div>
 			</div>
@@ -122,13 +123,13 @@ function ProfileCard({
 	);
 }
 
-// Sub-component: Plan Card (simplified - just shows unlimited access)
+// Sub-component: Plan Card
 function PlanCard() {
 	return (
 		<Card>
 			<CardHeader>
 				<CardTitle>Votre plan</CardTitle>
-				<CardDescription>Accès gratuit et illimité</CardDescription>
+				<CardDescription>Accès gratuit et généreux</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div>
@@ -137,8 +138,8 @@ function PlanCard() {
 					</Badge>
 				</div>
 				<p className="text-muted-foreground text-sm">
-					En tant qu'utilisateur authentifié, vous avez accès à toutes les
-					fonctionnalités sans aucune limite.
+					En tant qu'utilisateur authentifié, vous bénéficiez de limites très
+					généreuses : 100 calendriers et 2000 événements par calendrier.
 				</p>
 			</CardContent>
 		</Card>

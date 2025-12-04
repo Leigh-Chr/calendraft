@@ -110,6 +110,8 @@ export {
 export {
 	ANONYMOUS_LIMITS,
 	type AnonymousLimits,
+	AUTHENTICATED_LIMITS,
+	type AuthenticatedLimits,
 	getMaxCalendars,
 	getMaxEventsPerCalendar,
 	hasReachedCalendarLimit,

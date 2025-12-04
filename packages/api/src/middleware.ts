@@ -1,5 +1,6 @@
 import {
 	ANONYMOUS_LIMITS,
+	AUTHENTICATED_LIMITS,
 	getMaxCalendars,
 	getMaxEventsPerCalendar,
 	hasReachedCalendarLimit,
@@ -37,17 +38,34 @@ export function isAuthenticatedUser(ctx: Context): boolean {
 }
 
 /**
+ * Get error message for calendar limit based on user type
+ */
+function getCalendarLimitMessage(isAuth: boolean): string {
+	if (isAuth) {
+		return `Limite atteinte : vous avez atteint le maximum de ${AUTHENTICATED_LIMITS.calendars} calendriers. Cette limite généreuse permet de maintenir le service gratuit pour tous.`;
+	}
+	return `Limite atteinte : vous pouvez créer maximum ${ANONYMOUS_LIMITS.calendars} calendriers en mode anonyme. Créez un compte gratuit pour avoir jusqu'à ${AUTHENTICATED_LIMITS.calendars} calendriers.`;
+}
+
+/**
+ * Get error message for event limit based on user type
+ */
+function getEventLimitMessage(isAuth: boolean): string {
+	if (isAuth) {
+		return `Limite atteinte : vous avez atteint le maximum de ${AUTHENTICATED_LIMITS.eventsPerCalendar} événements par calendrier. Cette limite généreuse permet de maintenir le service gratuit pour tous.`;
+	}
+	return `Limite atteinte : vous pouvez créer maximum ${ANONYMOUS_LIMITS.eventsPerCalendar} événements par calendrier en mode anonyme. Créez un compte gratuit pour avoir jusqu'à ${AUTHENTICATED_LIMITS.eventsPerCalendar} événements.`;
+}
+
+/**
  * Check calendar limit for user
- * Authenticated users have no limits, anonymous users have ANONYMOUS_LIMITS
+ * Both authenticated and anonymous users have limits
  * Throws error if limit exceeded
  */
 export async function checkCalendarLimit(ctx: Context): Promise<void> {
 	const isAuth = isAuthenticatedUser(ctx);
+	const userId = isAuth ? ctx.session?.user?.id : ctx.anonymousId;
 
-	// Authenticated users have no limits
-	if (isAuth) return;
-
-	const userId = ctx.anonymousId;
 	if (!userId) return;
 
 	const calendarCount = await prisma.calendar.count({
@@ -57,14 +75,14 @@ export async function checkCalendarLimit(ctx: Context): Promise<void> {
 	if (hasReachedCalendarLimit(isAuth, calendarCount)) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
-			message: `Limite atteinte : vous pouvez créer maximum ${ANONYMOUS_LIMITS.calendars} calendriers en mode anonyme. Créez un compte gratuit pour des calendriers illimités.`,
+			message: getCalendarLimitMessage(isAuth),
 		});
 	}
 }
 
 /**
  * Check event limit for user in a calendar
- * Authenticated users have no limits, anonymous users have ANONYMOUS_LIMITS
+ * Both authenticated and anonymous users have limits
  * Throws error if limit exceeded
  */
 export async function checkEventLimit(
@@ -72,11 +90,8 @@ export async function checkEventLimit(
 	calendarId: string,
 ): Promise<void> {
 	const isAuth = isAuthenticatedUser(ctx);
+	const userId = isAuth ? ctx.session?.user?.id : ctx.anonymousId;
 
-	// Authenticated users have no limits
-	if (isAuth) return;
-
-	const userId = ctx.anonymousId;
 	if (!userId) return;
 
 	// Verify calendar belongs to user and get event count
@@ -102,7 +117,7 @@ export async function checkEventLimit(
 	if (hasReachedEventLimit(isAuth, calendar._count.events)) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
-			message: `Limite atteinte : vous pouvez créer maximum ${ANONYMOUS_LIMITS.eventsPerCalendar} événements par calendrier en mode anonyme. Créez un compte gratuit pour des événements illimités.`,
+			message: getEventLimitMessage(isAuth),
 		});
 	}
 }

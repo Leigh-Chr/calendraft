@@ -222,6 +222,7 @@ Pour déployer en production, consultez le guide complet : [DEPLOYMENT.md](./DEP
 - Headers de sécurité HTTP configurés automatiquement
 - Validation des inputs (taille max fichiers : 5MB)
 - Limitations utilisateurs anonymes : 10 calendriers, 500 événements/calendrier
+- Limitations utilisateurs authentifiés : 100 calendriers, 2 000 événements/calendrier
 
 
 

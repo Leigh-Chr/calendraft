@@ -85,6 +85,27 @@ import {
 } from '@calendraft/core';
 ```
 
+### Limites utilisateurs
+
+```typescript
+import { 
+  ANONYMOUS_LIMITS,       // { calendars: 10, eventsPerCalendar: 500 }
+  AUTHENTICATED_LIMITS,   // { calendars: 100, eventsPerCalendar: 2000 }
+  hasReachedCalendarLimit,
+  hasReachedEventLimit,
+  getMaxCalendars,
+  getMaxEventsPerCalendar,
+} from '@calendraft/core';
+
+// Vérifier si limite atteinte
+hasReachedCalendarLimit(isAuth, currentCount)  // boolean
+hasReachedEventLimit(isAuth, currentCount)     // boolean
+
+// Obtenir les limites
+getMaxCalendars(isAuth)           // 10 ou 100
+getMaxEventsPerCalendar(isAuth)   // 500 ou 2000
+```
+
 ### Récurrence (RRULE)
 
 ```typescript

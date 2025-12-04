@@ -325,14 +325,14 @@ function LandingPage() {
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
-										<span>Calendriers illimités</span>
+										<span>Jusqu'à 100 calendriers</span>
 									</li>
 									<li className="flex items-center gap-3">
 										<CalendarCheck
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
-										<span>Événements illimités</span>
+										<span>2 000 événements par calendrier</span>
 									</li>
 									<li className="flex items-center gap-3">
 										<CalendarCheck
