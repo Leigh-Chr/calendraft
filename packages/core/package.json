@@ -3,29 +3,30 @@
 	"version": "0.1.0",
 	"description": "Core domain logic and types for Calendraft calendar management",
 	"type": "module",
-	"main": "./dist/index.mjs",
-	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.mts",
 	"exports": {
 		".": {
-			"types": "./dist/index.d.mts",
-			"import": "./dist/index.mjs"
+			"types": "./dist/index.d.ts",
+			"default": "./src/index.ts"
 		},
 		"./types": {
-			"types": "./dist/types/index.d.mts",
-			"import": "./dist/types/index.mjs"
+			"types": "./dist/types/index.d.ts",
+			"default": "./src/types/index.ts"
 		},
 		"./utils": {
-			"types": "./dist/utils/index.d.mts",
-			"import": "./dist/utils/index.mjs"
+			"types": "./dist/utils/index.d.ts",
+			"default": "./src/utils/index.ts"
 		},
 		"./validation": {
-			"types": "./dist/validation/index.d.mts",
-			"import": "./dist/validation/index.mjs"
+			"types": "./dist/validation/index.d.ts",
+			"default": "./src/validation/index.ts"
 		},
 		"./constants": {
-			"types": "./dist/constants/index.d.mts",
-			"import": "./dist/constants/index.mjs"
+			"types": "./dist/constants/index.d.ts",
+			"default": "./src/constants/index.ts"
+		},
+		"./*": {
+			"types": "./dist/*.d.ts",
+			"default": "./src/*.ts"
 		}
 	},
 	"files": [
@@ -47,7 +48,7 @@
 		"validation"
 	],
 	"author": "",
-	"license": "AGPL-3.0",
+	"license": "MIT",
 	"dependencies": {
 		"date-fns": "^4.1.0",
 		"dequal": "^2.0.3"

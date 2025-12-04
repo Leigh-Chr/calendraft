@@ -1,60 +1,64 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: MIT
 /**
  * @calendraft/core
- * Plan limits and subscription logic
+ * User limits - Anonymous users have limits, authenticated users have none
  */
-
-export enum PlanType {
-	FREE = "FREE",
-	PERSONAL = "PERSONAL",
-	PRO = "PRO",
-}
-
-export interface PlanLimits {
-	calendars: number;
-	eventsPerCalendar: number;
-	historyDays: number;
-}
-
-export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
-	[PlanType.FREE]: {
-		calendars: 3,
-		eventsPerCalendar: 50,
-		historyDays: 30,
-	},
-	[PlanType.PERSONAL]: {
-		calendars: 15,
-		eventsPerCalendar: 500,
-		historyDays: 365,
-	},
-	[PlanType.PRO]: {
-		calendars: Number.POSITIVE_INFINITY,
-		eventsPerCalendar: Number.POSITIVE_INFINITY,
-		historyDays: Number.POSITIVE_INFINITY,
-	},
-};
 
 /**
- * Get plan limits for a given plan type
+ * Limits applied to anonymous (non-authenticated) users
  */
-export function getPlanLimits(planType: PlanType): PlanLimits {
-	return PLAN_LIMITS[planType];
+export const ANONYMOUS_LIMITS = {
+	calendars: 10,
+	eventsPerCalendar: 500,
+} as const;
+
+export type AnonymousLimits = typeof ANONYMOUS_LIMITS;
+
+/**
+ * Check if a user is authenticated (has a session)
+ */
+export function isAuthenticated(
+	sessionUserId: string | null | undefined,
+): boolean {
+	return !!sessionUserId;
 }
 
 /**
- * Check if a value is within the limit (handles Infinity)
- * Returns true if value is less than or equal to the limit
+ * Check if user has reached calendar limit
+ * Returns true if limit is reached (user cannot create more)
  */
-export function isWithinLimit(value: number, limit: number): boolean {
-	if (limit === Number.POSITIVE_INFINITY) {
-		return true;
-	}
-	return value <= limit;
+export function hasReachedCalendarLimit(
+	isAuth: boolean,
+	currentCount: number,
+): boolean {
+	if (isAuth) return false; // Authenticated users have no limits
+	return currentCount >= ANONYMOUS_LIMITS.calendars;
 }
 
 /**
- * Get the default plan type (FREE)
+ * Check if user has reached event limit for a calendar
+ * Returns true if limit is reached (user cannot create more)
  */
-export function getDefaultPlanType(): PlanType {
-	return PlanType.FREE;
+export function hasReachedEventLimit(
+	isAuth: boolean,
+	currentCount: number,
+): boolean {
+	if (isAuth) return false; // Authenticated users have no limits
+	return currentCount >= ANONYMOUS_LIMITS.eventsPerCalendar;
+}
+
+/**
+ * Get the maximum number of calendars for a user
+ * Returns -1 for unlimited (authenticated users)
+ */
+export function getMaxCalendars(isAuth: boolean): number {
+	return isAuth ? -1 : ANONYMOUS_LIMITS.calendars;
+}
+
+/**
+ * Get the maximum number of events per calendar for a user
+ * Returns -1 for unlimited (authenticated users)
+ */
+export function getMaxEventsPerCalendar(isAuth: boolean): number {
+	return isAuth ? -1 : ANONYMOUS_LIMITS.eventsPerCalendar;
 }

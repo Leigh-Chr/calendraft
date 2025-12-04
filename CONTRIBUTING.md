@@ -118,6 +118,29 @@ Types courants :
 - Préférez les `interface` aux `type` pour les objets
 - Utilisez les schémas Zod du package `@calendraft/schemas` pour la validation
 
+### React - Prévention des erreurs de hooks
+
+**IMPORTANT** : Ce projet utilise plusieurs mesures pour prévenir les erreurs "Invalid hook call" et "dispatcher is null" :
+
+1. **Configuration Vite** (`apps/web/vite.config.ts`) :
+   - `resolve.dedupe: ["react", "react-dom"]` - Force une seule instance de React
+   - `optimizeDeps.include: ["react", "react-dom"]` - Pré-bundle React
+   - `manualChunks` - Garantit que React et ReactDOM sont dans le même chunk
+
+2. **Package.json root** :
+   - `overrides` pour forcer React 19.2.0 dans tout le workspace
+
+3. **Peer Dependencies** :
+   - Tous les packages avec React doivent déclarer `react` et `react-dom` en peerDependencies
+
+4. **Règles Biome** :
+   - `useHookAtTopLevel: "error"` - Empêche l'utilisation de hooks en dehors des composants
+
+**Si vous rencontrez des erreurs de hooks** :
+- Vérifiez que vous n'avez pas plusieurs versions de React installées
+- Vérifiez que tous les imports React utilisent la même instance
+- Redémarrez le serveur de développement après avoir modifié les dépendances
+
 ### Tests
 
 ```bash

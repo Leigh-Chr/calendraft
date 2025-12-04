@@ -126,18 +126,3 @@ export const newEventDefaults: NewEventSearch = {
 	start: undefined,
 	end: undefined,
 };
-
-// ============================================================================
-// Success Page Search Params
-// Used in /success (payment success callback)
-// ============================================================================
-
-export const successSearchSchema = z.object({
-	checkout_id: fallback(z.string(), "").default(""),
-});
-
-export type SuccessSearch = z.infer<typeof successSearchSchema>;
-
-export const successDefaults = {
-	checkout_id: "",
-};

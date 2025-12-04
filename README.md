@@ -1,6 +1,6 @@
 # Calendraft
 
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.3-black?logo=bun&logoColor=white)](https://bun.sh/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -118,12 +118,6 @@ CORS_ORIGIN=http://localhost:3001
 BETTER_AUTH_SECRET=your-secret-key
 BETTER_AUTH_URL=http://localhost:3000
 
-# Configuration Polar (optionnel - pour les abonnements)
-POLAR_ACCESS_TOKEN=your-polar-access-token
-POLAR_WEBHOOK_SECRET=your-polar-webhook-secret
-POLAR_SUCCESS_URL=http://localhost:3001/success
-POLAR_PRODUCT_PERSONAL_ID=your-personal-product-id
-POLAR_PRODUCT_PRO_ID=your-pro-product-id
 ```
 
 Créez un fichier `.env` dans `apps/web` :
@@ -227,7 +221,7 @@ Pour déployer en production, consultez le guide complet : [DEPLOYMENT.md](./DEP
 - Rate limiting : 100 requêtes/minute par IP
 - Headers de sécurité HTTP configurés automatiquement
 - Validation des inputs (taille max fichiers : 5MB)
-- Limitations utilisateurs anonymes : 5 calendriers, 100 événements/calendrier
+- Limitations utilisateurs anonymes : 10 calendriers, 500 événements/calendrier
 
 
 
@@ -388,4 +382,4 @@ Les contributions sont les bienvenues ! Consultez le [guide de contribution](CON
 
 ## Licence
 
-Ce projet est sous licence AGPL v3 - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.

@@ -105,13 +105,14 @@ export {
 	validateRequired,
 } from "./validation";
 
-// ----- Plans -----
+// ----- User Limits -----
 
 export {
-	getDefaultPlanType,
-	getPlanLimits,
-	isWithinLimit,
-	PLAN_LIMITS,
-	type PlanLimits,
-	PlanType,
+	ANONYMOUS_LIMITS,
+	type AnonymousLimits,
+	getMaxCalendars,
+	getMaxEventsPerCalendar,
+	hasReachedCalendarLimit,
+	hasReachedEventLimit,
+	isAuthenticated,
 } from "./plans";

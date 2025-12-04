@@ -12,7 +12,6 @@ import {
 	Moon,
 	Plus,
 	Search,
-	Settings,
 	Sun,
 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -96,15 +95,6 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 				keywords: ["calendars", "list", "tous", "calendriers"],
 				group: "navigation",
 			},
-			{
-				id: "pricing",
-				label: "Tarifs",
-				icon: <Settings className="h-4 w-4" />,
-				action: () => closeAndNavigate("/pricing"),
-				keywords: ["pricing", "tarifs", "plans", "abonnement"],
-				group: "navigation",
-			},
-
 			// Actions
 			{
 				id: "new-calendar",

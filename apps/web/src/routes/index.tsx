@@ -291,14 +291,14 @@ function LandingPage() {
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
-										<span>Jusqu'à 5 calendriers</span>
+										<span>Jusqu'à 10 calendriers</span>
 									</li>
 									<li className="flex items-center gap-3">
 										<CalendarCheck
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
-										<span>100 événements par calendrier</span>
+										<span>500 événements par calendrier</span>
 									</li>
 								</ul>
 							</article>
@@ -325,6 +325,20 @@ function LandingPage() {
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
+										<span>Calendriers illimités</span>
+									</li>
+									<li className="flex items-center gap-3">
+										<CalendarCheck
+											className="size-4 text-primary"
+											aria-hidden="true"
+										/>
+										<span>Événements illimités</span>
+									</li>
+									<li className="flex items-center gap-3">
+										<CalendarCheck
+											className="size-4 text-primary"
+											aria-hidden="true"
+										/>
 										<span>Synchronisation multi-appareils</span>
 									</li>
 									<li className="flex items-center gap-3">
@@ -333,13 +347,6 @@ function LandingPage() {
 											aria-hidden="true"
 										/>
 										<span>Sauvegarde cloud permanente</span>
-									</li>
-									<li className="flex items-center gap-3">
-										<CalendarCheck
-											className="size-4 text-primary"
-											aria-hidden="true"
-										/>
-										<span>Calendriers illimités</span>
 									</li>
 								</ul>
 							</article>
@@ -485,7 +492,7 @@ function LandingPage() {
 						<div>
 							<p className="mb-4 font-medium text-sm">Open Source</p>
 							<p className="text-muted-foreground text-sm leading-relaxed">
-								Calendraft est open-source. Code bientôt disponible sur GitHub.
+								Calendraft est 100% gratuit et open-source sous licence MIT.
 							</p>
 						</div>
 					</div>

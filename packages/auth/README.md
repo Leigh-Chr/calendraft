@@ -1,6 +1,6 @@
 # @calendraft/auth
 
-Configuration Better-Auth pour l'authentification Calendraft avec support des paiements Polar.
+Configuration Better-Auth pour l'authentification Calendraft.
 
 ## Installation
 
@@ -30,10 +30,6 @@ BETTER_AUTH_URL=http://localhost:3000
 
 # CORS (pour les cookies cross-origin)
 CORS_ORIGIN=http://localhost:3001
-
-# Polar (optionnel - pour les paiements)
-POLAR_ACCESS_TOKEN=your-polar-token
-POLAR_SUCCESS_URL=https://your-domain.com/success
 ```
 
 ## Fonctionnalités
@@ -81,28 +77,6 @@ if (session) {
 }
 ```
 
-### Paiements Polar
-
-L'intégration Polar permet de gérer les abonnements :
-
-```typescript
-// Configuration des produits
-polar({
-  products: [{
-    productId: 'your-product-id',
-    slug: 'pro'
-  }],
-  successUrl: process.env.POLAR_SUCCESS_URL,
-  authenticatedUsersOnly: true
-});
-
-// Checkout
-await authClient.polar.checkout({ productSlug: 'pro' });
-
-// Portal client
-await authClient.polar.customerPortal();
-```
-
 ## Architecture
 
 ### Adapter Prisma
@@ -111,7 +85,7 @@ Utilise l'adapter Prisma pour Better-Auth avec PostgreSQL :
 
 ```typescript
 prismaAdapter(prisma, {
-  provider: 'sqlite'
+  provider: 'postgresql'
 });
 ```
 
@@ -135,9 +109,6 @@ trustedOrigins: [process.env.CORS_ORIGIN || 'http://localhost:3001']
 ```typescript
 // Instance auth configurée
 export { auth } from '@calendraft/auth';
-
-// Client Polar (pour les paiements)
-export { polarClient } from '@calendraft/auth/lib/payments';
 ```
 
 ## Schémas de base de données
@@ -152,7 +123,6 @@ Les tables suivantes sont créées par Better-Auth (voir `packages/db/prisma/sch
 ## Dépendances
 
 - `better-auth` - Framework d'authentification
-- `@polar-sh/better-auth` - Plugin Polar pour Better-Auth
 - `@calendraft/db` - Client Prisma
 
 ## Voir aussi
@@ -164,4 +134,3 @@ Les tables suivantes sont créées par Better-Auth (voir `packages/db/prisma/sch
 ## License
 
 MIT
-

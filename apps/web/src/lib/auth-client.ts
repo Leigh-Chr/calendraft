@@ -1,9 +1,8 @@
 import type { auth } from "@calendraft/auth";
-import { polarClient } from "@polar-sh/better-auth";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient({
 	baseURL: import.meta.env.VITE_SERVER_URL,
-	plugins: [inferAdditionalFields<typeof auth>(), polarClient()],
+	plugins: [inferAdditionalFields<typeof auth>()],
 });

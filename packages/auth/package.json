@@ -23,8 +23,6 @@
 	},
 	"dependencies": {
 		"better-auth": "catalog:",
-		"@polar-sh/better-auth": "catalog:",
-		"@polar-sh/sdk": "^0.41.5",
 		"dotenv": "catalog:",
 		"zod": "catalog:",
 		"@calendraft/db": "workspace:*"

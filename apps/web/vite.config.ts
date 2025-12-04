@@ -152,15 +152,31 @@ export default defineConfig({
 		alias: {
 			"@": path.resolve(__dirname, "./src"),
 		},
+		// CRITICAL: Deduplicate React to prevent "Invalid hook call" errors
+		// This ensures all dependencies use the same React instance
+		dedupe: ["react", "react-dom"],
+	},
+	optimizeDeps: {
+		// CRITICAL: Pre-bundle React to ensure single instance
+		// Prevents multiple React instances from being loaded
+		include: ["react", "react-dom"],
 	},
 	build: {
 		sourcemap: true, // Required for Sentry source maps
 		rollupOptions: {
 			output: {
 				manualChunks: (id) => {
+					// CRITICAL: Ensure React and ReactDOM are in the same chunk
+					// This prevents "Invalid hook call" and "dispatcher is null" errors
+					// by ensuring a single React instance across the entire bundle
+					if (
+						id.includes("node_modules/react/") ||
+						id.includes("node_modules/react-dom/")
+					) {
+						return "vendor-react";
+					}
 					// Vendor chunk mapping: [patterns, chunkName]
 					const chunks: [string[], string][] = [
-						[["react-dom", "/react/"], "vendor-react"],
 						[["@tanstack/react-router"], "vendor-router"],
 						[["@tanstack/react-query"], "vendor-query"],
 						[["@tanstack/react-form", "@tanstack/zod-adapter"], "vendor-form"],

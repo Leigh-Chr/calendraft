@@ -1,7 +1,9 @@
 import {
-	getDefaultPlanType,
-	getPlanLimits,
-	type PlanType,
+	ANONYMOUS_LIMITS,
+	getMaxCalendars,
+	getMaxEventsPerCalendar,
+	hasReachedCalendarLimit,
+	hasReachedEventLimit,
 } from "@calendraft/core";
 import prisma from "@calendraft/db";
 import { TRPCError } from "@trpc/server";
@@ -28,104 +30,56 @@ export function isAnonymousUser(ctx: Context): boolean {
 }
 
 /**
- * Check if a subscription is currently valid (active or in grace period)
+ * Check if user is authenticated
  */
-function isSubscriptionValid(subscription: {
-	status: string;
-	cancelAtPeriodEnd: boolean;
-	currentPeriodEnd: Date | null;
-}): boolean {
-	// Active or trialing subscriptions are valid
-	if (subscription.status === "ACTIVE" || subscription.status === "TRIALING") {
-		return true;
-	}
-	// Canceled subscriptions are valid until the end of the period
-	if (
-		subscription.status === "CANCELED" &&
-		subscription.cancelAtPeriodEnd &&
-		subscription.currentPeriodEnd &&
-		new Date(subscription.currentPeriodEnd) > new Date()
-	) {
-		return true;
-	}
-	return false;
+export function isAuthenticatedUser(ctx: Context): boolean {
+	return !!ctx.session?.user?.id;
 }
 
 /**
- * Get user's plan type
- * Returns FREE for anonymous users, or the plan from subscription for authenticated users
- * Takes into account subscription status - only ACTIVE and TRIALING subscriptions count
- */
-export async function getUserPlanType(ctx: Context): Promise<PlanType> {
-	if (!ctx.session?.user?.id) {
-		return getDefaultPlanType();
-	}
-
-	const subscription = await prisma.subscription.findUnique({
-		where: { userId: ctx.session.user.id },
-		select: {
-			planType: true,
-			status: true,
-			currentPeriodEnd: true,
-			cancelAtPeriodEnd: true,
-		},
-	});
-
-	if (!subscription || !isSubscriptionValid(subscription)) {
-		return getDefaultPlanType();
-	}
-
-	return (subscription.planType as PlanType) || getDefaultPlanType();
-}
-
-/**
- * Check calendar limit based on user's plan
+ * Check calendar limit for user
+ * Authenticated users have no limits, anonymous users have ANONYMOUS_LIMITS
  * Throws error if limit exceeded
  */
-export async function checkAnonymousCalendarLimit(ctx: Context): Promise<void> {
-	const planType = await getUserPlanType(ctx);
-	const limits = getPlanLimits(planType);
+export async function checkCalendarLimit(ctx: Context): Promise<void> {
+	const isAuth = isAuthenticatedUser(ctx);
 
-	const userId = ctx.session?.user?.id || ctx.anonymousId;
-	if (!userId) {
-		return;
-	}
+	// Authenticated users have no limits
+	if (isAuth) return;
+
+	const userId = ctx.anonymousId;
+	if (!userId) return;
 
 	const calendarCount = await prisma.calendar.count({
-		where: {
-			userId,
-		},
+		where: { userId },
 	});
 
-	if (
-		calendarCount >= limits.calendars &&
-		limits.calendars !== Number.POSITIVE_INFINITY
-	) {
-		const limitText = limits.calendars.toString();
+	if (hasReachedCalendarLimit(isAuth, calendarCount)) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
-			message: `Limite atteinte : vous pouvez créer maximum ${limitText} calendrier${limits.calendars === 1 ? "" : "s"} avec votre plan actuel. Passez à un plan supérieur pour créer plus de calendriers.`,
+			message: `Limite atteinte : vous pouvez créer maximum ${ANONYMOUS_LIMITS.calendars} calendriers en mode anonyme. Créez un compte gratuit pour des calendriers illimités.`,
 		});
 	}
 }
 
 /**
- * Check event limit based on user's plan in a calendar
+ * Check event limit for user in a calendar
+ * Authenticated users have no limits, anonymous users have ANONYMOUS_LIMITS
  * Throws error if limit exceeded
  */
-export async function checkAnonymousEventLimit(
+export async function checkEventLimit(
 	ctx: Context,
 	calendarId: string,
 ): Promise<void> {
-	const planType = await getUserPlanType(ctx);
-	const limits = getPlanLimits(planType);
+	const isAuth = isAuthenticatedUser(ctx);
 
-	const userId = ctx.session?.user?.id || ctx.anonymousId;
-	if (!userId) {
-		return;
-	}
+	// Authenticated users have no limits
+	if (isAuth) return;
 
-	// Verify calendar belongs to user
+	const userId = ctx.anonymousId;
+	if (!userId) return;
+
+	// Verify calendar belongs to user and get event count
 	const calendar = await prisma.calendar.findFirst({
 		where: {
 			id: calendarId,
@@ -145,14 +99,10 @@ export async function checkAnonymousEventLimit(
 		});
 	}
 
-	if (
-		calendar._count.events >= limits.eventsPerCalendar &&
-		limits.eventsPerCalendar !== Number.POSITIVE_INFINITY
-	) {
-		const limitText = limits.eventsPerCalendar.toString();
+	if (hasReachedEventLimit(isAuth, calendar._count.events)) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
-			message: `Limite atteinte : vous pouvez créer maximum ${limitText} événement${limits.eventsPerCalendar === 1 ? "" : "s"} par calendrier avec votre plan actuel. Passez à un plan supérieur pour créer plus d'événements.`,
+			message: `Limite atteinte : vous pouvez créer maximum ${ANONYMOUS_LIMITS.eventsPerCalendar} événements par calendrier en mode anonyme. Créez un compte gratuit pour des événements illimités.`,
 		});
 	}
 }
@@ -160,25 +110,22 @@ export async function checkAnonymousEventLimit(
 /**
  * Get current usage stats for user (authenticated or anonymous)
  */
-export async function getAnonymousUsage(ctx: Context): Promise<{
+export async function getUserUsage(ctx: Context): Promise<{
 	calendarCount: number;
 	maxCalendars: number;
 	eventCounts: Record<string, number>;
 	maxEventsPerCalendar: number;
-	planType: PlanType;
+	isAuthenticated: boolean;
 } | null> {
 	const userId = ctx.session?.user?.id || ctx.anonymousId;
 	if (!userId) {
 		return null;
 	}
 
-	const planType = await getUserPlanType(ctx);
-	const limits = getPlanLimits(planType);
+	const isAuth = isAuthenticatedUser(ctx);
 
 	const calendars = await prisma.calendar.findMany({
-		where: {
-			userId,
-		},
+		where: { userId },
 		include: {
 			_count: {
 				select: { events: true },
@@ -193,13 +140,14 @@ export async function getAnonymousUsage(ctx: Context): Promise<{
 
 	return {
 		calendarCount: calendars.length,
-		maxCalendars:
-			limits.calendars === Number.POSITIVE_INFINITY ? -1 : limits.calendars,
+		maxCalendars: getMaxCalendars(isAuth),
 		eventCounts,
-		maxEventsPerCalendar:
-			limits.eventsPerCalendar === Number.POSITIVE_INFINITY
-				? -1
-				: limits.eventsPerCalendar,
-		planType,
+		maxEventsPerCalendar: getMaxEventsPerCalendar(isAuth),
+		isAuthenticated: isAuth,
 	};
 }
+
+// Legacy aliases for backward compatibility during migration
+export const checkAnonymousCalendarLimit = checkCalendarLimit;
+export const checkAnonymousEventLimit = checkEventLimit;
+export const getAnonymousUsage = getUserUsage;

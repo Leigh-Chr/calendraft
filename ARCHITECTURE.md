@@ -118,7 +118,6 @@ protectedProcedure.query(...)   // ctx.session garanti
 
 ### `@calendraft/auth`
 - Configuration Better-Auth avec adapter Prisma
-- Plugin Polar pour les paiements
 - Gestion des cookies sécurisés
 
 ### `@calendraft/api`

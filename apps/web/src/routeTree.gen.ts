@@ -9,8 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SuccessRouteImport } from './routes/success'
-import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CalendarsRouteImport } from './routes/calendars'
@@ -24,16 +22,6 @@ import { Route as CalendarsCalendarIdImportRouteImport } from './routes/calendar
 import { Route as CalendarsCalendarIdEventsNewRouteImport } from './routes/calendars/$calendarId/events/new'
 import { Route as CalendarsCalendarIdEventsEventIdRouteImport } from './routes/calendars/$calendarId/events/$eventId'
 
-const SuccessRoute = SuccessRouteImport.update({
-  id: '/success',
-  path: '/success',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -103,8 +91,6 @@ export interface FileRoutesByFullPath {
   '/calendars': typeof CalendarsRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
-  '/success': typeof SuccessRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
   '/calendars/import': typeof CalendarsImportRoute
   '/calendars/merge': typeof CalendarsMergeRoute
@@ -119,8 +105,6 @@ export interface FileRoutesByTo {
   '/calendars': typeof CalendarsRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
-  '/success': typeof SuccessRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
   '/calendars/import': typeof CalendarsImportRoute
   '/calendars/merge': typeof CalendarsMergeRoute
@@ -136,8 +120,6 @@ export interface FileRoutesById {
   '/calendars': typeof CalendarsRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
-  '/success': typeof SuccessRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
   '/calendars/import': typeof CalendarsImportRoute
   '/calendars/merge': typeof CalendarsMergeRoute
@@ -154,8 +136,6 @@ export interface FileRouteTypes {
     | '/calendars'
     | '/dashboard'
     | '/login'
-    | '/pricing'
-    | '/success'
     | '/calendars/$calendarId'
     | '/calendars/import'
     | '/calendars/merge'
@@ -170,8 +150,6 @@ export interface FileRouteTypes {
     | '/calendars'
     | '/dashboard'
     | '/login'
-    | '/pricing'
-    | '/success'
     | '/calendars/$calendarId'
     | '/calendars/import'
     | '/calendars/merge'
@@ -186,8 +164,6 @@ export interface FileRouteTypes {
     | '/calendars'
     | '/dashboard'
     | '/login'
-    | '/pricing'
-    | '/success'
     | '/calendars/$calendarId'
     | '/calendars/import'
     | '/calendars/merge'
@@ -203,27 +179,11 @@ export interface RootRouteChildren {
   CalendarsRoute: typeof CalendarsRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
-  PricingRoute: typeof PricingRoute
-  SuccessRoute: typeof SuccessRoute
   ShareTokenRoute: typeof ShareTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/success': {
-      id: '/success'
-      path: '/success'
-      fullPath: '/success'
-      preLoaderRoute: typeof SuccessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -349,8 +309,6 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarsRoute: CalendarsRouteWithChildren,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
-  PricingRoute: PricingRoute,
-  SuccessRoute: SuccessRoute,
   ShareTokenRoute: ShareTokenRoute,
 }
 export const routeTree = rootRouteImport

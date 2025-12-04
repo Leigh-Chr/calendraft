@@ -68,8 +68,8 @@ Content-Security-Policy: default-src 'self'; ...
 ### Limitations utilisateurs anonymes
 
 Pour prévenir les abus :
-- Maximum 5 calendriers par utilisateur anonyme
-- Maximum 100 événements par calendrier
+- Maximum 10 calendriers par utilisateur anonyme
+- Maximum 500 événements par calendrier
 - Suppression automatique après 60 jours d'inactivité
 
 ## Bonnes pratiques de déploiement

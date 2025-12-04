@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
+import type * as React from "react";
 import ReactDOM from "react-dom/client";
 import Loader from "./components/loader";
 import { getAnonymousId } from "./lib/storage";
