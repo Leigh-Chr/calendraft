@@ -32,12 +32,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 	head: () => ({
 		meta: [
 			{
-				title: "Calendraft - Gérez vos calendriers .ics simplement",
+				title: "Calendraft - Manage your .ics calendars simply",
 			},
 			{
 				name: "description",
 				content:
-					"Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Compatible Google Calendar, Apple Calendar, Outlook. Gratuit et open-source.",
+					"Import, create, edit, and merge your ICS calendars in a few clicks. Compatible with Google Calendar, Apple Calendar, Outlook. Free and open-source.",
 			},
 			// Open Graph
 			{
@@ -50,12 +50,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				property: "og:title",
-				content: "Calendraft - Gérez vos calendriers .ics simplement",
+				content: "Calendraft - Manage your .ics calendars simply",
 			},
 			{
 				property: "og:description",
 				content:
-					"Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Application PWA gratuite et open-source.",
+					"Import, create, edit, and merge your ICS calendars in a few clicks. Free and open-source PWA application.",
 			},
 			{
 				property: "og:image",
@@ -63,7 +63,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				property: "og:locale",
-				content: "fr_FR",
+				content: "en_US",
 			},
 			{
 				property: "og:site_name",
@@ -76,12 +76,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				name: "twitter:title",
-				content: "Calendraft - Gérez vos calendriers .ics simplement",
+				content: "Calendraft - Manage your .ics calendars simply",
 			},
 			{
 				name: "twitter:description",
 				content:
-					"Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Application PWA gratuite et open-source.",
+					"Import, create, edit, and merge your ICS calendars in a few clicks. Free and open-source PWA application.",
 			},
 			{
 				name: "twitter:image",
@@ -137,7 +137,7 @@ function RootComponent() {
 						href="#main-content"
 						className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring"
 					>
-						Aller au contenu principal
+						Skip to main content
 					</a>
 					<ErrorBoundary>
 						<div className="flex min-h-svh flex-col">

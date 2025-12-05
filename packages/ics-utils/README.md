@@ -1,6 +1,6 @@
 # @calendraft/ics-utils
 
-Utilitaires TypeScript pour parser et générer des fichiers ICS (iCalendar) selon RFC 5545.
+TypeScript utilities for parsing and generating ICS (iCalendar) files according to RFC 5545.
 
 ## Installation
 
@@ -8,20 +8,20 @@ Utilitaires TypeScript pour parser et générer des fichiers ICS (iCalendar) sel
 bun add @calendraft/ics-utils
 ```
 
-## Usage rapide
+## Quick usage
 
 ```typescript
 import { parseIcsFile, generateIcsFile } from '@calendraft/ics-utils';
 
-// Parser un fichier ICS
+// Parse an ICS file
 const { events, errors } = parseIcsFile(icsContent);
 console.log(events[0].title);
 
-// Générer un fichier ICS
+// Generate an ICS file
 const ics = generateIcsFile({
-  calendarName: 'Mon Calendrier',
+  calendarName: 'My Calendar',
   events: [{
-    title: 'Réunion',
+    title: 'Meeting',
     startDate: new Date('2024-01-15T10:00:00Z'),
     endDate: new Date('2024-01-15T11:00:00Z'),
   }]
@@ -37,7 +37,7 @@ parseIcsFile(content: string): { events: ParsedEvent[], errors: string[] }
 generateIcsFile(options: GeneratorOptions): string
 ```
 
-### Dates ICS
+### ICS Dates
 
 ```typescript
 import { formatDateToICS, parseDateFromICS } from '@calendraft/ics-utils';
@@ -46,7 +46,7 @@ formatDateToICS(new Date())           // '20240115T100000Z'
 parseDateFromICS('20240115T100000Z')  // Date object
 ```
 
-### Durées ISO 8601
+### ISO 8601 Durations
 
 ```typescript
 import { formatDuration, parseDuration } from '@calendraft/ics-utils';
@@ -55,7 +55,7 @@ formatDuration(15, 'minutes')  // 'PT15M'
 parseDuration('PT15M')         // { value: 15, unit: 'minutes' }
 ```
 
-### Alarmes
+### Alarms
 
 ```typescript
 import { parseAlarmTrigger, formatAlarmTrigger } from '@calendraft/ics-utils';
@@ -64,18 +64,18 @@ parseAlarmTrigger('-PT15M')              // { when: 'before', value: 15, unit: '
 formatAlarmTrigger('before', 15, 'minutes')  // '-PT15M'
 ```
 
-## Types exportés
+## Exported types
 
-- `ParsedEvent` - Événement parsé depuis ICS
-- `ParsedAlarm` - Alarme parsée
-- `ParsedAttendee` - Participant parsé
-- `EventInput` - Input pour génération
-- `GeneratorOptions` - Options du générateur
+- `ParsedEvent` - Event parsed from ICS
+- `ParsedAlarm` - Parsed alarm
+- `ParsedAttendee` - Parsed attendee
+- `EventInput` - Input for generation
+- `GeneratorOptions` - Generator options
 
-## Voir aussi
+## See also
 
-- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Architecture globale du projet
-- [@calendraft/core](../core/README.md) - Logique métier et types
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Global project architecture
+- [@calendraft/core](../core/README.md) - Business logic and types
 
 ## License
 

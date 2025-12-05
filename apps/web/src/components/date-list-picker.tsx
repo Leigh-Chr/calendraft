@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { CalendarIcon, X } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +26,7 @@ export function DateListPicker({
 	onChange,
 	disabled = false,
 	label,
-	placeholder = "Ajouter une date",
+	placeholder = "Add a date",
 }: DateListPickerProps) {
 	const [open, setOpen] = useState(false);
 	const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -65,7 +65,7 @@ export function DateListPicker({
 		<div className="space-y-2">
 			{label && <Label>{label}</Label>}
 			<div className="space-y-2">
-				{/* Liste des dates */}
+				{/* Date list */}
 				<div className="flex min-h-[2.5rem] flex-wrap gap-2 rounded-md border p-2">
 					{dates.map((date, index) => (
 						<Badge
@@ -73,13 +73,13 @@ export function DateListPicker({
 							variant="secondary"
 							className="flex items-center gap-1"
 						>
-							{format(date, "dd MMM yyyy, HH:mm", { locale: fr })}
+							{format(date, "dd MMM yyyy, HH:mm", { locale: enUS })}
 							<button
 								type="button"
 								onClick={() => handleRemoveDate(index)}
 								disabled={disabled}
 								className="ml-1 rounded-full p-0.5 hover:bg-destructive/20"
-								aria-label={`Supprimer la date ${format(date, "dd MMM yyyy, HH:mm", { locale: fr })}`}
+								aria-label={`Remove date ${format(date, "dd MMM yyyy, HH:mm", { locale: enUS })}`}
 							>
 								<X className="h-3 w-3" />
 							</button>
@@ -108,7 +108,7 @@ export function DateListPicker({
 									initialFocus
 								/>
 								<div className="space-y-2">
-									<Label htmlFor="time">Heure</Label>
+									<Label htmlFor="time">Time</Label>
 									<Input
 										id="time"
 										type="time"
@@ -123,14 +123,14 @@ export function DateListPicker({
 									disabled={!selectedDate || disabled}
 									className="w-full"
 								>
-									Ajouter
+									Add
 								</Button>
 							</div>
 						</PopoverContent>
 					</Popover>
 				</div>
 				<p className="text-muted-foreground text-xs">
-					Cliquez sur "Ajouter une date" pour sélectionner une date et une heure
+					Click "Add a date" to select a date and time
 				</p>
 			</div>
 		</div>

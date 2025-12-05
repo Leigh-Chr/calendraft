@@ -126,20 +126,20 @@ function getTriggerDescription(
 	unit: "minutes" | "hours" | "days",
 ): string {
 	if (when === "at") {
-		return "L'alerte se déclenchera exactement au moment de l'événement.";
+		return "The alert will trigger exactly at the event time.";
 	}
 
 	const unitLabels: Record<"minutes" | "hours" | "days", string> = {
 		minutes: "minute",
-		hours: "heure",
-		days: "jour",
+		hours: "hour",
+		days: "day",
 	};
 
 	const unitLabel = unitLabels[unit];
 	const plural = value > 1 ? "s" : "";
-	const direction = when === "before" ? "avant" : "après";
+	const direction = when === "before" ? "before" : "after";
 
-	return `L'alerte se déclenchera ${value} ${unitLabel}${plural} ${direction} le début de l'événement.`;
+	return `The alert will trigger ${value} ${unitLabel}${plural} ${direction} the start of the event.`;
 }
 
 interface AlarmCardProps {
@@ -232,7 +232,7 @@ function AlarmDurationInput({
 	return (
 		<div className="space-y-2">
 			<Label htmlFor={`alarm-duration-${index}`}>
-				Durée de l'alerte (optionnel)
+				Alert duration (optional)
 			</Label>
 			<div className="flex gap-2">
 				<Input
@@ -244,21 +244,21 @@ function AlarmDurationInput({
 					disabled={disabled}
 					placeholder="5"
 					className="flex-1"
-					aria-label="Valeur de la durée"
+					aria-label="Duration value"
 				/>
 				<Select
 					value={unit}
 					onValueChange={handleUnitChange}
 					disabled={disabled}
 				>
-					<SelectTrigger className="w-[140px]" aria-label="Unité de durée">
+					<SelectTrigger className="w-[140px]" aria-label="Duration unit">
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value="seconds">
 							<div className="flex items-center gap-2">
 								<Timer className="h-4 w-4" />
-								<span>Secondes</span>
+								<span>Seconds</span>
 							</div>
 						</SelectItem>
 						<SelectItem value="minutes">
@@ -270,21 +270,21 @@ function AlarmDurationInput({
 						<SelectItem value="hours">
 							<div className="flex items-center gap-2">
 								<Clock className="h-4 w-4" />
-								<span>Heures</span>
+								<span>Hours</span>
 							</div>
 						</SelectItem>
 						<SelectItem value="days">
 							<div className="flex items-center gap-2">
 								<Calendar className="h-4 w-4" />
-								<span>Jours</span>
+								<span>Days</span>
 							</div>
 						</SelectItem>
 					</SelectContent>
 				</Select>
 			</div>
 			<p className="text-muted-foreground text-xs">
-				Durée pendant laquelle l'alerte doit rester active. Laissez vide si vous
-				ne souhaitez pas définir de durée spécifique.
+				Duration for which the alert should remain active. Leave empty if you do
+				not want to set a specific duration.
 			</p>
 		</div>
 	);
@@ -304,7 +304,7 @@ function AlarmActionSelect({
 }) {
 	return (
 		<div className="space-y-2">
-			<Label htmlFor={`alarm-action-${index}`}>Type d'alerte</Label>
+			<Label htmlFor={`alarm-action-${index}`}>Alert type</Label>
 			<Select
 				value={alarm.action}
 				onValueChange={(value) =>
@@ -314,7 +314,7 @@ function AlarmActionSelect({
 			>
 				<SelectTrigger
 					id={`alarm-action-${index}`}
-					aria-label={`Type d'action pour l'alerte ${index + 1}`}
+					aria-label={`Action type for alert ${index + 1}`}
 				>
 					<SelectValue />
 				</SelectTrigger>
@@ -322,25 +322,25 @@ function AlarmActionSelect({
 					<SelectItem value="DISPLAY">
 						<div className="flex items-center gap-2">
 							<Bell className="h-4 w-4" />
-							<span>Affichage (notification à l'écran)</span>
+							<span>Display (on-screen notification)</span>
 						</div>
 					</SelectItem>
 					<SelectItem value="EMAIL">
 						<div className="flex items-center gap-2">
 							<Mail className="h-4 w-4" />
-							<span>Email (envoi d'un email)</span>
+							<span>Email (send an email)</span>
 						</div>
 					</SelectItem>
 					<SelectItem value="AUDIO">
 						<div className="flex items-center gap-2">
 							<Volume2 className="h-4 w-4" />
-							<span>Audio (son ou alarme)</span>
+							<span>Audio (sound or alarm)</span>
 						</div>
 					</SelectItem>
 				</SelectContent>
 			</Select>
 			<p className="text-muted-foreground text-xs">
-				Choisissez comment vous souhaitez être alerté de cet événement.
+				Choose how you want to be alerted about this event.
 			</p>
 		</div>
 	);
@@ -361,7 +361,7 @@ function AlarmTriggerSelect({
 	return (
 		<div className="space-y-2">
 			<Label htmlFor={`alarm-trigger-when-${index}`}>
-				Quand déclencher l'alerte
+				When to trigger the alert
 			</Label>
 			<div className="grid grid-cols-3 gap-2">
 				<Select
@@ -380,7 +380,7 @@ function AlarmTriggerSelect({
 				>
 					<SelectTrigger
 						id={`alarm-trigger-when-${index}`}
-						aria-label={`Quand déclencher l'alerte ${index + 1}`}
+						aria-label={`When to trigger alert ${index + 1}`}
 					>
 						<SelectValue />
 					</SelectTrigger>
@@ -388,19 +388,19 @@ function AlarmTriggerSelect({
 						<SelectItem value="before">
 							<div className="flex items-center gap-2">
 								<Clock className="h-4 w-4" />
-								<span>Avant</span>
+								<span>Before</span>
 							</div>
 						</SelectItem>
 						<SelectItem value="at">
 							<div className="flex items-center gap-2">
 								<Calendar className="h-4 w-4" />
-								<span>À l'heure</span>
+								<span>At time</span>
 							</div>
 						</SelectItem>
 						<SelectItem value="after">
 							<div className="flex items-center gap-2">
 								<Clock className="h-4 w-4" />
-								<span>Après</span>
+								<span>After</span>
 							</div>
 						</SelectItem>
 					</SelectContent>
@@ -422,7 +422,7 @@ function AlarmTriggerSelect({
 							}
 							disabled={isSubmitting}
 							className="w-full"
-							aria-label={`Valeur du déclencheur pour l'alerte ${index + 1}`}
+							aria-label={`Trigger value for alert ${index + 1}`}
 							placeholder="15"
 						/>
 						<Select
@@ -433,7 +433,7 @@ function AlarmTriggerSelect({
 							disabled={isSubmitting}
 						>
 							<SelectTrigger
-								aria-label={`Unité de temps pour l'alerte ${index + 1}`}
+								aria-label={`Time unit for alert ${index + 1}`}
 								className="w-full"
 							>
 								<SelectValue />
@@ -448,13 +448,13 @@ function AlarmTriggerSelect({
 								<SelectItem value="hours">
 									<div className="flex items-center gap-2">
 										<Clock className="h-4 w-4" />
-										<span>Heures</span>
+										<span>Hours</span>
 									</div>
 								</SelectItem>
 								<SelectItem value="days">
 									<div className="flex items-center gap-2">
 										<Calendar className="h-4 w-4" />
-										<span>Jours</span>
+										<span>Days</span>
 									</div>
 								</SelectItem>
 							</SelectContent>
@@ -489,7 +489,7 @@ function DisplayAlarmMessage({
 
 	return (
 		<div className="space-y-2">
-			<Label htmlFor={`alarm-summary-${index}`}>Message de notification</Label>
+			<Label htmlFor={`alarm-summary-${index}`}>Notification message</Label>
 			<Input
 				id={`alarm-summary-${index}`}
 				value={alarm.summary || ""}
@@ -504,7 +504,7 @@ function DisplayAlarmMessage({
 							"summary",
 							value,
 							FIELD_LIMITS.ALARM_SUMMARY,
-							`Le message ne peut pas dépasser ${FIELD_LIMITS.ALARM_SUMMARY} caractères`,
+							`Message cannot exceed ${FIELD_LIMITS.ALARM_SUMMARY} characters`,
 						);
 						onValidationErrorChange(updatedErrors);
 					}
@@ -513,7 +513,7 @@ function DisplayAlarmMessage({
 				className={error ? "border-destructive" : ""}
 				aria-invalid={error ? "true" : "false"}
 				aria-describedby={error ? `alarm-summary-${index}-error` : undefined}
-				placeholder="Ex: Réunion dans 15 minutes"
+				placeholder="Ex: Meeting in 15 minutes"
 			/>
 			{error ? (
 				<p
@@ -526,7 +526,7 @@ function DisplayAlarmMessage({
 				</p>
 			) : (
 				<p className="text-muted-foreground text-xs">
-					Texte qui s'affichera dans la notification à l'écran.
+					Text that will be displayed in the on-screen notification.
 				</p>
 			)}
 		</div>
@@ -553,7 +553,7 @@ function EmailAlarmMessage({
 
 	return (
 		<div className="space-y-2">
-			<Label htmlFor={`alarm-description-${index}`}>Message de l'email</Label>
+			<Label htmlFor={`alarm-description-${index}`}>Email message</Label>
 			<Textarea
 				id={`alarm-description-${index}`}
 				value={alarm.description || ""}
@@ -568,7 +568,7 @@ function EmailAlarmMessage({
 							"description",
 							value,
 							FIELD_LIMITS.ALARM_DESCRIPTION,
-							`La description ne peut pas dépasser ${FIELD_LIMITS.ALARM_DESCRIPTION} caractères`,
+							`Description cannot exceed ${FIELD_LIMITS.ALARM_DESCRIPTION} characters`,
 						);
 						onValidationErrorChange(updatedErrors);
 					}
@@ -580,7 +580,7 @@ function EmailAlarmMessage({
 					error ? `alarm-description-${index}-error` : undefined
 				}
 				rows={2}
-				placeholder="Ex: N'oubliez pas votre réunion à 14h..."
+				placeholder="Ex: Don't forget your meeting at 2pm..."
 			/>
 			{error ? (
 				<p
@@ -593,7 +593,7 @@ function EmailAlarmMessage({
 				</p>
 			) : (
 				<p className="text-muted-foreground text-xs">
-					Contenu de l'email qui sera envoyé lors du déclenchement de l'alerte.
+					Email content that will be sent when the alarm is triggered.
 				</p>
 			)}
 		</div>
@@ -615,7 +615,7 @@ function AlarmRepeatInput({
 	return (
 		<div className="space-y-2">
 			<Label htmlFor={`alarm-repeat-${index}`}>
-				Nombre de répétitions (optionnel)
+				Number of repetitions (optional)
 			</Label>
 			<Input
 				id={`alarm-repeat-${index}`}
@@ -634,8 +634,8 @@ function AlarmRepeatInput({
 				placeholder="0"
 			/>
 			<p className="text-muted-foreground text-xs">
-				Nombre de fois que l'alerte doit se répéter (0-1000). 0 ou vide = pas de
-				répétition.
+				Number of times the alert should repeat (0-1000). 0 or empty = no
+				repetition.
 			</p>
 		</div>
 	);
@@ -659,7 +659,7 @@ function AlarmCard({
 				<div className="flex items-center justify-between">
 					<h4 className="flex items-center gap-2 font-medium">
 						<Bell className="h-4 w-4 text-muted-foreground" />
-						Alerte {index + 1}
+						Alert {index + 1}
 					</h4>
 					<Button
 						type="button"
@@ -667,10 +667,10 @@ function AlarmCard({
 						size="sm"
 						onClick={() => onRemoveAlarm(index)}
 						disabled={isSubmitting}
-						aria-label={`Supprimer l'alerte ${index + 1}`}
+						aria-label={`Remove alert ${index + 1}`}
 					>
 						<X className="h-4 w-4" />
-						Supprimer
+						Remove
 					</Button>
 				</div>
 				<div className="space-y-4">
@@ -732,8 +732,8 @@ function EmptyAlarmsState() {
 		<div className="flex items-start gap-3 rounded-md border border-muted bg-muted/50 p-4">
 			<Bell className="mt-0.5 h-5 w-5 flex-shrink-0 text-muted-foreground" />
 			<p className="text-muted-foreground text-sm">
-				Aucune alerte configurée. Cliquez sur "Ajouter une alerte" ci-dessous
-				pour recevoir des rappels avant ou pendant l'événement.
+				No alerts configured. Click "Add an alert" below to receive reminders
+				before or during the event.
 			</p>
 		</div>
 	);
@@ -783,7 +783,7 @@ export function AlarmsSection({
 				disabled={isSubmitting}
 			>
 				<Bell className="h-4 w-4" />
-				Ajouter une alerte
+				Add an alert
 			</Button>
 		</div>
 	);

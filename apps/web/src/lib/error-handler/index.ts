@@ -27,8 +27,8 @@ export function handleTRPCError(
 	options?: HandleErrorOptions,
 ): ErrorResult {
 	const {
-		fallbackTitle = "Erreur",
-		fallbackDescription = "Une erreur est survenue",
+		fallbackTitle = "Error",
+		fallbackDescription = "An error occurred",
 		showToast = true,
 		logError = true,
 	} = options || {};

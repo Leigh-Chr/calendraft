@@ -25,7 +25,7 @@ export default function Header() {
 	const { startTour, setIsTourCompleted } = useTour();
 	const isLandingPage = location.pathname === "/";
 
-	const appLinks = [{ to: "/calendars", label: "Mes calendriers" }] as const;
+	const appLinks = [{ to: "/calendars", label: "My calendars" }] as const;
 
 	const handleRestartTour = () => {
 		resetTourCompletion();
@@ -39,7 +39,7 @@ export default function Header() {
 				<Link
 					to="/"
 					className="logo-animated group flex items-center gap-2.5 rounded-md font-semibold text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-					aria-label="Calendraft - Accueil"
+					aria-label="Calendraft - Home"
 				>
 					<div className="relative">
 						<Calendar
@@ -58,23 +58,23 @@ export default function Header() {
 						{/* Desktop navigation */}
 						<nav
 							className="hidden items-center gap-8 sm:flex"
-							aria-label="Navigation principale"
+							aria-label="Main navigation"
 						>
 							<Link
 								to="/calendars"
 								className="rounded-sm font-medium text-muted-foreground text-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 							>
-								Mes calendriers
+								My calendars
 							</Link>
 							<Link
 								to="/login"
 								search={{ mode: "signin" }}
 								className="rounded-sm font-medium text-muted-foreground text-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 							>
-								Connexion
+								Sign in
 							</Link>
 							<Button size="sm" asChild>
-								<Link to="/calendars/new">Commencer</Link>
+								<Link to="/calendars/new">Get started</Link>
 							</Button>
 						</nav>
 
@@ -88,20 +88,20 @@ export default function Header() {
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end" className="w-48">
 									<DropdownMenuItem asChild>
-										<Link to="/calendars">Mes calendriers</Link>
+										<Link to="/calendars">My calendars</Link>
 									</DropdownMenuItem>
 									<DropdownMenuItem asChild>
-										<Link to="/calendars/import">Importer un .ics</Link>
+										<Link to="/calendars/import">Import a .ics</Link>
 									</DropdownMenuItem>
 									<DropdownMenuSeparator />
 									<DropdownMenuItem asChild>
 										<Link to="/login" search={{ mode: "signin" }}>
-											Connexion
+											Sign in
 										</Link>
 									</DropdownMenuItem>
 									<DropdownMenuItem asChild>
 										<Link to="/login" search={{ mode: "signup" }}>
-											Créer un compte
+											Create an account
 										</Link>
 									</DropdownMenuItem>
 								</DropdownMenuContent>
@@ -133,13 +133,13 @@ export default function Header() {
 										variant="ghost"
 										size="icon"
 										onClick={handleRestartTour}
-										aria-label="Relancer le tour guidé"
+										aria-label="Restart guided tour"
 									>
 										<HelpCircle className="size-5" />
 									</Button>
 								</TooltipTrigger>
 								<TooltipContent>
-									<p>Relancer le tour guidé</p>
+									<p>Restart guided tour</p>
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>

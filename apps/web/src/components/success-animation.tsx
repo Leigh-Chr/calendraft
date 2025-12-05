@@ -1,6 +1,6 @@
 /**
- * SuccessAnimation - Feedback visuel animé pour les actions réussies
- * Utilise motion/react pour des animations fluides
+ * SuccessAnimation - Animated visual feedback for successful actions
+ * Uses motion/react for smooth animations
  */
 
 import { Calendar, Check, Copy, Download, Trash2 } from "lucide-react";
@@ -102,7 +102,7 @@ export function SuccessAnimation({
 }
 
 /**
- * Hook pour gérer l'état de l'animation de succès
+ * Hook to manage the success animation state
  */
 export function useSuccessAnimation() {
 	const [state, setState] = useState<{

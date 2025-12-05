@@ -38,7 +38,7 @@ export const shareRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -52,7 +52,7 @@ export const shareRouter = router({
 			if (shareLinkCount >= MAX_SHARE_LINKS_PER_CALENDAR) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: `Limite atteinte : vous ne pouvez créer que ${MAX_SHARE_LINKS_PER_CALENDAR} liens de partage par calendrier. Supprimez un lien existant pour en créer un nouveau.`,
+					message: `Limit reached: you can only create ${MAX_SHARE_LINKS_PER_CALENDAR} share links per calendar. Delete an existing link to create a new one.`,
 				});
 			}
 
@@ -96,7 +96,7 @@ export const shareRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -138,7 +138,7 @@ export const shareRouter = router({
 			if (!shareLink) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Lien de partage non trouvé",
+					message: "Sharing link not found",
 				});
 			}
 
@@ -153,7 +153,7 @@ export const shareRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -207,7 +207,7 @@ export const shareRouter = router({
 			if (!shareLink) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Lien de partage non trouvé",
+					message: "Sharing link not found",
 				});
 			}
 
@@ -222,7 +222,7 @@ export const shareRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -248,7 +248,7 @@ export const shareRouter = router({
 			if (!shareLink) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Lien de partage non trouvé ou expiré",
+					message: "Sharing link not found or expired",
 				});
 			}
 
@@ -256,7 +256,7 @@ export const shareRouter = router({
 			if (!shareLink.isActive) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Ce lien de partage a été désactivé",
+					message: "This share link has been disabled",
 				});
 			}
 
@@ -264,7 +264,7 @@ export const shareRouter = router({
 			if (shareLink.expiresAt && shareLink.expiresAt < new Date()) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Ce lien de partage a expiré",
+					message: "This share link has expired",
 				});
 			}
 
@@ -287,7 +287,7 @@ export const shareRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -410,7 +410,7 @@ export const shareRouter = router({
 			if (!shareLink) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Lien de partage non trouvé ou expiré",
+					message: "Sharing link not found or expired",
 				});
 			}
 
@@ -418,7 +418,7 @@ export const shareRouter = router({
 			if (!shareLink.isActive) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Ce lien de partage a été désactivé",
+					message: "This share link has been disabled",
 				});
 			}
 
@@ -426,7 +426,7 @@ export const shareRouter = router({
 			if (shareLink.expiresAt && shareLink.expiresAt < new Date()) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Ce lien de partage a expiré",
+					message: "This share link has expired",
 				});
 			}
 
@@ -444,7 +444,7 @@ export const shareRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 

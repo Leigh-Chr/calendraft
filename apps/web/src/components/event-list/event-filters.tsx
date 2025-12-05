@@ -25,10 +25,10 @@ interface DateFilterButtonsProps {
 }
 
 const DATE_FILTER_LABELS = {
-	all: "Tout",
-	today: "Aujourd'hui",
-	week: "Cette semaine",
-	month: "Ce mois",
+	all: "All",
+	today: "Today",
+	week: "This week",
+	month: "This month",
 } as const;
 
 export const DateFilterButtons = React.memo(function DateFilterButtons({
@@ -78,7 +78,7 @@ export const SearchSortBar = React.memo(function SearchSortBar({
 				<div className="relative">
 					<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
 					<Input
-						placeholder="Rechercher un événement..."
+						placeholder="Search for an event..."
 						value={keyword}
 						onChange={(e) => onKeywordChange(e.target.value)}
 						className="pl-9"
@@ -90,12 +90,12 @@ export const SearchSortBar = React.memo(function SearchSortBar({
 				onValueChange={(v) => onSortChange(v as FilterState["sortBy"])}
 			>
 				<SelectTrigger className="w-[180px]">
-					<SelectValue placeholder="Trier par" />
+					<SelectValue placeholder="Sort by" />
 				</SelectTrigger>
 				<SelectContent>
 					<SelectItem value="date">Date</SelectItem>
-					<SelectItem value="name">Nom</SelectItem>
-					<SelectItem value="duration">Durée</SelectItem>
+					<SelectItem value="name">Name</SelectItem>
+					<SelectItem value="duration">Duration</SelectItem>
 				</SelectContent>
 			</Select>
 		</div>

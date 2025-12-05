@@ -235,7 +235,7 @@ function transformEventToFormData(
 function LoadingState() {
 	return (
 		<div className="container mx-auto max-w-2xl px-4 py-10">
-			<div className="text-center">Chargement...</div>
+			<div className="text-center">Loading...</div>
 		</div>
 	);
 }
@@ -246,7 +246,7 @@ function LoadingState() {
 function NotFoundState() {
 	return (
 		<div className="container mx-auto max-w-2xl px-4 py-10">
-			<div className="text-center">Événement non trouvé</div>
+			<div className="text-center">Event not found</div>
 		</div>
 	);
 }
@@ -273,15 +273,14 @@ function DuplicateDialog({
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Dupliquer l'événement</AlertDialogTitle>
+					<AlertDialogTitle>Duplicate event</AlertDialogTitle>
 					<AlertDialogDescription>
-						Créez une copie de cet événement. Vous pouvez décaler les dates si
-						nécessaire.
+						Create a copy of this event. You can shift the dates if necessary.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<div className="space-y-4 py-4">
 					<div className="space-y-2">
-						<Label htmlFor="day-offset">Décalage en jours</Label>
+						<Label htmlFor="day-offset">Day offset</Label>
 						<Input
 							id="day-offset"
 							type="number"
@@ -292,21 +291,20 @@ function DuplicateDialog({
 							placeholder="0"
 						/>
 						<p className="text-muted-foreground text-xs">
-							0 = même date, 7 = une semaine plus tard, -7 = une semaine plus
-							tôt
+							0 = same date, 7 = one week later, -7 = one week earlier
 						</p>
 					</div>
 				</div>
 				<AlertDialogFooter>
-					<AlertDialogCancel>Annuler</AlertDialogCancel>
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
 					<AlertDialogAction onClick={onDuplicate} disabled={isPending}>
 						{isPending ? (
 							<>
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-								Duplication...
+								Duplicating...
 							</>
 						) : (
-							"Dupliquer"
+							"Duplicate"
 						)}
 					</AlertDialogAction>
 				</AlertDialogFooter>
@@ -319,7 +317,7 @@ export const Route = createFileRoute("/calendars/$calendarId/events/$eventId")({
 	component: EditEventComponent,
 	head: () => ({
 		meta: [
-			{ title: "Modifier l'événement - Calendraft" },
+			{ title: "Edit event - Calendraft" },
 			{ name: "robots", content: "noindex, nofollow" },
 		],
 	}),
@@ -351,7 +349,7 @@ function EditEventComponent() {
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				toast.success("Événement dupliqué avec succès");
+				toast.success("Event duplicated successfully");
 				setDuplicateDialogOpen(false);
 				// Navigate to the new event
 				navigate({
@@ -360,9 +358,7 @@ function EditEventComponent() {
 			},
 			onError: (error: unknown) => {
 				const message =
-					error instanceof Error
-						? error.message
-						: "Erreur lors de la duplication";
+					error instanceof Error ? error.message : "Error during duplication";
 				toast.error(message);
 			},
 		}),
@@ -382,7 +378,7 @@ function EditEventComponent() {
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				toast.success("Événement modifié avec succès");
+				toast.success("Event updated successfully");
 				navigate({ to: `/calendars/${calendarId}` });
 			},
 			onError: (error: unknown) => {
@@ -430,10 +426,10 @@ function EditEventComponent() {
 					<Breadcrumb
 						items={[
 							{
-								label: calendar?.name || "Calendrier",
+								label: calendar?.name || "Calendar",
 								href: `/calendars/${calendarId}`,
 							},
-							{ label: event?.title || "Événement" },
+							{ label: event?.title || "Event" },
 						]}
 					/>
 					<Button
@@ -442,7 +438,7 @@ function EditEventComponent() {
 						onClick={() => setDuplicateDialogOpen(true)}
 					>
 						<Copy className="mr-2 h-4 w-4" />
-						Dupliquer
+						Duplicate
 					</Button>
 				</div>
 				<EventFormExtended

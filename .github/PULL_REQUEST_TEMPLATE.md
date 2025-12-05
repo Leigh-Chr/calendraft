@@ -1,66 +1,66 @@
 ## Description
 
-<!-- Décrivez les changements apportés par cette PR -->
+<!-- Describe the changes made in this PR -->
 
-## Type de changement
+## Type of change
 
-- [ ] 🐛 Bug fix (changement non-breaking qui corrige un problème)
-- [ ] ✨ Nouvelle fonctionnalité (changement non-breaking qui ajoute une feature)
-- [ ] 💥 Breaking change (fix ou feature qui casserait la compatibilité)
-- [ ] 📚 Documentation (changement de documentation uniquement)
-- [ ] 🔧 Maintenance (refactoring, dépendances, etc.)
+- [ ] 🐛 Bug fix (non-breaking change that fixes an issue)
+- [ ] ✨ New feature (non-breaking change that adds functionality)
+- [ ] 💥 Breaking change (fix or feature that would break compatibility)
+- [ ] 📚 Documentation (documentation changes only)
+- [ ] 🔧 Maintenance (refactoring, dependencies, etc.)
 
-## Issue liée
+## Related issue
 
-<!-- Liez l'issue que cette PR résout -->
-Fixes #(numéro de l'issue)
+<!-- Link the issue that this PR resolves -->
+Fixes #(issue number)
 
-## Changements effectués
+## Changes made
 
-<!-- Liste des changements principaux -->
+<!-- List of main changes -->
 - 
 - 
 - 
 
-## Comment tester
+## How to test
 
-<!-- Décrivez les étapes pour tester les changements -->
+<!-- Describe the steps to test the changes -->
 1. 
 2. 
 3. 
 
-## Captures d'écran
+## Screenshots
 
-<!-- Si applicable, ajoutez des captures d'écran des changements UI -->
+<!-- If applicable, add screenshots of UI changes -->
 
 ## Checklist
 
 ### Code
-- [ ] Mon code suit le style du projet (formaté avec Biome)
-- [ ] J'ai effectué une self-review de mon code
-- [ ] J'ai commenté le code complexe
-- [ ] Mes changements ne génèrent pas de nouveaux warnings
+- [ ] My code follows the project style (formatted with Biome)
+- [ ] I have performed a self-review of my code
+- [ ] I have commented complex code
+- [ ] My changes do not generate new warnings
 
 ### Tests
-- [ ] J'ai ajouté des tests qui prouvent que mon fix/feature fonctionne
-- [ ] Les tests existants passent localement avec mes changements
+- [ ] I have added tests that prove my fix/feature works
+- [ ] Existing tests pass locally with my changes
 
 ### Documentation
-- [ ] J'ai mis à jour la documentation si nécessaire
-- [ ] J'ai mis à jour les types TypeScript si nécessaire
+- [ ] I have updated the documentation if necessary
+- [ ] I have updated TypeScript types if necessary
 
-### Sécurité
-- [ ] J'ai vérifié qu'il n'y a pas de failles de sécurité introduites
-- [ ] Les inputs utilisateur sont correctement validés
-- [ ] Pas de secrets/credentials dans le code
+### Security
+- [ ] I have verified that no security vulnerabilities were introduced
+- [ ] User inputs are properly validated
+- [ ] No secrets/credentials in the code
 
-## Notes pour les reviewers
+## Notes for reviewers
 
-<!-- Indiquez les points particuliers sur lesquels vous aimeriez avoir des retours -->
+<!-- Indicate any particular points you would like feedback on -->
 
-## Dépendances
+## Dependencies
 
-<!-- Cette PR dépend-elle d'autres PRs ? -->
-- [ ] Aucune dépendance
-- [ ] Dépend de #(numéro)
+<!-- Does this PR depend on other PRs? -->
+- [ ] No dependencies
+- [ ] Depends on #(number)
 

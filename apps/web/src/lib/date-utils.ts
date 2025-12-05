@@ -15,22 +15,22 @@ import {
 	isTomorrow,
 	isYesterday,
 } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 
 /**
- * Format a date to display format with time (e.g., "15 janvier 2024 à 14:30")
+ * Format a date to display format with time (e.g., "January 15, 2024 at 14:30")
  */
 export function formatDateTime(date: Date | string): string {
 	const dateObj = typeof date === "string" ? new Date(date) : date;
-	return format(dateObj, "PPP 'à' HH:mm", { locale: fr });
+	return format(dateObj, "PPP 'at' HH:mm", { locale: enUS });
 }
 
 /**
- * Format a date for display without time (e.g., "15 janvier 2024")
+ * Format a date for display without time (e.g., "January 15, 2024")
  */
 export function formatDate(date: Date | string): string {
 	const dateObj = typeof date === "string" ? new Date(date) : date;
-	return format(dateObj, "PPP", { locale: fr });
+	return format(dateObj, "PPP", { locale: enUS });
 }
 
 /**
@@ -94,36 +94,37 @@ export function normalizeDate(date: Date | string): Date {
 }
 
 /**
- * Format date for short display (e.g., "15/01/2024 14:30")
+ * Format date for short display (e.g., "2024-01-15 14:30")
+ * Uses ISO 8601 date format for universal compatibility
  */
 export function formatDateTimeShort(date: Date | string): string {
 	const dateObj = typeof date === "string" ? new Date(date) : date;
-	return format(dateObj, "dd/MM/yyyy HH:mm");
+	return format(dateObj, "yyyy-MM-dd HH:mm");
 }
 
 /**
- * Format date with contextual label (Aujourd'hui, Demain, etc.)
+ * Format date with contextual label (Today, Tomorrow, etc.)
  * Returns a user-friendly date string that adapts to context
  */
 export function formatDateContextual(date: Date | string): string {
 	const dateObj = normalizeDate(date);
 
 	if (isToday(dateObj)) {
-		return "Aujourd'hui";
+		return "Today";
 	}
 	if (isTomorrow(dateObj)) {
-		return "Demain";
+		return "Tomorrow";
 	}
 	if (isYesterday(dateObj)) {
-		return "Hier";
+		return "Yesterday";
 	}
-	if (isThisWeek(dateObj, { locale: fr })) {
-		return format(dateObj, "EEEE", { locale: fr }); // "Lundi", "Mardi", etc.
+	if (isThisWeek(dateObj, { locale: enUS })) {
+		return format(dateObj, "EEEE", { locale: enUS }); // "Monday", "Tuesday", etc.
 	}
 	if (isThisYear(dateObj)) {
-		return format(dateObj, "d MMMM", { locale: fr }); // "15 janvier"
+		return format(dateObj, "MMM d", { locale: enUS }); // "Jan 15"
 	}
-	return format(dateObj, "d MMM yyyy", { locale: fr }); // "15 jan. 2024"
+	return format(dateObj, "MMM d, yyyy", { locale: enUS }); // "Jan 15, 2024"
 }
 
 /**
@@ -203,7 +204,7 @@ export function getEventTimeStatus(
 
 	// Event is in the past
 	if (isPast(end)) {
-		return { status: "past", label: "Terminé" };
+		return { status: "past", label: "Finished" };
 	}
 
 	// Event is upcoming
@@ -211,10 +212,10 @@ export function getEventTimeStatus(
 		const minutesUntilStart = differenceInMinutes(start, now);
 
 		if (minutesUntilStart <= 15) {
-			return { status: "soon", label: `Dans ${minutesUntilStart} min` };
+			return { status: "soon", label: `In ${minutesUntilStart} min` };
 		}
 		if (minutesUntilStart <= 60) {
-			return { status: "upcoming", label: `Dans ${minutesUntilStart} min` };
+			return { status: "upcoming", label: `In ${minutesUntilStart} min` };
 		}
 	}
 

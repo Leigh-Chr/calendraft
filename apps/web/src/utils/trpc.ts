@@ -28,9 +28,8 @@ export const queryClient = new QueryClient({
 				}
 
 				handleTRPCError(trpcError, {
-					fallbackTitle: "Erreur de requête",
-					fallbackDescription:
-						"Une erreur est survenue lors de la récupération des données.",
+					fallbackTitle: "Request error",
+					fallbackDescription: "An error occurred while retrieving data.",
 					showToast: true,
 				});
 			} else if (import.meta.env.DEV) {

@@ -116,20 +116,19 @@ export function ExpertModeSection({
 		<div className="space-y-4">
 			<div className="rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/20">
 				<p className="mb-1 font-medium text-amber-800 text-xs dark:text-amber-200">
-					⚠️ Mode Expert : Champs pour import/export ICS
+					⚠️ Expert Mode: Fields for ICS import/export
 				</p>
 				<p className="text-amber-700 text-xs dark:text-amber-300">
-					Ces champs sont principalement utiles lors de l'import/export de
-					fichiers ICS. Ils sont gérés automatiquement lors de la création
-					normale d'événements. Modifiez uniquement si vous importez des
-					événements depuis un autre calendrier.
+					These fields are primarily useful when importing/exporting ICS files.
+					They are automatically managed during normal event creation. Only
+					modify if you are importing events from another calendar.
 				</p>
 			</div>
 
 			<div className="space-y-4">
 				<div className="space-y-2">
 					<div className="flex items-center gap-2">
-						<Label htmlFor="uid">UID (Identifiant unique)</Label>
+						<Label htmlFor="uid">UID (Unique identifier)</Label>
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>
@@ -137,8 +136,8 @@ export function ExpertModeSection({
 								</TooltipTrigger>
 								<TooltipContent>
 									<p>
-										Identifiant unique technique de l'événement au format ICS.
-										Généré automatiquement à la création.
+										Technical unique identifier of the event in ICS format.
+										Automatically generated on creation.
 									</p>
 								</TooltipContent>
 							</Tooltip>
@@ -149,7 +148,7 @@ export function ExpertModeSection({
 						value={formData.uid || ""}
 						onChange={(e) => handleUIDChange(e.target.value)}
 						disabled={isSubmitting || !!formData.uid}
-						placeholder="Auto-généré si vide"
+						placeholder="Auto-generated if empty"
 						readOnly={!!formData.uid}
 						className={
 							formData.uid
@@ -173,15 +172,15 @@ export function ExpertModeSection({
 					)}
 					<p className="text-muted-foreground text-xs">
 						{formData.uid
-							? "Identifiant unique préservé depuis l'import (lecture seule). Modifier ce champ peut casser la synchronisation."
-							: "Identifiant unique auto-généré. Ne modifiez que lors de l'import d'un événement depuis un fichier ICS pour préserver son identifiant original."}
+							? "Unique identifier preserved from import (read-only). Modifying this field may break synchronization."
+							: "Auto-generated unique identifier. Only modify when importing an event from an ICS file to preserve its original identifier."}
 					</p>
 				</div>
 
 				<div className="space-y-2">
 					<div className="flex items-center gap-2">
 						<Label htmlFor="recurrenceId">
-							Date de l'occurrence modifiée (RECURRENCE-ID)
+							Date of modified occurrence (RECURRENCE-ID)
 						</Label>
 						<TooltipProvider>
 							<Tooltip>
@@ -190,9 +189,9 @@ export function ExpertModeSection({
 								</TooltipTrigger>
 								<TooltipContent>
 									<p>
-										Date et heure de l'occurrence spécifique qui a été modifiée
-										dans une série récurrente. Généré automatiquement lors de la
-										modification d'une occurrence.
+										Date and time of the specific occurrence that was modified
+										in a recurring series. Automatically generated when
+										modifying an occurrence.
 									</p>
 								</TooltipContent>
 							</Tooltip>
@@ -203,8 +202,8 @@ export function ExpertModeSection({
 						value={recurrenceIdDateTime}
 						onChange={handleRecurrenceIdDateTimeChange}
 						disabled={isSubmitting}
-						placeholder="Sélectionner la date et l'heure de l'occurrence"
-						aria-label="Date et heure de l'occurrence modifiée"
+						placeholder="Select the date and time of the occurrence"
+						aria-label="Date and time of the modified occurrence"
 					/>
 					{validationErrors?.recurrenceId && (
 						<p
@@ -217,16 +216,15 @@ export function ExpertModeSection({
 						</p>
 					)}
 					<p className="text-muted-foreground text-xs">
-						Généré automatiquement lors de la modification d'une occurrence
-						récurrente. Ne modifiez que lors de l'import d'un événement avec
-						exception depuis un autre calendrier.
+						Automatically generated when modifying a recurring occurrence. Only
+						modify when importing an event with exception from another calendar.
 					</p>
 				</div>
 
-				{/* RELATED-TO : Très rarement utilisé, masqué par défaut mais disponible si nécessaire */}
+				{/* RELATED-TO: Very rarely used, hidden by default but available if needed */}
 				{formData.relatedTo && (
 					<div className="space-y-2">
-						<Label htmlFor="relatedTo">Événement lié (RELATED-TO)</Label>
+						<Label htmlFor="relatedTo">Related event (RELATED-TO)</Label>
 						{calendarId ? (
 							<>
 								<Select
@@ -239,16 +237,16 @@ export function ExpertModeSection({
 									disabled={isSubmitting}
 								>
 									<SelectTrigger>
-										<SelectValue placeholder="Sélectionner un événement" />
+										<SelectValue placeholder="Select an event" />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="none">Aucun</SelectItem>
+										<SelectItem value="none">None</SelectItem>
 										{relatedToEventList}
 									</SelectContent>
 								</Select>
 								<p className="text-muted-foreground text-xs">
-									Propriété très rarement utilisée. Permet de lier cet événement
-									à un autre événement du calendrier.
+									Very rarely used property. Allows linking this event to
+									another event in the calendar.
 								</p>
 							</>
 						) : (
@@ -257,7 +255,7 @@ export function ExpertModeSection({
 								value={formData.relatedTo || ""}
 								onChange={(e) => onChange({ relatedTo: e.target.value })}
 								disabled={isSubmitting}
-								placeholder="UID d'un événement lié"
+								placeholder="UID of a related event"
 							/>
 						)}
 					</div>
@@ -265,7 +263,7 @@ export function ExpertModeSection({
 
 				<div className="space-y-2">
 					<div className="flex items-center gap-2">
-						<Label htmlFor="sequence">Séquence (SEQUENCE)</Label>
+						<Label htmlFor="sequence">Sequence (SEQUENCE)</Label>
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>
@@ -273,8 +271,8 @@ export function ExpertModeSection({
 								</TooltipTrigger>
 								<TooltipContent>
 									<p>
-										Numéro de séquence incrémenté automatiquement lors des mises
-										à jour. Utile pour la synchronisation entre calendriers.
+										Sequence number automatically incremented during updates.
+										Useful for calendar synchronization.
 									</p>
 								</TooltipContent>
 							</Tooltip>
@@ -291,8 +289,8 @@ export function ExpertModeSection({
 						className="bg-muted"
 					/>
 					<p className="text-muted-foreground text-xs">
-						Numéro de séquence pour la synchronisation (lecture seule, géré
-						automatiquement).
+						Sequence number for synchronization (read-only, managed
+						automatically).
 					</p>
 				</div>
 			</div>

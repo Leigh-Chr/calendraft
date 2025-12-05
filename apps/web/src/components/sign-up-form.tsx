@@ -44,7 +44,7 @@ export default function SignUpForm({
 						} else {
 							navigate({ to: "/calendars" });
 						}
-						toast.success("Inscription réussie");
+						toast.success("Registration successful");
 					},
 					onError: (error) => {
 						toast.error(error.error.message || error.error.statusText);
@@ -54,11 +54,11 @@ export default function SignUpForm({
 		},
 		validators: {
 			onSubmit: z.object({
-				name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-				email: z.email("Adresse email invalide"),
+				name: z.string().min(2, "Name must contain at least 2 characters"),
+				email: z.email("Invalid email address"),
 				password: z
 					.string()
-					.min(8, "Le mot de passe doit contenir au moins 8 caractères"),
+					.min(8, "Password must contain at least 8 characters"),
 			}),
 		},
 	});
@@ -81,10 +81,10 @@ export default function SignUpForm({
 					<div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 shadow-lg shadow-primary/20">
 						<Calendar className="size-7 text-primary" />
 					</div>
-					<h1 className="text-center font-bold text-3xl">Créer un compte</h1>
+					<h1 className="text-center font-bold text-3xl">Create an account</h1>
 					<p className="mt-2 flex items-center gap-2 text-center text-muted-foreground text-sm">
 						<Sparkles className="size-4 text-primary" />
-						Synchronisez vos calendriers partout
+						Synchronize your calendars everywhere
 					</p>
 				</div>
 
@@ -102,7 +102,7 @@ export default function SignUpForm({
 							<form.Field name="name">
 								{(field) => (
 									<div className="space-y-2">
-										<Label htmlFor={field.name}>Nom</Label>
+										<Label htmlFor={field.name}>Name</Label>
 										<Input
 											id={field.name}
 											name={field.name}
@@ -147,7 +147,7 @@ export default function SignUpForm({
 							<form.Field name="password">
 								{(field) => (
 									<div className="space-y-2">
-										<Label htmlFor={field.name}>Mot de passe</Label>
+										<Label htmlFor={field.name}>Password</Label>
 										<Input
 											id={field.name}
 											name={field.name}
@@ -173,9 +173,7 @@ export default function SignUpForm({
 									className="interactive-glow w-full"
 									disabled={!state.canSubmit || state.isSubmitting}
 								>
-									{state.isSubmitting
-										? "Inscription en cours..."
-										: "S'inscrire"}
+									{state.isSubmitting ? "Registering..." : "Sign up"}
 								</Button>
 							)}
 						</form.Subscribe>
@@ -183,7 +181,7 @@ export default function SignUpForm({
 
 					<div className="mt-4 text-center">
 						<Button variant="link" onClick={onSwitchToSignIn}>
-							Déjà un compte ? Se connecter
+							Already have an account? Sign in
 						</Button>
 					</div>
 				</div>

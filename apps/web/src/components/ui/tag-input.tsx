@@ -27,8 +27,8 @@ export function TagInput({
 	value,
 	onChange,
 	disabled = false,
-	placeholder = "Ajouter un tag (Entrée ou virgule)",
-	helpText = "Appuyez sur Entrée ou tapez une virgule pour ajouter un tag",
+	placeholder = "Add a tag (Enter or comma)",
+	helpText = "Press Enter or type a comma to add a tag",
 	maxTagLength,
 	maxTotalLength,
 }: TagInputProps) {
@@ -134,7 +134,7 @@ export function TagInput({
 								onClick={() => handleRemoveTag(tag)}
 								disabled={disabled}
 								className="ml-1 rounded-full p-0.5 transition-colors hover:bg-destructive/20"
-								aria-label={`Supprimer ${tag}`}
+								aria-label={`Remove ${tag}`}
 							>
 								<X className="h-3 w-3" />
 							</button>

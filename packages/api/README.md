@@ -1,6 +1,6 @@
 # @calendraft/api
 
-API tRPC pour Calendraft avec routers, procedures et middleware d'authentification.
+tRPC API for Calendraft with routers, procedures, and authentication middleware.
 
 ## Installation
 
@@ -8,13 +8,13 @@ API tRPC pour Calendraft avec routers, procedures et middleware d'authentificati
 bun add @calendraft/api
 ```
 
-## Usage rapide
+## Quick usage
 
 ```typescript
 import { appRouter, createContext } from '@calendraft/api';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
-// Dans un handler Hono
+// In a Hono handler
 app.use('/trpc/*', async (c) => {
   return fetchRequestHandler({
     endpoint: '/trpc',
@@ -27,123 +27,123 @@ app.use('/trpc/*', async (c) => {
 
 ## Architecture
 
-### Routers disponibles
+### Available routers
 
 | Router | Description |
 |--------|-------------|
-| `calendar` | CRUD des calendriers (liste, création, import, export, fusion) |
-| `event` | CRUD des événements (création, modification, suppression) |
+| `calendar` | Calendar CRUD (list, create, import, export, merge) |
+| `event` | Event CRUD (create, update, delete) |
 
 ### Procedures
 
 ```typescript
 import { publicProcedure, protectedProcedure, router } from '@calendraft/api';
 
-// Procedure publique (accessible sans auth)
+// Public procedure (accessible without auth)
 const myRouter = router({
   getPublicData: publicProcedure.query(() => {
     return { data: 'public' };
   }),
   
-  // Procedure protégée (nécessite authentification)
+  // Protected procedure (requires authentication)
   getPrivateData: protectedProcedure.query(({ ctx }) => {
     return { userId: ctx.session.user.id };
   }),
 });
 ```
 
-### Contexte
+### Context
 
-Le contexte inclut :
+The context includes:
 
 ```typescript
 type Context = {
-  session: Session | null;    // Session Better-Auth si authentifié
-  anonymousId: string | null; // ID anonyme via header x-anonymous-id
-  userId: string | null;      // session.user.id ou anonymousId
+  session: Session | null;    // Better-Auth session if authenticated
+  anonymousId: string | null; // Anonymous ID via x-anonymous-id header
+  userId: string | null;      // session.user.id or anonymousId
 };
 ```
 
-## Routers détaillés
+## Detailed routers
 
 ### Calendar Router
 
 ```typescript
-// Liste des calendriers de l'utilisateur
+// List user's calendars
 trpc.calendar.list.query();
 
-// Obtenir un calendrier par ID
+// Get calendar by ID
 trpc.calendar.getById.query({ id: 'calendar-id' });
 
-// Créer un calendrier vide
-trpc.calendar.create.mutate({ name: 'Mon Calendrier' });
+// Create empty calendar
+trpc.calendar.create.mutate({ name: 'My Calendar' });
 
-// Importer un fichier ICS
+// Import ICS file
 trpc.calendar.import.mutate({ 
   name: 'Imported',
   icsContent: '...'
 });
 
-// Exporter en ICS
+// Export as ICS
 trpc.calendar.export.query({ id: 'calendar-id' });
 
-// Fusionner plusieurs calendriers
+// Merge multiple calendars
 trpc.calendar.merge.mutate({
   calendarIds: ['id1', 'id2'],
   name: 'Merged'
 });
 
-// Supprimer un calendrier
+// Delete calendar
 trpc.calendar.delete.mutate({ id: 'calendar-id' });
 ```
 
 ### Event Router
 
 ```typescript
-// Liste des événements d'un calendrier
+// List calendar events
 trpc.event.list.query({ calendarId: 'calendar-id' });
 
-// Créer un événement
+// Create event
 trpc.event.create.mutate({
   calendarId: 'calendar-id',
-  title: 'Réunion',
+  title: 'Meeting',
   startDate: new Date(),
   endDate: new Date(),
-  // ... autres champs optionnels
+  // ... other optional fields
 });
 
-// Modifier un événement
+// Update event
 trpc.event.update.mutate({
   id: 'event-id',
-  title: 'Nouveau titre'
+  title: 'New title'
 });
 
-// Supprimer un événement
+// Delete event
 trpc.event.delete.mutate({ id: 'event-id' });
 ```
 
 ## Exports
 
 ```typescript
-// Router principal
+// Main router
 export { appRouter, type AppRouter } from '@calendraft/api/routers';
 
 // Context
 export { createContext, type Context } from '@calendraft/api/context';
 
-// Utilitaires
+// Utilities
 export { t, router, publicProcedure, protectedProcedure } from '@calendraft/api';
 
 // Middleware
 export { authMiddleware, createAuthMiddleware } from '@calendraft/api/middleware';
 ```
 
-## Gestion des erreurs
+## Error handling
 
-Les erreurs tRPC sont automatiquement loggées avec contexte :
+tRPC errors are automatically logged with context:
 
 ```typescript
-// Erreurs INTERNAL_SERVER_ERROR et BAD_REQUEST sont loggées
+// INTERNAL_SERVER_ERROR and BAD_REQUEST errors are logged
 {
   code: 'INTERNAL_SERVER_ERROR',
   message: 'Error message',
@@ -152,22 +152,21 @@ Les erreurs tRPC sont automatiquement loggées avec contexte :
 }
 ```
 
-## Dépendances
+## Dependencies
 
-- `@trpc/server` - Framework tRPC
-- `@calendraft/auth` - Authentification
-- `@calendraft/db` - Base de données
-- `@calendraft/schemas` - Validation Zod
-- `@calendraft/ics-utils` - Parsing/génération ICS
+- `@trpc/server` - tRPC framework
+- `@calendraft/auth` - Authentication
+- `@calendraft/db` - Database
+- `@calendraft/schemas` - Zod validation
+- `@calendraft/ics-utils` - ICS parsing/generation
 
-## Voir aussi
+## See also
 
-- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Architecture globale du projet
-- [@calendraft/auth](../auth/README.md) - Configuration Better-Auth
-- [@calendraft/db](../db/README.md) - Client Prisma
-- [@calendraft/schemas](../schemas/README.md) - Schémas de validation
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Global project architecture
+- [@calendraft/auth](../auth/README.md) - Better-Auth configuration
+- [@calendraft/db](../db/README.md) - Prisma client
+- [@calendraft/schemas](../schemas/README.md) - Validation schemas
 
 ## License
 
 MIT
-

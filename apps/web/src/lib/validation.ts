@@ -14,7 +14,7 @@ export function validateEmail(email: string): string | undefined {
 	if (!email || !email.trim()) return undefined;
 	const result = emailSchema.safeParse(email);
 	if (!result.success) {
-		return result.error.issues[0]?.message || "Format d'email invalide";
+		return result.error.issues[0]?.message || "Invalid email format";
 	}
 	return undefined;
 }
@@ -28,7 +28,7 @@ export function validateURL(url: string): string | undefined {
 	if (!url || !url.trim()) return undefined;
 	const result = urlSchema.safeParse(url);
 	if (!result.success) {
-		return result.error.issues[0]?.message || "Format d'URL invalide";
+		return result.error.issues[0]?.message || "Invalid URL format";
 	}
 	return undefined;
 }

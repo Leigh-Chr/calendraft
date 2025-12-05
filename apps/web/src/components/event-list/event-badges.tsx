@@ -13,17 +13,17 @@ import type { EventItem } from "./types";
 const STATUS_CONFIG = {
 	CONFIRMED: {
 		dot: "bg-green-500",
-		label: "Confirmé",
+		label: "Confirmed",
 		show: false, // Don't show badge for confirmed (default state)
 	},
 	TENTATIVE: {
 		dot: "bg-amber-500",
-		label: "Tentatif",
+		label: "Tentative",
 		show: true,
 	},
 	CANCELLED: {
 		dot: "bg-red-500",
-		label: "Annulé",
+		label: "Canceled",
 		show: true,
 		strikethrough: true,
 	},
@@ -73,7 +73,7 @@ export const ClassBadge = React.memo(function ClassBadge({
 	return (
 		<span
 			className="inline-flex items-center gap-1 text-muted-foreground text-xs"
-			title={classValue === "PRIVATE" ? "Privé" : "Confidentiel"}
+			title={classValue === "PRIVATE" ? "Private" : "Confidential"}
 		>
 			<Lock className="h-3 w-3" />
 		</span>
@@ -115,7 +115,7 @@ export const RecurrenceBadge = React.memo(function RecurrenceBadge({
 	return (
 		<span
 			className="inline-flex items-center text-muted-foreground"
-			title="Événement récurrent"
+			title="Recurring event"
 		>
 			<Repeat className="h-3.5 w-3.5" />
 		</span>

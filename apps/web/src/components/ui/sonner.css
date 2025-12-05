@@ -1,6 +1,6 @@
-/* Styles personnalisés pour Sonner alignés avec shadcn/ui */
+/* Custom styles for Sonner aligned with shadcn/ui */
 
-/* Variables CSS pour Sonner */
+/* CSS variables for Sonner */
 [data-sonner-toaster] {
 	--normal-bg: var(--popover);
 	--normal-text: var(--popover-foreground);
@@ -8,13 +8,13 @@
 	--border-radius: var(--radius);
 }
 
-/* Style général pour tous les toasts - utilise les variables inline définies dans le composant */
+/* General style for all toasts - uses inline variables defined in the component */
 [data-sonner-toast] {
 	border-radius: var(--radius);
 	font-family: var(--font-sans);
 }
 
-/* Personnalisation des couleurs avec richColors - les couleurs sont gérées par Sonner mais on s'assure que le style de base est cohérent */
+/* Color customization with richColors - colors are managed by Sonner but we ensure the base style is consistent */
 [data-sonner-toast][data-styled="true"] {
 	box-shadow:
 		0 4px 6px -1px rgba(0, 0, 0, 0.1),

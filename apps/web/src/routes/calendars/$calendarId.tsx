@@ -58,12 +58,13 @@ export const Route = createFileRoute("/calendars/$calendarId")({
 	},
 	head: () => ({
 		meta: [
-			{ title: "Calendrier - Calendraft" },
+			{ title: "Calendar - Calendraft" },
 			{ name: "robots", content: "noindex, nofollow" },
 		],
 	}),
 });
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex component with multiple state and effects
 function CalendarViewComponent() {
 	const { calendarId } = Route.useParams();
 	const search = Route.useSearch();
@@ -115,10 +116,10 @@ function CalendarViewComponent() {
 				});
 				if (data.removedCount > 0) {
 					toast.success(
-						`${data.removedCount} doublon(s) supprimé(s). ${data.remainingEvents} événement(s) restant(s).`,
+						`${data.removedCount} duplicate(s) removed. ${data.remainingEvents} event(s) remaining.`,
 					);
 				} else {
-					toast.info("Aucun doublon trouvé dans ce calendrier.");
+					toast.info("No duplicates found in this calendar.");
 				}
 				setCleanDialogOpen(false);
 			},
@@ -126,7 +127,7 @@ function CalendarViewComponent() {
 				const message =
 					error instanceof Error
 						? error.message
-						: "Erreur lors du nettoyage des doublons";
+						: "Error during duplicate cleanup";
 				toast.error(message);
 			},
 		}),
@@ -141,14 +142,12 @@ function CalendarViewComponent() {
 				});
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
 				toast.success(
-					`Calendrier actualisé ! ${data.importedEvents} nouveau(x) événement(s), ${data.skippedDuplicates} doublon(s) ignoré(s).`,
+					`Calendar updated! ${data.importedEvents} new event(s), ${data.skippedDuplicates} duplicate(s) skipped.`,
 				);
 			},
 			onError: (error: unknown) => {
 				const message =
-					error instanceof Error
-						? error.message
-						: "Erreur lors de l'actualisation";
+					error instanceof Error ? error.message : "Error during update";
 				toast.error(message);
 			},
 		}),
@@ -184,7 +183,7 @@ function CalendarViewComponent() {
 					<div className="gradient-mesh absolute inset-0 opacity-30" />
 				</div>
 				<div className="container mx-auto max-w-6xl px-4 py-10">
-					<div className="text-center text-muted-foreground">Chargement...</div>
+					<div className="text-center text-muted-foreground">Loading...</div>
 				</div>
 			</div>
 		);
@@ -198,7 +197,7 @@ function CalendarViewComponent() {
 				</div>
 				<div className="container mx-auto max-w-6xl px-4 py-10">
 					<div className="text-center text-muted-foreground">
-						Calendrier non trouvé
+						Calendar not found
 					</div>
 				</div>
 			</div>
@@ -218,7 +217,7 @@ function CalendarViewComponent() {
 				<div className="mb-6 flex items-center justify-between">
 					<div>
 						<h1 className="font-bold text-3xl">{calendar.name}</h1>
-						<p className="text-muted-foreground">{eventCount} événement(s)</p>
+						<p className="text-muted-foreground">{eventCount} event(s)</p>
 					</div>
 					<div className="flex gap-2">
 						<Button
@@ -230,7 +229,7 @@ function CalendarViewComponent() {
 							}
 						>
 							<Plus className="mr-2 h-4 w-4" />
-							Ajouter un événement
+							Add an event
 						</Button>
 						<div id={TOUR_STEP_IDS.ACTION_BUTTONS} className="flex gap-2">
 							<Button
@@ -241,7 +240,7 @@ function CalendarViewComponent() {
 								}
 							>
 								<Upload className="mr-2 h-4 w-4" />
-								Importer
+								Import
 							</Button>
 							{/* Refresh button - only shown for calendars with a source URL */}
 							{calendar.sourceUrl && (
@@ -250,14 +249,14 @@ function CalendarViewComponent() {
 									size="sm"
 									onClick={handleRefreshFromUrl}
 									disabled={refreshFromUrlMutation.isPending}
-									title={`Actualiser depuis ${calendar.sourceUrl}`}
+									title={`Refresh from ${calendar.sourceUrl}`}
 								>
 									{refreshFromUrlMutation.isPending ? (
 										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									) : (
 										<RefreshCw className="mr-2 h-4 w-4" />
 									)}
-									Actualiser
+									Refresh
 								</Button>
 							)}
 							<Button
@@ -266,7 +265,7 @@ function CalendarViewComponent() {
 								onClick={() => setCleanDialogOpen(true)}
 							>
 								<Sparkles className="mr-2 h-4 w-4" />
-								Nettoyer
+								Clean up
 							</Button>
 							<Button
 								variant="outline"
@@ -279,7 +278,7 @@ function CalendarViewComponent() {
 								}
 							>
 								<Merge className="mr-2 h-4 w-4" />
-								Fusionner
+								Merge
 							</Button>
 							<Button
 								variant="outline"
@@ -287,7 +286,7 @@ function CalendarViewComponent() {
 								onClick={() => setExportDialogOpen(true)}
 							>
 								<Download className="mr-2 h-4 w-4" />
-								Exporter
+								Export
 							</Button>
 							<Button
 								variant="outline"
@@ -295,7 +294,7 @@ function CalendarViewComponent() {
 								onClick={() => setShareDialogOpen(true)}
 							>
 								<Link2 className="mr-2 h-4 w-4" />
-								Partager
+								Share
 							</Button>
 						</div>
 					</div>
@@ -314,7 +313,7 @@ function CalendarViewComponent() {
 							onClick={() => updateSearch({ view: "list" })}
 						>
 							<List className="mr-2 h-4 w-4" />
-							Liste
+							List
 						</Button>
 						<Button
 							variant={viewMode === "calendar" ? "default" : "ghost"}
@@ -323,7 +322,7 @@ function CalendarViewComponent() {
 							onClick={() => updateSearch({ view: "calendar" })}
 						>
 							<CalendarIcon className="mr-2 h-4 w-4" />
-							Calendrier
+							Calendar
 						</Button>
 					</div>
 
@@ -335,30 +334,30 @@ function CalendarViewComponent() {
 								size="sm"
 								className="h-8"
 								onClick={() => updateSearch({ calendarView: "month" })}
-								title="Vue mois"
+								title="Month view"
 							>
 								<CalendarIcon className="h-4 w-4" />
-								<span className="ml-2 hidden sm:inline">Mois</span>
+								<span className="ml-2 hidden sm:inline">Month</span>
 							</Button>
 							<Button
 								variant={search.calendarView === "week" ? "default" : "ghost"}
 								size="sm"
 								className="h-8"
 								onClick={() => updateSearch({ calendarView: "week" })}
-								title="Vue semaine"
+								title="Week view"
 							>
 								<CalendarRange className="h-4 w-4" />
-								<span className="ml-2 hidden sm:inline">Semaine</span>
+								<span className="ml-2 hidden sm:inline">Week</span>
 							</Button>
 							<Button
 								variant={search.calendarView === "day" ? "default" : "ghost"}
 								size="sm"
 								className="h-8"
 								onClick={() => updateSearch({ calendarView: "day" })}
-								title="Vue jour"
+								title="Day view"
 							>
 								<CalendarDays className="h-4 w-4" />
-								<span className="ml-2 hidden sm:inline">Jour</span>
+								<span className="ml-2 hidden sm:inline">Day</span>
 							</Button>
 						</div>
 					)}
@@ -398,21 +397,19 @@ function CalendarViewComponent() {
 				<AlertDialog open={cleanDialogOpen} onOpenChange={setCleanDialogOpen}>
 					<AlertDialogContent>
 						<AlertDialogHeader>
-							<AlertDialogTitle>Nettoyer les doublons</AlertDialogTitle>
+							<AlertDialogTitle>Clean up duplicates</AlertDialogTitle>
 							<AlertDialogDescription>
-								Cela supprimera tous les événements en double (même titre et
-								mêmes horaires). Cette action est irréversible. Continuer ?
+								This will remove all duplicate events (same title and same
+								times). This action is irreversible. Continue?
 							</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
-							<AlertDialogCancel>Annuler</AlertDialogCancel>
+							<AlertDialogCancel>Cancel</AlertDialogCancel>
 							<AlertDialogAction
 								onClick={handleCleanDuplicates}
 								disabled={cleanDuplicatesMutation.isPending}
 							>
-								{cleanDuplicatesMutation.isPending
-									? "Nettoyage..."
-									: "Nettoyer"}
+								{cleanDuplicatesMutation.isPending ? "Cleaning..." : "Clean up"}
 							</AlertDialogAction>
 						</AlertDialogFooter>
 					</AlertDialogContent>

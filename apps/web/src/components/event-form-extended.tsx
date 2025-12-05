@@ -104,7 +104,7 @@ function RelatedToEventList({
 				.map((event) => (
 					<SelectItem key={event.uid || event.id} value={event.uid || event.id}>
 						{event.title} -{" "}
-						{format(new Date(event.startDate), "dd/MM/yyyy HH:mm")}
+						{format(new Date(event.startDate), "yyyy-MM-dd HH:mm")}
 					</SelectItem>
 				))}
 		</>
@@ -174,17 +174,13 @@ export function EventFormExtended({
 			// Parse RDATE/EXDATE from JSON strings
 			const rdates = parseDateArray(initialData.rdate, "RDATE");
 			if (rdates.length === 0 && initialData.rdate) {
-				toast.error(
-					"Format de dates invalide pour les dates additionnelles (RDATE)",
-				);
+				toast.error("Invalid date format for additional dates (RDATE)");
 			}
 			setRdateList(rdates);
 
 			const exdates = parseDateArray(initialData.exdate, "EXDATE");
 			if (exdates.length === 0 && initialData.exdate) {
-				toast.error(
-					"Format de dates invalide pour les dates d'exception (EXDATE)",
-				);
+				toast.error("Invalid date format for exception dates (EXDATE)");
 			}
 			setExdateList(exdates);
 		}
@@ -221,7 +217,7 @@ export function EventFormExtended({
 			if (hasModifications && mode === "edit") {
 				e.preventDefault();
 				e.returnValue =
-					"Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ?";
+					"You have unsaved changes. Are you sure you want to leave?";
 				return e.returnValue;
 			}
 		};
@@ -256,13 +252,13 @@ export function EventFormExtended({
 			() => errors.organizerEmail || null,
 			() =>
 				errors.attendeeEmails && Object.keys(errors.attendeeEmails).length > 0
-					? "Veuillez corriger les emails invalides des participants"
+					? "Please correct invalid attendee emails"
 					: null,
 			() => errors.geoLatitude || null,
 			() => errors.geoLongitude || null,
 			() =>
 				errors.alarms && Object.keys(errors.alarms).length > 0
-					? "Veuillez corriger les erreurs dans les alertes"
+					? "Please correct errors in alerts"
 					: null,
 			() => errors.uid || null,
 			() => errors.recurrenceId || null,
@@ -401,24 +397,22 @@ export function EventFormExtended({
 					<div className="flex items-start justify-between">
 						<div className="space-y-1.5">
 							<CardTitle className="flex items-center gap-2">
-								{mode === "create"
-									? "Créer un événement"
-									: "Modifier l'événement"}
+								{mode === "create" ? "Create an event" : "Edit event"}
 								{hasModifications && mode === "edit" && (
 									<Badge variant="outline" className="text-xs">
-										Modifications non enregistrées
+										Unsaved changes
 									</Badge>
 								)}
 							</CardTitle>
 							<CardDescription>
-								Remplissez les informations de votre événement. Les champs
-								marqués d'un astérisque (*) sont obligatoires.
+								Fill in your event information. Fields marked with an asterisk
+								(*) are required.
 							</CardDescription>
 							{fromQuickCreate && (
 								<div className="flex items-center gap-2 pt-2 text-muted-foreground text-sm">
-									<span>⚡ Création rapide</span>
+									<span>⚡ Quick creation</span>
 									<span>→</span>
-									<span>📋 Options avancées</span>
+									<span>📋 Advanced options</span>
 									{onReturnToQuickCreate && (
 										<Button
 											type="button"
@@ -427,7 +421,7 @@ export function EventFormExtended({
 											onClick={onReturnToQuickCreate}
 											className="h-auto p-0 text-sm"
 										>
-											← Retour
+											← Back
 										</Button>
 									)}
 								</div>
@@ -437,10 +431,10 @@ export function EventFormExtended({
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSubmit} className="space-y-8">
-						{/* Section 1: Informations essentielles */}
+						{/* Section 1: Essential information */}
 						<CollapsibleSection
 							id="basic"
-							title="Informations essentielles"
+							title="Essential information"
 							isExpanded={expandedSections.has("basic")}
 							onToggle={() => toggleSection("basic")}
 							icon={FileText}
@@ -453,7 +447,7 @@ export function EventFormExtended({
 									if (data.title !== undefined) {
 										const titleError = data.title.trim()
 											? undefined
-											: "Le titre est requis";
+											: "Title is required";
 										setValidationErrors((prev) => ({
 											...prev,
 											title: titleError,
@@ -495,10 +489,10 @@ export function EventFormExtended({
 							/>
 						</CollapsibleSection>
 
-						{/* Section 2: Récurrence */}
+						{/* Section 2: Recurrence */}
 						<CollapsibleSection
 							id="recurrence"
-							title="Récurrence"
+							title="Recurrence"
 							isExpanded={expandedSections.has("recurrence")}
 							onToggle={() => toggleSection("recurrence")}
 							icon={Repeat}
@@ -516,10 +510,10 @@ export function EventFormExtended({
 							/>
 						</CollapsibleSection>
 
-						{/* Section 4: Participants et organisateur */}
+						{/* Section 4: Participants and organizer */}
 						<CollapsibleSection
 							id="people"
-							title="Participants et organisateur"
+							title="Attendees and organizer"
 							isExpanded={expandedSections.has("people")}
 							onToggle={() => toggleSection("people")}
 							icon={Users}
@@ -538,10 +532,10 @@ export function EventFormExtended({
 							/>
 						</CollapsibleSection>
 
-						{/* Section 5: Alertes et notifications */}
+						{/* Section 5: Alerts and notifications */}
 						<CollapsibleSection
 							id="alarms"
-							title="Alertes et notifications"
+							title="Alerts and notifications"
 							isExpanded={expandedSections.has("alarms")}
 							onToggle={() => toggleSection("alarms")}
 							badge={formData.alarms?.length || 0}
@@ -565,21 +559,21 @@ export function EventFormExtended({
 							/>
 						</CollapsibleSection>
 
-						{/* Section: Options avancées (fermée par défaut) */}
+						{/* Section: Advanced options (closed by default) */}
 						<CollapsibleSection
 							id="advanced"
-							title="Options avancées"
-							description="Localisation précise, organisation, visibilité, informations complémentaires et mode expert."
+							title="Advanced options"
+							description="Precise location, organization, visibility, additional information, and expert mode."
 							isExpanded={expandedSections.has("advanced")}
 							onToggle={() => toggleSection("advanced")}
 							icon={Settings}
 						>
 							<div className="space-y-6">
-								{/* Section 3: Localisation avancée */}
+								{/* Section 3: Advanced location */}
 								<CollapsibleSection
 									id="geo"
-									title="Localisation avancée"
-									description="Coordonnées géographiques précises pour le lieu de l'événement."
+									title="Advanced location"
+									description="Precise geographic coordinates for the event location."
 									isExpanded={expandedSections.has("geo")}
 									onToggle={() => toggleSection("geo")}
 									icon={MapPin}
@@ -616,11 +610,11 @@ export function EventFormExtended({
 									/>
 								</CollapsibleSection>
 
-								{/* Section 6: Métadonnées et organisation */}
+								{/* Section 6: Organization and visibility */}
 								<CollapsibleSection
 									id="metadata"
-									title="Organisation et visibilité"
-									description="Statut, priorité, catégories, couleur, visibilité et disponibilité de l'événement."
+									title="Organization and visibility"
+									description="Status, priority, categories, color, visibility, and event availability."
 									isExpanded={expandedSections.has("metadata")}
 									onToggle={() => toggleSection("metadata")}
 									icon={Settings}
@@ -634,11 +628,11 @@ export function EventFormExtended({
 									/>
 								</CollapsibleSection>
 
-								{/* Section 7: Informations complémentaires */}
+								{/* Section 7: Additional information */}
 								<CollapsibleSection
 									id="additional"
-									title="Informations complémentaires"
-									description="URL, ressources nécessaires et autres détails."
+									title="Additional information"
+									description="URL, required resources, and other details."
 									isExpanded={expandedSections.has("additional")}
 									onToggle={() => toggleSection("additional")}
 									icon={Link2}
@@ -669,7 +663,7 @@ export function EventFormExtended({
 											}}
 											className="flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground"
 										>
-											<span>Mode Expert</span>
+											<span>Expert Mode</span>
 											<HelpCircle className="h-4 w-4" />
 										</button>
 										<Button
@@ -679,14 +673,14 @@ export function EventFormExtended({
 											onClick={() => setExpertMode(!expertMode)}
 											disabled={isSubmitting}
 										>
-											{expertMode ? "Masquer" : "Afficher"}
+											{expertMode ? "Hide" : "Show"}
 										</Button>
 									</div>
 									{expertMode && (
 										<CollapsibleSection
 											id="expert"
-											title="Propriétés ICS avancées"
-											description="Champs techniques pour les utilisateurs avancés (UID, RECURRENCE-ID, etc.)."
+											title="Advanced ICS properties"
+											description="Technical fields for advanced users (UID, RECURRENCE-ID, etc.)."
 											isExpanded={expandedSections.has("expert")}
 											onToggle={() => toggleSection("expert")}
 											icon={Code}
@@ -734,17 +728,17 @@ export function EventFormExtended({
 								{isSubmitting ? (
 									<>
 										<Loader2 className="h-4 w-4 animate-spin" />
-										{mode === "create" ? "Création..." : "Modification..."}
+										{mode === "create" ? "Creating..." : "Updating..."}
 									</>
 								) : mode === "create" ? (
 									<>
 										<FileText className="h-4 w-4" />
-										Créer
+										Create
 									</>
 								) : (
 									<>
 										<FileText className="h-4 w-4" />
-										Enregistrer
+										Save
 									</>
 								)}
 							</Button>
@@ -755,7 +749,7 @@ export function EventFormExtended({
 								disabled={isSubmitting}
 							>
 								<X className="h-4 w-4" />
-								Annuler
+								Cancel
 							</Button>
 						</div>
 					</form>

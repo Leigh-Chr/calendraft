@@ -44,7 +44,7 @@ export function AdditionalInfoSection({
 			<div className="space-y-2">
 				<Label htmlFor="url" className="flex items-center gap-2">
 					<Link2 className="h-4 w-4 text-muted-foreground" />
-					URL (lien web)
+					URL (web link)
 				</Label>
 				<Input
 					id="url"
@@ -68,10 +68,10 @@ export function AdditionalInfoSection({
 					</p>
 				) : (
 					<p className="text-muted-foreground text-xs">
-						Lien vers une page web liée à l'événement (site web, document
-						partagé, visioconférence, etc.).
+						Link to a web page related to the event (website, shared document,
+						video conference, etc.).
 						<span className="mt-1 block">
-							Doit commencer par http:// ou https://
+							Must start with http:// or https://
 						</span>
 					</p>
 				)}
@@ -80,7 +80,7 @@ export function AdditionalInfoSection({
 			<div className="space-y-2">
 				<div className="flex items-center gap-2">
 					<Package className="h-4 w-4 text-muted-foreground" />
-					<Label htmlFor="resources">Ressources nécessaires</Label>
+					<Label htmlFor="resources">Required resources</Label>
 				</div>
 				<TagInput
 					id="resources"
@@ -88,8 +88,8 @@ export function AdditionalInfoSection({
 					value={formData.resources}
 					onChange={(value) => onChange({ resources: value })}
 					disabled={isSubmitting}
-					placeholder="Ex: Projecteur, Salle de conférence, Micro..."
-					helpText="Listez les ressources matérielles ou lieux nécessaires pour cet événement"
+					placeholder="Ex: Projector, Conference room, Microphone..."
+					helpText="List the material resources or locations needed for this event"
 					maxTagLength={FIELD_LIMITS.TAG}
 					maxTotalLength={500}
 				/>

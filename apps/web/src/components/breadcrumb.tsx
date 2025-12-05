@@ -27,7 +27,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 
 	return (
 		<nav
-			aria-label="Fil d'Ariane"
+			aria-label="Breadcrumb"
 			className={cn("flex items-center space-x-2 text-sm", className)}
 		>
 			<Button
@@ -35,7 +35,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 				size="sm"
 				onClick={() => handleClick("/calendars")}
 				className="h-8 px-2"
-				aria-label="Accueil - Mes calendriers"
+				aria-label="Home - My calendars"
 			>
 				<Home className="h-4 w-4" aria-hidden="true" />
 			</Button>

@@ -42,7 +42,7 @@ export default function SignInForm({
 						} else {
 							navigate({ to: "/calendars" });
 						}
-						toast.success("Connexion réussie");
+						toast.success("Login successful");
 					},
 					onError: (error) => {
 						toast.error(error.error.message || error.error.statusText);
@@ -52,10 +52,10 @@ export default function SignInForm({
 		},
 		validators: {
 			onSubmit: z.object({
-				email: z.email("Adresse email invalide"),
+				email: z.email("Invalid email address"),
 				password: z
 					.string()
-					.min(8, "Le mot de passe doit contenir au moins 8 caractères"),
+					.min(8, "Password must contain at least 8 characters"),
 			}),
 		},
 	});
@@ -78,9 +78,9 @@ export default function SignInForm({
 					<div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 shadow-lg shadow-primary/20">
 						<Calendar className="size-7 text-primary" />
 					</div>
-					<h1 className="text-center font-bold text-3xl">Bon retour !</h1>
+					<h1 className="text-center font-bold text-3xl">Welcome back!</h1>
 					<p className="mt-2 text-center text-muted-foreground text-sm">
-						Connectez-vous pour accéder à vos calendriers
+						Sign in to access your calendars
 					</p>
 				</div>
 
@@ -121,7 +121,7 @@ export default function SignInForm({
 							<form.Field name="password">
 								{(field) => (
 									<div className="space-y-2">
-										<Label htmlFor={field.name}>Mot de passe</Label>
+										<Label htmlFor={field.name}>Password</Label>
 										<Input
 											id={field.name}
 											name={field.name}
@@ -147,9 +147,7 @@ export default function SignInForm({
 									className="interactive-glow w-full"
 									disabled={!state.canSubmit || state.isSubmitting}
 								>
-									{state.isSubmitting
-										? "Connexion en cours..."
-										: "Se connecter"}
+									{state.isSubmitting ? "Signing in..." : "Sign in"}
 								</Button>
 							)}
 						</form.Subscribe>
@@ -157,7 +155,7 @@ export default function SignInForm({
 
 					<div className="mt-4 text-center">
 						<Button variant="link" onClick={onSwitchToSignUp}>
-							Pas encore de compte ? S'inscrire
+							Don't have an account? Sign up
 						</Button>
 					</div>
 				</div>

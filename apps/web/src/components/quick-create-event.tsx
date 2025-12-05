@@ -1,11 +1,11 @@
 /**
- * Quick Create Event - Modal rapide pour créer un événement
- * S'affiche au clic sur un slot du calendrier pour une création simplifiée
+ * Quick Create Event - Quick modal to create an event
+ * Displays on calendar slot click for simplified creation
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import {
 	Calendar,
 	ChevronRight,
@@ -35,12 +35,12 @@ interface QuickCreateEventProps {
 	isOpen: boolean;
 }
 
-// Presets de durée rapides
+// Quick duration presets
 const DURATION_PRESETS = [
 	{ label: "30 min", minutes: 30 },
 	{ label: "1h", minutes: 60 },
 	{ label: "2h", minutes: 120 },
-	{ label: "Journée", allDay: true },
+	{ label: "All day", allDay: true },
 ];
 
 export function QuickCreateEvent({
@@ -77,12 +77,12 @@ export function QuickCreateEvent({
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				toast.success("Événement créé !");
+				toast.success("Event created!");
 				onClose();
 			},
 			onError: (error: unknown) => {
 				const message =
-					error instanceof Error ? error.message : "Erreur lors de la création";
+					error instanceof Error ? error.message : "Error during creation";
 				toast.error(message);
 			},
 		}),
@@ -92,7 +92,7 @@ export function QuickCreateEvent({
 		(e?: React.FormEvent) => {
 			e?.preventDefault();
 			if (!title.trim()) {
-				toast.error("Le titre est requis");
+				toast.error("Title is required");
 				return;
 			}
 
@@ -149,9 +149,9 @@ export function QuickCreateEvent({
 	const formatDateRange = () => {
 		const sameDay = startDate.toDateString() === currentEndDate.toDateString();
 		if (sameDay) {
-			return `${format(startDate, "EEEE d MMMM", { locale: fr })}, ${format(startDate, "HH:mm")} - ${format(currentEndDate, "HH:mm")}`;
+			return `${format(startDate, "EEEE d MMMM", { locale: enUS })}, ${format(startDate, "HH:mm")} - ${format(currentEndDate, "HH:mm")}`;
 		}
-		return `${format(startDate, "d MMM HH:mm", { locale: fr })} - ${format(currentEndDate, "d MMM HH:mm", { locale: fr })}`;
+		return `${format(startDate, "d MMM HH:mm", { locale: enUS })} - ${format(currentEndDate, "d MMM HH:mm", { locale: enUS })}`;
 	};
 
 	return (
@@ -170,7 +170,7 @@ export function QuickCreateEvent({
 					<div className="flex items-center justify-between border-b p-3">
 						<div className="flex items-center gap-2 text-muted-foreground text-sm">
 							<Calendar className="h-4 w-4" />
-							<span>Nouvel événement</span>
+							<span>New event</span>
 						</div>
 						<Button
 							type="button"
@@ -191,7 +191,7 @@ export function QuickCreateEvent({
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
 							onKeyDown={handleKeyDown}
-							placeholder="Titre de l'événement"
+							placeholder="Event title"
 							className="border-0 p-0 font-medium text-lg placeholder:text-muted-foreground/60 focus-visible:ring-0"
 							disabled={createMutation.isPending}
 						/>
@@ -226,7 +226,7 @@ export function QuickCreateEvent({
 								<Input
 									value={location}
 									onChange={(e) => setLocation(e.target.value)}
-									placeholder="Lieu"
+									placeholder="Location"
 									className="h-8 flex-1"
 									disabled={createMutation.isPending}
 									autoFocus
@@ -240,7 +240,7 @@ export function QuickCreateEvent({
 								disabled={createMutation.isPending}
 							>
 								<MapPin className="h-4 w-4" />
-								<span>Ajouter un lieu</span>
+								<span>Add a location</span>
 							</button>
 						)}
 					</div>
@@ -255,7 +255,7 @@ export function QuickCreateEvent({
 							disabled={createMutation.isPending}
 							className="text-muted-foreground"
 						>
-							Plus d'options
+							More options
 							<ChevronRight className="ml-1 h-4 w-4" />
 						</Button>
 						<Button
@@ -266,10 +266,10 @@ export function QuickCreateEvent({
 							{createMutation.isPending ? (
 								<>
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Création...
+									Creating...
 								</>
 							) : (
-								"Créer"
+								"Create"
 							)}
 						</Button>
 					</div>
@@ -280,7 +280,7 @@ export function QuickCreateEvent({
 }
 
 /**
- * Hook pour gérer l'état du quick create
+ * Hook to manage quick create state
  */
 export function useQuickCreate() {
 	const [state, setState] = useState<{

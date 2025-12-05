@@ -54,7 +54,7 @@ export function validateLength(
 	if (value && value.length > maxLength) {
 		return {
 			field: fieldName,
-			message: `${fieldName} doit contenir au maximum ${maxLength} caractères`,
+			message: `${fieldName} must contain at most ${maxLength} characters`,
 		};
 	}
 	return null;
@@ -70,7 +70,7 @@ export function validateRequired(
 	if (!value || value.trim().length === 0) {
 		return {
 			field: fieldName,
-			message: `${fieldName} est requis`,
+			message: `${fieldName} is required`,
 		};
 	}
 	return null;
@@ -88,19 +88,19 @@ export function validateAttendee(
 	if (!attendee.email) {
 		errors.push({
 			field: `attendees[${index}].email`,
-			message: "L'email du participant est requis",
+			message: "Attendee email is required",
 		});
 	} else if (!isValidEmail(attendee.email)) {
 		errors.push({
 			field: `attendees[${index}].email`,
-			message: "Format d'email invalide",
+			message: "Invalid email format",
 		});
 	}
 
 	if (attendee.name && attendee.name.length > FIELD_LIMITS.NAME) {
 		errors.push({
 			field: `attendees[${index}].name`,
-			message: `Le nom doit contenir au maximum ${FIELD_LIMITS.NAME} caractères`,
+			message: `Name must contain at most ${FIELD_LIMITS.NAME} characters`,
 		});
 	}
 
@@ -119,21 +119,21 @@ export function validateAlarm(
 	if (!alarm.trigger) {
 		errors.push({
 			field: `alarms[${index}].trigger`,
-			message: "Le déclencheur de l'alarme est requis",
+			message: "Alarm trigger is required",
 		});
 	}
 
 	if (!alarm.action) {
 		errors.push({
 			field: `alarms[${index}].action`,
-			message: "L'action de l'alarme est requise",
+			message: "Alarm action is required",
 		});
 	}
 
 	if (alarm.summary && alarm.summary.length > FIELD_LIMITS.ALARM_SUMMARY) {
 		errors.push({
 			field: `alarms[${index}].summary`,
-			message: `Le résumé doit contenir au maximum ${FIELD_LIMITS.ALARM_SUMMARY} caractères`,
+			message: `Summary must contain at most ${FIELD_LIMITS.ALARM_SUMMARY} characters`,
 		});
 	}
 
@@ -182,14 +182,14 @@ function validateDateFields(data: EventFormData): ValidationError[] {
 	if (!data.startDate) {
 		errors.push({
 			field: "startDate",
-			message: "La date de début est requise",
+			message: "Start date is required",
 		});
 	}
 
 	if (!data.endDate) {
 		errors.push({
 			field: "endDate",
-			message: "La date de fin est requise",
+			message: "End date is required",
 		});
 	}
 
@@ -199,7 +199,7 @@ function validateDateFields(data: EventFormData): ValidationError[] {
 		if (end < start) {
 			errors.push({
 				field: "endDate",
-				message: "La date de fin doit être après la date de début",
+				message: "End date must be after start date",
 			});
 		}
 	}
@@ -214,27 +214,27 @@ function validateFormatFields(data: EventFormData): ValidationError[] {
 	const errors: ValidationError[] = [];
 
 	if (data.url && !isValidUrl(data.url)) {
-		errors.push({ field: "url", message: "URL invalide" });
+		errors.push({ field: "url", message: "Invalid URL" });
 	}
 
 	if (data.organizerEmail && !isValidEmail(data.organizerEmail)) {
 		errors.push({
 			field: "organizerEmail",
-			message: "Format d'email invalide pour l'organisateur",
+			message: "Invalid email format for organizer",
 		});
 	}
 
 	if (data.color && !isValidHexColor(data.color)) {
 		errors.push({
 			field: "color",
-			message: "Format de couleur invalide (attendu: #RRGGBB)",
+			message: "Invalid color format (expected: #RRGGBB)",
 		});
 	}
 
 	if (data.priority !== undefined && (data.priority < 0 || data.priority > 9)) {
 		errors.push({
 			field: "priority",
-			message: "La priorité doit être entre 0 et 9",
+			message: "Priority must be between 0 and 9",
 		});
 	}
 

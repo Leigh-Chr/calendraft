@@ -66,9 +66,9 @@ export function useCreateCalendar() {
 			},
 			onError: (error) => {
 				handleTRPCError(error, {
-					fallbackTitle: "Erreur lors de la création du calendrier",
+					fallbackTitle: "Error creating calendar",
 					fallbackDescription:
-						"Impossible de créer le calendrier. Veuillez réessayer.",
+						"Unable to create the calendar. Please try again.",
 				});
 			},
 		}),
@@ -91,13 +91,13 @@ export function useUpdateCalendar() {
 			onSuccess: () => {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.all });
-				toast.success("Calendrier mis à jour");
+				toast.success("Calendar updated");
 			},
 			onError: (error) => {
 				handleTRPCError(error, {
-					fallbackTitle: "Erreur lors de la mise à jour",
+					fallbackTitle: "Error updating",
 					fallbackDescription:
-						"Impossible de mettre à jour le calendrier. Veuillez réessayer.",
+						"Unable to update the calendar. Please try again.",
 				});
 			},
 		}),
@@ -119,13 +119,13 @@ export function useDeleteCalendar() {
 		trpc.calendar.delete.mutationOptions({
 			onSuccess: () => {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
-				toast.success("Calendrier supprimé");
+				toast.success("Calendar deleted");
 			},
 			onError: (error) => {
 				handleTRPCError(error, {
-					fallbackTitle: "Erreur lors de la suppression",
+					fallbackTitle: "Error deleting",
 					fallbackDescription:
-						"Impossible de supprimer le calendrier. Veuillez réessayer.",
+						"Unable to delete the calendar. Please try again.",
 				});
 			},
 		}),

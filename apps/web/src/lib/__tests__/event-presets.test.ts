@@ -52,12 +52,12 @@ describe("getPresetLabel", () => {
 	it("should return formatted label with icon", () => {
 		const label = getPresetLabel("meeting");
 		expect(label).toContain("👥");
-		expect(label).toContain("Réunion");
+		expect(label).toContain("Meeting");
 	});
 
 	it("should handle invalid preset id", () => {
 		const label = getPresetLabel("invalid-id");
-		expect(label).toBe("Personnalisé");
+		expect(label).toBe("Custom");
 	});
 });
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import {
 	Check,
 	Copy,
@@ -58,10 +58,10 @@ export function ShareCalendarDialog({
 					queryKey: [["share", "list"]],
 				});
 				setNewLinkName("");
-				toast.success("Lien de partage créé");
+				toast.success("Sharing link created");
 			},
 			onError: (error) => {
-				toast.error(error.message || "Erreur lors de la création du lien");
+				toast.error(error.message || "Error during link creation");
 			},
 		}),
 	);
@@ -75,7 +75,7 @@ export function ShareCalendarDialog({
 				});
 			},
 			onError: (error) => {
-				toast.error(error.message || "Erreur lors de la mise à jour");
+				toast.error(error.message || "Error during update");
 			},
 		}),
 	);
@@ -87,10 +87,10 @@ export function ShareCalendarDialog({
 				queryClient.invalidateQueries({
 					queryKey: [["share", "list"]],
 				});
-				toast.success("Lien de partage supprimé");
+				toast.success("Sharing link deleted");
 			},
 			onError: (error) => {
-				toast.error(error.message || "Erreur lors de la suppression");
+				toast.error(error.message || "Error during deletion");
 			},
 		}),
 	);
@@ -109,9 +109,9 @@ export function ShareCalendarDialog({
 				await navigator.clipboard.writeText(url);
 				setCopiedId(linkId);
 				setTimeout(() => setCopiedId(null), 2000);
-				toast.success("Lien copié !");
+				toast.success("Link copied!");
 			} catch {
-				toast.error("Impossible de copier le lien");
+				toast.error("Unable to copy link");
 			}
 		},
 		[getShareUrl],
@@ -136,7 +136,7 @@ export function ShareCalendarDialog({
 	// Delete link
 	const handleDelete = useCallback(
 		(linkId: string) => {
-			if (confirm("Êtes-vous sûr de vouloir supprimer ce lien de partage ?")) {
+			if (confirm("Are you sure you want to delete this sharing link?")) {
 				deleteMutation.mutate({ id: linkId });
 			}
 		},
@@ -149,11 +149,11 @@ export function ShareCalendarDialog({
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Link2 className="h-5 w-5" />
-						Partager « {calendarName} »
+						Share « {calendarName} »
 					</DialogTitle>
 					<DialogDescription>
-						Créez des liens de partage pour permettre à d'autres personnes de
-						télécharger ce calendrier au format .ics
+						Create sharing links to allow others to download this calendar in
+						.ics format
 					</DialogDescription>
 				</DialogHeader>
 
@@ -161,7 +161,7 @@ export function ShareCalendarDialog({
 					{/* Create new link */}
 					<div className="flex gap-2">
 						<Input
-							placeholder="Nom du lien (optionnel)"
+							placeholder="Link name (optional)"
 							value={newLinkName}
 							onChange={(e) => setNewLinkName(e.target.value)}
 							onKeyDown={(e) => e.key === "Enter" && handleCreate()}
@@ -177,7 +177,7 @@ export function ShareCalendarDialog({
 							) : (
 								<Plus className="h-4 w-4" />
 							)}
-							<span className="ml-2 hidden sm:inline">Créer</span>
+							<span className="ml-2 hidden sm:inline">Create</span>
 						</Button>
 					</div>
 
@@ -190,6 +190,7 @@ export function ShareCalendarDialog({
 						</div>
 					) : shareLinks && shareLinks.length > 0 ? (
 						<div className="space-y-3">
+							{/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex rendering logic */}
 							{shareLinks.map((link) => (
 								<div
 									key={link.id}
@@ -199,11 +200,11 @@ export function ShareCalendarDialog({
 										<div className="min-w-0 flex-1">
 											<div className="flex items-center gap-2">
 												<span className="truncate font-medium text-sm">
-													{link.name || "Lien sans nom"}
+													{link.name || "Unnamed link"}
 												</span>
 												{!link.isActive && (
 													<Badge variant="secondary" className="text-xs">
-														Désactivé
+														Disabled
 													</Badge>
 												)}
 											</div>
@@ -240,23 +241,23 @@ export function ShareCalendarDialog({
 											</div>
 											<div className="mt-1.5 text-muted-foreground text-xs">
 												{link.accessCount > 0
-													? `${link.accessCount} accès`
-													: "Jamais utilisé"}
+													? `${link.accessCount} access${link.accessCount !== 1 ? "es" : ""}`
+													: "Never used"}
 												{link.lastAccessedAt && (
 													<>
 														{" "}
-														• Dernier accès{" "}
+														• Last access{" "}
 														{format(
 															new Date(link.lastAccessedAt),
-															"d MMM à HH:mm",
-															{ locale: fr },
+															"MMM d 'at' HH:mm",
+															{ locale: enUS },
 														)}
 													</>
 												)}
 												<span className="ml-2 text-muted-foreground/70">
-													Créé le{" "}
-													{format(new Date(link.createdAt), "d MMM yyyy", {
-														locale: fr,
+													Created on{" "}
+													{format(new Date(link.createdAt), "MMM d, yyyy", {
+														locale: enUS,
 													})}
 												</span>
 											</div>
@@ -268,7 +269,7 @@ export function ShareCalendarDialog({
 													htmlFor={`active-${link.id}`}
 													className="sr-only"
 												>
-													Activer/Désactiver
+													Enable/Disable
 												</Label>
 												<Switch
 													id={`active-${link.id}`}
@@ -295,10 +296,8 @@ export function ShareCalendarDialog({
 					) : (
 						<div className="py-8 text-center text-muted-foreground text-sm">
 							<Link2 className="mx-auto mb-2 h-8 w-8 opacity-50" />
-							<p>Aucun lien de partage</p>
-							<p className="text-xs">
-								Créez un lien pour partager ce calendrier
-							</p>
+							<p>No sharing links</p>
+							<p className="text-xs">Create a link to share this calendar</p>
 						</div>
 					)}
 				</div>

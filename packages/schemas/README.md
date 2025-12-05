@@ -1,6 +1,6 @@
 # @calendraft/schemas
 
-Schémas de validation Zod partagés entre le frontend et le backend.
+Zod validation schemas shared between frontend and backend.
 
 ## Installation
 
@@ -8,7 +8,7 @@ Schémas de validation Zod partagés entre le frontend et le backend.
 bun add @calendraft/schemas
 ```
 
-## Usage rapide
+## Quick usage
 
 ```typescript
 import { 
@@ -19,41 +19,41 @@ import {
   FIELD_LIMITS 
 } from '@calendraft/schemas';
 
-// Valider des données d'événement
+// Validate event data
 const result = eventCreateSchema.safeParse(data);
 if (!result.success) {
   console.log(result.error.issues);
 }
 ```
 
-## Schémas disponibles
+## Available schemas
 
-### Événements
+### Events
 
-| Schéma | Description |
+| Schema | Description |
 |--------|-------------|
-| `eventCreateSchema` | Création d'événement (validation complète) |
-| `eventUpdateSchema` | Mise à jour d'événement (champs optionnels) |
-| `eventFormDataSchema` | Données de formulaire (dates en string) |
+| `eventCreateSchema` | Event creation (complete validation) |
+| `eventUpdateSchema` | Event update (optional fields) |
+| `eventFormDataSchema` | Form data (dates as strings) |
 
-### Entités liées
+### Related entities
 
-| Schéma | Description |
+| Schema | Description |
 |--------|-------------|
-| `attendeeSchema` | Participant avec rôle et statut RSVP |
-| `alarmSchema` | Alarme avec trigger et action |
+| `attendeeSchema` | Attendee with role and RSVP status |
+| `alarmSchema` | Alarm with trigger and action |
 
-### Utilitaires
+### Utilities
 
-| Schéma | Description |
+| Schema | Description |
 |--------|-------------|
-| `rruleSchema` | Règle de récurrence RFC 5545 |
-| `geoCoordinatesSchema` | Coordonnées géographiques |
-| `recurrenceIdSchema` | ID de récurrence ICS |
-| `uidSchema` | Identifiant unique d'événement |
-| `colorSchema` | Couleur hexadécimale |
+| `rruleSchema` | RFC 5545 recurrence rule |
+| `geoCoordinatesSchema` | Geographic coordinates |
+| `recurrenceIdSchema` | ICS recurrence ID |
+| `uidSchema` | Unique event identifier |
+| `colorSchema` | Hexadecimal color |
 
-## Schémas de base
+## Base schemas
 
 ### emailSchema
 
@@ -84,7 +84,7 @@ schema.parse('');          // null
 schema.parse(null);        // null
 ```
 
-## Limites des champs
+## Field limits
 
 ```typescript
 import { FIELD_LIMITS } from '@calendraft/schemas';
@@ -98,49 +98,49 @@ FIELD_LIMITS.RRULE            // 500
 // ... etc
 ```
 
-## Validation RFC 5545
+## RFC 5545 validation
 
 ### RRULE
 
 ```typescript
 import { rruleSchema } from '@calendraft/schemas';
 
-// Valide
+// Valid
 rruleSchema.parse('FREQ=DAILY;COUNT=5');
 rruleSchema.parse('FREQ=WEEKLY;BYDAY=MO,WE,FR');
 
-// Invalide - UNTIL et COUNT sont mutuellement exclusifs
+// Invalid - UNTIL and COUNT are mutually exclusive
 rruleSchema.parse('FREQ=DAILY;UNTIL=20240101;COUNT=5'); // Error
 ```
 
-### Alarmes
+### Alarms
 
 ```typescript
 import { alarmSchema } from '@calendraft/schemas';
 
-// DISPLAY requiert summary
+// DISPLAY requires summary
 alarmSchema.parse({
   trigger: '-PT15M',
   action: 'DISPLAY',
-  summary: 'Rappel'
+  summary: 'Reminder'
 }); // OK
 
-// EMAIL requiert summary ET description
+// EMAIL requires summary AND description
 alarmSchema.parse({
   trigger: '-PT15M',
   action: 'EMAIL',
-  summary: 'Sujet',
-  description: 'Corps du message'
+  summary: 'Subject',
+  description: 'Message body'
 }); // OK
 ```
 
-### Participants
+### Attendees
 
 ```typescript
 import { attendeeSchema } from '@calendraft/schemas';
 
 attendeeSchema.parse({
-  email: 'participant@example.com',
+  email: 'attendee@example.com',
   name: 'John Doe',
   role: 'REQ_PARTICIPANT',
   status: 'NEEDS_ACTION',
@@ -148,7 +148,7 @@ attendeeSchema.parse({
 });
 ```
 
-## Types exportés
+## Exported types
 
 ```typescript
 import type {
@@ -160,31 +160,31 @@ import type {
 } from '@calendraft/schemas';
 ```
 
-## Refinements personnalisés
+## Custom refinements
 
-Les schémas incluent des validations avancées :
+Schemas include advanced validations:
 
 ```typescript
-// eventCreateSchema vérifie :
+// eventCreateSchema checks:
 // 1. endDate > startDate
-// 2. geoLatitude et geoLongitude ensemble ou aucun
-// 3. recurrenceId requiert rrule
+// 2. geoLatitude and geoLongitude together or neither
+// 3. recurrenceId requires rrule
 ```
 
-## Exemples complets
+## Complete examples
 
-### Création d'événement
+### Event creation
 
 ```typescript
 import { eventCreateSchema } from '@calendraft/schemas';
 
 const eventData = {
   calendarId: 'calendar-123',
-  title: 'Réunion d\'équipe',
+  title: 'Team meeting',
   startDate: new Date('2024-01-15T10:00:00Z'),
   endDate: new Date('2024-01-15T11:00:00Z'),
-  description: 'Réunion hebdomadaire',
-  location: 'Salle A',
+  description: 'Weekly meeting',
+  location: 'Room A',
   status: 'CONFIRMED',
   rrule: 'FREQ=WEEKLY;BYDAY=MO',
   attendees: [
@@ -192,21 +192,21 @@ const eventData = {
     { email: 'bob@example.com', role: 'OPT_PARTICIPANT' }
   ],
   alarms: [
-    { trigger: '-PT15M', action: 'DISPLAY', summary: 'Rappel réunion' }
+    { trigger: '-PT15M', action: 'DISPLAY', summary: 'Meeting reminder' }
   ]
 };
 
 const result = eventCreateSchema.safeParse(eventData);
 ```
 
-### Formulaire frontend
+### Frontend form
 
 ```typescript
 import { eventFormDataSchema } from '@calendraft/schemas';
 
-// Les dates sont en string (format datetime-local)
+// Dates are strings (datetime-local format)
 const formData = {
-  title: 'Mon événement',
+  title: 'My event',
   startDate: '2024-01-15T10:00',
   endDate: '2024-01-15T11:00'
 };
@@ -217,34 +217,33 @@ eventFormDataSchema.parse(formData);
 ## Exports
 
 ```typescript
-// Schémas principaux
+// Main schemas
 export { eventCreateSchema, eventUpdateSchema, eventFormDataSchema };
 export { attendeeSchema, alarmSchema };
 export { rruleSchema, geoCoordinatesSchema };
 
-// Schémas utilitaires
+// Utility schemas
 export { emailSchema, urlSchema, nullableTrimmedStringSchema };
 export { recurrenceIdSchema, uidSchema, colorSchema };
 export { jsonDateArraySchema };
 
-// Constantes
+// Constants
 export { FIELD_LIMITS };
 
 // Types
 export type * from './validation-types';
 ```
 
-## Dépendances
+## Dependencies
 
-- `zod` - Validation de schémas TypeScript-first
+- `zod` - TypeScript-first schema validation
 
-## Voir aussi
+## See also
 
-- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Architecture globale du projet
-- [@calendraft/core](../core/README.md) - Logique métier et types
-- [@calendraft/api](../api/README.md) - API tRPC
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Global project architecture
+- [@calendraft/core](../core/README.md) - Business logic and types
+- [@calendraft/api](../api/README.md) - tRPC API
 
 ## License
 
 MIT
-

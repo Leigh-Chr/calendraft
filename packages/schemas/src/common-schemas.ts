@@ -12,10 +12,10 @@ import { FIELD_LIMITS } from "./field-limits";
 export const emailSchema = z
 	.string()
 	.trim()
-	.email("Format d'email invalide")
+	.email("Invalid email format")
 	.max(
 		FIELD_LIMITS.EMAIL,
-		`L'email ne peut pas dépasser ${FIELD_LIMITS.EMAIL} caractères`,
+		`Email cannot exceed ${FIELD_LIMITS.EMAIL} characters`,
 	);
 
 /**
@@ -25,10 +25,7 @@ export const emailSchema = z
 export const urlSchema = z
 	.string()
 	.trim()
-	.max(
-		FIELD_LIMITS.URL,
-		`L'URL ne peut pas dépasser ${FIELD_LIMITS.URL} caractères`,
-	)
+	.max(FIELD_LIMITS.URL, `URL cannot exceed ${FIELD_LIMITS.URL} characters`)
 	.refine(
 		(val) => {
 			if (!val || val.trim() === "") return true;
@@ -42,7 +39,7 @@ export const urlSchema = z
 		},
 		{
 			message:
-				"Format d'URL invalide ou protocole non autorisé. Utilisez http://, https://, mailto: ou tel:",
+				"Invalid URL format or unauthorized protocol. Use http://, https://, mailto: or tel:",
 		},
 	)
 	.optional()
@@ -72,14 +69,14 @@ export const nullableTrimmedStringSchema = (maxLength?: number) =>
  */
 export const dateStringSchema = z
 	.string()
-	.min(1, "La date est requise")
+	.min(1, "Date is required")
 	.refine(
 		(val) => {
 			const date = new Date(val);
 			return !Number.isNaN(date.getTime());
 		},
 		{
-			message: "Format de date invalide",
+			message: "Invalid date format",
 		},
 	);
 
@@ -98,7 +95,7 @@ export const dateRangeSchema = z
 			return end > start;
 		},
 		{
-			message: "La date de fin doit être après la date de début",
+			message: "End date must be after start date",
 			path: ["endDate"],
 		},
 	);

@@ -25,6 +25,7 @@ interface AccountPromptProps {
 	dismissible?: boolean;
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex component with multiple conditional branches
 export function AccountPrompt({
 	variant = "banner",
 	showUsage = true,
@@ -91,24 +92,24 @@ export function AccountPrompt({
 						<p className="font-medium text-sm">
 							{isNearLimit ? (
 								<>
-									Vous approchez de la limite ({usage?.calendarCount}/
-									{usage?.maxCalendars} calendriers)
+									You're approaching the limit ({usage?.calendarCount}/
+									{usage?.maxCalendars} calendars)
 								</>
 							) : (
-								"Synchronisez vos calendriers sur tous vos appareils"
+								"Sync your calendars across all your devices"
 							)}
 						</p>
 						<p className="text-muted-foreground text-xs">
 							{isNearLimit
-								? "Créez un compte gratuit pour jusqu'à 100 calendriers"
-								: "Données sauvegardées dans le cloud, accessibles partout"}
+								? "Create a free account for up to 100 calendars"
+								: "Data saved in the cloud, accessible everywhere"}
 						</p>
 					</div>
 				</div>
 
 				<div className="flex shrink-0 items-center gap-2">
 					<Button size="sm" onClick={handleSignup}>
-						Créer un compte
+						Create an account
 					</Button>
 					{dismissible && (
 						<Button
@@ -116,7 +117,7 @@ export function AccountPrompt({
 							size="icon"
 							className="h-8 w-8 text-muted-foreground"
 							onClick={() => setIsDismissed(true)}
-							aria-label="Fermer"
+							aria-label="Close"
 						>
 							<X className="h-4 w-4" />
 						</Button>
@@ -132,11 +133,9 @@ export function AccountPrompt({
 			<CardHeader className="pb-3">
 				<div className="flex items-start justify-between">
 					<div>
-						<CardTitle className="text-lg">
-							Sauvegardez vos calendriers
-						</CardTitle>
+						<CardTitle className="text-lg">Save your calendars</CardTitle>
 						<CardDescription>
-							Créez un compte gratuit pour ne jamais perdre vos données
+							Create a free account to never lose your data
 						</CardDescription>
 					</div>
 					{dismissible && (
@@ -145,7 +144,7 @@ export function AccountPrompt({
 							size="icon"
 							className="h-8 w-8 shrink-0 text-muted-foreground"
 							onClick={() => setIsDismissed(true)}
-							aria-label="Fermer"
+							aria-label="Close"
 						>
 							<X className="h-4 w-4" />
 						</Button>
@@ -157,20 +156,20 @@ export function AccountPrompt({
 				{isNearLimit && usage && (
 					<div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800/50 dark:bg-amber-900/10">
 						<p className="font-medium text-amber-700 text-sm dark:text-amber-400">
-							{usage.calendarCount}/{usage.maxCalendars} calendriers utilisés
+							{usage.calendarCount}/{usage.maxCalendars} calendars used
 						</p>
 					</div>
 				)}
 
 				{/* Benefits - compact grid */}
 				<div className="grid grid-cols-3 gap-3">
-					<BenefitItem icon={Cloud} label="Sauvegarde cloud" />
-					<BenefitItem icon={Smartphone} label="Multi-appareils" />
-					<BenefitItem icon={Calendar} label="100 calendriers" />
+					<BenefitItem icon={Cloud} label="Cloud backup" />
+					<BenefitItem icon={Smartphone} label="Multi-device" />
+					<BenefitItem icon={Calendar} label="100 calendars" />
 				</div>
 
 				<Button className="w-full" onClick={handleSignup}>
-					Créer un compte gratuit
+					Create a free account
 				</Button>
 			</CardContent>
 		</Card>

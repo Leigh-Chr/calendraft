@@ -20,9 +20,9 @@ export interface EventPreset {
 export const EVENT_PRESETS: EventPreset[] = [
 	{
 		id: "meeting",
-		label: "Réunion",
+		label: "Meeting",
 		icon: "👥",
-		description: "1 heure, alerte 15min avant",
+		description: "1 hour, alert 15min before",
 		defaultDurationMinutes: 60,
 		defaults: {
 			status: "CONFIRMED",
@@ -39,9 +39,9 @@ export const EVENT_PRESETS: EventPreset[] = [
 	},
 	{
 		id: "call",
-		label: "Appel",
+		label: "Call",
 		icon: "📞",
-		description: "30 minutes, alerte 5min avant",
+		description: "30 minutes, alert 5min before",
 		defaultDurationMinutes: 30,
 		defaults: {
 			status: "CONFIRMED",
@@ -57,9 +57,9 @@ export const EVENT_PRESETS: EventPreset[] = [
 	},
 	{
 		id: "birthday",
-		label: "Anniversaire",
+		label: "Birthday",
 		icon: "🎂",
-		description: "Journée entière, alerte 1 jour avant",
+		description: "Full day, alert 1 day before",
 		defaultDurationMinutes: 24 * 60,
 		defaults: {
 			status: "CONFIRMED",
@@ -76,9 +76,9 @@ export const EVENT_PRESETS: EventPreset[] = [
 	},
 	{
 		id: "task",
-		label: "Tâche",
+		label: "Task",
 		icon: "✅",
-		description: "30 minutes, alerte au début",
+		description: "30 minutes, alert at start",
 		defaultDurationMinutes: 30,
 		defaults: {
 			status: "CONFIRMED",
@@ -95,9 +95,9 @@ export const EVENT_PRESETS: EventPreset[] = [
 	},
 	{
 		id: "reminder",
-		label: "Rappel",
+		label: "Reminder",
 		icon: "🔔",
-		description: "Aucune durée, alerte uniquement",
+		description: "No duration, alert only",
 		defaultDurationMinutes: 1,
 		defaults: {
 			status: "CONFIRMED",
@@ -113,9 +113,9 @@ export const EVENT_PRESETS: EventPreset[] = [
 	},
 	{
 		id: "custom",
-		label: "Personnalisé",
+		label: "Custom",
 		icon: "⚙️",
-		description: "Configuration manuelle",
+		description: "Manual configuration",
 		defaultDurationMinutes: 60,
 		defaults: {
 			status: "CONFIRMED",
@@ -137,7 +137,7 @@ export function getPreset(id: string): EventPreset | undefined {
  */
 export function getPresetLabel(presetId: string): string {
 	const preset = getPreset(presetId);
-	return preset ? `${preset.icon} ${preset.label}` : "Personnalisé";
+	return preset ? `${preset.icon} ${preset.label}` : "Custom";
 }
 
 /**

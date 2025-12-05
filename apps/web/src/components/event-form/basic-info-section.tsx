@@ -115,7 +115,7 @@ export function BasicInfoSection({
 			<div className="space-y-2">
 				<Label htmlFor="title" className="flex items-center gap-2">
 					<FileText className="h-4 w-4 text-muted-foreground" />
-					Titre *<span className="sr-only">requis</span>
+					Title *<span className="sr-only">required</span>
 				</Label>
 				<Input
 					id="title"
@@ -128,7 +128,7 @@ export function BasicInfoSection({
 					aria-describedby={validationErrors?.title ? "title-error" : undefined}
 					className={validationErrors?.title ? "border-destructive" : ""}
 					maxLength={FIELD_LIMITS.TITLE}
-					placeholder="Ex: Réunion d'équipe, Anniversaire, Rendez-vous médical..."
+					placeholder="Ex: Team meeting, Birthday, Medical appointment..."
 				/>
 				{validationErrors?.title && (
 					<p
@@ -142,8 +142,8 @@ export function BasicInfoSection({
 				)}
 				{!validationErrors?.title && (
 					<p className="text-muted-foreground text-xs">
-						Nom de l'événement qui apparaîtra dans votre calendrier. Soyez
-						concis et descriptif.
+						Event name that will appear in your calendar. Be concise and
+						descriptive.
 					</p>
 				)}
 			</div>
@@ -151,32 +151,32 @@ export function BasicInfoSection({
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 				<DateField
 					id="startDate"
-					label="Date de début *"
+					label="Start date *"
 					value={formData.startDate}
 					onChange={(value) => onChange({ startDate: value })}
 					validationError={validationErrors?.startDate}
 					disabled={isSubmitting}
-					placeholder="Sélectionner la date et l'heure de début"
-					ariaLabel="Date et heure de début de l'événement"
-					helpText="Date et heure de début de l'événement. Cliquez pour ouvrir le calendrier."
+					placeholder="Select start date and time"
+					ariaLabel="Event start date and time"
+					helpText="Event start date and time. Click to open the calendar."
 				/>
 				<DateField
 					id="endDate"
-					label="Date de fin *"
+					label="End date *"
 					value={formData.endDate}
 					onChange={(value) => onChange({ endDate: value })}
 					validationError={validationErrors?.endDate}
 					disabled={isSubmitting}
-					placeholder="Sélectionner la date et l'heure de fin"
-					ariaLabel="Date et heure de fin de l'événement"
-					helpText="Date et heure de fin de l'événement. Doit être après la date de début."
+					placeholder="Select end date and time"
+					ariaLabel="Event end date and time"
+					helpText="Event end date and time. Must be after the start date."
 				/>
 			</div>
 
 			<div className="space-y-2">
 				<Label htmlFor="location" className="flex items-center gap-2">
 					<MapPin className="h-4 w-4 text-muted-foreground" />
-					Localisation
+					Location
 				</Label>
 				<Input
 					id="location"
@@ -191,15 +191,15 @@ export function BasicInfoSection({
 					}}
 					disabled={isSubmitting}
 					maxLength={FIELD_LIMITS.LOCATION}
-					placeholder="Ex: Salle de conférence A, 123 Rue Example..."
+					placeholder="Ex: Conference Room A, 123 Example Street..."
 				/>
 				<p className="text-muted-foreground text-xs">
-					Adresse ou nom du lieu où se déroule l'événement. Vous pouvez ajouter
-					des coordonnées précises dans la section "Localisation avancée".
+					Address or name of the place where the event takes place. You can add
+					precise coordinates in the "Advanced location" section.
 					{formData.location &&
 						formData.location.length > FIELD_LIMITS.LOCATION * 0.9 && (
 							<span className="mt-1 block text-orange-600 dark:text-orange-400">
-								⚠️ Limite de {FIELD_LIMITS.LOCATION} caractères approchée (
+								⚠️ {FIELD_LIMITS.LOCATION} character limit approaching (
 								{formData.location.length}/{FIELD_LIMITS.LOCATION})
 							</span>
 						)}
@@ -218,15 +218,15 @@ export function BasicInfoSection({
 					disabled={isSubmitting}
 					rows={4}
 					maxLength={FIELD_LIMITS.DESCRIPTION}
-					placeholder="Décrivez votre événement, son objectif, l'ordre du jour..."
+					placeholder="Describe your event, its purpose, the agenda..."
 				/>
 				<p className="text-muted-foreground text-xs">
-					Informations détaillées sur l'événement. Cette description sera
-					visible par tous les participants.
+					Detailed information about the event. This description will be visible
+					to all attendees.
 					{formData.description &&
 						formData.description.length > FIELD_LIMITS.DESCRIPTION * 0.9 && (
 							<span className="mt-1 block text-orange-600 dark:text-orange-400">
-								⚠️ Limite de {FIELD_LIMITS.DESCRIPTION} caractères approchée (
+								⚠️ {FIELD_LIMITS.DESCRIPTION} character limit approaching (
 								{formData.description.length}/{FIELD_LIMITS.DESCRIPTION})
 							</span>
 						)}

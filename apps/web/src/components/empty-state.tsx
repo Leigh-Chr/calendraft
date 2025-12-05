@@ -1,5 +1,5 @@
 /**
- * Empty State - États vides engageants avec illustrations
+ * Empty State - Engaging empty states with illustrations
  */
 
 import { motion } from "motion/react";
@@ -137,7 +137,7 @@ export function EmptyCalendarIllustration({
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 			role="img"
-			aria-label="Calendrier vide"
+			aria-label="Empty calendar"
 		>
 			{/* Background glow */}
 			<circle cx="64" cy="68" r="40" className="fill-primary/5" />
@@ -235,7 +235,7 @@ export function EmptyEventsIllustration({ className }: { className?: string }) {
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 			role="img"
-			aria-label="Aucun événement"
+			aria-label="No events"
 		>
 			<circle cx="64" cy="64" r="48" stroke="currentColor" strokeWidth="4" />
 			<path
@@ -266,7 +266,7 @@ export function EmptySearchIllustration({ className }: { className?: string }) {
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 			role="img"
-			aria-label="Aucun résultat"
+			aria-label="No results"
 		>
 			<circle cx="52" cy="52" r="32" stroke="currentColor" strokeWidth="4" />
 			<path
@@ -298,7 +298,7 @@ export function ImportFileIllustration({ className }: { className?: string }) {
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 			role="img"
-			aria-label="Importer un fichier"
+			aria-label="Import a file"
 		>
 			{/* File shape */}
 			<path
@@ -338,7 +338,7 @@ export function SuccessIllustration({ className }: { className?: string }) {
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 			role="img"
-			aria-label="Succès"
+			aria-label="Success"
 		>
 			<circle cx="64" cy="64" r="48" stroke="currentColor" strokeWidth="4" />
 			<motion.path

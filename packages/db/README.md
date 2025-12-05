@@ -1,6 +1,6 @@
 # @calendraft/db
 
-Client Prisma et schémas de base de données pour Calendraft.
+Prisma client and database schemas for Calendraft.
 
 ## Installation
 
@@ -8,12 +8,12 @@ Client Prisma et schémas de base de données pour Calendraft.
 bun add @calendraft/db
 ```
 
-## Usage rapide
+## Quick usage
 
 ```typescript
 import prisma from '@calendraft/db';
 
-// Requête exemple
+// Example query
 const calendars = await prisma.calendar.findMany({
   where: { userId: 'user-id' },
   include: { events: true }
@@ -22,30 +22,30 @@ const calendars = await prisma.calendar.findMany({
 
 ## Configuration
 
-### Variables d'environnement
+### Environment variables
 
 ```env
-# URL de la base de données PostgreSQL
+# PostgreSQL database URL
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 ```
 
 ## Scripts
 
 ```bash
-# Générer le client Prisma
+# Generate Prisma client
 bun run db:generate
 
-# Pousser le schéma vers la DB (dev)
+# Push schema to DB (dev)
 bun run db:push
 
-# Créer une migration
+# Create a migration
 bun run db:migrate
 
-# Ouvrir Prisma Studio
+# Open Prisma Studio
 bun run db:studio
 ```
 
-## Schémas
+## Schemas
 
 ### Calendar
 
@@ -71,7 +71,7 @@ model Event {
   endDate     DateTime
   description String?
   location    String?
-  // ... autres champs RFC 5545
+  // ... other RFC 5545 fields
   
   calendar    Calendar  @relation(fields: [calendarId], references: [id])
   attendees   Attendee[]
@@ -112,7 +112,7 @@ model Alarm {
 }
 ```
 
-### Tables d'authentification (Better-Auth)
+### Authentication tables (Better-Auth)
 
 ```prisma
 model User {
@@ -130,30 +130,30 @@ model Session {
   userId    String
   expiresAt DateTime
   token     String   @unique
-  // ... autres champs
+  // ... other fields
 }
 ```
 
 ## Architecture
 
-### Structure des fichiers
+### File structure
 
 ```
 packages/db/
 ├── prisma/
 │   ├── schema/
 │   │   ├── schema.prisma  # Config (generator, datasource)
-│   │   ├── auth.prisma    # Tables Better-Auth
-│   │   └── calendar.prisma # Tables métier
-│   └── generated/         # Client généré
+│   │   ├── auth.prisma    # Better-Auth tables
+│   │   └── calendar.prisma # Business tables
+│   └── generated/         # Generated client
 ├── src/
-│   └── index.ts           # Export du client
-└── prisma.config.ts       # Config Prisma
+│   └── index.ts           # Client export
+└── prisma.config.ts       # Prisma config
 ```
 
-### Adapter PostgreSQL
+### PostgreSQL adapter
 
-Le client utilise l'adapter PostgreSQL :
+The client uses the PostgreSQL adapter:
 
 ```typescript
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -180,12 +180,12 @@ User ─────< Session
    └─────< Account
 ```
 
-## Bonnes pratiques
+## Best practices
 
-### Requêtes avec relations
+### Queries with relations
 
 ```typescript
-// Inclure les événements
+// Include events
 const calendar = await prisma.calendar.findUnique({
   where: { id },
   include: {
@@ -208,10 +208,10 @@ await prisma.$transaction([
 ]);
 ```
 
-### Filtres
+### Filters
 
 ```typescript
-// Événements futurs
+// Future events
 const events = await prisma.event.findMany({
   where: {
     startDate: { gte: new Date() }
@@ -223,25 +223,24 @@ const events = await prisma.event.findMany({
 ## Exports
 
 ```typescript
-// Client Prisma par défaut
+// Default Prisma client
 export default prisma;
 
-// Types générés
+// Generated types
 export type { Calendar, Event, Attendee, Alarm } from '../prisma/generated/client';
 ```
 
-## Dépendances
+## Dependencies
 
-- `@prisma/client` - Client Prisma
-- `@prisma/adapter-pg` - Adapter pour PostgreSQL
+- `@prisma/client` - Prisma client
+- `@prisma/adapter-pg` - PostgreSQL adapter
 
-## Voir aussi
+## See also
 
-- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Architecture globale du projet
-- [@calendraft/auth](../auth/README.md) - Configuration Better-Auth
-- [DEPLOYMENT.md](../../DEPLOYMENT.md) - Guide de déploiement
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Global project architecture
+- [@calendraft/auth](../auth/README.md) - Better-Auth configuration
+- [DEPLOYMENT.md](../../DEPLOYMENT.md) - Deployment guide
 
 ## License
 
 MIT
-

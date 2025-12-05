@@ -23,20 +23,19 @@ export const Route = createFileRoute("/calendars/import")({
 	component: ImportCalendarComponent,
 	head: () => ({
 		meta: [
-			{ title: "Importer un calendrier .ics - Calendraft" },
+			{ title: "Import a .ics calendar - Calendraft" },
 			{
 				name: "description",
 				content:
-					"Importez un fichier calendrier ICS depuis votre appareil ou depuis une URL. Compatible avec les exports de Google Calendar, Apple Calendar, Outlook et tous les formats iCalendar standard.",
+					"Import an ICS calendar file from your device or from a URL. Compatible with exports from Google Calendar, Apple Calendar, Outlook, and all standard iCalendar formats.",
 			},
 			{
 				property: "og:title",
-				content: "Importer un calendrier .ics - Calendraft",
+				content: "Import a .ics calendar - Calendraft",
 			},
 			{
 				property: "og:description",
-				content:
-					"Importez un fichier calendrier ICS depuis votre appareil ou une URL.",
+				content: "Import an ICS calendar file from your device or a URL.",
 			},
 			{ property: "og:url", content: `${BASE_URL}/calendars/import` },
 		],
@@ -60,13 +59,13 @@ function ImportCalendarComponent() {
 		trpc.calendar.importIcs.mutationOptions({
 			onSuccess: (data) => {
 				toast.success(
-					`Calendrier importé avec succès ! ${data.importedEvents} événement(s) importé(s).`,
+					`Calendar imported successfully! ${data.importedEvents} event(s) imported.`,
 				);
 				navigate({ to: `/calendars/${data.calendar.id}` });
 			},
 			onError: (error: unknown) => {
 				const message =
-					error instanceof Error ? error.message : "Erreur lors de l'import";
+					error instanceof Error ? error.message : "Error during import";
 				toast.error(message);
 			},
 		}),
@@ -76,13 +75,13 @@ function ImportCalendarComponent() {
 		trpc.calendar.importFromUrl.mutationOptions({
 			onSuccess: (data) => {
 				toast.success(
-					`Calendrier importé avec succès ! ${data.importedEvents} événement(s) importé(s).`,
+					`Calendar imported successfully! ${data.importedEvents} event(s) imported.`,
 				);
 				navigate({ to: `/calendars/${data.calendar.id}` });
 			},
 			onError: (error: unknown) => {
 				const message =
-					error instanceof Error ? error.message : "Erreur lors de l'import";
+					error instanceof Error ? error.message : "Error during import";
 				toast.error(message);
 			},
 		}),
@@ -106,7 +105,7 @@ function ImportCalendarComponent() {
 
 	const handleImport = async () => {
 		if (!file) {
-			toast.error("Veuillez sélectionner un fichier");
+			toast.error("Please select a file");
 			return;
 		}
 
@@ -119,7 +118,7 @@ function ImportCalendarComponent() {
 
 	const handleImportFromUrl = () => {
 		if (!url.trim()) {
-			toast.error("Veuillez entrer une URL");
+			toast.error("Please enter a URL");
 			return;
 		}
 
@@ -143,12 +142,12 @@ function ImportCalendarComponent() {
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Upload className="h-5 w-5" />
-							Importer un calendrier .ics
+							Import a .ics calendar
 						</CardTitle>
 						<CardDescription>
-							Importez un fichier calendrier depuis votre appareil ou depuis une
-							URL. Compatible avec Google Calendar, Apple Calendar, Outlook et
-							tous les formats iCalendar.
+							Import a calendar file from your device or from a URL. Compatible
+							with Google Calendar, Apple Calendar, Outlook, and all iCalendar
+							formats.
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -156,11 +155,11 @@ function ImportCalendarComponent() {
 							<TabsList className="mb-6 grid w-full grid-cols-2">
 								<TabsTrigger value="file" disabled={isPending}>
 									<Upload className="mr-2 h-4 w-4" />
-									Depuis un fichier
+									From a file
 								</TabsTrigger>
 								<TabsTrigger value="url" disabled={isPending}>
 									<Globe className="mr-2 h-4 w-4" />
-									Depuis une URL
+									From a URL
 								</TabsTrigger>
 							</TabsList>
 
@@ -174,16 +173,16 @@ function ImportCalendarComponent() {
 
 								{file && (
 									<div className="space-y-2">
-										<Label htmlFor="name">Nom du calendrier</Label>
+										<Label htmlFor="name">Calendar name</Label>
 										<Input
 											id="name"
 											value={calendarName}
 											onChange={(e) => setCalendarName(e.target.value)}
-											placeholder="Mon calendrier importé"
+											placeholder="My imported calendar"
 											disabled={isPending}
 										/>
 										<p className="text-muted-foreground text-xs">
-											Laissez vide pour utiliser le nom du fichier
+											Leave empty to use the file name
 										</p>
 									</div>
 								)}
@@ -197,12 +196,12 @@ function ImportCalendarComponent() {
 										{importMutation.isPending ? (
 											<>
 												<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-												Import en cours...
+												Importing...
 											</>
 										) : (
 											<>
-												Importer
-												{eventCount > 0 && ` (${eventCount} événements)`}
+												Import
+												{eventCount > 0 && ` (${eventCount} events)`}
 											</>
 										)}
 									</Button>
@@ -211,7 +210,7 @@ function ImportCalendarComponent() {
 										onClick={() => navigate({ to: "/calendars" })}
 										disabled={isPending}
 									>
-										Annuler
+										Cancel
 									</Button>
 								</div>
 							</TabsContent>
@@ -219,7 +218,7 @@ function ImportCalendarComponent() {
 							{/* URL import tab */}
 							<TabsContent value="url" className="space-y-6">
 								<div className="space-y-2">
-									<Label htmlFor="url">URL du calendrier</Label>
+									<Label htmlFor="url">Calendar URL</Label>
 									<Input
 										id="url"
 										type="url"
@@ -229,19 +228,17 @@ function ImportCalendarComponent() {
 										disabled={isPending}
 									/>
 									<p className="text-muted-foreground text-xs">
-										Collez l'URL publique de votre calendrier (format ICS/iCal)
+										Paste the public URL of your calendar (ICS/iCal format)
 									</p>
 								</div>
 
 								<div className="space-y-2">
-									<Label htmlFor="url-name">
-										Nom du calendrier (optionnel)
-									</Label>
+									<Label htmlFor="url-name">Calendar name (optional)</Label>
 									<Input
 										id="url-name"
 										value={urlCalendarName}
 										onChange={(e) => setUrlCalendarName(e.target.value)}
-										placeholder="Mon calendrier"
+										placeholder="My calendar"
 										disabled={isPending}
 									/>
 								</div>
@@ -249,21 +246,20 @@ function ImportCalendarComponent() {
 								{/* Help text */}
 								<div className="rounded-lg bg-muted/50 p-4 text-sm">
 									<p className="mb-2 font-medium">
-										Où trouver l'URL de votre calendrier ?
+										Where to find your calendar URL?
 									</p>
 									<ul className="list-inside list-disc space-y-1 text-muted-foreground text-xs">
 										<li>
-											<strong>Google Calendar</strong> : Paramètres du
-											calendrier → Intégrer le calendrier → Adresse secrète au
-											format iCal
+											<strong>Google Calendar</strong> : Calendar settings →
+											Integrate calendar → Secret address in iCal format
 										</li>
 										<li>
-											<strong>Apple iCloud</strong> : Partage du calendrier →
-											Calendrier public → Copier le lien
+											<strong>Apple iCloud</strong> : Calendar sharing → Public
+											calendar → Copy link
 										</li>
 										<li>
-											<strong>Outlook</strong> : Paramètres du calendrier →
-											Calendriers partagés → Publier un calendrier
+											<strong>Outlook</strong> : Calendar settings → Shared
+											calendars → Publish calendar
 										</li>
 									</ul>
 								</div>
@@ -277,12 +273,12 @@ function ImportCalendarComponent() {
 										{importFromUrlMutation.isPending ? (
 											<>
 												<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-												Import en cours...
+												Importing...
 											</>
 										) : (
 											<>
 												<Globe className="mr-2 h-4 w-4" />
-												Importer depuis l'URL
+												Import from URL
 											</>
 										)}
 									</Button>
@@ -291,13 +287,13 @@ function ImportCalendarComponent() {
 										onClick={() => navigate({ to: "/calendars" })}
 										disabled={isPending}
 									>
-										Annuler
+										Cancel
 									</Button>
 								</div>
 
 								<p className="text-center text-muted-foreground text-xs">
-									💡 Vous pourrez actualiser ce calendrier depuis l'URL plus
-									tard
+									💡 You will be able to refresh this calendar from the URL
+									later
 								</p>
 							</TabsContent>
 						</Tabs>

@@ -18,13 +18,13 @@ export const Route = createFileRoute("/login")({
 	},
 	head: () => ({
 		meta: [
-			{ title: "Connexion - Calendraft" },
+			{ title: "Sign in - Calendraft" },
 			{
 				name: "description",
 				content:
-					"Connectez-vous ou créez un compte Calendraft pour accéder à vos calendriers synchronisés.",
+					"Sign in or create a Calendraft account to access your synchronized calendars.",
 			},
-			{ property: "og:title", content: "Connexion - Calendraft" },
+			{ property: "og:title", content: "Login - Calendraft" },
 			{ property: "og:url", content: `${BASE_URL}/login` },
 		],
 		links: [{ rel: "canonical", href: `${BASE_URL}/login` }],

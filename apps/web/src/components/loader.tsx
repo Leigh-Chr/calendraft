@@ -24,7 +24,7 @@ export default function Loader({ className, size = "md" }: LoaderProps) {
 				className={cn("animate-spin text-muted-foreground", sizeClasses[size])}
 				aria-hidden="true"
 			/>
-			<span className="sr-only">Chargement en cours...</span>
+			<span className="sr-only">Loading...</span>
 		</div>
 	);
 }

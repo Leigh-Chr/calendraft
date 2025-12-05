@@ -25,11 +25,11 @@ export const Route = createFileRoute("/share/$token")({
 	component: SharePage,
 	head: () => ({
 		meta: [
-			{ title: "Calendrier partagé - Calendraft" },
+			{ title: "Shared calendar - Calendraft" },
 			{
 				name: "description",
 				content:
-					"Téléchargez ce calendrier partagé au format .ics compatible avec toutes les applications calendrier.",
+					"Download this shared calendar in .ics format compatible with all calendar applications.",
 			},
 		],
 	}),
@@ -70,17 +70,17 @@ function SharePage() {
 			URL.revokeObjectURL(url);
 
 			setDownloadState("success");
-			toast.success("Calendrier téléchargé !");
+			toast.success("Calendar downloaded!");
 		} catch (_err) {
 			setDownloadState("error");
-			toast.error("Erreur lors du téléchargement");
+			toast.error("Error during download");
 		}
 	}, [token]);
 
 	// Error state
 	if (error) {
 		const errorMessage =
-			error.message || "Ce lien de partage n'est pas valide ou a expiré.";
+			error.message || "This sharing link is not valid or has expired.";
 		return (
 			<div className="relative min-h-screen">
 				{/* Background */}
@@ -94,12 +94,12 @@ function SharePage() {
 							<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
 								<XCircle className="h-8 w-8 text-destructive" />
 							</div>
-							<CardTitle>Lien non valide</CardTitle>
+							<CardTitle>Invalid link</CardTitle>
 							<CardDescription>{errorMessage}</CardDescription>
 						</CardHeader>
 						<CardContent className="text-center">
 							<Button asChild variant="outline">
-								<Link to="/">Retour à l'accueil</Link>
+								<Link to="/">Back to home</Link>
 							</Button>
 						</CardContent>
 					</Card>
@@ -119,7 +119,7 @@ function SharePage() {
 
 				<div className="container mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-10">
 					<Loader2 className="h-10 w-10 animate-spin text-primary" />
-					<p className="mt-4 text-muted-foreground">Chargement...</p>
+					<p className="mt-4 text-muted-foreground">Loading...</p>
 				</div>
 			</div>
 		);
@@ -143,14 +143,14 @@ function SharePage() {
 							{info?.shareName && (
 								<span className="mb-1 block text-sm">{info.shareName}</span>
 							)}
-							{info?.eventCount} événement{info?.eventCount !== 1 ? "s" : ""}
+							{info?.eventCount} event{info?.eventCount !== 1 ? "s" : ""}
 						</CardDescription>
 					</CardHeader>
 
 					<CardContent className="space-y-4">
 						<p className="text-center text-muted-foreground text-sm">
-							Ce calendrier vous a été partagé. Téléchargez-le au format .ics
-							pour l'importer dans votre application calendrier préférée.
+							This calendar has been shared with you. Download it in .ics format
+							to import it into your favorite calendar application.
 						</p>
 
 						<Button
@@ -162,31 +162,31 @@ function SharePage() {
 							{downloadState === "loading" ? (
 								<>
 									<Loader2 className="mr-2 h-5 w-5 animate-spin" />
-									Téléchargement...
+									Downloading...
 								</>
 							) : downloadState === "success" ? (
 								<>
 									<CheckCircle2 className="mr-2 h-5 w-5" />
-									Téléchargé !
+									Downloaded!
 								</>
 							) : (
 								<>
 									<Download className="mr-2 h-5 w-5" />
-									Télécharger le calendrier
+									Download calendar
 								</>
 							)}
 						</Button>
 
 						{downloadState === "success" && (
 							<p className="text-center text-muted-foreground text-sm">
-								Le fichier a été téléchargé. Ouvrez-le avec votre application
-								calendrier pour l'importer.
+								The file has been downloaded. Open it with your calendar
+								application to import it.
 							</p>
 						)}
 
 						<div className="border-t pt-4">
 							<p className="mb-3 text-center text-muted-foreground text-xs">
-								Compatible avec :
+								Compatible with:
 							</p>
 							<div className="flex flex-wrap justify-center gap-2 text-muted-foreground text-xs">
 								<span className="rounded-full bg-muted px-3 py-1">
@@ -206,11 +206,11 @@ function SharePage() {
 
 				<div className="mt-6 text-center">
 					<p className="text-muted-foreground text-sm">
-						Besoin de créer vos propres calendriers ?
+						Need to create your own calendars?
 					</p>
 					<Button asChild variant="link" className="text-primary">
 						<Link to="/">
-							Découvrir Calendraft
+							Discover Calendraft
 							<ExternalLink className="ml-1 h-4 w-4" />
 						</Link>
 					</Button>

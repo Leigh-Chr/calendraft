@@ -25,13 +25,13 @@ function validateLatitude(
 ): GeoValidationErrors {
 	const errors: GeoValidationErrors = {};
 	if (lat < -90 || lat > 90) {
-		errors.geoLatitude = "La latitude doit être entre -90 et 90";
+		errors.geoLatitude = "Latitude must be between -90 and 90";
 	}
 	if (lon !== undefined && (lon < -180 || lon > 180)) {
-		errors.geoLongitude = "La longitude doit être entre -180 et 180";
+		errors.geoLongitude = "Longitude must be between -180 and 180";
 	}
 	if (lat !== undefined && lon === undefined) {
-		errors.geoLongitude = "La longitude est requise si la latitude est définie";
+		errors.geoLongitude = "Longitude is required if latitude is defined";
 	}
 	return errors;
 }
@@ -45,13 +45,13 @@ function validateLongitude(
 ): GeoValidationErrors {
 	const errors: GeoValidationErrors = {};
 	if (lon < -180 || lon > 180) {
-		errors.geoLongitude = "La longitude doit être entre -180 et 180";
+		errors.geoLongitude = "Longitude must be between -180 and 180";
 	}
 	if (lat !== undefined && (lat < -90 || lat > 90)) {
-		errors.geoLatitude = "La latitude doit être entre -90 et 90";
+		errors.geoLatitude = "Latitude must be between -90 and 90";
 	}
 	if (lon !== undefined && lat === undefined) {
-		errors.geoLatitude = "La latitude est requise si la longitude est définie";
+		errors.geoLatitude = "Latitude is required if longitude is defined";
 	}
 	return errors;
 }
@@ -110,21 +110,17 @@ export function LocationSection({
 	return (
 		<div className="space-y-4">
 			<p className="text-muted-foreground text-sm">
-				Coordonnées géographiques précises de l'événement. Utiles pour la
-				navigation GPS et l'affichage sur une carte.
+				Precise geographic coordinates of the event. Useful for GPS navigation
+				and map display.
 			</p>
 			<div className="rounded-md bg-muted/50 p-3">
 				<p className="mb-2 text-muted-foreground text-xs">
-					<strong className="text-foreground">
-						Comment obtenir les coordonnées :
-					</strong>
+					<strong className="text-foreground">How to get coordinates:</strong>
 				</p>
 				<ul className="list-inside list-disc space-y-1 text-muted-foreground text-xs">
-					<li>
-						Sur Google Maps : cliquez droit sur l'emplacement → "Coordonnées"
-					</li>
-					<li>Sur OpenStreetMap : cliquez droit → "Afficher l'adresse"</li>
-					<li>Exemple pour Paris : Latitude 48.8566, Longitude 2.3522</li>
+					<li>On Google Maps: right-click on the location → "Coordinates"</li>
+					<li>On OpenStreetMap: right-click → "Show address"</li>
+					<li>Example for Paris: Latitude 48.8566, Longitude 2.3522</li>
 				</ul>
 			</div>
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -157,7 +153,7 @@ export function LocationSection({
 							if (Number.isNaN(newLat)) {
 								onValidationErrorChange?.({
 									...validationErrors,
-									geoLatitude: "La latitude doit être un nombre valide",
+									geoLatitude: "Latitude must be a valid number",
 								});
 								return;
 							}
@@ -194,13 +190,12 @@ export function LocationSection({
 					)}
 					{!validationErrors?.geoLatitude && (
 						<p className="text-muted-foreground text-xs">
-							Position nord-sud. Entre -90 (pôle Sud) et 90 (pôle Nord). Pour la
-							France, généralement entre 42 et 51.
+							North-south position. Between -90 (South Pole) and 90 (North
+							Pole). For France, generally between 42 and 51.
 							{formData.geoLatitude !== undefined &&
 								formData.geoLongitude === undefined && (
 									<span className="mt-1 block text-orange-600 dark:text-orange-400">
-										⚠️ La longitude est également requise pour utiliser les
-										coordonnées GPS.
+										⚠️ Longitude is also required to use GPS coordinates.
 									</span>
 								)}
 						</p>
@@ -235,7 +230,7 @@ export function LocationSection({
 							if (Number.isNaN(newLon)) {
 								onValidationErrorChange?.({
 									...validationErrors,
-									geoLongitude: "La longitude doit être un nombre valide",
+									geoLongitude: "Longitude must be a valid number",
 								});
 								return;
 							}
@@ -272,13 +267,12 @@ export function LocationSection({
 					)}
 					{!validationErrors?.geoLongitude && (
 						<p className="text-muted-foreground text-xs">
-							Position est-ouest. Entre -180 et 180. Pour la France,
-							généralement entre -5 et 8.
+							East-west position. Between -180 and 180. For France, generally
+							between -5 and 8.
 							{formData.geoLongitude !== undefined &&
 								formData.geoLatitude === undefined && (
 									<span className="mt-1 block text-orange-600 dark:text-orange-400">
-										⚠️ La latitude est également requise pour utiliser les
-										coordonnées GPS.
+										⚠️ Latitude is also required to use GPS coordinates.
 									</span>
 								)}
 						</p>

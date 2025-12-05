@@ -17,9 +17,9 @@ import {
 import { Button } from "@/components/ui/button";
 
 const BASE_URL = "https://calendraft.app";
-const TITLE = "Calendraft - Gérez vos calendriers .ics simplement";
+const TITLE = "Calendraft - Manage your .ics calendars simply";
 const DESCRIPTION =
-	"Importez, créez, modifiez et fusionnez vos calendriers ICS en quelques clics. Compatible Google Calendar, Apple Calendar, Outlook. Gratuit et open-source.";
+	"Import, create, edit, and merge your ICS calendars in a few clicks. Compatible with Google Calendar, Apple Calendar, Outlook. Free and open-source.";
 
 export const Route = createFileRoute("/")({
 	component: LandingPage,
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/")({
 			{ property: "og:image", content: `${BASE_URL}/og-image.png` },
 			{ property: "og:image:width", content: "1200" },
 			{ property: "og:image:height", content: "630" },
-			{ property: "og:locale", content: "fr_FR" },
+			{ property: "og:locale", content: "en_US" },
 			{ property: "og:site_name", content: "Calendraft" },
 			// Twitter Card
 			{ name: "twitter:card", content: "summary_large_image" },
@@ -76,7 +76,7 @@ function LandingPage() {
 						<div className="fade-in slide-in-from-bottom-3 mb-8 inline-flex animate-in items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm duration-500">
 							<Sparkles className="size-4 text-primary" aria-hidden="true" />
 							<span className="text-foreground/80">
-								Application PWA • Fonctionne hors-ligne
+								PWA Application • Works offline
 							</span>
 						</div>
 
@@ -85,18 +85,18 @@ function LandingPage() {
 							id="hero-heading"
 							className="fade-in slide-in-from-bottom-4 mb-6 animate-in font-bold text-4xl tracking-tight duration-700 sm:text-5xl lg:text-6xl"
 						>
-							Vos calendriers{" "}
-							<span className="font-mono text-primary">.ics</span>
+							Your <span className="font-mono text-primary">.ics</span>{" "}
+							calendars
 							<br />
-							<span className="gradient-brand">simplifiés</span>
+							<span className="gradient-brand">simplified</span>
 						</h1>
 
 						{/* Subtitle */}
 						<p className="fade-in slide-in-from-bottom-5 mx-auto mb-10 max-w-2xl animate-in text-lg text-muted-foreground leading-relaxed duration-1000">
-							Importez, créez, modifiez et fusionnez vos calendriers en quelques
-							clics. Compatible avec{" "}
+							Import, create, edit, and merge your calendars in just a few
+							clicks. Compatible with{" "}
 							<span className="text-foreground">Google Calendar</span>,{" "}
-							<span className="text-foreground">Apple Calendar</span> et{" "}
+							<span className="text-foreground">Apple Calendar</span>, and{" "}
 							<span className="text-foreground">Outlook</span>.
 						</p>
 
@@ -104,7 +104,7 @@ function LandingPage() {
 						<div className="fade-in slide-in-from-bottom-6 flex animate-in flex-col items-center justify-center gap-4 duration-1000 sm:flex-row">
 							<Button size="lg" className="group h-12 gap-2 px-8" asChild>
 								<Link to="/calendars">
-									Commencer gratuitement
+									Get started for free
 									<ArrowRight
 										className="size-4 transition-transform group-hover:translate-x-1"
 										aria-hidden="true"
@@ -114,7 +114,7 @@ function LandingPage() {
 							<Button size="lg" variant="outline" className="h-12" asChild>
 								<Link to="/calendars/import">
 									<FileUp className="mr-2 size-4" aria-hidden="true" />
-									Importer un .ics
+									Import a .ics
 								</Link>
 							</Button>
 						</div>
@@ -123,7 +123,7 @@ function LandingPage() {
 						<div className="fade-in mt-14 flex animate-in flex-wrap items-center justify-center gap-x-8 gap-y-4 text-muted-foreground text-sm duration-1000">
 							<div className="flex items-center gap-2.5">
 								<Lock className="size-4 text-primary/70" aria-hidden="true" />
-								<span>Données sécurisées</span>
+								<span>Secure data</span>
 							</div>
 							<div className="flex items-center gap-2.5">
 								<Smartphone
@@ -134,7 +134,7 @@ function LandingPage() {
 							</div>
 							<div className="flex items-center gap-2.5">
 								<Cloud className="size-4 text-primary/70" aria-hidden="true" />
-								<span>Synchronisation cloud</span>
+								<span>Cloud synchronization</span>
 							</div>
 						</div>
 					</div>
@@ -157,10 +157,10 @@ function LandingPage() {
 							id="features-heading"
 							className="mb-4 font-bold text-3xl tracking-tight sm:text-4xl"
 						>
-							Tout ce dont vous avez besoin
+							Everything you need
 						</h2>
 						<p className="text-muted-foreground">
-							Des outils puissants pour gérer vos calendriers, sans complexité.
+							Powerful tools to manage your calendars, without complexity.
 						</p>
 					</div>
 
@@ -169,37 +169,37 @@ function LandingPage() {
 						<BentoCard
 							icon={FileUp}
 							title="Import flexible"
-							description="Importez vos fichiers .ics depuis n'importe quelle source. Glissez-déposez ou sélectionnez."
+							description="Import your .ics files from any source. Drag and drop or select."
 							delay={0}
 						/>
 						<BentoCard
 							icon={GitMerge}
-							title="Fusion intelligente"
-							description="Combinez plusieurs calendriers en un seul avec détection des doublons."
+							title="Smart Merge"
+							description="Combine multiple calendars into one with duplicate detection."
 							delay={50}
 						/>
 						<BentoCard
 							icon={Download}
-							title="Export universel"
-							description="Exportez vers Google Calendar, Apple Calendar, Outlook et plus."
+							title="Universal Export"
+							description="Export to Google Calendar, Apple Calendar, Outlook, and more."
 							delay={100}
 						/>
 						<BentoCard
 							icon={Calendar}
-							title="Vues multiples"
-							description="Basculez entre vue liste et calendrier mensuel."
+							title="Multiple Views"
+							description="Switch between list view and monthly calendar."
 							delay={150}
 						/>
 						<BentoCard
 							icon={Search}
-							title="Recherche rapide"
-							description="Trouvez vos événements par date, mot-clé ou catégorie."
+							title="Quick Search"
+							description="Find your events by date, keyword, or category."
 							delay={200}
 						/>
 						<BentoCard
 							icon={Zap}
-							title="Mode hors-ligne"
-							description="Application PWA qui fonctionne même sans connexion."
+							title="Offline Mode"
+							description="PWA application that works even without connection."
 							delay={250}
 						/>
 					</div>
@@ -221,30 +221,30 @@ function LandingPage() {
 							id="how-it-works-heading"
 							className="mb-4 font-bold text-3xl tracking-tight sm:text-4xl"
 						>
-							Comment ça marche
+							How it works
 						</h2>
 						<p className="text-muted-foreground">
-							Trois étapes simples pour maîtriser vos calendriers.
+							Three simple steps to master your calendars.
 						</p>
 					</div>
 
 					<div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-3">
 						<StepCard
 							number="01"
-							title="Importez ou créez"
-							description="Importez un fichier .ics existant ou créez un nouveau calendrier vierge."
+							title="Import or create"
+							description="Import an existing .ics file or create a new empty calendar."
 							delay={0}
 						/>
 						<StepCard
 							number="02"
-							title="Éditez librement"
-							description="Ajoutez, modifiez ou supprimez des événements. Fusionnez si besoin."
+							title="Edit freely"
+							description="Add, modify, or delete events. Merge if needed."
 							delay={100}
 						/>
 						<StepCard
 							number="03"
-							title="Exportez partout"
-							description="Téléchargez au format .ics, compatible avec toutes les applications."
+							title="Export anywhere"
+							description="Download in .ics format, compatible with all applications."
 							delay={200}
 						/>
 					</div>
@@ -254,7 +254,7 @@ function LandingPage() {
 			{/* Anonymous vs Account Section */}
 			<section
 				className="section-divider relative overflow-hidden bg-muted/30"
-				aria-label="Options d'utilisation"
+				aria-label="Usage options"
 			>
 				{/* Background elements */}
 				<div className="-z-10 pointer-events-none absolute inset-0">
@@ -273,10 +273,10 @@ function LandingPage() {
 										aria-hidden="true"
 									/>
 								</div>
-								<h3 className="mb-3 font-semibold text-xl">Mode anonyme</h3>
+								<h3 className="mb-3 font-semibold text-xl">Anonymous Mode</h3>
 								<p className="mb-6 text-muted-foreground text-sm leading-relaxed">
-									Utilisez Calendraft immédiatement sans créer de compte. Vos
-									données restent dans votre navigateur.
+									Use Calendraft immediately without creating an account. Your
+									data stays in your browser.
 								</p>
 								<ul className="space-y-3 text-muted-foreground text-sm">
 									<li className="flex items-center gap-3">
@@ -284,21 +284,21 @@ function LandingPage() {
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
-										<span>Aucune inscription requise</span>
+										<span>No registration required</span>
 									</li>
 									<li className="flex items-center gap-3">
 										<CalendarCheck
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
-										<span>Jusqu'à 10 calendriers</span>
+										<span>Up to 10 calendars</span>
 									</li>
 									<li className="flex items-center gap-3">
 										<CalendarCheck
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
-										<span>500 événements par calendrier</span>
+										<span>500 events per calendar</span>
 									</li>
 								</ul>
 							</article>
@@ -308,16 +308,16 @@ function LandingPage() {
 								{/* Recommended badge */}
 								<div className="absolute top-6 right-6">
 									<span className="rounded-full bg-primary/10 px-3 py-1 font-medium text-primary text-xs">
-										Recommandé
+										Recommended
 									</span>
 								</div>
 								<div className="mb-6 inline-flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
 									<Layers className="size-6" aria-hidden="true" />
 								</div>
-								<h3 className="mb-3 font-semibold text-xl">Avec un compte</h3>
+								<h3 className="mb-3 font-semibold text-xl">With an account</h3>
 								<p className="mb-6 text-muted-foreground text-sm leading-relaxed">
-									Créez un compte gratuit pour synchroniser vos calendriers sur
-									tous vos appareils.
+									Create a free account to sync your calendars across all your
+									devices.
 								</p>
 								<ul className="space-y-3 text-muted-foreground text-sm">
 									<li className="flex items-center gap-3">
@@ -325,28 +325,28 @@ function LandingPage() {
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
-										<span>Jusqu'à 100 calendriers</span>
+										<span>Up to 100 calendars</span>
 									</li>
 									<li className="flex items-center gap-3">
 										<CalendarCheck
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
-										<span>2 000 événements par calendrier</span>
+										<span>2,000 events per calendar</span>
 									</li>
 									<li className="flex items-center gap-3">
 										<CalendarCheck
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
-										<span>Synchronisation multi-appareils</span>
+										<span>Multi-device synchronization</span>
 									</li>
 									<li className="flex items-center gap-3">
 										<CalendarCheck
 											className="size-4 text-primary"
 											aria-hidden="true"
 										/>
-										<span>Sauvegarde cloud permanente</span>
+										<span>Permanent cloud backup</span>
 									</li>
 								</ul>
 							</article>
@@ -373,15 +373,15 @@ function LandingPage() {
 							id="cta-heading"
 							className="mb-6 font-bold text-3xl tracking-tight sm:text-4xl"
 						>
-							Prêt à simplifier vos calendriers ?
+							Ready to simplify your calendars?
 						</h2>
 						<p className="mb-10 text-muted-foreground">
-							Commencez dès maintenant, gratuitement et sans inscription.
+							Start now, free and without registration.
 						</p>
 						<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
 							<Button size="lg" className="group h-12 gap-2 px-8" asChild>
 								<Link to="/calendars/new">
-									Créer un calendrier
+									Create a calendar
 									<ArrowRight
 										className="size-4 transition-transform group-hover:translate-x-1"
 										aria-hidden="true"
@@ -390,7 +390,7 @@ function LandingPage() {
 							</Button>
 							<Button size="lg" variant="outline" className="h-12" asChild>
 								<Link to="/login" search={{ mode: "signup" }}>
-									Créer un compte gratuit
+									Create a free account
 								</Link>
 							</Button>
 						</div>
@@ -411,21 +411,21 @@ function LandingPage() {
 							<Link
 								to="/"
 								className="mb-4 inline-flex items-center gap-2 font-semibold"
-								aria-label="Calendraft - Accueil"
+								aria-label="Calendraft - Home"
 							>
 								<Calendar className="size-5 text-primary" aria-hidden="true" />
 								<span>Calendraft</span>
 							</Link>
 							<p className="text-muted-foreground text-sm leading-relaxed">
-								Gérez vos calendriers{" "}
-								<span className="font-mono text-primary">.ics</span> simplement.
+								Manage your <span className="font-mono text-primary">.ics</span>{" "}
+								calendars simply.
 							</p>
 						</div>
 
 						{/* Product navigation */}
-						<nav aria-label="Liens produit">
+						<nav aria-label="Product links">
 							<p className="mb-4 font-medium text-sm" id="footer-product">
-								Produit
+								Product
 							</p>
 							<ul
 								className="space-y-2.5 text-muted-foreground text-sm"
@@ -436,7 +436,7 @@ function LandingPage() {
 										to="/calendars"
 										className="rounded-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 									>
-										Mes calendriers
+										My calendars
 									</Link>
 								</li>
 								<li>
@@ -444,7 +444,7 @@ function LandingPage() {
 										to="/calendars/new"
 										className="rounded-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 									>
-										Créer un calendrier
+										Create a calendar
 									</Link>
 								</li>
 								<li>
@@ -452,16 +452,16 @@ function LandingPage() {
 										to="/calendars/import"
 										className="rounded-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 									>
-										Importer un .ics
+										Import a .ics
 									</Link>
 								</li>
 							</ul>
 						</nav>
 
 						{/* Account navigation */}
-						<nav aria-label="Liens compte">
+						<nav aria-label="Account links">
 							<p className="mb-4 font-medium text-sm" id="footer-account">
-								Compte
+								Account
 							</p>
 							<ul
 								className="space-y-2.5 text-muted-foreground text-sm"
@@ -473,7 +473,7 @@ function LandingPage() {
 										search={{ mode: "signin" }}
 										className="rounded-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 									>
-										Connexion
+										Sign in
 									</Link>
 								</li>
 								<li>
@@ -482,7 +482,7 @@ function LandingPage() {
 										search={{ mode: "signup" }}
 										className="rounded-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 									>
-										Créer un compte
+										Create an account
 									</Link>
 								</li>
 							</ul>
@@ -492,7 +492,7 @@ function LandingPage() {
 						<div>
 							<p className="mb-4 font-medium text-sm">Open Source</p>
 							<p className="text-muted-foreground text-sm leading-relaxed">
-								Calendraft est 100% gratuit et open-source sous licence MIT.
+								Calendraft is 100% free and open-source under the MIT license.
 							</p>
 						</div>
 					</div>
@@ -503,7 +503,7 @@ function LandingPage() {
 							© {new Date().getFullYear()} Calendraft
 						</p>
 						<p className="text-muted-foreground/60 text-xs">
-							Fait avec soin pour simplifier vos calendriers
+							Made with care to simplify your calendars
 						</p>
 					</div>
 				</div>

@@ -6,7 +6,7 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import {
 	Calendar,
 	Edit,
@@ -66,16 +66,16 @@ export const Route = createFileRoute("/calendars")({
 	component: CalendarsListComponent,
 	head: () => ({
 		meta: [
-			{ title: "Mes calendriers - Calendraft" },
+			{ title: "My calendars - Calendraft" },
 			{
 				name: "description",
 				content:
-					"Gérez tous vos calendriers ICS en un seul endroit. Créez, modifiez, fusionnez et exportez vos calendriers facilement.",
+					"Manage all your ICS calendars in one place. Create, edit, merge, and export your calendars easily.",
 			},
-			{ property: "og:title", content: "Mes calendriers - Calendraft" },
+			{ property: "og:title", content: "My calendars - Calendraft" },
 			{
 				property: "og:description",
-				content: "Gérez tous vos calendriers ICS en un seul endroit.",
+				content: "Manage all your ICS calendars in one place.",
 			},
 			{ property: "og:url", content: `${BASE_URL}/calendars` },
 			{ name: "robots", content: "noindex, nofollow" }, // Private page
@@ -165,7 +165,7 @@ function CalendarsListComponent() {
 				});
 				closeDialog();
 			} else {
-				toast.error("Le nom ne peut pas être vide");
+				toast.error("Name cannot be empty");
 			}
 		}
 	}, [dialog, updateCalendar, closeDialog]);
@@ -224,19 +224,19 @@ function CalendarsListComponent() {
 				<TourAlertDialog isOpen={tourOpen} setIsOpen={setTourOpen} />
 
 				<div className="mb-6 flex items-center justify-between">
-					<h1 className="font-bold text-3xl">Mes calendriers</h1>
+					<h1 className="font-bold text-3xl">My calendars</h1>
 					<div className="flex items-center gap-2">
 						<Button
 							id={TOUR_STEP_IDS.NEW_CALENDAR_BUTTON}
 							onClick={() => navigate({ to: "/calendars/new" })}
 						>
 							<Plus className="mr-2 h-4 w-4" />
-							Nouveau calendrier
+							New calendar
 						</Button>
 						<Button id={TOUR_STEP_IDS.IMPORT_BUTTON} variant="outline" asChild>
 							<Link to="/calendars/import">
 								<FileUp className="mr-2 h-4 w-4" />
-								Importer
+								Import
 							</Link>
 						</Button>
 					</div>
@@ -250,47 +250,45 @@ function CalendarsListComponent() {
 							<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
 								<Calendar className="h-8 w-8 text-muted-foreground" />
 							</div>
-							<h3 className="mb-2 font-semibold text-lg">
-								Aucun calendrier pour le moment
-							</h3>
+							<h3 className="mb-2 font-semibold text-lg">No calendars yet</h3>
 							<p className="mb-6 text-muted-foreground">
-								Créez votre premier calendrier ou importez un fichier .ics
-								existant.
+								Create your first calendar or import an existing .ics file.
 							</p>
 							<div className="flex justify-center gap-3">
 								<Button onClick={() => navigate({ to: "/calendars/new" })}>
 									<Plus className="mr-2 h-4 w-4" />
-									Créer un calendrier
+									Create a calendar
 								</Button>
 								<Button variant="outline" asChild>
 									<Link to="/calendars/import">
 										<FileUp className="mr-2 h-4 w-4" />
-										Importer un .ics
+										Import a .ics
 									</Link>
 								</Button>
 							</div>
 						</CardContent>
 					</Card>
 				) : (
-					<StaggerContainer
-						id={TOUR_STEP_IDS.CALENDAR_GRID}
-						className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-					>
-						{calendars.map((calendar) => (
-							<StaggerItem key={calendar.id}>
-								<CalendarCard
-									calendar={calendar}
-									onOpen={() => navigate({ to: `/calendars/${calendar.id}` })}
-									onEdit={() =>
-										openEditDialog(calendar.id, calendar.name, calendar.color)
-									}
-									onDelete={() => openDeleteDialog(calendar.id, calendar.name)}
-									isDeleting={isDeleting}
-									isUpdating={isUpdating}
-								/>
-							</StaggerItem>
-						))}
-					</StaggerContainer>
+					<div id={TOUR_STEP_IDS.CALENDAR_GRID}>
+						<StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+							{calendars.map((calendar) => (
+								<StaggerItem key={calendar.id}>
+									<CalendarCard
+										calendar={calendar}
+										onOpen={() => navigate({ to: `/calendars/${calendar.id}` })}
+										onEdit={() =>
+											openEditDialog(calendar.id, calendar.name, calendar.color)
+										}
+										onDelete={() =>
+											openDeleteDialog(calendar.id, calendar.name)
+										}
+										isDeleting={isDeleting}
+										isUpdating={isUpdating}
+									/>
+								</StaggerItem>
+							))}
+						</StaggerContainer>
+					</div>
 				)}
 
 				{/* Delete Dialog */}
@@ -300,22 +298,21 @@ function CalendarsListComponent() {
 				>
 					<AlertDialogContent>
 						<AlertDialogHeader>
-							<AlertDialogTitle>Supprimer le calendrier</AlertDialogTitle>
+							<AlertDialogTitle>Delete calendar</AlertDialogTitle>
 							<AlertDialogDescription>
-								Êtes-vous sûr de vouloir supprimer "
-								{dialog?.type === "delete" ? dialog.calendar.name : ""}" ? Cette
-								action est irréversible et supprimera tous les événements
-								associés.
+								Are you sure you want to delete "
+								{dialog?.type === "delete" ? dialog.calendar.name : ""}"? This
+								action is irreversible and will delete all associated events.
 							</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
-							<AlertDialogCancel>Annuler</AlertDialogCancel>
+							<AlertDialogCancel>Cancel</AlertDialogCancel>
 							<AlertDialogAction
 								onClick={confirmDelete}
 								disabled={isDeleting}
 								className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 							>
-								{isDeleting ? "Suppression..." : "Supprimer"}
+								{isDeleting ? "Deleting..." : "Delete"}
 							</AlertDialogAction>
 						</AlertDialogFooter>
 					</AlertDialogContent>
@@ -328,20 +325,20 @@ function CalendarsListComponent() {
 				>
 					<AlertDialogContent>
 						<AlertDialogHeader>
-							<AlertDialogTitle>Modifier le calendrier</AlertDialogTitle>
+							<AlertDialogTitle>Edit calendar</AlertDialogTitle>
 							<AlertDialogDescription>
-								Modifiez les paramètres du calendrier "
+								Edit calendar settings for "
 								{dialog?.type === "edit" ? dialog.calendar.name : ""}"
 							</AlertDialogDescription>
 						</AlertDialogHeader>
 						<div className="space-y-4 py-4">
 							<div className="space-y-2">
-								<Label htmlFor="calendar-name">Nom</Label>
+								<Label htmlFor="calendar-name">Name</Label>
 								<Input
 									id="calendar-name"
 									value={dialog?.type === "edit" ? dialog.newName : ""}
 									onChange={(e) => handleEditNameChange(e.target.value)}
-									placeholder="Nom du calendrier"
+									placeholder="Calendar name"
 									onKeyDown={(e) => {
 										if (e.key === "Enter") {
 											confirmEdit();
@@ -352,13 +349,13 @@ function CalendarsListComponent() {
 							<ColorPicker
 								value={dialog?.type === "edit" ? dialog.newColor : null}
 								onChange={handleEditColorChange}
-								label="Couleur"
+								label="Color"
 							/>
 						</div>
 						<AlertDialogFooter>
-							<AlertDialogCancel>Annuler</AlertDialogCancel>
+							<AlertDialogCancel>Cancel</AlertDialogCancel>
 							<AlertDialogAction onClick={confirmEdit} disabled={isUpdating}>
-								{isUpdating ? "Enregistrement..." : "Enregistrer"}
+								{isUpdating ? "Saving..." : "Save"}
 							</AlertDialogAction>
 						</AlertDialogFooter>
 					</AlertDialogContent>
@@ -392,7 +389,7 @@ interface CalendarCardProps {
 
 /**
  * Format date for calendar card preview
- * Shows contextual labels: "Aujourd'hui", "Demain", or date
+ * Shows contextual labels: "Today", "Tomorrow", or date
  */
 function formatCardDate(date: string | Date): string {
 	const d = new Date(date);
@@ -403,12 +400,12 @@ function formatCardDate(date: string | Date): string {
 	const eventDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
 	if (eventDate.getTime() === today.getTime()) {
-		return "Auj.";
+		return "Today";
 	}
 	if (eventDate.getTime() === tomorrow.getTime()) {
-		return "Dem.";
+		return "Tomorrow";
 	}
-	return format(d, "d MMM", { locale: fr });
+	return format(d, "MMM d", { locale: enUS });
 }
 
 function CalendarCard({
@@ -453,22 +450,22 @@ function CalendarCard({
 						</CardTitle>
 						<CardDescription className="mt-0.5 flex items-center gap-2">
 							<span>
-								{calendar.eventCount} événement
+								{calendar.eventCount} event
 								{calendar.eventCount !== 1 ? "s" : ""}
 							</span>
 							{calendar.sourceUrl && (
 								<span
 									className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-1.5 py-0.5 font-medium text-blue-600 text-xs dark:text-blue-400"
-									title={`Abonné à ${calendar.sourceUrl}`}
+									title={`Subscribed to ${calendar.sourceUrl}`}
 								>
 									<Globe className="h-3 w-3" />
-									Abonné
+									Subscribed
 								</span>
 							)}
 							{isNextEventToday && (
 								<span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 font-medium text-primary text-xs">
 									<span className="h-1 w-1 animate-pulse rounded-full bg-primary" />
-									Aujourd'hui
+									Today
 								</span>
 							)}
 						</CardDescription>
@@ -493,7 +490,7 @@ function CalendarCard({
 								}}
 							>
 								<ExternalLink className="mr-2 h-4 w-4" />
-								Ouvrir
+								Open
 							</DropdownMenuItem>
 							<DropdownMenuItem
 								onClick={(e) => {
@@ -503,7 +500,7 @@ function CalendarCard({
 								disabled={isUpdating}
 							>
 								<Edit className="mr-2 h-4 w-4" />
-								Modifier
+								Edit
 							</DropdownMenuItem>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
@@ -515,7 +512,7 @@ function CalendarCard({
 								className="text-destructive focus:text-destructive"
 							>
 								<Trash2 className="mr-2 h-4 w-4" />
-								Supprimer
+								Delete
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
@@ -555,13 +552,13 @@ function CalendarCard({
 						})}
 						{calendar.eventCount > 3 && (
 							<p className="mt-1 text-muted-foreground/60 text-xs">
-								+{calendar.eventCount - 3} autres
+								+{calendar.eventCount - 3} others
 							</p>
 						)}
 					</div>
 				) : (
 					<p className="py-2 text-center text-muted-foreground/50 text-xs italic">
-						Aucun événement à venir
+						No upcoming events
 					</p>
 				)}
 			</CardContent>

@@ -30,12 +30,11 @@ export function PWAUpdatePrompt() {
 						}
 					},
 					onNeedRefresh() {
-						toast.info("Nouvelle version disponible", {
-							description:
-								"Une mise à jour est disponible. Cliquez pour actualiser.",
+						toast.info("New version available", {
+							description: "An update is available. Click to refresh.",
 							duration: Number.POSITIVE_INFINITY,
 							action: {
-								label: "Actualiser",
+								label: "Refresh",
 								onClick: () => {
 									if (waitingWorker) {
 										waitingWorker.postMessage({ type: "SKIP_WAITING" });
@@ -46,8 +45,8 @@ export function PWAUpdatePrompt() {
 						});
 					},
 					onOfflineReady() {
-						toast.success("Application prête", {
-							description: "L'application est prête à fonctionner hors ligne.",
+						toast.success("Application ready", {
+							description: "The application is ready to work offline.",
 							duration: 4000,
 						});
 					},

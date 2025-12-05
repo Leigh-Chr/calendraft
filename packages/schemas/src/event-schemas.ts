@@ -400,11 +400,11 @@ export const eventFormDataSchema = z
 		title: z
 			.string()
 			.trim()
-			.min(1, "Le titre est requis")
+			.min(1, "Title is required")
 			.max(FIELD_LIMITS.TITLE)
 			.transform((val) => val.trim()),
-		startDate: z.string().min(1, "La date de début est requise"),
-		endDate: z.string().min(1, "La date de fin est requise"),
+		startDate: z.string().min(1, "Start date is required"),
+		endDate: z.string().min(1, "End date is required"),
 		description: nullableTrimmedStringSchema(FIELD_LIMITS.DESCRIPTION),
 		location: nullableTrimmedStringSchema(FIELD_LIMITS.LOCATION),
 
@@ -462,7 +462,7 @@ export const eventFormDataSchema = z
 			return end > start;
 		},
 		{
-			message: "La date de fin doit être après la date de début",
+			message: "End date must be after start date",
 			path: ["endDate"],
 		},
 	)
@@ -476,7 +476,7 @@ export const eventFormDataSchema = z
 			return hasLat === hasLon;
 		},
 		{
-			message: "La latitude et la longitude doivent être définies ensemble",
+			message: "Latitude and longitude must be defined together",
 			path: ["geoLongitude"],
 		},
 	)
@@ -489,7 +489,7 @@ export const eventFormDataSchema = z
 			return true;
 		},
 		{
-			message: "RECURRENCE-ID nécessite que RRULE soit défini",
+			message: "RECURRENCE-ID requires that RRULE be defined",
 			path: ["recurrenceId"],
 		},
 	);

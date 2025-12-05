@@ -27,7 +27,7 @@ export default function UserMenu() {
 					to="/login"
 					search={{ mode: "signin", redirect: location.pathname }}
 				>
-					Se connecter
+					Sign in
 				</Link>
 			</Button>
 		);
@@ -39,7 +39,7 @@ export default function UserMenu() {
 				<Button variant="outline">{session.user.name}</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent>
-				<DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+				<DropdownMenuLabel>My account</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem disabled>{session.user.email}</DropdownMenuItem>
 				<DropdownMenuSeparator />

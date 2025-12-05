@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+import { enUS } from "date-fns/locale";
 import {
 	ChevronDownIcon,
 	ChevronLeftIcon,
@@ -37,8 +39,7 @@ function Calendar({
 			)}
 			captionLayout={captionLayout}
 			formatters={{
-				formatMonthDropdown: (date) =>
-					date.toLocaleString("default", { month: "short" }),
+				formatMonthDropdown: (date) => format(date, "MMM", { locale: enUS }),
 				...formatters,
 			}}
 			classNames={{
@@ -194,7 +195,7 @@ function CalendarDayButton({
 			ref={ref}
 			variant="ghost"
 			size="icon"
-			data-day={day.date.toLocaleDateString()}
+			data-day={format(day.date, "yyyy-MM-dd", { locale: enUS })}
 			data-selected-single={
 				modifiers.selected &&
 				!modifiers.range_start &&

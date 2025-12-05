@@ -1,62 +1,61 @@
 ---
 name: ✨ Feature Request
-about: Proposer une nouvelle fonctionnalité
+about: Propose a new feature
 title: '[Feature] '
 labels: enhancement
 assignees: ''
 ---
 
-## Description de la fonctionnalité
+## Feature description
 
-<!-- Une description claire et concise de la fonctionnalité souhaitée -->
+<!-- A clear and concise description of the desired feature -->
 
-## Problème ou besoin
+## Problem or need
 
-<!-- Quel problème cette fonctionnalité résout-elle ? -->
-<!-- Ex: Je suis frustré quand... -->
+<!-- What problem does this feature solve? -->
+<!-- Ex: I'm frustrated when... -->
 
-## Solution proposée
+## Proposed solution
 
-<!-- Décrivez la solution que vous aimeriez voir -->
+<!-- Describe the solution you would like to see -->
 
-## Alternatives considérées
+## Alternatives considered
 
-<!-- Décrivez les alternatives que vous avez envisagées -->
+<!-- Describe the alternatives you have considered -->
 
-## Maquettes / Wireframes
+## Mockups / Wireframes
 
-<!-- Si applicable, ajoutez des maquettes ou schémas pour illustrer la fonctionnalité -->
+<!-- If applicable, add mockups or diagrams to illustrate the feature -->
 
-## Cas d'utilisation
+## Use cases
 
-<!-- Décrivez un ou plusieurs scénarios d'utilisation concrets -->
+<!-- Describe one or more concrete usage scenarios -->
 
-1. En tant que [utilisateur], je veux [action] pour [bénéfice]
+1. As a [user], I want [action] to [benefit]
 
-## Impact technique
+## Technical impact
 
-<!-- Si vous avez une idée de l'impact technique, décrivez-le -->
+<!-- If you have an idea of the technical impact, describe it -->
 
-- [ ] Changement frontend uniquement
-- [ ] Changement backend uniquement
-- [ ] Changement frontend + backend
-- [ ] Modification de la base de données
-- [ ] Nouvelle dépendance nécessaire
+- [ ] Frontend change only
+- [ ] Backend change only
+- [ ] Frontend + backend change
+- [ ] Database modification
+- [ ] New dependency required
 
-## Priorité suggérée
+## Suggested priority
 
-- [ ] Critique - Bloque l'utilisation
-- [ ] Haute - Améliore significativement l'expérience
-- [ ] Moyenne - Nice to have
-- [ ] Basse - Amélioration mineure
+- [ ] Critical - Blocks usage
+- [ ] High - Significantly improves experience
+- [ ] Medium - Nice to have
+- [ ] Low - Minor improvement
 
-## Contexte additionnel
+## Additional context
 
-<!-- Tout autre contexte ou captures d'écran -->
+<!-- Any other context or screenshots -->
 
 ## Checklist
 
-- [ ] J'ai vérifié qu'il n'existe pas déjà une issue ou PR similaire
-- [ ] J'ai décrit clairement le problème et la solution proposée
-- [ ] Je suis prêt à discuter et affiner cette proposition
-
+- [ ] I have checked that a similar issue or PR does not already exist
+- [ ] I have clearly described the problem and proposed solution
+- [ ] I am ready to discuss and refine this proposal

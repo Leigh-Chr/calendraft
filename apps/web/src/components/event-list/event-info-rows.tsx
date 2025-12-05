@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Enhanced DateTime display with contextual formatting
- * Shows "Aujourd'hui" / "Demain" etc. with time range
+ * Shows "Today" / "Tomorrow" etc. with time range
  */
 export const DateTimeRow = React.memo(function DateTimeRow({
 	startDate,
@@ -176,7 +176,7 @@ export const AlarmsRow = React.memo(function AlarmsRow({
 		<div className="flex items-center gap-2">
 			<Bell className="h-4 w-4" />
 			<span>
-				{count} alerte{count > 1 ? "s" : ""}
+				{count} alert{count > 1 ? "s" : ""}
 			</span>
 		</div>
 	);

@@ -32,7 +32,7 @@ export function RecurrenceSection({
 			<div className="space-y-2">
 				<Label className="flex items-center gap-2">
 					<Repeat className="h-4 w-4 text-muted-foreground" />
-					Règle de récurrence
+					Recurrence rule
 				</Label>
 				<RecurrenceBuilder
 					rrule={formData.rrule || ""}
@@ -43,8 +43,8 @@ export function RecurrenceSection({
 					}
 				/>
 				<p className="text-muted-foreground text-xs">
-					Définissez comment l'événement se répète (quotidien, hebdomadaire,
-					mensuel, etc.). Laissez vide pour un événement unique.
+					Define how the event repeats (daily, weekly, monthly, etc.). Leave
+					empty for a one-time event.
 				</p>
 			</div>
 			{formData.rrule?.trim() ? (
@@ -52,7 +52,7 @@ export function RecurrenceSection({
 					<div className="space-y-2">
 						<div className="mb-2 flex items-center gap-2">
 							<CalendarPlus className="h-4 w-4 text-muted-foreground" />
-							<Label>Dates additionnelles</Label>
+							<Label>Additional dates</Label>
 						</div>
 						<DateListPicker
 							dates={rdateList}
@@ -62,18 +62,18 @@ export function RecurrenceSection({
 							}}
 							disabled={isSubmitting}
 							label=""
-							placeholder="Ajouter une date additionnelle"
+							placeholder="Add an additional date"
 						/>
 						<p className="text-muted-foreground text-xs">
-							Ajoutez des dates supplémentaires où l'événement doit avoir lieu,
-							en plus de celles définies par la règle de récurrence. Utile pour
-							ajouter des occurrences exceptionnelles.
+							Add additional dates where the event should occur, in addition to
+							those defined by the recurrence rule. Useful for adding
+							exceptional occurrences.
 						</p>
 					</div>
 					<div className="space-y-2">
 						<div className="mb-2 flex items-center gap-2">
 							<CalendarX className="h-4 w-4 text-muted-foreground" />
-							<Label>Dates d'exception</Label>
+							<Label>Exception dates</Label>
 						</div>
 						<DateListPicker
 							dates={exdateList}
@@ -83,12 +83,12 @@ export function RecurrenceSection({
 							}}
 							disabled={isSubmitting}
 							label=""
-							placeholder="Ajouter une date d'exception"
+							placeholder="Add an exception date"
 						/>
 						<p className="text-muted-foreground text-xs">
-							Excluez des dates spécifiques de la récurrence. Par exemple, si
-							votre événement se répète tous les lundis mais que vous voulez
-							exclure un lundi particulier.
+							Exclude specific dates from the recurrence. For example, if your
+							event repeats every Monday but you want to exclude a particular
+							Monday.
 						</p>
 					</div>
 				</>
@@ -96,9 +96,8 @@ export function RecurrenceSection({
 				<div className="flex items-start gap-3 rounded-md border border-muted bg-muted/50 p-4">
 					<Repeat className="mt-0.5 h-5 w-5 flex-shrink-0 text-muted-foreground" />
 					<p className="text-muted-foreground text-sm">
-						Les dates additionnelles et d'exception ne sont disponibles que
-						lorsqu'une règle de récurrence est définie. Définissez d'abord une
-						règle de récurrence ci-dessus.
+						Additional and exception dates are only available when a recurrence
+						rule is defined. First define a recurrence rule above.
 					</p>
 				</div>
 			)}

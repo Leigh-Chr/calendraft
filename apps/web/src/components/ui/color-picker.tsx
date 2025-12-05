@@ -11,16 +11,16 @@ import {
 import { cn } from "@/lib/utils";
 
 const PREDEFINED_COLORS = [
-	{ name: "Rouge", value: "#EF4444" },
+	{ name: "Red", value: "#EF4444" },
 	{ name: "Orange", value: "#F97316" },
-	{ name: "Jaune", value: "#EAB308" },
-	{ name: "Vert", value: "#22C55E" },
-	{ name: "Bleu", value: "#3B82F6" },
+	{ name: "Yellow", value: "#EAB308" },
+	{ name: "Green", value: "#22C55E" },
+	{ name: "Blue", value: "#3B82F6" },
 	{ name: "Indigo", value: "#6366F1" },
-	{ name: "Violet", value: "#8B5CF6" },
-	{ name: "Rose", value: "#EC4899" },
+	{ name: "Purple", value: "#8B5CF6" },
+	{ name: "Pink", value: "#EC4899" },
 	{ name: "Cyan", value: "#06B6D4" },
-	{ name: "Gris", value: "#6B7280" },
+	{ name: "Gray", value: "#6B7280" },
 ];
 
 interface ColorPickerProps {
@@ -39,7 +39,7 @@ export function ColorPicker({
 	onChange,
 	disabled,
 	showInput = true,
-	label = "Couleur",
+	label = "Color",
 }: ColorPickerProps) {
 	const [open, setOpen] = useState(false);
 
@@ -54,7 +54,7 @@ export function ColorPicker({
 							variant="outline"
 							className="w-auto"
 							disabled={disabled}
-							aria-label="Sélectionner une couleur prédéfinie"
+							aria-label="Select a predefined color"
 						>
 							{value ? (
 								<div
@@ -64,14 +64,12 @@ export function ColorPicker({
 							) : (
 								<Palette className="mr-2 h-4 w-4" />
 							)}
-							{value || "Couleur"}
+							{value || "Color"}
 						</Button>
 					</PopoverTrigger>
 					<PopoverContent className="w-64">
 						<div className="space-y-3">
-							<Label className="font-medium text-xs">
-								Couleurs prédéfinies
-							</Label>
+							<Label className="font-medium text-xs">Predefined colors</Label>
 							<div className="grid grid-cols-5 gap-2">
 								{PREDEFINED_COLORS.map((color) => (
 									<button
@@ -107,7 +105,7 @@ export function ColorPicker({
 									setOpen(false);
 								}}
 							>
-								Aucune couleur
+								No color
 							</Button>
 						</div>
 					</PopoverContent>
@@ -120,7 +118,7 @@ export function ColorPicker({
 							onChange={(e) => onChange(e.target.value.toUpperCase())}
 							disabled={disabled}
 							className="h-10 w-14 cursor-pointer p-1"
-							aria-label="Sélecteur de couleur personnalisée"
+							aria-label="Custom color picker"
 						/>
 						<Input
 							value={value || ""}
@@ -133,7 +131,7 @@ export function ColorPicker({
 							disabled={disabled}
 							placeholder="#3B82F6"
 							className="w-24"
-							aria-label="Code couleur hexadécimal"
+							aria-label="Hexadecimal color code"
 						/>
 					</>
 				)}
@@ -170,9 +168,9 @@ export function ColorIndicator({
 				className,
 			)}
 			style={{ backgroundColor: color }}
-			title={`Couleur: ${color}`}
+			title={`Color: ${color}`}
 			role="img"
-			aria-label={`Couleur: ${color}`}
+			aria-label={`Color: ${color}`}
 		/>
 	);
 }

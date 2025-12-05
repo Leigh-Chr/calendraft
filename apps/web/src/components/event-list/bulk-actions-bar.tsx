@@ -67,11 +67,11 @@ export function BulkActionsBar({
 			onSuccess: (data) => {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.all });
-				toast.success(`${data.deletedCount} événement(s) supprimé(s)`);
+				toast.success(`${data.deletedCount} event(s) deleted`);
 				onExitSelectionMode();
 			},
 			onError: (error) => {
-				toast.error(error.message || "Erreur lors de la suppression");
+				toast.error(error.message || "Error during deletion");
 			},
 		}),
 	);
@@ -83,12 +83,12 @@ export function BulkActionsBar({
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.all });
 				toast.success(
-					`${data.movedCount} événement(s) déplacé(s) vers "${data.targetCalendarName}"`,
+					`${data.movedCount} event(s) moved to "${data.targetCalendarName}"`,
 				);
 				onExitSelectionMode();
 			},
 			onError: (error) => {
-				toast.error(error.message || "Erreur lors du déplacement");
+				toast.error(error.message || "Error during move");
 			},
 		}),
 	);
@@ -134,10 +134,10 @@ export function BulkActionsBar({
 						) : (
 							<Square className="mr-2 h-4 w-4" />
 						)}
-						{isAllSelected ? "Tout désélectionner" : "Tout sélectionner"}
+						{isAllSelected ? "Deselect all" : "Select all"}
 					</Button>
 					<span className="text-muted-foreground text-sm">
-						{selectedCount} sur {totalCount} sélectionné(s)
+						{selectedCount} of {totalCount} selected
 					</span>
 				</div>
 
@@ -154,7 +154,7 @@ export function BulkActionsBar({
 								disabled={isPending || selectedCount === 0}
 							>
 								<SelectTrigger className="h-8 w-[180px]">
-									<SelectValue placeholder="Déplacer vers..." />
+									<SelectValue placeholder="Move to..." />
 								</SelectTrigger>
 								<SelectContent>
 									{moveDestinations.map((cal) => (
@@ -176,7 +176,7 @@ export function BulkActionsBar({
 								) : (
 									<ArrowRight className="mr-2 h-4 w-4" />
 								)}
-								Déplacer
+								Move
 							</Button>
 						</div>
 					)}
@@ -194,7 +194,7 @@ export function BulkActionsBar({
 						) : (
 							<Trash2 className="mr-2 h-4 w-4" />
 						)}
-						Supprimer
+						Delete
 					</Button>
 
 					{/* Exit selection mode */}
@@ -215,20 +215,20 @@ export function BulkActionsBar({
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>
-							Supprimer {selectedCount} événement(s) ?
+							Delete {selectedCount} event(s)?
 						</AlertDialogTitle>
 						<AlertDialogDescription>
-							Cette action est irréversible. Les événements sélectionnés seront
-							définitivement supprimés.
+							This action is irreversible. The selected events will be
+							permanently deleted.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel>Annuler</AlertDialogCancel>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={handleDelete}
 							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 						>
-							Supprimer
+							Delete
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

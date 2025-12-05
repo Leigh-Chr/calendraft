@@ -1,56 +1,55 @@
 ---
 name: 🐛 Bug Report
-about: Signaler un bug pour aider à améliorer Calendraft
+about: Report a bug to help improve Calendraft
 title: '[Bug] '
 labels: bug
 assignees: ''
 ---
 
-## Description du bug
+## Bug description
 
-<!-- Une description claire et concise du bug -->
+<!-- A clear and concise description of the bug -->
 
-## Étapes pour reproduire
+## Steps to reproduce
 
-1. Aller sur '...'
-2. Cliquer sur '...'
-3. Scroller jusqu'à '...'
-4. Voir l'erreur
+1. Go to '...'
+2. Click on '...'
+3. Scroll down to '...'
+4. See error
 
-## Comportement attendu
+## Expected behavior
 
-<!-- Une description claire de ce qui devrait se passer -->
+<!-- A clear description of what should happen -->
 
-## Comportement actuel
+## Actual behavior
 
-<!-- Une description claire de ce qui se passe réellement -->
+<!-- A clear description of what actually happens -->
 
-## Captures d'écran
+## Screenshots
 
-<!-- Si applicable, ajoutez des captures d'écran pour illustrer le problème -->
+<!-- If applicable, add screenshots to illustrate the problem -->
 
-## Environnement
+## Environment
 
-- **OS** : [ex: Windows 11, macOS Sonoma, Ubuntu 22.04]
-- **Navigateur** : [ex: Chrome 120, Firefox 121, Safari 17]
-- **Version de Bun** : [ex: 1.3.1]
-- **Mode** : [ex: Mode anonyme / Mode authentifié]
+- **OS**: [ex: Windows 11, macOS Sonoma, Ubuntu 22.04]
+- **Browser**: [ex: Chrome 120, Firefox 121, Safari 17]
+- **Bun version**: [ex: 1.3.1]
+- **Mode**: [ex: Anonymous mode / Authenticated mode]
 
 ## Console / Logs
 
-<!-- Copiez-collez les erreurs de la console du navigateur ou des logs serveur -->
+<!-- Copy-paste browser console errors or server logs -->
 
 ```
-// Erreurs ici
+// Errors here
 ```
 
-## Contexte additionnel
+## Additional context
 
-<!-- Tout autre contexte sur le problème -->
+<!-- Any other context about the problem -->
 
 ## Checklist
 
-- [ ] J'ai vérifié qu'il n'existe pas déjà une issue similaire
-- [ ] J'ai fourni toutes les informations nécessaires pour reproduire le bug
-- [ ] J'ai testé avec la dernière version du code
-
+- [ ] I have checked that a similar issue does not already exist
+- [ ] I have provided all necessary information to reproduce the bug
+- [ ] I have tested with the latest version of the code

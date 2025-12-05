@@ -7,8 +7,8 @@ import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 const ReactCompilerConfig = {
-	// Activer uniquement en production pour ne pas ralentir le dev
-	// Désactiver cette ligne pour tester en dev
+	// Enable only in production to not slow down dev
+	// Disable this line to test in dev
 };
 
 export default defineConfig({
@@ -37,7 +37,7 @@ export default defineConfig({
 				name: "Calendraft",
 				short_name: "Calendraft",
 				description:
-					"Importez, créez, modifiez et fusionnez vos calendriers ICS. Compatible Google Calendar, Apple Calendar, Outlook.",
+					"Import, create, edit, and merge your ICS calendars. Compatible with Google Calendar, Apple Calendar, Outlook.",
 				theme_color: "#18181b",
 				background_color: "#18181b",
 				display: "standalone",
@@ -45,7 +45,7 @@ export default defineConfig({
 				orientation: "any",
 				scope: "/",
 				start_url: "/",
-				lang: "fr",
+				lang: "en",
 				categories: ["productivity", "utilities"],
 				icons: [
 					{
@@ -78,16 +78,16 @@ export default defineConfig({
 				],
 				shortcuts: [
 					{
-						name: "Nouveau calendrier",
-						short_name: "Nouveau",
-						description: "Créer un nouveau calendrier",
+						name: "New calendar",
+						short_name: "New",
+						description: "Create a new calendar",
 						url: "/calendars/new",
 						icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
 					},
 					{
-						name: "Mes calendriers",
-						short_name: "Calendriers",
-						description: "Voir tous mes calendriers",
+						name: "My calendars",
+						short_name: "Calendars",
+						description: "View all my calendars",
 						url: "/calendars",
 						icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
 					},

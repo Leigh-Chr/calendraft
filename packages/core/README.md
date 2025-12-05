@@ -1,6 +1,6 @@
 # @calendraft/core
 
-Logique métier et types pour la gestion de calendriers. Package sans dépendance framework.
+Business logic and types for calendar management. Framework-independent package.
 
 ## Installation
 
@@ -8,7 +8,7 @@ Logique métier et types pour la gestion de calendriers. Package sans dépendanc
 bun add @calendraft/core
 ```
 
-## Usage rapide
+## Quick usage
 
 ```typescript
 import {
@@ -20,22 +20,22 @@ import {
   applyPreset,
 } from '@calendraft/core';
 
-// Initialiser un formulaire vide
+// Initialize an empty form
 const formData = initializeFormData();
 
-// Appliquer un preset
+// Apply a preset
 const withPreset = applyPreset('meeting', { 
   startDate: '2024-01-15T10:00',
-  title: 'Réunion équipe'
+  title: 'Team meeting'
 });
 
-// Valider
+// Validate
 const result = validateEventForm(formData);
 if (!result.valid) {
   console.log(result.errors);
 }
 
-// Transformer pour l'API
+// Transform for API
 const apiData = transformEventFormData(formData, 'calendar-id');
 ```
 
@@ -45,36 +45,36 @@ const apiData = transformEventFormData(formData, 'calendar-id');
 
 | Type | Description |
 |------|-------------|
-| `EventFormData` | Données de formulaire d'événement |
-| `EventEntity` | Entité événement persistée |
-| `CalendarEntity` | Entité calendrier |
-| `AttendeeData` | Données participant |
-| `AlarmData` | Données alarme |
+| `EventFormData` | Event form data |
+| `EventEntity` | Persisted event entity |
+| `CalendarEntity` | Calendar entity |
+| `AttendeeData` | Attendee data |
+| `AlarmData` | Alarm data |
 
 ### Validation
 
 ```typescript
 import { validateEventForm, isValidEmail, isValidUrl } from '@calendraft/core';
 
-validateEventForm(data)     // Validation complète
+validateEventForm(data)     // Complete validation
 isValidEmail('a@b.com')     // true
 isValidUrl('https://...')   // true
 isValidHexColor('#FF0000')  // true
 ```
 
-### Utilitaires
+### Utilities
 
 ```typescript
 import { 
-  parseTags, addTag, removeTag,      // Gestion tags
-  deepEqual,                          // Comparaison
+  parseTags, addTag, removeTag,      // Tag management
+  deepEqual,                          // Comparison
   normalizeDate, formatEventDuration, // Dates
-  initializeFormData,                 // Init formulaire
-  transformEventFormData,             // Transform API
+  initializeFormData,                 // Form initialization
+  transformEventFormData,             // API transformation
 } from '@calendraft/core';
 ```
 
-### Constantes
+### Constants
 
 ```typescript
 import { 
@@ -85,7 +85,7 @@ import {
 } from '@calendraft/core';
 ```
 
-### Limites utilisateurs
+### User limits
 
 ```typescript
 import { 
@@ -97,16 +97,16 @@ import {
   getMaxEventsPerCalendar,
 } from '@calendraft/core';
 
-// Vérifier si limite atteinte
+// Check if limit reached
 hasReachedCalendarLimit(isAuth, currentCount)  // boolean
 hasReachedEventLimit(isAuth, currentCount)     // boolean
 
-// Obtenir les limites
-getMaxCalendars(isAuth)           // 10 ou 100
-getMaxEventsPerCalendar(isAuth)   // 500 ou 2000
+// Get limits
+getMaxCalendars(isAuth)           // 10 or 100
+getMaxEventsPerCalendar(isAuth)   // 500 or 2000
 ```
 
-### Récurrence (RRULE)
+### Recurrence (RRULE)
 
 ```typescript
 import { parseRRule, buildRRule } from '@calendraft/core';
@@ -118,11 +118,11 @@ buildRRule({ frequency: 'MONTHLY', count: 6 })
 // 'FREQ=MONTHLY;COUNT=6'
 ```
 
-## Voir aussi
+## See also
 
-- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Architecture globale du projet
-- [@calendraft/schemas](../schemas/README.md) - Schémas de validation Zod
-- [@calendraft/ics-utils](../ics-utils/README.md) - Utilitaires ICS
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Global project architecture
+- [@calendraft/schemas](../schemas/README.md) - Zod validation schemas
+- [@calendraft/ics-utils](../ics-utils/README.md) - ICS utilities
 
 ## License
 

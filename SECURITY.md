@@ -1,76 +1,76 @@
-# Politique de sécurité
+# Security Policy
 
-## Versions supportées
+## Supported Versions
 
-| Version | Supportée          |
+| Version | Supported          |
 | ------- | ------------------ |
 | 1.x.x   | :white_check_mark: |
 
-## Signaler une vulnérabilité
+## Reporting a Vulnerability
 
-La sécurité de Calendraft est prise très au sérieux. Si vous découvrez une vulnérabilité de sécurité, merci de nous le signaler de manière responsable.
+Calendraft takes security very seriously. If you discover a security vulnerability, please report it responsibly.
 
-### Comment signaler
+### How to Report
 
-**Ne créez PAS d'issue publique pour les vulnérabilités de sécurité.**
+**Do NOT create a public issue for security vulnerabilities.**
 
-1. **Par email** : Contactez le mainteneur du projet (voir profil GitHub)
-2. **Via GitHub** : Utilisez la fonctionnalité "Report a vulnerability" si disponible dans l'onglet Security
+1. **By email**: Contact the project maintainer (see GitHub profile)
+2. **Via GitHub**: Use the "Report a vulnerability" feature if available in the Security tab
 
-### Informations à inclure
+### Information to Include
 
-1. **Description** de la vulnérabilité
-2. **Étapes** pour reproduire le problème
-3. **Impact** potentiel
-4. **Suggestion** de correction (si vous en avez une)
+1. **Description** of the vulnerability
+2. **Steps** to reproduce the issue
+3. **Potential impact**
+4. **Suggestion** for fix (if you have one)
 
-### Processus de réponse
+### Response Process
 
-1. Vous recevrez un accusé de réception sous **48 heures**
-2. Nous évaluerons la vulnérabilité et vous tiendrons informé
-3. Un correctif sera développé en privé
-4. Une fois le correctif prêt, nous publierons une mise à jour
-5. Vous serez crédité dans les notes de version (si vous le souhaitez)
+1. You will receive an acknowledgment within **48 hours**
+2. We will assess the vulnerability and keep you informed
+3. A fix will be developed privately
+4. Once the fix is ready, we will publish an update
+5. You will be credited in the release notes (if you wish)
 
-## Mesures de sécurité en place
+## Security Measures in Place
 
-### Authentification
+### Authentication
 
-- Authentification via [Better-Auth](https://better-auth.com/)
-- Cookies sécurisés (HttpOnly, Secure, SameSite)
-- Support des utilisateurs anonymes avec ID unique haute entropie (192 bits)
-- Validation serveur des IDs anonymes (protection contre l'injection)
+- Authentication via [Better-Auth](https://better-auth.com/)
+- Secure cookies (HttpOnly, Secure, SameSite)
+- Support for anonymous users with high entropy unique ID (192 bits)
+- Server-side validation of anonymous IDs (injection protection)
 
-### Protection SSRF (Server-Side Request Forgery)
+### SSRF Protection (Server-Side Request Forgery)
 
-L'importation d'URL externes est protégée contre les attaques SSRF :
+External URL imports are protected against SSRF attacks:
 
-- Blocage des adresses IP privées (10.x, 172.16-31.x, 192.168.x, 127.x)
-- Blocage des endpoints metadata cloud (169.254.169.254, metadata.google, etc.)
-- Blocage de localhost et variantes
-- Validation du protocole (HTTP/HTTPS uniquement)
+- Blocking private IP addresses (10.x, 172.16-31.x, 192.168.x, 127.x)
+- Blocking cloud metadata endpoints (169.254.169.254, metadata.google, etc.)
+- Blocking localhost and variants
+- Protocol validation (HTTP/HTTPS only)
 
 ### Rate Limiting
 
-Protection contre les attaques par force brute et déni de service :
+Protection against brute force and denial of service attacks:
 
-| Route | Limite | Fenêtre |
-|-------|--------|---------|
-| Général (`/*`) | 100 requêtes | 1 minute |
-| Authentification (`/api/auth/*`) | 10 requêtes | 1 minute |
+| Route | Limit | Window |
+|-------|-------|--------|
+| General (`/*`) | 100 requests | 1 minute |
+| Authentication (`/api/auth/*`) | 10 requests | 1 minute |
 
-Les événements de rate limiting sont loggés pour audit.
+Rate limiting events are logged for audit.
 
-### Protection des API
+### API Protection
 
-- Validation des entrées avec schémas Zod
-- Taille maximale des fichiers : 5 MB
-- CORS configuré strictement (pas de wildcard `*` en production)
-- Limite de 10 liens de partage par calendrier
+- Input validation with Zod schemas
+- Maximum file size: 5 MB
+- CORS configured strictly (no wildcard `*` in production)
+- Limit of 10 sharing links per calendar
 
-### Headers de sécurité HTTP
+### HTTP Security Headers
 
-Les headers suivants sont configurés automatiquement :
+The following headers are configured automatically:
 
 ```
 X-Content-Type-Options: nosniff
@@ -78,12 +78,12 @@ X-Frame-Options: DENY
 X-XSS-Protection: 1; mode=block
 Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: geolocation=(), microphone=(), camera=()
-Strict-Transport-Security: max-age=31536000; includeSubDomains (HTTPS uniquement)
+Strict-Transport-Security: max-age=31536000; includeSubDomains (HTTPS only)
 ```
 
 ### Content Security Policy (CSP)
 
-**Frontend** (via meta tag) :
+**Frontend** (via meta tag):
 ```
 default-src 'self';
 script-src 'self' 'unsafe-inline';
@@ -93,82 +93,82 @@ connect-src 'self' https://*.sentry.io;
 frame-ancestors 'none';
 ```
 
-**Backend** (API) :
+**Backend** (API):
 ```
 default-src 'none';
 frame-ancestors 'none';
 base-uri 'none';
 ```
 
-### Données utilisateur
+### User Data
 
-- Les données des utilisateurs anonymes sont automatiquement supprimées après 60 jours d'inactivité
-- Les mots de passe sont hashés avec des algorithmes sécurisés
-- Les sessions expirent automatiquement
-- Sentry configuré pour ne pas collecter de données personnelles (PII)
+- Anonymous user data is automatically deleted after 60 days of inactivity
+- Passwords are hashed with secure algorithms
+- Sessions expire automatically
+- Sentry configured to not collect personal data (PII)
 
-### Limitations utilisateurs
+### User Limitations
 
-Pour prévenir les abus, des limites sont appliquées à tous les utilisateurs :
+To prevent abuse, limits are applied to all users:
 
-**Utilisateurs anonymes :**
-- Maximum 10 calendriers
-- Maximum 500 événements par calendrier
-- Suppression automatique après 60 jours d'inactivité
+**Anonymous users:**
+- Maximum 10 calendars
+- Maximum 500 events per calendar
+- Automatic deletion after 60 days of inactivity
 
-**Utilisateurs authentifiés :**
-- Maximum 100 calendriers
-- Maximum 2 000 événements par calendrier
-- Pas de suppression automatique
+**Authenticated users:**
+- Maximum 100 calendars
+- Maximum 2,000 events per calendar
+- No automatic deletion
 
-### Logging de sécurité
+### Security Logging
 
-Les événements de sécurité suivants sont loggés :
-- Dépassement de rate limit
-- Tentatives d'accès bloquées
-- Tentatives SSRF bloquées
+The following security events are logged:
+- Rate limit exceeded
+- Blocked access attempts
+- Blocked SSRF attempts
 
-## Bonnes pratiques de déploiement
+## Deployment Best Practices
 
-Consultez [DEPLOYMENT.md](DEPLOYMENT.md) pour les recommandations de sécurité en production :
+See [DEPLOYMENT.md](DEPLOYMENT.md) for production security recommendations:
 
-- [ ] HTTPS obligatoire (certificat SSL/TLS)
-- [ ] `CORS_ORIGIN` défini explicitement (pas de `*`)
-- [ ] `BETTER_AUTH_SECRET` généré de manière sécurisée (min 32 caractères)
-- [ ] Variables d'environnement non commitées dans le repo
-- [ ] `NODE_ENV=production` en production
-- [ ] Proxy inverse configuré (nginx, Caddy) avec headers de sécurité supplémentaires
+- [ ] HTTPS required (SSL/TLS certificate)
+- [ ] `CORS_ORIGIN` defined explicitly (no `*`)
+- [ ] `BETTER_AUTH_SECRET` generated securely (min 32 characters)
+- [ ] Environment variables not committed to the repo
+- [ ] `NODE_ENV=production` in production
+- [ ] Reverse proxy configured (nginx, Caddy) with additional security headers
 
-### Rotation des secrets
+### Secret Rotation
 
-Il est recommandé de faire une rotation des secrets suivants périodiquement :
+It is recommended to periodically rotate the following secrets:
 
-| Secret | Fréquence recommandée |
+| Secret | Recommended Frequency |
 |--------|----------------------|
-| `BETTER_AUTH_SECRET` | Tous les 6 mois |
-| `DATABASE_URL` (mot de passe) | Tous les 6 mois |
+| `BETTER_AUTH_SECRET` | Every 6 months |
+| `DATABASE_URL` (password) | Every 6 months |
 
-## Dépendances
+## Dependencies
 
-Les dépendances sont régulièrement mises à jour pour inclure les correctifs de sécurité. Nous utilisons :
+Dependencies are regularly updated to include security patches. We use:
 
-- `bun audit` pour scanner les vulnérabilités connues
-- Dependabot (si configuré) pour les mises à jour automatiques
-- Hono >= 4.10.3 (correctifs de sécurité critiques)
+- `bun audit` to scan for known vulnerabilities
+- Dependabot (if configured) for automatic updates
+- Hono >= 4.10.3 (critical security patches)
 
 ## Scope
 
-Cette politique couvre :
+This policy covers:
 
-- L'application web Calendraft
-- L'API backend
-- Les packages internes (`@calendraft/*`)
-- Les déploiements tiers ou forks ne sont pas couverts
+- The Calendraft web application
+- The backend API
+- Internal packages (`@calendraft/*`)
+- Third-party deployments or forks are not covered
 
-## Reconnaissance
+## Acknowledgments
 
-Nous remercions les chercheurs en sécurité qui contribuent à la sécurité de Calendraft. Les contributeurs seront reconnus ici (avec leur permission).
+We thank security researchers who contribute to Calendraft's security. Contributors will be recognized here (with their permission).
 
 ---
 
-Merci de nous aider à garder Calendraft sécurisé !
+Thank you for helping keep Calendraft secure!

@@ -312,7 +312,7 @@ export function TourProvider({
 							className="z-[100] rounded-xl border bg-card p-4 shadow-lg"
 							role="dialog"
 							aria-modal="true"
-							aria-label={`Étape ${currentStep + 1} sur ${steps.length}`}
+							aria-label={`Step ${currentStep + 1} of ${steps.length}`}
 						>
 							{/* Progress indicator */}
 							<div className="absolute top-4 right-4 font-mono text-muted-foreground text-xs">
@@ -341,7 +341,7 @@ export function TourProvider({
 											onClick={previousStep}
 											className="text-muted-foreground text-sm transition-colors hover:text-foreground"
 										>
-											← Précédent
+											← Previous
 										</button>
 									)}
 								</div>
@@ -351,12 +351,10 @@ export function TourProvider({
 										onClick={endTour}
 										className="text-muted-foreground text-sm transition-colors hover:text-foreground"
 									>
-										Passer
+										Skip
 									</button>
 									<Button onClick={nextStep} size="sm">
-										{currentStep === steps.length - 1
-											? "Terminer"
-											: "Suivant →"}
+										{currentStep === steps.length - 1 ? "Finish" : "Next →"}
 									</Button>
 								</div>
 							</div>
@@ -386,8 +384,8 @@ interface TourAlertDialogProps {
 export function TourAlertDialog({
 	isOpen,
 	setIsOpen,
-	title = "Bienvenue sur Calendraft ! 👋",
-	description = "Découvrez les fonctionnalités principales de l'application avec un tour guidé rapide (~30 secondes).",
+	title = "Welcome to Calendraft! 👋",
+	description = "Discover the main features of the application with a quick guided tour (~30 seconds).",
 }: TourAlertDialogProps) {
 	const { startTour, steps, isTourCompleted, currentStep, setIsTourCompleted } =
 		useTour();
@@ -456,10 +454,10 @@ export function TourAlertDialog({
 
 				<div className="mt-6 space-y-3">
 					<Button onClick={handleStart} className="w-full">
-						Commencer le tour
+						Start the tour
 					</Button>
 					<Button onClick={handleSkip} variant="ghost" className="w-full">
-						Passer pour l'instant
+						Skip for now
 					</Button>
 				</div>
 			</AlertDialogContent>

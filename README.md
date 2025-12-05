@@ -5,184 +5,184 @@
 [![Bun](https://img.shields.io/badge/Bun-1.3-black?logo=bun&logoColor=white)](https://bun.sh/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**Calendraft** est une plateforme web conçue pour simplifier la gestion, la modification et la création de calendriers au format **.ics**.
+**Calendraft** is a web platform designed to simplify the management, editing, and creation of **.ics** format calendars.
 
-L'objectif est d'offrir une expérience moderne et intuitive permettant aux utilisateurs de travailler facilement avec des fichiers calendrier — sans outils complexes, sans configuration, et sans compétences techniques particulières.
+The goal is to offer a modern and intuitive experience that allows users to work easily with calendar files — without complex tools, without configuration, and without particular technical skills.
 
-## Fonctionnalités
+## Features
 
-### Gestion de calendriers
-- **Import de fichiers .ics** - Importez vos calendriers depuis n'importe quelle source
-- **Import dans un calendrier existant** - Ajoutez des événements d'un fichier .ics à un calendrier existant
-- **Création de calendriers vides** - Créez de nouveaux calendriers pour organiser vos événements
-- **Fusion de calendriers** - Combinez plusieurs calendriers en un seul avec détection automatique des doublons
-- **Export .ics** - Exportez vos calendriers modifiés au format .ics compatible (Google Calendar, Apple Calendar, Outlook, etc.)
-- **Nettoyage de doublons** - Supprimez automatiquement les événements en double dans un calendrier
+### Calendar Management
+- **Import .ics files** - Import your calendars from any source
+- **Import into existing calendar** - Add events from a .ics file to an existing calendar
+- **Create empty calendars** - Create new calendars to organize your events
+- **Merge calendars** - Combine multiple calendars into one with automatic duplicate detection
+- **Export .ics** - Export your modified calendars in .ics format compatible with Google Calendar, Apple Calendar, Outlook, etc.
+- **Clean duplicates** - Automatically remove duplicate events in a calendar
 
-### Visualisation et navigation
-- **Vue liste** - Affichez tous vos événements dans une liste avec tri et filtres
-- **Vue calendrier** - Visualisez vos événements dans une vue mensuelle interactive (react-big-calendar)
-- **Filtres par date** - Filtrez rapidement par : Aujourd'hui, Cette semaine, Ce mois, ou Tout
-- **Recherche** - Recherchez des événements par mot-clé dans le titre
-- **Tri** - Triez par date, nom ou durée
+### Visualization and Navigation
+- **List view** - Display all your events in a list with sorting and filters
+- **Calendar view** - Visualize your events in an interactive monthly view (react-big-calendar)
+- **Date filters** - Quickly filter by: Today, This week, This month, or All
+- **Search** - Search for events by keyword in the title
+- **Sort** - Sort by date, name, or duration
 
-### Gestion d'événements
-- **Création d'événements** - Ajoutez de nouveaux événements avec titre, dates, description et localisation
-- **Modification d'événements** - Éditez tous les détails d'un événement existant
-- **Suppression d'événements** - Supprimez des événements individuellement
-- **Création depuis la vue calendrier** - Cliquez sur un créneau pour créer un événement avec les dates pré-remplies
+### Event Management
+- **Create events** - Add new events with title, dates, description, and location
+- **Edit events** - Edit all details of an existing event
+- **Delete events** - Delete events individually
+- **Create from calendar view** - Click on a time slot to create an event with pre-filled dates
 
-### Authentification et stockage
-- **Mode anonyme** - Utilisez l'application sans créer de compte (données stockées localement dans le navigateur)
-- **Authentification** - Option de compte pour sauvegarder dans le cloud (Better-Auth)
-- **Synchronisation** - Les utilisateurs authentifiés peuvent accéder à leurs calendriers depuis n'importe quel appareil
+### Authentication and Storage
+- **Anonymous mode** - Use the application without creating an account (data stored locally in the browser)
+- **Authentication** - Account option to save in the cloud (Better-Auth)
+- **Synchronization** - Authenticated users can access their calendars from any device
 
-## Stack technique
+## Tech Stack
 
 - **TypeScript** - Type safety end-to-end
-- **TanStack Router** - Routing avec type safety
-- **TailwindCSS** - UI moderne et responsive
-- **shadcn/ui** - Composants UI réutilisables
-- **Hono** - Framework serveur léger et performant
-- **tRPC** - APIs type-safe end-to-end
-- **Bun** - Runtime et gestionnaire de paquets
-- **Prisma** - ORM TypeScript-first
-- **PostgreSQL** - Base de données
-- **Better-Auth** - Authentification
-- **Biome** - Linting et formatting
-- **PWA** - Support Progressive Web App
-- **Turborepo** - Monorepo optimisé
-- **Sentry** - Monitoring des erreurs et performances
+- **TanStack Router** - Type-safe routing
+- **TailwindCSS** - Modern and responsive UI
+- **shadcn/ui** - Reusable UI components
+- **Hono** - Lightweight and performant server framework
+- **tRPC** - Type-safe APIs end-to-end
+- **Bun** - Runtime and package manager
+- **Prisma** - TypeScript-first ORM
+- **PostgreSQL** - Database
+- **Better-Auth** - Authentication
+- **Biome** - Linting and formatting
+- **PWA** - Progressive Web App support
+- **Turborepo** - Optimized monorepo
+- **Sentry** - Error and performance monitoring
 
 ## Getting Started
 
-### Prérequis
+### Prerequisites
 
-- [Bun](https://bun.sh) (version 1.3.1 ou supérieure)
-- [Docker](https://www.docker.com/) (optionnel, pour PostgreSQL en local)
+- [Bun](https://bun.sh) (version 1.3.1 or higher)
+- [Docker](https://www.docker.com/) (optional, for local PostgreSQL)
 
 ### Installation
 
-1. Clonez le repository et installez les dépendances :
+1. Clone the repository and install dependencies:
 
 ```bash
 bun install
 ```
 
-### Configuration de la base de données
+### Database Configuration
 
-Ce projet utilise PostgreSQL avec Prisma.
+This project uses PostgreSQL with Prisma.
 
-#### Option 1 : PostgreSQL avec Docker (recommandé)
+#### Option 1: PostgreSQL with Docker (recommended)
 
 ```bash
-# Démarrer PostgreSQL en local
+# Start PostgreSQL locally
 docker compose -f docker-compose.dev.yml up -d
 
-# Configurer la variable d'environnement dans apps/server/.env
+# Configure the environment variable in apps/server/.env
 DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"
 ```
 
-#### Option 2 : PostgreSQL existant
+#### Option 2: Existing PostgreSQL
 
 ```env
-# Dans apps/server/.env
+# In apps/server/.env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 ```
 
-#### Initialiser la base de données
+#### Initialize the database
 
 ```bash
-# Générer le client Prisma et pousser le schéma
+# Generate Prisma client and push schema
 bun run db:push
 
-# (Optionnel) Ouvrir Prisma Studio
+# (Optional) Open Prisma Studio
 bun run db:studio
 ```
 
-### Configuration de l'environnement
+### Environment Configuration
 
-Créez un fichier `.env` dans `apps/server` :
+Create a `.env` file in `apps/server`:
 
 ```env
-# Base de données PostgreSQL (obligatoire)
+# PostgreSQL database (required)
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 
-# Port du serveur backend (défaut: 3000)
+# Backend server port (default: 3000)
 PORT=3000
 
-# URL du frontend pour CORS (défaut: http://localhost:3001)
+# Frontend URL for CORS (default: http://localhost:3001)
 CORS_ORIGIN=http://localhost:3001
 
-# Configuration Better-Auth (optionnel pour le mode anonyme)
+# Better-Auth configuration (optional for anonymous mode)
 BETTER_AUTH_SECRET=your-secret-key
 BETTER_AUTH_URL=http://localhost:3000
 
 ```
 
-Créez un fichier `.env` dans `apps/web` :
+Create a `.env` file in `apps/web`:
 
 ```env
-# URL du serveur backend (défaut: http://localhost:3000)
+# Backend server URL (default: http://localhost:3000)
 VITE_SERVER_URL=http://localhost:3000
 ```
 
-### Démarrage
+### Starting
 
-Lancez l'application en mode développement :
+Launch the application in development mode:
 
 ```bash
 bun run dev
 ```
 
-Cela démarre :
-- Le serveur backend sur [http://localhost:3000](http://localhost:3000)
-- L'application web sur [http://localhost:3001](http://localhost:3001)
+This starts:
+- The backend server on [http://localhost:3000](http://localhost:3000)
+- The web application on [http://localhost:3001](http://localhost:3001)
 
-Ou lancez-les séparément :
+Or launch them separately:
 
 ```bash
-# Backend uniquement
+# Backend only
 bun run dev:server
 
-# Frontend uniquement
+# Frontend only
 bun run dev:web
 ```
 
 ## Docker
 
-Le projet est entièrement dockerisé pour faciliter le déploiement.
+The project is fully dockerized to facilitate deployment.
 
-### 🚀 Démarrage rapide
+### 🚀 Quick Start
 
-#### Option 1 : Développement (PostgreSQL Docker + Apps locales)
+#### Option 1: Development (PostgreSQL Docker + Local Apps)
 
 ```bash
-# 1. Démarrer PostgreSQL
+# 1. Start PostgreSQL
 docker-compose -f docker-compose.dev.yml up -d
 
-# 2. Initialiser la base de données
+# 2. Initialize the database
 bun run db:push
 
-# 3. Lancer les apps en local (hot reload)
+# 3. Launch apps locally (hot reload)
 bun run dev
 ```
 
-#### Option 2 : Production complète (tout en Docker)
+#### Option 2: Full Production (Everything in Docker)
 
 ```bash
-# 1. Configurer l'environnement
+# 1. Configure environment
 cp docker.env.example .env
-# Éditer .env avec vos valeurs
+# Edit .env with your values
 
-# 2. Construire et démarrer
+# 2. Build and start
 docker-compose up -d --build
 
-# 3. Voir les logs
+# 3. View logs
 docker-compose logs -f
 ```
 
-### Services Docker
+### Docker Services
 
 | Service | Port | Description |
 |---------|------|-------------|
@@ -190,137 +190,137 @@ docker-compose logs -f
 | `server` | 3000 | Backend API (Bun + Hono) |
 | `web` | 3001 | Frontend (Nginx) |
 
-📖 **Guide complet** : Voir [DOCKER.md](./DOCKER.md) pour toutes les commandes et le dépannage.
+📖 **Complete guide**: See [DOCKER.md](./DOCKER.md) for all commands and troubleshooting.
 
 ## Production
 
-Pour déployer en production, consultez le guide complet : [DEPLOYMENT.md](./DEPLOYMENT.md)
+To deploy in production, consult the complete guide: [DEPLOYMENT.md](./DEPLOYMENT.md)
 
-### Checklist rapide production
+### Quick Production Checklist
 
-- [ ] Variables d'environnement configurées (voir `apps/server/.env.example`)
-- [ ] `CORS_ORIGIN` défini (obligatoire, ne pas utiliser `*`)
-- [ ] `BETTER_AUTH_SECRET` généré (min 32 caractères)
-- [ ] Base de données initialisée
-- [ ] Build effectué (`bun run build`)
-- [ ] Certificat SSL/TLS configuré
+- [ ] Environment variables configured (see `apps/server/.env.example`)
+- [ ] `CORS_ORIGIN` defined (required, do not use `*`)
+- [ ] `BETTER_AUTH_SECRET` generated (min 32 characters)
+- [ ] Database initialized
+- [ ] Build completed (`bun run build`)
+- [ ] SSL/TLS certificate configured
 - [ ] Health check accessible (`/health`)
 
-### Variables d'environnement critiques
+### Critical Environment Variables
 
-**Backend** (`apps/server/.env`) :
-- `CORS_ORIGIN` : URL du frontend (obligatoire en production)
-- `BETTER_AUTH_SECRET` : Clé secrète pour l'authentification (obligatoire)
-- `NODE_ENV=production` : Mode production
+**Backend** (`apps/server/.env`):
+- `CORS_ORIGIN`: Frontend URL (required in production)
+- `BETTER_AUTH_SECRET`: Secret key for authentication (required)
+- `NODE_ENV=production`: Production mode
 
-**Frontend** (`apps/web/.env`) :
-- `VITE_SERVER_URL` : URL de l'API backend
+**Frontend** (`apps/web/.env`):
+- `VITE_SERVER_URL`: Backend API URL
 
-### Sécurité
+### Security
 
-- Rate limiting : 100 requêtes/minute par IP
-- Headers de sécurité HTTP configurés automatiquement
-- Validation des inputs (taille max fichiers : 5MB)
-- Limitations utilisateurs anonymes : 10 calendriers, 500 événements/calendrier
-- Limitations utilisateurs authentifiés : 100 calendriers, 2 000 événements/calendrier
-
-
+- Rate limiting: 100 requests/minute per IP
+- HTTP security headers configured automatically
+- Input validation (max file size: 5MB)
+- Anonymous user limitations: 10 calendars, 500 events/calendar
+- Authenticated user limitations: 100 calendars, 2,000 events/calendar
 
 
-## Structure du projet
+
+
+## Project Structure
 
 ```
 calendraft/
 ├── apps/
-│   ├── web/           # Application frontend (React + TanStack Router)
-│   └── server/        # Serveur API (Hono)
+│   ├── web/           # Frontend application (React + TanStack Router)
+│   └── server/        # API server (Hono)
 ├── packages/
-│   ├── api/           # Routers tRPC
-│   ├── auth/          # Configuration Better-Auth
-│   ├── core/          # Logique métier et types partagés
-│   ├── db/            # Client Prisma et schémas
-│   ├── ics-utils/     # Parsing et génération ICS
-│   ├── react-utils/   # Hooks et utilitaires React
-│   └── schemas/       # Schémas de validation Zod
+│   ├── api/           # tRPC routers
+│   ├── auth/          # Better-Auth configuration
+│   ├── core/          # Business logic and shared types
+│   ├── db/            # Prisma client and schemas
+│   ├── ics-utils/     # ICS parsing and generation
+│   ├── react-utils/   # React hooks and utilities
+│   └── schemas/       # Zod validation schemas
 ```
 
-## Guide d'utilisation
+## User Guide
 
-### Mode anonyme (sans compte)
+### Anonymous Mode (without account)
 
-1. Ouvrez l'application dans votre navigateur
-2. Un ID anonyme est automatiquement généré et stocké dans le localStorage
-3. Vos calendriers sont sauvegardés sur le serveur mais liés à votre ID anonyme
-4. Vous pouvez utiliser toutes les fonctionnalités sans créer de compte
+1. Open the application in your browser
+2. An anonymous ID is automatically generated and stored in localStorage
+3. Your calendars are saved on the server but linked to your anonymous ID
+4. You can use all features without creating an account
 
-**⚠️ Important - Limitations du mode anonyme :**
-- Vos calendriers sont liés à votre navigateur via un ID anonyme stocké dans le localStorage
-- Si vous effacez les données du navigateur ou utilisez la navigation privée, vous perdrez l'accès à vos calendriers
-- Les calendriers anonymes non consultés depuis 60 jours sont automatiquement supprimés
-- Pour une sauvegarde permanente et un accès multi-appareils, créez un compte
+**⚠️ Important - Anonymous Mode Limitations:**
+- Your calendars are linked to your browser via an anonymous ID stored in localStorage
+- If you clear browser data or use private browsing, you will lose access to your calendars
+- Anonymous calendars not accessed for 60 days are automatically deleted
+- For permanent backup and multi-device access, create an account
 
-### Mode authentifié (avec compte)
+### Authenticated Mode (with account)
 
-1. Créez un compte via la page de connexion
-2. Vos calendriers sont sauvegardés sur le serveur
-3. Vous pouvez accéder à vos calendriers depuis n'importe quel appareil
+1. Create an account via the login page
+2. Your calendars are saved on the server
+3. You can access your calendars from any device
 
-### Workflow typique
+### Typical Workflow
 
-1. **Importer un calendrier** : Cliquez sur "Importer un fichier .ics" depuis la page d'accueil
-2. **Créer un calendrier vide** : Cliquez sur "Créer un calendrier" pour commencer de zéro
-3. **Ajouter des événements** : Dans la vue calendrier, cliquez sur "Ajouter un événement" ou cliquez directement sur un créneau dans la vue mois
-4. **Modifier/Supprimer** : Utilisez les boutons d'édition et de suppression dans la vue liste
-5. **Fusionner** : Sélectionnez plusieurs calendriers et fusionnez-les en un seul
-6. **Nettoyer** : Supprimez les doublons d'un calendrier avec le bouton "Nettoyer"
-7. **Exporter** : Téléchargez votre calendrier modifié au format .ics
+1. **Import a calendar**: Click on "Import a .ics file" from the home page
+2. **Create an empty calendar**: Click on "Create a calendar" to start from scratch
+3. **Add events**: In the calendar view, click on "Add an event" or click directly on a time slot in the month view
+4. **Edit/Delete**: Use the edit and delete buttons in the list view
+5. **Merge**: Select multiple calendars and merge them into one
+6. **Clean up**: Remove duplicates from a calendar with the "Clean up" button
+7. **Export**: Download your modified calendar in .ics format
 
 ## Available Scripts
 
-- `bun run dev` - Démarre toutes les applications en mode développement
-- `bun run build` - Compile toutes les applications pour la production
-- `bun run dev:web` - Démarre uniquement l'application web
-- `bun run dev:server` - Démarre uniquement le serveur backend
-- `bun run check-types` - Vérifie les types TypeScript dans toutes les applications
-- `bun run db:push` - Pousse les changements de schéma vers la base de données
-- `bun run db:studio` - Ouvre Prisma Studio pour visualiser la base de données
-- `bun run db:generate` - Génère le client Prisma
-- `bun run db:migrate` - Applique les migrations de base de données
-- `bun run check` - Exécute le formatage et le linting avec Biome
-- `cd apps/web && bun run generate-pwa-assets` - Génère les assets PWA
+- `bun run dev` - Start all applications in development mode
+- `bun run build` - Compile all applications for production
+- `bun run dev:web` - Start only the web application
+- `bun run dev:server` - Start only the backend server
+- `bun run check-types` - Check TypeScript types in all applications
+- `bun run db:push` - Push schema changes to the database
+- `bun run db:studio` - Open Prisma Studio to visualize the database
+- `bun run db:generate` - Generate Prisma client
+- `bun run db:migrate` - Apply database migrations
+- `bun run check` - Run formatting and linting with Biome
+- `cd apps/web && bun run generate-pwa-assets` - Generate PWA assets
 
-## Dépannage
+## Troubleshooting
 
-### Le serveur backend ne démarre pas
+### Backend server won't start
 
-- Vérifiez que le port 3000 n'est pas déjà utilisé
-- Assurez-vous que la base de données est correctement configurée : `bun run db:push`
-- Vérifiez les logs dans le terminal pour les erreurs
+- Check that port 3000 is not already in use
+- Make sure the database is properly configured: `bun run db:push`
+- Check the terminal logs for errors
 
-### Le frontend ne peut pas se connecter au backend
+### Frontend cannot connect to backend
 
-- Vérifiez que `VITE_SERVER_URL` dans `apps/web/.env` pointe vers `http://localhost:3000`
-- Assurez-vous que le serveur backend est démarré (`bun run dev:server`)
-- Vérifiez la console du navigateur pour les erreurs CORS
+- Check that `VITE_SERVER_URL` in `apps/web/.env` points to `http://localhost:3000`
+- Make sure the backend server is started (`bun run dev:server`)
+- Check the browser console for CORS errors
 
-### Les données ne persistent pas (mode anonyme)
+### Data doesn't persist (anonymous mode)
 
-- Vérifiez que le localStorage est activé dans votre navigateur
-- Les données sont stockées localement, elles ne seront pas disponibles sur un autre navigateur ou appareil
-- Pour la persistance multi-appareils, créez un compte
+- Check that localStorage is enabled in your browser
+- Data is stored locally, it will not be available on another browser or device
+- For multi-device persistence, create an account
 
-### Erreurs de parsing ICS
+### ICS parsing errors
 
-- Vérifiez que le fichier .ics est valide et conforme au format RFC 5545
-- Certains champs optionnels peuvent être ignorés, mais les dates de début et de fin sont requises
+- Check that the .ics file is valid and conforms to RFC 5545 format
+- Some optional fields may be ignored, but start and end dates are required
 
 ## Sentry MCP (Model Context Protocol)
 
-Pour une intégration avancée avec des assistants IA (comme Cursor, Claude, etc.), vous pouvez ajouter le serveur MCP officiel de Sentry. Cela permet à l'IA d'accéder directement aux erreurs Sentry pour vous aider à les débugger.
+For advanced integration with AI assistants (like Cursor, Claude, etc.), you can add the official Sentry MCP server. This allows the AI to directly access Sentry errors to help you debug them.
 
-### Configuration du MCP Sentry
+### Sentry MCP Configuration
 
-Ajoutez cette configuration dans votre fichier de configuration MCP (par exemple `.cursor/mcp.json` ou équivalent) :
+Add this configuration to your MCP configuration file (e.g., `.cursor/mcp.json` or equivalent):
 
 ```json
 {
@@ -332,7 +332,7 @@ Ajoutez cette configuration dans votre fichier de configuration MCP (par exemple
 }
 ```
 
-Ou pour une configuration avec authentification :
+Or for authentication-enabled configuration:
 
 ```json
 {
@@ -345,42 +345,42 @@ Ou pour une configuration avec authentification :
 }
 ```
 
-### Fonctionnalités du MCP Sentry
+### Sentry MCP Features
 
-Une fois configuré, l'assistant IA pourra :
-- Lister les issues Sentry de votre projet
-- Analyser les stack traces et erreurs
-- Proposer des corrections basées sur les erreurs réelles
-- Corréler les erreurs avec le code source
+Once configured, the AI assistant will be able to:
+- List Sentry issues for your project
+- Analyze stack traces and errors
+- Propose fixes based on actual errors
+- Correlate errors with source code
 
-Pour plus d'informations : [github.com/getsentry/sentry-mcp](https://github.com/getsentry/sentry-mcp)
+For more information: [github.com/getsentry/sentry-mcp](https://github.com/getsentry/sentry-mcp)
 
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
-| [README.md](README.md) | Ce fichier - Vue d'ensemble et démarrage rapide |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Architecture des packages et diagramme de dépendances |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Guide complet de déploiement en production |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Guide de contribution au projet |
-| [SECURITY.md](SECURITY.md) | Politique de sécurité et signalement de vulnérabilités |
+| [README.md](README.md) | This file - Overview and quick start |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Package architecture and dependency diagram |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Complete production deployment guide |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Project contribution guide |
+| [SECURITY.md](SECURITY.md) | Security policy and vulnerability reporting |
 
-### Documentation des packages
+### Package Documentation
 
 | Package | Description |
 |---------|-------------|
-| [@calendraft/core](packages/core/README.md) | Logique métier et types partagés |
-| [@calendraft/ics-utils](packages/ics-utils/README.md) | Parsing et génération de fichiers ICS |
-| [@calendraft/react-utils](packages/react-utils/README.md) | Hooks et utilitaires React |
-| [@calendraft/api](packages/api/README.md) | API tRPC et routers |
-| [@calendraft/auth](packages/auth/README.md) | Configuration Better-Auth |
-| [@calendraft/db](packages/db/README.md) | Client Prisma et schémas DB |
-| [@calendraft/schemas](packages/schemas/README.md) | Schémas de validation Zod |
+| [@calendraft/core](packages/core/README.md) | Business logic and shared types |
+| [@calendraft/ics-utils](packages/ics-utils/README.md) | ICS file parsing and generation |
+| [@calendraft/react-utils](packages/react-utils/README.md) | React hooks and utilities |
+| [@calendraft/api](packages/api/README.md) | tRPC API and routers |
+| [@calendraft/auth](packages/auth/README.md) | Better-Auth configuration |
+| [@calendraft/db](packages/db/README.md) | Prisma client and DB schemas |
+| [@calendraft/schemas](packages/schemas/README.md) | Zod validation schemas |
 
-## Contribuer
+## Contributing
 
-Les contributions sont les bienvenues ! Consultez le [guide de contribution](CONTRIBUTING.md) pour commencer.
+Contributions are welcome! See the [contribution guide](CONTRIBUTING.md) to get started.
 
-## Licence
+## License
 
-Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+This project is licensed under MIT - see the [LICENSE](LICENSE) file for details.

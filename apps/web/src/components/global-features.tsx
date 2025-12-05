@@ -1,11 +1,11 @@
 /**
- * GlobalFeatures - Raccourcis clavier globaux pour l'application
+ * GlobalFeatures - Global keyboard shortcuts for the application
  *
- * Raccourcis disponibles:
- * - N : Nouveau calendrier
- * - I : Importer un fichier .ics
- * - H : Retour à l'accueil
- * - C : Liste des calendriers
+ * Available shortcuts:
+ * - N : New calendar
+ * - I : Import a .ics file
+ * - H : Return to home
+ * - C : Calendar list
  */
 
 import { useNavigate } from "@tanstack/react-router";

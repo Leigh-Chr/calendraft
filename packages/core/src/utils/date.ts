@@ -35,10 +35,11 @@ export function toDateTimeLocal(date: Date | string): string {
 
 /**
  * Format a date for display (short format)
+ * Uses ISO 8601 date format for universal compatibility
  */
 export function formatDateShort(date: Date | string): string {
 	const dateObj = normalizeDate(date);
-	return format(dateObj, "dd/MM/yyyy HH:mm");
+	return format(dateObj, "yyyy-MM-dd HH:mm");
 }
 
 /**

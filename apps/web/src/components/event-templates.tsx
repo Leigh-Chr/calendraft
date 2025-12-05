@@ -1,5 +1,5 @@
 /**
- * Event Templates - Modèles prédéfinis pour création rapide d'événements
+ * Event Templates - Predefined templates for quick event creation
  */
 
 import { addHours, format, setHours, setMinutes } from "date-fns";
@@ -43,59 +43,59 @@ export interface EventTemplate {
 export const EVENT_TEMPLATES: EventTemplate[] = [
 	{
 		id: "meeting",
-		name: "Réunion",
+		name: "Meeting",
 		icon: <Users className="h-4 w-4" />,
 		color: "#3b82f6", // blue
 		duration: 60,
-		title: "Réunion",
+		title: "Meeting",
 		alarm: "-PT15M",
 	},
 	{
 		id: "video-call",
-		name: "Visio",
+		name: "Video call",
 		icon: <Video className="h-4 w-4" />,
 		color: "#8b5cf6", // purple
 		duration: 30,
-		title: "Appel vidéo",
+		title: "Video call",
 		location: "Google Meet / Zoom",
 		alarm: "-PT5M",
 	},
 	{
 		id: "phone-call",
-		name: "Appel",
+		name: "Call",
 		icon: <Phone className="h-4 w-4" />,
 		color: "#06b6d4", // cyan
 		duration: 15,
-		title: "Appel téléphonique",
+		title: "Phone call",
 		alarm: "-PT5M",
 	},
 	{
 		id: "work",
-		name: "Travail",
+		name: "Work",
 		icon: <Briefcase className="h-4 w-4" />,
 		color: "#f59e0b", // amber
 		duration: 480, // 8 hours
-		title: "Journée de travail",
+		title: "Work day",
 		rrule: "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
-		categories: "Travail",
+		categories: "Work",
 	},
 	{
 		id: "lunch",
-		name: "Déjeuner",
+		name: "Lunch",
 		icon: <Utensils className="h-4 w-4" />,
 		color: "#f97316", // orange
 		duration: 60,
-		title: "Déjeuner",
-		categories: "Personnel",
+		title: "Lunch",
+		categories: "Personal",
 	},
 	{
 		id: "coffee",
-		name: "Café",
+		name: "Coffee",
 		icon: <Coffee className="h-4 w-4" />,
 		color: "#78716c", // stone
 		duration: 30,
-		title: "Pause café",
-		categories: "Personnel",
+		title: "Coffee break",
+		categories: "Personal",
 	},
 	{
 		id: "sport",
@@ -103,48 +103,48 @@ export const EVENT_TEMPLATES: EventTemplate[] = [
 		icon: <Dumbbell className="h-4 w-4" />,
 		color: "#22c55e", // green
 		duration: 90,
-		title: "Séance de sport",
-		categories: "Sport,Santé",
+		title: "Workout session",
+		categories: "Sport,Health",
 		rrule: "FREQ=WEEKLY",
 	},
 	{
 		id: "doctor",
-		name: "Médecin",
+		name: "Doctor",
 		icon: <Stethoscope className="h-4 w-4" />,
 		color: "#ef4444", // red
 		duration: 30,
-		title: "Rendez-vous médical",
-		categories: "Santé",
+		title: "Medical appointment",
+		categories: "Health",
 		alarm: "-PT1H",
 	},
 	{
 		id: "study",
-		name: "Études",
+		name: "Study",
 		icon: <GraduationCap className="h-4 w-4" />,
 		color: "#6366f1", // indigo
 		duration: 120,
-		title: "Session d'étude",
-		categories: "Études",
+		title: "Study session",
+		categories: "Study",
 	},
 	{
 		id: "birthday",
-		name: "Anniversaire",
+		name: "Birthday",
 		icon: <PartyPopper className="h-4 w-4" />,
 		color: "#ec4899", // pink
 		duration: 1440, // All day
-		title: "Anniversaire",
+		title: "Birthday",
 		rrule: "FREQ=YEARLY",
-		categories: "Personnel,Anniversaire",
+		categories: "Personal,Birthday",
 		alarm: "-P1D", // 1 day before
 	},
 	{
 		id: "date",
-		name: "Rendez-vous",
+		name: "Date",
 		icon: <Heart className="h-4 w-4" />,
 		color: "#f43f5e", // rose
 		duration: 120,
-		title: "Rendez-vous",
-		categories: "Personnel",
+		title: "Date",
+		categories: "Personal",
 	},
 	{
 		id: "travel",

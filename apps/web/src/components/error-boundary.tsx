@@ -59,30 +59,30 @@ export class ErrorBoundary extends Component<Props, State> {
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2 text-destructive">
 								<AlertCircle className="h-5 w-5" aria-hidden="true" />
-								Une erreur est survenue
+								An error occurred
 							</CardTitle>
 							<CardDescription>
-								Une erreur inattendue s'est produite. Veuillez réessayer.
+								An unexpected error occurred. Please try again.
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							{this.state.error && (
 								<div className="rounded-lg border border-destructive/20 bg-card p-3 text-sm">
 									<p className="font-medium text-destructive">
-										{this.state.error.message || "Erreur inconnue"}
+										{this.state.error.message || "Unknown error"}
 									</p>
 								</div>
 							)}
 
 							<div className="flex gap-2">
 								<Button onClick={this.handleReset} variant="default">
-									Réessayer
+									Try again
 								</Button>
 								<Button
 									onClick={() => window.location.reload()}
 									variant="outline"
 								>
-									Recharger la page
+									Reload page
 								</Button>
 							</div>
 						</CardContent>

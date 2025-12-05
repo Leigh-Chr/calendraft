@@ -1,6 +1,6 @@
 /**
- * Command Palette - Navigation et actions rapides via Cmd+K
- * Inspiré de Notion, Linear, Figma
+ * Command Palette - Quick navigation and actions via Cmd+K
+ * Inspired by Notion, Linear, Figma
  */
 
 import { useNavigate } from "@tanstack/react-router";
@@ -79,55 +79,55 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 			// Navigation
 			{
 				id: "home",
-				label: "Accueil",
+				label: "Home",
 				icon: <Home className="h-4 w-4" />,
 				shortcut: "G H",
 				action: () => closeAndNavigate("/"),
-				keywords: ["home", "landing", "accueil"],
+				keywords: ["home", "landing"],
 				group: "navigation",
 			},
 			{
 				id: "calendars",
-				label: "Mes calendriers",
+				label: "My calendars",
 				icon: <Calendar className="h-4 w-4" />,
 				shortcut: "G C",
 				action: () => closeAndNavigate("/calendars"),
-				keywords: ["calendars", "list", "tous", "calendriers"],
+				keywords: ["calendars", "list"],
 				group: "navigation",
 			},
 			// Actions
 			{
 				id: "new-calendar",
-				label: "Nouveau calendrier",
+				label: "New calendar",
 				icon: <Plus className="h-4 w-4" />,
 				shortcut: "N",
 				action: () => closeAndNavigate("/calendars/new"),
-				keywords: ["new", "create", "nouveau", "créer", "calendrier"],
+				keywords: ["new", "create", "calendar"],
 				group: "actions",
 			},
 			{
 				id: "import",
-				label: "Importer un .ics",
+				label: "Import a .ics",
 				icon: <FileUp className="h-4 w-4" />,
 				shortcut: "I",
 				action: () => closeAndNavigate("/calendars/import"),
-				keywords: ["import", "importer", "ics", "fichier", "upload"],
+				keywords: ["import", "ics", "file", "upload"],
 				group: "actions",
 			},
 			{
 				id: "merge",
-				label: "Fusionner des calendriers",
+				label: "Merge calendars",
 				icon: <GitMerge className="h-4 w-4" />,
 				shortcut: "M",
 				action: () => closeAndNavigate("/calendars/merge"),
-				keywords: ["merge", "fusionner", "combiner", "calendriers"],
+				keywords: ["merge", "combine", "calendars"],
 				group: "actions",
 			},
 
 			// Settings
 			{
 				id: "toggle-theme",
-				label: theme === "dark" ? "Mode clair" : "Mode sombre",
+				label: theme === "dark" ? "Light mode" : "Dark mode",
 				icon:
 					theme === "dark" ? (
 						<Sun className="h-4 w-4" />
@@ -136,7 +136,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 					),
 				action: () =>
 					closeAndAction(() => setTheme(theme === "dark" ? "light" : "dark")),
-				keywords: ["theme", "dark", "light", "sombre", "clair", "mode"],
+				keywords: ["theme", "dark", "light", "mode"],
 				group: "settings",
 			},
 
@@ -153,8 +153,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 				action: () => closeAndNavigate(`/calendars/${calendar.id}`),
 				keywords: [
 					calendar.name.toLowerCase(),
-					"calendrier",
-					`${calendar.eventCount} événements`,
+					"calendar",
+					`${calendar.eventCount} events`,
 				],
 				group: "calendars" as const,
 			})),
@@ -172,7 +172,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 		<CommandDialog open={open} onOpenChange={onOpenChange}>
 			<CommandInput
 				ref={inputRef}
-				placeholder="Rechercher ou taper une commande..."
+				placeholder="Search or type a command..."
 				value={search}
 				onValueChange={setSearch}
 			/>
@@ -181,14 +181,14 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 					<div className="py-6 text-center">
 						<Search className="mx-auto mb-2 h-8 w-8 text-muted-foreground/50" />
 						<p className="text-muted-foreground text-sm">
-							Aucun résultat pour "{search}"
+							No results for "{search}"
 						</p>
 					</div>
 				</CommandEmpty>
 
-				{/* Actions rapides */}
+				{/* Quick actions */}
 				{actionCommands.length > 0 && (
-					<CommandGroup heading="Actions rapides">
+					<CommandGroup heading="Quick actions">
 						{actionCommands.map((command) => (
 							<CommandItem
 								key={command.id}
@@ -205,11 +205,11 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 					</CommandGroup>
 				)}
 
-				{/* Calendriers */}
+				{/* Calendars */}
 				{calendarCommands.length > 0 && (
 					<>
 						<CommandSeparator />
-						<CommandGroup heading="Calendriers">
+						<CommandGroup heading="Calendars">
 							{calendarCommands.map((command) => (
 								<CommandItem
 									key={command.id}
@@ -242,9 +242,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 					))}
 				</CommandGroup>
 
-				{/* Paramètres */}
+				{/* Settings */}
 				<CommandSeparator />
-				<CommandGroup heading="Paramètres">
+				<CommandGroup heading="Settings">
 					{settingsCommands.map((command) => (
 						<CommandItem
 							key={command.id}
@@ -258,7 +258,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 				</CommandGroup>
 			</CommandList>
 
-			{/* Footer avec aide */}
+			{/* Footer with help */}
 			<div className="border-t px-3 py-2">
 				<div className="flex items-center justify-between text-muted-foreground text-xs">
 					<div className="flex items-center gap-3">
@@ -266,19 +266,19 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 							<kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">
 								↑↓
 							</kbd>{" "}
-							naviguer
+							navigate
 						</span>
 						<span>
 							<kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">
 								↵
 							</kbd>{" "}
-							sélectionner
+							select
 						</span>
 						<span>
 							<kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">
 								esc
 							</kbd>{" "}
-							fermer
+							close
 						</span>
 					</div>
 				</div>
@@ -288,14 +288,14 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 }
 
 /**
- * Hook pour ouvrir/fermer le Command Palette
+ * Hook to open/close the Command Palette
  */
 export function useCommandPalette() {
 	const [open, setOpen] = useState(false);
 
 	useEffect(() => {
 		const down = (e: KeyboardEvent) => {
-			// Cmd+K ou Ctrl+K
+			// Cmd+K or Ctrl+K
 			if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
 				e.preventDefault();
 				setOpen((open) => !open);

@@ -180,7 +180,7 @@ function getFirstAlarmError(
  */
 export function getFirstValidationError(
 	errors: ValidationErrors,
-	fallback = "Veuillez corriger les erreurs dans le formulaire",
+	fallback = "Please correct the errors in the form",
 ): string {
 	// Priority order for error display (top-level first)
 	const priorityFields: Array<keyof ValidationErrors> = [
@@ -231,7 +231,7 @@ export function handleTRPCMutationError(
 
 	if (!isTRPCClientError(error)) {
 		const message =
-			error instanceof Error ? error.message : "Une erreur est survenue";
+			error instanceof Error ? error.message : "An error occurred";
 		onGenericError?.(message);
 		return null;
 	}
@@ -244,7 +244,7 @@ export function handleTRPCMutationError(
 	}
 
 	// Fallback to generic error
-	const message = error.message || "Une erreur est survenue";
+	const message = error.message || "An error occurred";
 	onGenericError?.(message);
 	return null;
 }

@@ -1,27 +1,27 @@
-# Architecture Calendraft
+# Calendraft Architecture
 
-Ce document décrit l'architecture technique du projet et les relations entre les packages.
+This document describes the technical architecture of the project and the relationships between packages.
 
-## Vue d'ensemble
+## Overview
 
-Calendraft est un **monorepo** géré avec Turborepo, composé de :
-- **2 applications** : `apps/web` (frontend) et `apps/server` (backend)
-- **7 packages** partagés dans `packages/`
+Calendraft is a **monorepo** managed with Turborepo, composed of:
+- **2 applications**: `apps/web` (frontend) and `apps/server` (backend)
+- **7 packages** shared in `packages/`
 
-## Structure des packages
+## Package Structure
 
 ```
 packages/
-├── ics-utils/     # Parsing/génération ICS (0 dépendance interne)
-├── core/          # Logique métier pure (dépend de date-fns)
-├── schemas/       # Schémas Zod partagés
-├── react-utils/   # Hooks et utilitaires React
-├── db/            # Client Prisma et schémas de base de données
-├── auth/          # Configuration Better-Auth
-└── api/           # Routers tRPC
+├── ics-utils/     # ICS parsing/generation (0 internal dependencies)
+├── core/          # Pure business logic (depends on date-fns)
+├── schemas/       # Shared Zod schemas
+├── react-utils/   # React hooks and utilities
+├── db/            # Prisma client and database schemas
+├── auth/          # Better-Auth configuration
+└── api/           # tRPC routers
 ```
 
-## Diagramme de dépendances
+## Dependency Diagram
 
 ```
                         ┌─────────────┐
@@ -50,22 +50,22 @@ packages/
                               └─────────────┘
 ```
 
-## Packages externalisables
+## Publishable Packages
 
-| Package | Publiable npm | Dépendances |
-|---------|---------------|-------------|
-| `@calendraft/ics-utils` | ✅ Oui | `ical.js` uniquement |
-| `@calendraft/core` | ✅ Oui | `date-fns` uniquement |
-| `@calendraft/react-utils` | ✅ Oui | Peer: `react`, `@tanstack/react-query` |
+| Package | Publishable to npm | Dependencies |
+|---------|-------------------|--------------|
+| `@calendraft/ics-utils` | ✅ Yes | `ical.js` only |
+| `@calendraft/core` | ✅ Yes | `date-fns` only |
+| `@calendraft/react-utils` | ✅ Yes | Peer: `react`, `@tanstack/react-query` |
 
-## Contenu des packages
+## Package Contents
 
 ### `@calendraft/ics-utils`
-- `parseIcsFile()` - Parser fichiers ICS
-- `generateIcsFile()` - Générer fichiers ICS
-- `formatDateToICS()` / `parseDateFromICS()` - Conversion dates
-- `formatDuration()` / `parseDuration()` - Durées ISO 8601
-- `formatAlarmTrigger()` / `parseAlarmTrigger()` - Triggers alarmes
+- `parseIcsFile()` - Parse ICS files
+- `generateIcsFile()` - Generate ICS files
+- `formatDateToICS()` / `parseDateFromICS()` - Date conversion
+- `formatDuration()` / `parseDuration()` - ISO 8601 durations
+- `formatAlarmTrigger()` / `parseAlarmTrigger()` - Alarm triggers
 
 ### `@calendraft/core`
 - **Types**: `EventFormData`, `EventEntity`, `CalendarEntity`, `AttendeeData`, `AlarmData`
@@ -73,74 +73,74 @@ packages/
 - **Utils**: `deepEqual()`, `parseTags()`, `normalizeDate()`, `formatEventDuration()`
 - **Form**: `initializeFormData()`, `transformEventFormData()`
 - **Constants**: `FIELD_LIMITS`, `EVENT_PRESETS`, `EVENT_STATUS_VALUES`
-- **Récurrence**: `parseRRule()`, `buildRRule()`
+- **Recurrence**: `parseRRule()`, `buildRRule()`
 
 ### `@calendraft/react-utils`
 - **Hooks**: `useDebounce`, `useLocalStorage`, `useIsMobile`, `usePrevious`, `useMounted`
-- **Query**: `createQueryKeys()` - Factory générique pour query keys
+- **Query**: `createQueryKeys()` - Generic factory for query keys
 - **Error**: `getErrorMessage()`, `isNetworkError()`, `logErrorInDev()`
 - **Style**: `cn()` (Tailwind class merge)
 
-## Principes
+## Principles
 
-1. **Single source of truth** - Types ICS dans `core/constants/ics-enums.ts`
-2. **Pure functions** - Pas d'effets de bord dans `core` et `ics-utils`
-3. **Pas d'over-engineering** - Une fonction par besoin, pas de converters inutiles
-4. **Tree-shakeable** - Imports granulaires possibles
+1. **Single source of truth** - ICS types in `core/constants/ics-enums.ts`
+2. **Pure functions** - No side effects in `core` and `ics-utils`
+3. **No over-engineering** - One function per need, no unnecessary converters
+4. **Tree-shakeable** - Granular imports possible
 
-## Authentification
+## Authentication
 
-L'application supporte deux modes d'utilisateurs :
-- **Authentifié** : Utilisateur avec compte (session Better-Auth)
-- **Anonyme** : ID unique stocké côté client (`anon-xxx`)
+The application supports two user modes:
+- **Authenticated**: User with account (Better-Auth session)
+- **Anonymous**: Unique ID stored client-side (`anon-xxx`)
 
-Les procédures tRPC utilisent le pattern suivant :
+tRPC procedures use the following pattern:
 ```typescript
-// Endpoints publics (health check, etc.)
+// Public endpoints (health check, etc.)
 publicProcedure.query(...)
 
-// Endpoints nécessitant identification (session OU anonyme)
-authOrAnonProcedure.query(...)  // ctx.userId garanti
+// Endpoints requiring identification (session OR anonymous)
+authOrAnonProcedure.query(...)  // ctx.userId guaranteed
 
-// Endpoints nécessitant un compte (session uniquement)
-protectedProcedure.query(...)   // ctx.session garanti
+// Endpoints requiring an account (session only)
+protectedProcedure.query(...)   // ctx.session guaranteed
 ```
 
 ### `@calendraft/schemas`
-- **Événements** : `eventCreateSchema`, `eventUpdateSchema`, `eventFormDataSchema`
-- **Entités** : `attendeeSchema`, `alarmSchema`
-- **RFC 5545** : `rruleSchema`, `geoCoordinatesSchema`, `recurrenceIdSchema`
-- **Constantes** : `FIELD_LIMITS`
+- **Events**: `eventCreateSchema`, `eventUpdateSchema`, `eventFormDataSchema`
+- **Entities**: `attendeeSchema`, `alarmSchema`
+- **RFC 5545**: `rruleSchema`, `geoCoordinatesSchema`, `recurrenceIdSchema`
+- **Constants**: `FIELD_LIMITS`
 
 ### `@calendraft/db`
-- Client Prisma configuré avec adapter PostgreSQL
-- Modèles : `Calendar`, `Event`, `Attendee`, `Alarm`, `User`, `Session`
+- Prisma client configured with PostgreSQL adapter
+- Models: `Calendar`, `Event`, `Attendee`, `Alarm`, `User`, `Session`
 
 ### `@calendraft/auth`
-- Configuration Better-Auth avec adapter Prisma
-- Gestion des cookies sécurisés
+- Better-Auth configuration with Prisma adapter
+- Secure cookie management
 
 ### `@calendraft/api`
-- `calendarRouter` : CRUD calendriers, import/export ICS, fusion
-- `eventRouter` : CRUD événements
-- **Procédures tRPC** :
-  - `publicProcedure` : Endpoints vraiment publics (health check)
-  - `authOrAnonProcedure` : Requiert session OU ID anonyme (majorité des endpoints)
-  - `protectedProcedure` : Requiert session authentifiée uniquement
+- `calendarRouter`: Calendar CRUD, ICS import/export, merge
+- `eventRouter`: Event CRUD
+- **tRPC Procedures**:
+  - `publicProcedure`: Truly public endpoints (health check)
+  - `authOrAnonProcedure`: Requires session OR anonymous ID (majority of endpoints)
+  - `protectedProcedure`: Requires authenticated session only
 
-## Migration depuis apps/web
+## Migration from apps/web
 
 ```typescript
-// Avant
+// Before
 import { parseTags } from '@/lib/tag-utils';
 import { FIELD_LIMITS } from '@/lib/field-limits';
 
-// Après
+// After
 import { parseTags, FIELD_LIMITS } from '@calendraft/core';
 ```
 
-## Voir aussi
+## See Also
 
-- [README.md](README.md) - Vue d'ensemble du projet
-- [DEPLOYMENT.md](DEPLOYMENT.md) - Guide de déploiement
-- Documentation des packages dans `packages/*/README.md`
+- [README.md](README.md) - Project overview
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Deployment guide
+- Package documentation in `packages/*/README.md`

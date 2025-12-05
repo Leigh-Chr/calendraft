@@ -1,122 +1,122 @@
-# Guide Docker - Calendraft
+# Docker Guide - Calendraft
 
-Guide complet pour lancer Calendraft avec Docker.
+Complete guide to run Calendraft with Docker.
 
-## 🚀 Démarrage rapide
+## 🚀 Quick Start
 
-### Option 1 : Développement (PostgreSQL Docker + Apps locales)
+### Option 1: Development (PostgreSQL Docker + Local Apps)
 
 ```bash
-# 1. Démarrer PostgreSQL
+# 1. Start PostgreSQL
 docker-compose -f docker-compose.dev.yml up -d
 
-# 2. Configurer l'environnement
+# 2. Configure environment
 echo 'DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"
 PORT=3000
 CORS_ORIGIN=http://localhost:3001
 BETTER_AUTH_SECRET=dev-secret-key-min-32-characters-long
 BETTER_AUTH_URL=http://localhost:3000' > apps/server/.env
 
-# 3. Initialiser la base de données
+# 3. Initialize the database
 bun run db:push
 
-# 4. Lancer les apps en local (hot reload)
+# 4. Launch apps locally (hot reload)
 bun run dev
 ```
 
-**Accès :**
-- Frontend : http://localhost:3001
-- Backend : http://localhost:3000
-- PostgreSQL : localhost:5432
+**Access:**
+- Frontend: http://localhost:3001
+- Backend: http://localhost:3000
+- PostgreSQL: localhost:5432
 
-### Option 2 : Production complète (tout en Docker)
+### Option 2: Full Production (Everything in Docker)
 
 ```bash
-# 1. Configurer les variables d'environnement
+# 1. Configure environment variables
 cp docker.env.example .env
-# Éditer .env avec vos valeurs
+# Edit .env with your values
 
-# 2. Construire et démarrer tous les services
+# 2. Build and start all services
 docker-compose up -d --build
 
-# 3. Vérifier que tout fonctionne
+# 3. Verify everything works
 docker-compose ps
 docker-compose logs -f
 ```
 
-**Accès :**
-- Frontend : http://localhost:3001
-- Backend : http://localhost:3000
-- PostgreSQL : localhost:5432
+**Access:**
+- Frontend: http://localhost:3001
+- Backend: http://localhost:3000
+- PostgreSQL: localhost:5432
 
-## 📋 Commandes utiles
+## 📋 Useful Commands
 
-### Voir les logs
+### View Logs
 
 ```bash
-# Tous les services
+# All services
 docker-compose logs -f
 
-# Un service spécifique
+# A specific service
 docker-compose logs -f server
 docker-compose logs -f web
 docker-compose logs -f db
 ```
 
-### Arrêter les services
+### Stop Services
 
 ```bash
-# Arrêter (garder les données)
+# Stop (keep data)
 docker-compose down
 
-# Arrêter et supprimer les volumes (⚠️ supprime les données)
+# Stop and remove volumes (⚠️ deletes data)
 docker-compose down -v
 ```
 
-### Redémarrer un service
+### Restart a Service
 
 ```bash
 docker-compose restart server
 docker-compose restart web
 ```
 
-### Reconstruire un service
+### Rebuild a Service
 
 ```bash
 docker-compose up -d --build server
 docker-compose up -d --build web
 ```
 
-### Accéder à PostgreSQL
+### Access PostgreSQL
 
 ```bash
 # Via Docker
 docker-compose exec db psql -U calendraft -d calendraft
 
-# Depuis l'extérieur (si port exposé)
+# From outside (if port exposed)
 psql -h localhost -p 5432 -U calendraft -d calendraft
 ```
 
-### Backup de la base de données
+### Database Backup
 
 ```bash
-# Créer un backup
+# Create a backup
 docker-compose exec db pg_dump -U calendraft calendraft > backup.sql
 
-# Restaurer un backup
+# Restore a backup
 docker-compose exec -T db psql -U calendraft calendraft < backup.sql
 ```
 
 ## 🔧 Configuration
 
-### Variables d'environnement
+### Environment Variables
 
-Copiez `docker.env.example` vers `.env` et configurez :
+Copy `docker.env.example` to `.env` and configure:
 
 ```env
-# Base de données
+# Database
 POSTGRES_USER=calendraft
-POSTGRES_PASSWORD=votre_mot_de_passe_securise
+POSTGRES_PASSWORD=your_secure_password
 POSTGRES_DB=calendraft
 
 # Backend
@@ -130,58 +130,58 @@ VITE_SERVER_URL=http://localhost:3000
 
 ### Ports
 
-Par défaut :
-- **3000** : Backend API
-- **3001** : Frontend Web
-- **5432** : PostgreSQL
+By default:
+- **3000**: Backend API
+- **3001**: Frontend Web
+- **5432**: PostgreSQL
 
-Modifiez dans `.env` si nécessaire :
+Modify in `.env` if necessary:
 ```env
 SERVER_PORT=3000
 WEB_PORT=3001
 POSTGRES_PORT=5432
 ```
 
-## 🐛 Dépannage
+## 🐛 Troubleshooting
 
-### Le build Docker échoue
+### Docker Build Fails
 
 ```bash
-# Reconstruire sans cache
+# Rebuild without cache
 docker-compose build --no-cache
 
-# Vérifier les logs
+# Check logs
 docker-compose logs
 ```
 
-### La base de données ne démarre pas
+### Database Won't Start
 
 ```bash
-# Vérifier les logs
+# Check logs
 docker-compose logs db
 
-# Vérifier que le port n'est pas déjà utilisé
+# Check that port is not already in use
 lsof -i :5432
 ```
 
-### Le serveur ne peut pas se connecter à la base
+### Server Cannot Connect to Database
 
 ```bash
-# Vérifier que la base est healthy
+# Check that database is healthy
 docker-compose ps
 
-# Tester la connexion
+# Test connection
 docker-compose exec server wget -O- http://localhost:3000/health
 ```
 
-### Les données ne persistent pas
+### Data Doesn't Persist
 
-Vérifiez que le volume est bien créé :
+Check that the volume is created:
 ```bash
 docker volume ls | grep postgres
 ```
 
-## 📦 Structure des services
+## 📦 Service Structure
 
 ```
 ┌─────────────────────────────────────────┐
@@ -197,18 +197,18 @@ docker volume ls | grep postgres
 └─────────────────────────────────────────┘
 ```
 
-## 🔐 Sécurité en production
+## 🔐 Production Security
 
-1. **Changez tous les mots de passe** dans `.env`
-2. **Générez un BETTER_AUTH_SECRET** sécurisé : `openssl rand -base64 32`
-3. **Configurez CORS_ORIGIN** avec votre domaine réel
-4. **Utilisez HTTPS** avec un reverse proxy (Nginx, Traefik, Caddy)
-5. **Ne commitez jamais** le fichier `.env`
+1. **Change all passwords** in `.env`
+2. **Generate a secure BETTER_AUTH_SECRET**: `openssl rand -base64 32`
+3. **Configure CORS_ORIGIN** with your actual domain
+4. **Use HTTPS** with a reverse proxy (Nginx, Traefik, Caddy)
+5. **Never commit** the `.env` file
 
-## 📚 Voir aussi
+## 📚 See Also
 
-- [README.md](README.md) - Vue d'ensemble du projet
-- [DEPLOYMENT.md](DEPLOYMENT.md) - Guide de déploiement détaillé
+- [README.md](README.md) - Project overview
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Detailed deployment guide
 
 
 

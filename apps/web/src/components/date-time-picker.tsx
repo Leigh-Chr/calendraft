@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { CalendarIcon, Clock } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export function DateTimePicker({
 	disabled = false,
 	id,
 	required = false,
-	placeholder = "Sélectionner date et heure",
+	placeholder = "Select date and time",
 	"aria-label": ariaLabel,
 }: DateTimePickerProps) {
 	const [open, setOpen] = useState(false);
@@ -105,7 +105,7 @@ export function DateTimePicker({
 				>
 					<CalendarIcon className="mr-2 h-4 w-4" />
 					{date ? (
-						format(date, "PPP 'à' HH:mm", { locale: fr })
+						format(date, "PPP 'at' HH:mm", { locale: enUS })
 					) : (
 						<span>{placeholder}</span>
 					)}
@@ -123,7 +123,7 @@ export function DateTimePicker({
 					<div className="space-y-2 border-t pt-4">
 						<Label htmlFor={`${id}-time`} className="flex items-center gap-2">
 							<Clock className="h-4 w-4" />
-							Heure
+							Time
 						</Label>
 						<Input
 							id={`${id}-time`}

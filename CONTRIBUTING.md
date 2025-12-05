@@ -1,216 +1,216 @@
-# Guide de contribution
+# Contribution Guide
 
-Merci de votre intérêt pour contribuer à Calendraft ! Ce guide vous aidera à démarrer.
+Thank you for your interest in contributing to Calendraft! This guide will help you get started.
 
-## Table des matières
+## Table of Contents
 
-- [Code de conduite](#code-de-conduite)
-- [Comment contribuer](#comment-contribuer)
-- [Configuration de l'environnement](#configuration-de-lenvironnement)
-- [Standards de développement](#standards-de-développement)
-- [Processus de Pull Request](#processus-de-pull-request)
-- [Signaler des bugs](#signaler-des-bugs)
-- [Proposer des fonctionnalités](#proposer-des-fonctionnalités)
+- [Code of Conduct](#code-of-conduct)
+- [How to Contribute](#how-to-contribute)
+- [Environment Setup](#environment-setup)
+- [Development Standards](#development-standards)
+- [Pull Request Process](#pull-request-process)
+- [Reporting Bugs](#reporting-bugs)
+- [Proposing Features](#proposing-features)
 
-## Code de conduite
+## Code of Conduct
 
-En participant à ce projet, vous acceptez de maintenir un environnement respectueux et inclusif. Soyez bienveillant envers les autres contributeurs.
+By participating in this project, you agree to maintain a respectful and inclusive environment. Be kind to other contributors.
 
-## Comment contribuer
+## How to Contribute
 
-### Types de contributions
+### Types of Contributions
 
-- 🐛 **Corrections de bugs** - Corrigez un problème existant
-- ✨ **Nouvelles fonctionnalités** - Ajoutez une nouvelle feature
-- 📚 **Documentation** - Améliorez ou ajoutez de la documentation
-- 🧪 **Tests** - Ajoutez ou améliorez les tests
-- 🔧 **Maintenance** - Mises à jour de dépendances, refactoring
+- 🐛 **Bug fixes** - Fix an existing issue
+- ✨ **New features** - Add a new feature
+- 📚 **Documentation** - Improve or add documentation
+- 🧪 **Tests** - Add or improve tests
+- 🔧 **Maintenance** - Dependency updates, refactoring
 
-### Avant de commencer
+### Before Starting
 
-1. Vérifiez qu'il n'existe pas déjà une issue ou PR pour votre contribution
-2. Pour les changements majeurs, ouvrez d'abord une issue pour en discuter
-3. Consultez le [README](README.md) et [ARCHITECTURE.md](ARCHITECTURE.md) pour comprendre le projet
+1. Check that there isn't already an issue or PR for your contribution
+2. For major changes, open an issue first to discuss
+3. Consult the [README](README.md) and [ARCHITECTURE.md](ARCHITECTURE.md) to understand the project
 
-## Configuration de l'environnement
+## Environment Setup
 
-### Prérequis
+### Prerequisites
 
-- [Bun](https://bun.sh) version 1.3.1 ou supérieure
+- [Bun](https://bun.sh) version 1.3.1 or higher
 - Git
 
 ### Installation
 
 ```bash
-# Cloner le repository
-git clone <url-du-repository>
+# Clone the repository
+git clone <repository-url>
 cd calendraft
 
-# Installer les dépendances
+# Install dependencies
 bun install
 
-# Configurer la base de données
+# Configure the database
 bun run db:push
 
-# Lancer en mode développement
+# Launch in development mode
 bun run dev
 ```
 
-### Structure du projet
+### Project Structure
 
 ```
 calendraft/
 ├── apps/
-│   ├── web/              # Application frontend React
-│   └── server/           # Serveur API Hono
+│   ├── web/              # React frontend application
+│   └── server/           # Hono API server
 ├── packages/
-│   ├── api/              # Routers tRPC
-│   ├── auth/             # Configuration Better-Auth
-│   ├── core/             # Logique métier et types
-│   ├── db/               # Schémas Prisma
-│   ├── ics-utils/        # Parsing/génération ICS
-│   ├── react-utils/      # Hooks et utilitaires React
-│   └── schemas/          # Schémas de validation Zod
+│   ├── api/              # tRPC routers
+│   ├── auth/             # Better-Auth configuration
+│   ├── core/             # Business logic and types
+│   ├── db/               # Prisma schemas
+│   ├── ics-utils/        # ICS parsing/generation
+│   ├── react-utils/      # React hooks and utilities
+│   └── schemas/          # Zod validation schemas
 ```
 
-## Standards de développement
+## Development Standards
 
-### Style de code
+### Code Style
 
-Ce projet utilise [Biome](https://biomejs.dev/) pour le linting et le formatage. Le code est automatiquement formaté à chaque commit via Husky.
+This project uses [Biome](https://biomejs.dev/) for linting and formatting. Code is automatically formatted on each commit via Husky.
 
 ```bash
-# Vérifier et corriger le style
+# Check and fix style
 bun run check
 ```
 
-### Conventions de nommage
+### Naming Conventions
 
-- **Fichiers** : `kebab-case.ts` pour les fichiers, `PascalCase.tsx` pour les composants React
-- **Variables/Fonctions** : `camelCase`
-- **Types/Interfaces** : `PascalCase`
-- **Constantes** : `SCREAMING_SNAKE_CASE`
+- **Files**: `kebab-case.ts` for files, `PascalCase.tsx` for React components
+- **Variables/Functions**: `camelCase`
+- **Types/Interfaces**: `PascalCase`
+- **Constants**: `SCREAMING_SNAKE_CASE`
 
 ### Commits
 
-Utilisez des messages de commit descriptifs :
+Use descriptive commit messages:
 
 ```
-type(scope): description courte
+type(scope): short description
 
-Corps optionnel avec plus de détails
+Optional body with more details
 
 Fixes #123
 ```
 
-Types courants :
-- `feat` : Nouvelle fonctionnalité
-- `fix` : Correction de bug
-- `docs` : Documentation
-- `style` : Formatage (pas de changement de code)
-- `refactor` : Refactoring
-- `test` : Ajout/modification de tests
-- `chore` : Maintenance
+Common types:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation
+- `style`: Formatting (no code change)
+- `refactor`: Refactoring
+- `test`: Add/modify tests
+- `chore`: Maintenance
 
 ### TypeScript
 
-- Utilisez les types explicites, évitez `any`
-- Préférez les `interface` aux `type` pour les objets
-- Utilisez les schémas Zod du package `@calendraft/schemas` pour la validation
+- Use explicit types, avoid `any`
+- Prefer `interface` over `type` for objects
+- Use Zod schemas from the `@calendraft/schemas` package for validation
 
-### React - Prévention des erreurs de hooks
+### React - Preventing Hook Errors
 
-**IMPORTANT** : Ce projet utilise plusieurs mesures pour prévenir les erreurs "Invalid hook call" et "dispatcher is null" :
+**IMPORTANT**: This project uses several measures to prevent "Invalid hook call" and "dispatcher is null" errors:
 
-1. **Configuration Vite** (`apps/web/vite.config.ts`) :
-   - `resolve.dedupe: ["react", "react-dom"]` - Force une seule instance de React
-   - `optimizeDeps.include: ["react", "react-dom"]` - Pré-bundle React
-   - `manualChunks` - Garantit que React et ReactDOM sont dans le même chunk
+1. **Vite Configuration** (`apps/web/vite.config.ts`):
+   - `resolve.dedupe: ["react", "react-dom"]` - Forces a single instance of React
+   - `optimizeDeps.include: ["react", "react-dom"]` - Pre-bundles React
+   - `manualChunks` - Ensures React and ReactDOM are in the same chunk
 
-2. **Package.json root** :
-   - `overrides` pour forcer React 19.2.0 dans tout le workspace
+2. **Root Package.json**:
+   - `overrides` to force React 19.2.0 across the entire workspace
 
-3. **Peer Dependencies** :
-   - Tous les packages avec React doivent déclarer `react` et `react-dom` en peerDependencies
+3. **Peer Dependencies**:
+   - All packages with React must declare `react` and `react-dom` in peerDependencies
 
-4. **Règles Biome** :
-   - `useHookAtTopLevel: "error"` - Empêche l'utilisation de hooks en dehors des composants
+4. **Biome Rules**:
+   - `useHookAtTopLevel: "error"` - Prevents using hooks outside components
 
-**Si vous rencontrez des erreurs de hooks** :
-- Vérifiez que vous n'avez pas plusieurs versions de React installées
-- Vérifiez que tous les imports React utilisent la même instance
-- Redémarrez le serveur de développement après avoir modifié les dépendances
+**If you encounter hook errors**:
+- Check that you don't have multiple versions of React installed
+- Check that all React imports use the same instance
+- Restart the development server after modifying dependencies
 
 ### Tests
 
 ```bash
-# Lancer les tests
+# Run tests
 cd apps/web && bun run test
 ```
 
-## Processus de Pull Request
+## Pull Request Process
 
-### 1. Créer une branche
+### 1. Create a Branch
 
 ```bash
-git checkout -b feat/ma-nouvelle-feature
-# ou
-git checkout -b fix/correction-bug
+git checkout -b feat/my-new-feature
+# or
+git checkout -b fix/bug-fix
 ```
 
-### 2. Développer
+### 2. Develop
 
-- Faites des commits atomiques et bien décrits
-- Assurez-vous que le code compile : `bun run check-types`
-- Vérifiez le style : `bun run check`
+- Make atomic and well-described commits
+- Ensure the code compiles: `bun run check-types`
+- Check style: `bun run check`
 
-### 3. Créer la PR
+### 3. Create the PR
 
-1. Poussez votre branche sur GitHub
-2. Créez une Pull Request vers `master`
-3. Remplissez le template de PR
-4. Attendez la review
+1. Push your branch to GitHub
+2. Create a Pull Request to `master`
+3. Fill out the PR template
+4. Wait for review
 
 ### 4. Review
 
-- Répondez aux commentaires de review
-- Faites les modifications demandées
-- Une fois approuvée, la PR sera mergée
+- Respond to review comments
+- Make requested changes
+- Once approved, the PR will be merged
 
-### Checklist avant PR
+### Pre-PR Checklist
 
-- [ ] Le code compile sans erreurs (`bun run check-types`)
-- [ ] Le linting passe (`bun run check`)
-- [ ] Les tests passent (si applicable)
-- [ ] La documentation est à jour (si changement d'API)
-- [ ] Le message de commit est descriptif
+- [ ] Code compiles without errors (`bun run check-types`)
+- [ ] Linting passes (`bun run check`)
+- [ ] Tests pass (if applicable)
+- [ ] Documentation is up to date (if API changes)
+- [ ] Commit message is descriptive
 
-## Signaler des bugs
+## Reporting Bugs
 
-Utilisez le [template de bug report](.github/ISSUE_TEMPLATE/bug_report.md) pour signaler un bug.
+Use the [bug report template](.github/ISSUE_TEMPLATE/bug_report.md) to report a bug.
 
-Incluez :
-- Une description claire du problème
-- Les étapes pour reproduire
-- Le comportement attendu vs actuel
-- Votre environnement (OS, navigateur, version de Bun)
-- Des captures d'écran si pertinent
+Include:
+- A clear description of the problem
+- Steps to reproduce
+- Expected vs actual behavior
+- Your environment (OS, browser, Bun version)
+- Screenshots if relevant
 
-## Proposer des fonctionnalités
+## Proposing Features
 
-Utilisez le [template de feature request](.github/ISSUE_TEMPLATE/feature_request.md) pour proposer une fonctionnalité.
+Use the [feature request template](.github/ISSUE_TEMPLATE/feature_request.md) to propose a feature.
 
-Incluez :
-- Une description claire de la feature
-- Le problème que ça résout
-- Des exemples d'utilisation
-- Des alternatives considérées
+Include:
+- A clear description of the feature
+- The problem it solves
+- Usage examples
+- Alternatives considered
 
-## Questions ?
+## Questions?
 
-Si vous avez des questions, ouvrez une issue avec le label `question`.
+If you have questions, open an issue with the `question` label.
 
 ---
 
-Merci de contribuer à Calendraft ! 🎉
+Thank you for contributing to Calendraft! 🎉
 

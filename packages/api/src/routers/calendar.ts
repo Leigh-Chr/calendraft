@@ -36,7 +36,7 @@ function validateFileSize(fileContent: string) {
 	if (fileSizeBytes > maxSizeBytes) {
 		throw new TRPCError({
 			code: "BAD_REQUEST",
-			message: `Fichier trop volumineux. Taille maximale autorisée : 5MB. Taille actuelle : ${(fileSizeBytes / 1024 / 1024).toFixed(2)}MB`,
+			message: `File too large. Maximum allowed size: 5MB. Current size: ${(fileSizeBytes / 1024 / 1024).toFixed(2)}MB`,
 		});
 	}
 }
@@ -250,7 +250,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -275,7 +275,7 @@ export const calendarRouter = router({
 					.transform((val) => val.trim()), // Max length validation with auto-trimming
 				color: z
 					.string()
-					.regex(/^#[0-9A-Fa-f]{6}$/, "Couleur invalide (format: #RRGGBB)")
+					.regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color (format: #RRGGBB)")
 					.optional()
 					.nullable(),
 			}),
@@ -307,7 +307,7 @@ export const calendarRouter = router({
 					.optional(), // Now optional for partial updates
 				color: z
 					.string()
-					.regex(/^#[0-9A-Fa-f]{6}$/, "Couleur invalide (format: #RRGGBB)")
+					.regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color (format: #RRGGBB)")
 					.optional()
 					.nullable(),
 			}),
@@ -323,7 +323,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -354,7 +354,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -380,7 +380,7 @@ export const calendarRouter = router({
 			if (parseResult.errors.length > 0 && parseResult.events.length === 0) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: `Impossible de parser le fichier ICS : ${parseResult.errors.join(", ")}`,
+					message: `Unable to parse ICS file: ${parseResult.errors.join(", ")}`,
 				});
 			}
 
@@ -472,7 +472,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -591,7 +591,7 @@ export const calendarRouter = router({
 			if (calendars.length !== input.calendarIds.length) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Un ou plusieurs calendriers non trouvés",
+					message: "One or more calendars not found",
 				});
 			}
 
@@ -655,7 +655,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -704,7 +704,7 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -715,7 +715,7 @@ export const calendarRouter = router({
 			if (parseResult.errors.length > 0 && parseResult.events.length === 0) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: `Impossible de parser le fichier ICS : ${parseResult.errors.join(", ")}`,
+					message: `Unable to parse ICS file: ${parseResult.errors.join(", ")}`,
 				});
 			}
 
@@ -784,7 +784,7 @@ export const calendarRouter = router({
 	importFromUrl: authOrAnonProcedure
 		.input(
 			z.object({
-				url: z.string().url("URL invalide"),
+				url: z.string().url("Invalid URL"),
 				name: z.string().optional(),
 			}),
 		)
@@ -808,7 +808,7 @@ export const calendarRouter = router({
 				if (!response.ok) {
 					throw new TRPCError({
 						code: "BAD_REQUEST",
-						message: `Impossible de récupérer le calendrier: ${response.status} ${response.statusText}`,
+						message: `Unable to retrieve calendar: ${response.status} ${response.statusText}`,
 					});
 				}
 
@@ -817,7 +817,7 @@ export const calendarRouter = router({
 				if (error instanceof TRPCError) throw error;
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: `Erreur lors de la récupération du calendrier: ${error instanceof Error ? error.message : "Erreur inconnue"}`,
+					message: `Error retrieving calendar: ${error instanceof Error ? error.message : "Unknown error"}`,
 				});
 			}
 
@@ -827,7 +827,7 @@ export const calendarRouter = router({
 			if (parseResult.errors.length > 0 && parseResult.events.length === 0) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: `Impossible de parser le fichier ICS: ${parseResult.errors.join(", ")}`,
+					message: `Unable to parse ICS file: ${parseResult.errors.join(", ")}`,
 				});
 			}
 
@@ -836,7 +836,7 @@ export const calendarRouter = router({
 				data: {
 					name:
 						input.name ||
-						`Calendrier importé - ${new Date().toLocaleDateString("fr-FR")}`,
+						`Imported Calendar - ${new Date().toLocaleDateString("en-US")}`,
 					userId: ctx.session?.user?.id || ctx.anonymousId || null,
 					sourceUrl: input.url,
 					lastSyncedAt: new Date(),
@@ -884,15 +884,14 @@ export const calendarRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
 			if (!calendar.sourceUrl) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message:
-						"Ce calendrier n'a pas d'URL source. Il ne peut pas être actualisé.",
+					message: "This calendar has no source URL. It cannot be refreshed.",
 				});
 			}
 
@@ -913,7 +912,7 @@ export const calendarRouter = router({
 				if (!response.ok) {
 					throw new TRPCError({
 						code: "BAD_REQUEST",
-						message: `Impossible de récupérer le calendrier: ${response.status} ${response.statusText}`,
+						message: `Unable to retrieve calendar: ${response.status} ${response.statusText}`,
 					});
 				}
 
@@ -922,7 +921,7 @@ export const calendarRouter = router({
 				if (error instanceof TRPCError) throw error;
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: `Erreur lors de la récupération du calendrier: ${error instanceof Error ? error.message : "Erreur inconnue"}`,
+					message: `Error retrieving calendar: ${error instanceof Error ? error.message : "Unknown error"}`,
 				});
 			}
 
@@ -932,7 +931,7 @@ export const calendarRouter = router({
 			if (parseResult.errors.length > 0 && parseResult.events.length === 0) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: `Impossible de parser le fichier ICS: ${parseResult.errors.join(", ")}`,
+					message: `Unable to parse ICS file: ${parseResult.errors.join(", ")}`,
 				});
 			}
 

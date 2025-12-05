@@ -8,7 +8,7 @@ import {
 	startOfMonth,
 	startOfWeek,
 } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	Calendar,
@@ -33,7 +33,7 @@ import "./calendar-month-view.css";
 
 // Configure date-fns localizer for react-big-calendar
 const locales = {
-	"fr-FR": fr,
+	"en-US": enUS,
 };
 
 const localizer = dateFnsLocalizer({
@@ -121,7 +121,7 @@ function EventWithHover({
 					<div>
 						<h4 className="font-semibold text-base">{event.title}</h4>
 						<p className="mt-1 text-muted-foreground text-sm">
-							{format(event.start, "EEEE d MMMM yyyy", { locale: fr })}
+							{format(event.start, "EEEE d MMMM yyyy", { locale: enUS })}
 						</p>
 						<p className="text-muted-foreground text-sm">
 							{format(event.start, "HH:mm")} - {format(event.end, "HH:mm")}
@@ -145,7 +145,7 @@ function EventWithHover({
 
 					{/* Quick actions hint */}
 					<p className="text-muted-foreground/60 text-xs">
-						Cliquez pour modifier • Glissez pour déplacer
+						Click to edit • Drag to move
 					</p>
 				</div>
 			</HoverCardContent>
@@ -200,13 +200,11 @@ export function CalendarView({
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				toast.success("Événement mis à jour");
+				toast.success("Event updated");
 			},
 			onError: (error: unknown) => {
 				const message =
-					error instanceof Error
-						? error.message
-						: "Erreur lors de la mise à jour";
+					error instanceof Error ? error.message : "Error during update";
 				toast.error(message);
 				// Refetch to revert optimistic update
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
@@ -344,7 +342,7 @@ export function CalendarView({
 		>
 			<DnDCalendar
 				localizer={localizer}
-				culture="fr-FR"
+				culture="en-US"
 				events={calendarEvents}
 				startAccessor="start"
 				endAccessor="end"
@@ -364,25 +362,25 @@ export function CalendarView({
 				popup
 				components={components}
 				messages={{
-					next: "Suivant",
-					previous: "Précédent",
-					today: "Aujourd'hui",
-					month: "Mois",
-					week: "Semaine",
-					day: "Jour",
-					showMore: (count) => `+${count} autres`,
-					noEventsInRange: "Aucun événement sur cette période",
+					next: "Next",
+					previous: "Previous",
+					today: "Today",
+					month: "Month",
+					week: "Week",
+					day: "Day",
+					showMore: (count) => `+${count} more`,
+					noEventsInRange: "No events in this period",
 				}}
 				formats={{
 					monthHeaderFormat: (date: Date) =>
-						format(date, "MMMM yyyy", { locale: fr }),
+						format(date, "MMMM yyyy", { locale: enUS }),
 					weekdayFormat: (date: Date) =>
-						format(date, "EEEE", { locale: fr }).slice(0, 3),
-					dayFormat: (date: Date) => format(date, "d", { locale: fr }),
+						format(date, "EEEE", { locale: enUS }).slice(0, 3),
+					dayFormat: (date: Date) => format(date, "d", { locale: enUS }),
 					dayHeaderFormat: (date: Date) =>
-						format(date, "EEEE d MMMM", { locale: fr }),
+						format(date, "EEEE, MMMM d", { locale: enUS }),
 					dayRangeHeaderFormat: ({ start, end }: { start: Date; end: Date }) =>
-						`${format(start, "d MMM", { locale: fr })} - ${format(end, "d MMM yyyy", { locale: fr })}`,
+						`${format(start, "MMM d", { locale: enUS })} - ${format(end, "MMM d, yyyy", { locale: enUS })}`,
 				}}
 			/>
 

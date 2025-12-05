@@ -1,5 +1,5 @@
 /**
- * Template Selector - Sélection rapide de modèles d'événements
+ * Template Selector - Quick selection of event templates
  */
 
 import { Sparkles } from "lucide-react";
@@ -32,7 +32,7 @@ export function TemplateSelector({
 		<div className={cn("space-y-3", className)}>
 			<div className="flex items-center gap-2 text-muted-foreground text-sm">
 				<Sparkles className="h-4 w-4" />
-				<span>Créer à partir d'un modèle</span>
+				<span>Create from a template</span>
 			</div>
 			<div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
 				{EVENT_TEMPLATES.map((template, index) => (

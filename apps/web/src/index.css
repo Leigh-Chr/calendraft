@@ -48,7 +48,7 @@ body {
 	--primary: oklch(0.55 0.22 270);
 	--primary-foreground: oklch(0.98 0.005 270);
 
-	/* Secondaire - Gris très léger */
+	/* Secondary - Very light gray */
 	--secondary: oklch(0.965 0.001 286);
 	--secondary-foreground: oklch(0.205 0.005 286);
 
@@ -284,7 +284,7 @@ body {
 		);
 }
 
-/* Aurora effect - pour les sections hero */
+/* Aurora effect - for hero sections */
 .aurora {
 	background:
 		radial-gradient(
@@ -423,7 +423,7 @@ body {
    CARDS & COMPOSANTS
    ============================================ */
 
-/* Glow effect pour les cards - amélioré */
+/* Glow effect for cards - improved */
 .card-glow {
 	transition:
 		box-shadow 0.3s ease,
@@ -446,7 +446,7 @@ body {
 		0 0 50px var(--ring) / 0.12;
 }
 
-/* Focus states pour les cards interactives */
+/* Focus states for interactive cards */
 .card-glow:focus-visible {
 	outline: none;
 	box-shadow:
@@ -454,7 +454,7 @@ body {
 		0 0 0 4px var(--ring);
 }
 
-/* Card avec bordure gradient */
+/* Card with gradient border */
 .card-gradient-border {
 	position: relative;
 	background: var(--card);
@@ -490,7 +490,7 @@ body {
 	opacity: 1;
 }
 
-/* Section divider avec gradient */
+/* Section divider with gradient */
 .section-divider {
 	position: relative;
 	border-top: 1px solid var(--border);
@@ -519,7 +519,7 @@ body {
 	letter-spacing: -0.02em;
 }
 
-/* Shimmer effect pour loading states */
+/* Shimmer effect for loading states */
 .shimmer {
 	background: linear-gradient(
 		90deg,
@@ -550,7 +550,7 @@ body {
 	}
 }
 
-/* Subtle glow pour les éléments interactifs */
+/* Subtle glow for interactive elements */
 .interactive-glow {
 	transition: box-shadow 0.3s ease;
 }
@@ -563,7 +563,7 @@ body {
 	box-shadow: 0 0 25px oklch(0.6 0.22 270 / 0.2);
 }
 
-/* Floating animation pour les éléments décoratifs */
+/* Floating animation for decorative elements */
 @keyframes float {
 	0%,
 	100% {

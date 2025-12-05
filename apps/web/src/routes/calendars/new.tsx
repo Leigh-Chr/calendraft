@@ -23,16 +23,16 @@ export const Route = createFileRoute("/calendars/new")({
 	component: NewCalendarComponent,
 	head: () => ({
 		meta: [
-			{ title: "Créer un calendrier - Calendraft" },
+			{ title: "Create a calendar - Calendraft" },
 			{
 				name: "description",
 				content:
-					"Créez un nouveau calendrier ICS vierge en quelques secondes. Ajoutez ensuite vos événements et exportez-les vers Google Calendar, Apple Calendar ou Outlook.",
+					"Create a new blank ICS calendar in seconds. Then add your events and export them to Google Calendar, Apple Calendar, or Outlook.",
 			},
-			{ property: "og:title", content: "Créer un calendrier - Calendraft" },
+			{ property: "og:title", content: "Create a calendar - Calendraft" },
 			{
 				property: "og:description",
-				content: "Créez un nouveau calendrier ICS vierge en quelques secondes.",
+				content: "Create a new blank ICS calendar in seconds.",
 			},
 			{ property: "og:url", content: `${BASE_URL}/calendars/new` },
 		],
@@ -46,13 +46,11 @@ export const Route = createFileRoute("/calendars/new")({
 			<div className="container mx-auto max-w-2xl px-4 py-10">
 				<Card className="border-destructive/50 bg-destructive/5">
 					<CardHeader>
-						<CardTitle className="text-destructive">
-							Erreur de chargement
-						</CardTitle>
+						<CardTitle className="text-destructive">Loading error</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<p className="text-muted-foreground">
-							{error?.message || "Une erreur est survenue"}
+							{error?.message || "An error occurred"}
 						</p>
 					</CardContent>
 				</Card>
@@ -71,15 +69,15 @@ function NewCalendarComponent() {
 	const handleCreate = () => {
 		// Validation
 		if (!name.trim()) {
-			toast.error("Le nom du calendrier ne peut pas être vide");
+			toast.error("Calendar name cannot be empty");
 			return;
 		}
 
 		// Check server status
 		if (isOffline) {
-			toast.error("Serveur backend inaccessible", {
+			toast.error("Backend server unavailable", {
 				description:
-					"Veuillez démarrer le serveur backend avec 'bun run dev:server'",
+					"Please start the backend server with 'bun run dev:server'",
 				duration: 10000,
 			});
 			return;
@@ -90,14 +88,14 @@ function NewCalendarComponent() {
 			{ name: name.trim(), color },
 			{
 				onSuccess: (calendar) => {
-					toast.success("Calendrier créé avec succès !");
+					toast.success("Calendar created successfully!");
 					navigate({ to: `/calendars/${calendar.id}` });
 				},
 				onError: (error) => {
 					handleTRPCError(error, {
-						fallbackTitle: "Erreur lors de la création",
+						fallbackTitle: "Error during creation",
 						fallbackDescription:
-							"Impossible de créer le calendrier. Veuillez réessayer.",
+							"Unable to create the calendar. Please try again.",
 					});
 				},
 			},
@@ -116,10 +114,10 @@ function NewCalendarComponent() {
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Plus className="h-5 w-5" />
-							Créer un nouveau calendrier
+							Create a new calendar
 						</CardTitle>
 						<CardDescription>
-							Créez un calendrier vide pour commencer à ajouter des événements
+							Create an empty calendar to start adding events
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
@@ -127,24 +125,24 @@ function NewCalendarComponent() {
 							<div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-destructive text-sm">
 								<AlertCircle className="h-4 w-4" />
 								<span>
-									Le serveur backend n'est pas accessible. Vérifiez qu'il est
-									démarré.
+									The backend server is not accessible. Check that it is
+									started.
 								</span>
 							</div>
 						)}
 						{isChecking && (
 							<div className="flex items-center gap-2 rounded-lg border p-3 text-muted-foreground text-sm">
 								<Loader2 className="h-4 w-4 animate-spin" />
-								<span>Vérification de la connexion au serveur...</span>
+								<span>Checking server connection...</span>
 							</div>
 						)}
 						<div className="space-y-2">
-							<Label htmlFor="name">Nom du calendrier</Label>
+							<Label htmlFor="name">Calendar name</Label>
 							<Input
 								id="name"
 								value={name}
 								onChange={(e) => setName(e.target.value)}
-								placeholder="Mon calendrier"
+								placeholder="My calendar"
 								onKeyDown={(e) => {
 									if (e.key === "Enter") {
 										handleCreate();
@@ -158,7 +156,7 @@ function NewCalendarComponent() {
 							value={color}
 							onChange={setColor}
 							disabled={isCreating}
-							label="Couleur du calendrier"
+							label="Calendar color"
 						/>
 
 						<div className="flex gap-2">
@@ -170,10 +168,10 @@ function NewCalendarComponent() {
 								{isCreating ? (
 									<>
 										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-										Création...
+										Creating...
 									</>
 								) : (
-									"Créer"
+									"Create"
 								)}
 							</Button>
 							<Button
@@ -181,7 +179,7 @@ function NewCalendarComponent() {
 								onClick={() => navigate({ to: "/" })}
 								disabled={isCreating}
 							>
-								Annuler
+								Cancel
 							</Button>
 						</div>
 					</CardContent>

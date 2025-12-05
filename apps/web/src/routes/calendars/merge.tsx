@@ -36,11 +36,11 @@ export const Route = createFileRoute("/calendars/merge")({
 	},
 	head: () => ({
 		meta: [
-			{ title: "Fusionner des calendriers - Calendraft" },
+			{ title: "Merge calendars - Calendraft" },
 			{
 				name: "description",
 				content:
-					"Fusionnez plusieurs calendriers ICS en un seul avec détection automatique des doublons.",
+					"Merge multiple ICS calendars into one with automatic duplicate detection.",
 			},
 			{ name: "robots", content: "noindex, nofollow" },
 		],
@@ -70,13 +70,13 @@ function MergeCalendarsComponent() {
 			onSuccess: (data) => {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
 				toast.success(
-					`Calendriers fusionnés ! ${data.mergedEvents} événement(s), ${data.removedDuplicates} doublon(s) supprimé(s).`,
+					`Calendars merged! ${data.mergedEvents} event(s), ${data.removedDuplicates} duplicate(s) removed.`,
 				);
 				navigate({ to: `/calendars/${data.calendar.id}` });
 			},
 			onError: (error: unknown) => {
 				const message =
-					error instanceof Error ? error.message : "Erreur lors de la fusion";
+					error instanceof Error ? error.message : "Error during merge";
 				toast.error(message);
 			},
 		}),
@@ -102,12 +102,12 @@ function MergeCalendarsComponent() {
 
 	const handleMerge = () => {
 		if (selectedIds.size < 2) {
-			toast.error("Sélectionnez au moins 2 calendriers à fusionner");
+			toast.error("Select at least 2 calendars to merge");
 			return;
 		}
 
 		if (!mergedName.trim()) {
-			toast.error("Veuillez entrer un nom pour le calendrier fusionné");
+			toast.error("Please enter a name for the merged calendar");
 			return;
 		}
 
@@ -130,21 +130,19 @@ function MergeCalendarsComponent() {
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Merge className="h-5 w-5" />
-							Fusionner des calendriers
+							Merge calendars
 						</CardTitle>
 						<CardDescription>
-							Combinez plusieurs calendriers en un seul
+							Combine multiple calendars into one
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="space-y-2">
-							<Label>
-								Sélectionnez les calendriers à fusionner (minimum 2)
-							</Label>
+							<Label>Select calendars to merge (minimum 2)</Label>
 							<div className="max-h-64 space-y-2 overflow-y-auto rounded-md border p-4">
 								{calendars.length === 0 ? (
 									<p className="text-muted-foreground text-sm">
-										Aucun calendrier disponible
+										No calendars available
 									</p>
 								) : (
 									calendars.map((calendar) => (
@@ -161,7 +159,7 @@ function MergeCalendarsComponent() {
 												htmlFor={calendar.id}
 												className="flex-1 cursor-pointer text-sm"
 											>
-												{calendar.name} ({calendar.eventCount} événement
+												{calendar.name} ({calendar.eventCount} event
 												{calendar.eventCount !== 1 ? "s" : ""})
 											</label>
 										</div>
@@ -171,12 +169,12 @@ function MergeCalendarsComponent() {
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="mergedName">Nom du calendrier fusionné</Label>
+							<Label htmlFor="mergedName">Merged calendar name</Label>
 							<Input
 								id="mergedName"
 								value={mergedName}
 								onChange={(e) => setMergedName(e.target.value)}
-								placeholder="Calendrier fusionné"
+								placeholder="Merged calendar"
 								disabled={mergeMutation.isPending}
 							/>
 						</div>
@@ -194,7 +192,7 @@ function MergeCalendarsComponent() {
 								htmlFor="removeDuplicates"
 								className="cursor-pointer text-sm"
 							>
-								Supprimer les doublons (même titre + mêmes horaires)
+								Remove duplicates (same title + same times)
 							</label>
 						</div>
 
@@ -211,10 +209,10 @@ function MergeCalendarsComponent() {
 								{mergeMutation.isPending ? (
 									<>
 										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-										Fusion en cours...
+										Merging...
 									</>
 								) : (
-									"Fusionner"
+									"Merge"
 								)}
 							</Button>
 							<Button
@@ -222,7 +220,7 @@ function MergeCalendarsComponent() {
 								onClick={() => navigate({ to: "/calendars" })}
 								disabled={mergeMutation.isPending}
 							>
-								Annuler
+								Cancel
 							</Button>
 						</div>
 					</CardContent>

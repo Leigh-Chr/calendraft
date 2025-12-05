@@ -31,7 +31,7 @@ export const Route = createFileRoute("/calendars/$calendarId/events/new")({
 	},
 	head: () => ({
 		meta: [
-			{ title: "Nouvel événement - Calendraft" },
+			{ title: "New event - Calendraft" },
 			{ name: "robots", content: "noindex, nofollow" },
 		],
 	}),
@@ -66,7 +66,7 @@ function NewEventComponent() {
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				toast.success("Événement créé avec succès");
+				toast.success("Event created successfully");
 				navigate({ to: `/calendars/${calendarId}` });
 			},
 			onError: (error: unknown) => {
@@ -102,7 +102,7 @@ function NewEventComponent() {
 			color?: string;
 		}) => {
 			setTemplateData(data);
-			toast.success(`Modèle "${data.title}" appliqué`);
+			toast.success(`Template "${data.title}" applied`);
 		},
 		[],
 	);
@@ -141,10 +141,10 @@ function NewEventComponent() {
 				<Breadcrumb
 					items={[
 						{
-							label: calendar?.name || "Calendrier",
+							label: calendar?.name || "Calendar",
 							href: `/calendars/${calendarId}`,
 						},
-						{ label: "Nouvel événement" },
+						{ label: "New event" },
 					]}
 				/>
 

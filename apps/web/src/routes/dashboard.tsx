@@ -18,7 +18,7 @@ export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
 	head: () => ({
 		meta: [
-			{ title: "Mon compte - Calendraft" },
+			{ title: "My account - Calendraft" },
 			{ name: "robots", content: "noindex, nofollow" },
 		],
 	}),
@@ -47,14 +47,14 @@ function UsageCard({ usage }: { usage: UsageInfo | null | undefined }) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Utilisation</CardTitle>
-				<CardDescription>Vos statistiques d'utilisation</CardDescription>
+				<CardTitle>Usage</CardTitle>
+				<CardDescription>Your usage statistics</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{usage ? (
 					<UsageDetails usage={usage} />
 				) : (
-					<p className="text-muted-foreground text-sm">Chargement...</p>
+					<p className="text-muted-foreground text-sm">Loading...</p>
 				)}
 			</CardContent>
 		</Card>
@@ -71,7 +71,7 @@ function UsageDetails({ usage }: { usage: UsageInfo }) {
 		<>
 			<div className="space-y-2">
 				<div className="flex items-center justify-between text-sm">
-					<span className="text-muted-foreground">Calendriers</span>
+					<span className="text-muted-foreground">Calendars</span>
 					<span className="font-medium">
 						{usage.calendarCount} / {usage.maxCalendars}
 					</span>
@@ -80,11 +80,9 @@ function UsageDetails({ usage }: { usage: UsageInfo }) {
 			</div>
 			<div className="space-y-2">
 				<div className="flex items-center justify-between text-sm">
-					<span className="text-muted-foreground">
-						Événements par calendrier
-					</span>
+					<span className="text-muted-foreground">Events per calendar</span>
 					<span className="font-medium">
-						Max {usage.maxEventsPerCalendar.toLocaleString("fr-FR")}
+						Max {usage.maxEventsPerCalendar.toLocaleString("en-US")}
 					</span>
 				</div>
 			</div>
@@ -103,20 +101,20 @@ function ProfileCard({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Profil</CardTitle>
-				<CardDescription>Informations de votre compte</CardDescription>
+				<CardTitle>Profile</CardTitle>
+				<CardDescription>Your account information</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-2">
 				<p className="text-sm">
-					<strong>Nom :</strong> {userName}
+					<strong>Name:</strong> {userName}
 				</p>
 				<p className="text-sm">
-					<strong>Email :</strong> {userEmail}
+					<strong>Email:</strong> {userEmail}
 				</p>
 			</CardContent>
 			<CardFooter>
 				<Button variant="outline" className="w-full" asChild>
-					<Link to="/calendars">Voir mes calendriers</Link>
+					<Link to="/calendars">View my calendars</Link>
 				</Button>
 			</CardFooter>
 		</Card>
@@ -128,18 +126,18 @@ function PlanCard() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Votre plan</CardTitle>
-				<CardDescription>Accès gratuit et généreux</CardDescription>
+				<CardTitle>Your plan</CardTitle>
+				<CardDescription>Free and generous access</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div>
 					<Badge variant="default" className="text-base">
-						Gratuit
+						Free
 					</Badge>
 				</div>
 				<p className="text-muted-foreground text-sm">
-					En tant qu'utilisateur authentifié, vous bénéficiez de limites très
-					généreuses : 100 calendriers et 2000 événements par calendrier.
+					As an authenticated user, you benefit from very generous limits: 100
+					calendars and 2000 events per calendar.
 				</p>
 			</CardContent>
 		</Card>
@@ -161,9 +159,9 @@ function RouteComponent() {
 
 			<div className="container mx-auto max-w-6xl px-4 py-10">
 				<div className="mb-8">
-					<h1 className="mb-2 font-bold text-3xl">Mon compte</h1>
+					<h1 className="mb-2 font-bold text-3xl">My account</h1>
 					<p className="text-muted-foreground">
-						Bonjour {session.data?.user.name?.split(" ")[0] || "là"} 👋
+						Hello {session.data?.user.name?.split(" ")[0] || "there"} 👋
 					</p>
 				</div>
 

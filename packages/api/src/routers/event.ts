@@ -29,7 +29,7 @@ async function verifyEventAccess(
 	if (!event) {
 		throw new TRPCError({
 			code: "NOT_FOUND",
-			message: "Événement non trouvé",
+			message: "Event not found",
 		});
 	}
 
@@ -46,7 +46,7 @@ async function verifyEventAccess(
 	if (!calendar) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
-			message: "Accès refusé",
+			message: "Access denied",
 		});
 	}
 
@@ -74,7 +74,7 @@ async function verifyCalendarAccess(
 	if (!calendar) {
 		throw new TRPCError({
 			code: "NOT_FOUND",
-			message: "Calendrier non trouvé ou accès refusé",
+			message: "Calendar not found or access denied",
 		});
 	}
 
@@ -102,7 +102,7 @@ async function validateUidChange(
 			if (existingEvent) {
 				throw new TRPCError({
 					code: "CONFLICT",
-					message: "Un événement avec cet UID existe déjà dans ce calendrier",
+					message: "An event with this UID already exists in this calendar",
 				});
 			}
 		}
@@ -130,13 +130,13 @@ async function validateRelatedToChange(
 				throw new TRPCError({
 					code: "BAD_REQUEST",
 					message:
-						"L'événement lié (RELATED-TO) n'existe pas dans ce calendrier",
+						"The related event (RELATED-TO) does not exist in this calendar",
 				});
 			}
 			if (relatedEvent.id === eventId) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: "Un événement ne peut pas être lié à lui-même",
+					message: "An event cannot be related to itself",
 				});
 			}
 		}
@@ -215,7 +215,7 @@ export const eventRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -323,7 +323,7 @@ export const eventRouter = router({
 			if (!event) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Événement non trouvé",
+					message: "Event not found",
 				});
 			}
 
@@ -341,7 +341,7 @@ export const eventRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Accès refusé",
+					message: "Access denied",
 				});
 			}
 
@@ -368,7 +368,7 @@ export const eventRouter = router({
 			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier non trouvé",
+					message: "Calendar not found",
 				});
 			}
 
@@ -386,7 +386,7 @@ export const eventRouter = router({
 				if (existingEvent) {
 					throw new TRPCError({
 						code: "CONFLICT",
-						message: "Un événement avec cet UID existe déjà dans ce calendrier",
+						message: "An event with this UID already exists in this calendar",
 					});
 				}
 			}
@@ -403,7 +403,7 @@ export const eventRouter = router({
 					throw new TRPCError({
 						code: "BAD_REQUEST",
 						message:
-							"L'événement lié (RELATED-TO) n'existe pas dans ce calendrier",
+							"The related event (RELATED-TO) does not exist in this calendar",
 					});
 				}
 			}
@@ -499,7 +499,7 @@ export const eventRouter = router({
 				throw new TRPCError({
 					code: "BAD_REQUEST",
 					message:
-						"La séquence ne peut pas être diminuée manuellement. Elle est gérée automatiquement.",
+						"Sequence cannot be manually decreased. It is managed automatically.",
 				});
 			}
 
@@ -591,7 +591,7 @@ export const eventRouter = router({
 			if (!sourceEvent) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Événement non trouvé",
+					message: "Event not found",
 				});
 			}
 
@@ -716,7 +716,7 @@ export const eventRouter = router({
 			if (events.length === 0) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Aucun événement trouvé",
+					message: "No events found",
 				});
 			}
 
@@ -746,7 +746,7 @@ export const eventRouter = router({
 			if (accessibleEventIds.length === 0) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Vous n'avez pas accès à ces événements",
+					message: "You do not have access to these events",
 				});
 			}
 
@@ -786,7 +786,7 @@ export const eventRouter = router({
 			if (!targetCalendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Calendrier de destination non trouvé",
+					message: "Destination calendar not found",
 				});
 			}
 
@@ -799,7 +799,7 @@ export const eventRouter = router({
 			if (events.length === 0) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Aucun événement trouvé",
+					message: "No events found",
 				});
 			}
 
@@ -829,7 +829,7 @@ export const eventRouter = router({
 			if (accessibleEventIds.length === 0) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Vous n'avez pas accès à ces événements",
+					message: "You do not have access to these events",
 				});
 			}
 

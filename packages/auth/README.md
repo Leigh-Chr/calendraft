@@ -1,6 +1,6 @@
 # @calendraft/auth
 
-Configuration Better-Auth pour l'authentification Calendraft.
+Better-Auth configuration for Calendraft authentication.
 
 ## Installation
 
@@ -8,12 +8,12 @@ Configuration Better-Auth pour l'authentification Calendraft.
 bun add @calendraft/auth
 ```
 
-## Usage rapide
+## Quick usage
 
 ```typescript
 import { auth } from '@calendraft/auth';
 
-// Dans un handler Hono
+// In a Hono handler
 app.on(['GET', 'POST'], '/api/auth/*', (c) => {
   return auth.handler(c.req.raw);
 });
@@ -21,43 +21,43 @@ app.on(['GET', 'POST'], '/api/auth/*', (c) => {
 
 ## Configuration
 
-### Variables d'environnement
+### Environment variables
 
 ```env
-# Obligatoire
+# Required
 BETTER_AUTH_SECRET=your-secret-key-min-32-chars
 BETTER_AUTH_URL=http://localhost:3000
 
-# CORS (pour les cookies cross-origin)
+# CORS (for cross-origin cookies)
 CORS_ORIGIN=http://localhost:3001
 ```
 
-## Fonctionnalités
+## Features
 
-### Authentification Email/Password
+### Email/Password authentication
 
 ```typescript
-// Côté client avec Better-Auth client
+// Client-side with Better-Auth client
 import { createAuthClient } from 'better-auth/client';
 
 const authClient = createAuthClient({
   baseURL: 'http://localhost:3000'
 });
 
-// Inscription
+// Sign up
 await authClient.signUp.email({
   email: 'user@example.com',
   password: 'password123',
   name: 'John Doe'
 });
 
-// Connexion
+// Sign in
 await authClient.signIn.email({
   email: 'user@example.com',
   password: 'password123'
 });
 
-// Déconnexion
+// Sign out
 await authClient.signOut();
 ```
 
@@ -66,7 +66,7 @@ await authClient.signOut();
 ```typescript
 import { auth } from '@calendraft/auth';
 
-// Obtenir la session depuis les headers
+// Get session from headers
 const session = await auth.api.getSession({
   headers: request.headers
 });
@@ -79,9 +79,9 @@ if (session) {
 
 ## Architecture
 
-### Adapter Prisma
+### Prisma adapter
 
-Utilise l'adapter Prisma pour Better-Auth avec PostgreSQL :
+Uses Prisma adapter for Better-Auth with PostgreSQL:
 
 ```typescript
 prismaAdapter(prisma, {
@@ -89,16 +89,16 @@ prismaAdapter(prisma, {
 });
 ```
 
-### Configuration des cookies
+### Cookie configuration
 
-| Environnement | SameSite | Secure | HttpOnly |
-|---------------|----------|--------|----------|
-| Développement | `lax`    | `false`| `true`   |
-| Production    | `none`   | `true` | `true`   |
+| Environment | SameSite | Secure | HttpOnly |
+|-------------|----------|--------|----------|
+| Development  | `lax`    | `false`| `true`   |
+| Production  | `none`   | `true` | `true`   |
 
 ### Trusted Origins
 
-Les origines autorisées sont configurées via `CORS_ORIGIN` :
+Allowed origins are configured via `CORS_ORIGIN`:
 
 ```typescript
 trustedOrigins: [process.env.CORS_ORIGIN || 'http://localhost:3001']
@@ -107,29 +107,29 @@ trustedOrigins: [process.env.CORS_ORIGIN || 'http://localhost:3001']
 ## Exports
 
 ```typescript
-// Instance auth configurée
+// Configured auth instance
 export { auth } from '@calendraft/auth';
 ```
 
-## Schémas de base de données
+## Database schemas
 
-Les tables suivantes sont créées par Better-Auth (voir `packages/db/prisma/schema/auth.prisma`) :
+The following tables are created by Better-Auth (see `packages/db/prisma/schema/auth.prisma`):
 
-- `user` - Utilisateurs
-- `session` - Sessions actives
-- `account` - Comptes liés (OAuth)
-- `verification` - Tokens de vérification
+- `user` - Users
+- `session` - Active sessions
+- `account` - Linked accounts (OAuth)
+- `verification` - Verification tokens
 
-## Dépendances
+## Dependencies
 
-- `better-auth` - Framework d'authentification
-- `@calendraft/db` - Client Prisma
+- `better-auth` - Authentication framework
+- `@calendraft/db` - Prisma client
 
-## Voir aussi
+## See also
 
-- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Architecture globale du projet
-- [@calendraft/db](../db/README.md) - Client Prisma et schémas
-- [SECURITY.md](../../SECURITY.md) - Politique de sécurité
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Global project architecture
+- [@calendraft/db](../db/README.md) - Prisma client and schemas
+- [SECURITY.md](../../SECURITY.md) - Security policy
 
 ## License
 

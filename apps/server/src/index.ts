@@ -46,8 +46,8 @@ Sentry.init({
 				string,
 				string | undefined
 			>;
-			headers["authorization"] = undefined;
-			headers["cookie"] = undefined;
+			headers.authorization = undefined;
+			headers.cookie = undefined;
 			headers["x-anonymous-id"] = undefined;
 		}
 

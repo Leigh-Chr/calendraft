@@ -1,6 +1,6 @@
 # @calendraft/react-utils
 
-Utilitaires React : hooks, query keys, gestion d'erreurs.
+React utilities: hooks, query keys, error handling.
 
 ## Installation
 
@@ -10,7 +10,7 @@ bun add @calendraft/react-utils
 
 **Peer deps:** `react` >= 18, `@tanstack/react-query` >= 5
 
-## Usage rapide
+## Quick usage
 
 ```typescript
 import { 
@@ -29,17 +29,17 @@ import {
 // Debounce
 const debouncedValue = useDebounce(value, 300);
 
-// localStorage avec sync
+// localStorage with sync
 const [theme, setTheme] = useLocalStorage('theme', 'light');
 
 // Responsive
 const isMobile = useIsMobile();
 const isDesktop = useIsDesktop();
 
-// Valeur précédente
+// Previous value
 const prevCount = usePrevious(count);
 
-// Check si monté (évite setState sur unmount)
+// Check if mounted (avoids setState on unmount)
 const isMounted = useMounted();
 ```
 
@@ -48,18 +48,18 @@ const isMounted = useMounted();
 ```typescript
 import { createQueryKeys } from '@calendraft/react-utils';
 
-// Factory pour créer des query keys par domaine
+// Factory to create query keys by domain
 const userKeys = createQueryKeys('user');
 // userKeys.all        => ['user']
 // userKeys.list()     => ['user', 'list']
 // userKeys.detail(id) => ['user', 'detail', id]
 
-// Usage avec React Query
+// Usage with React Query
 useQuery({ queryKey: userKeys.list() });
 useQuery({ queryKey: userKeys.detail(id) });
 ```
 
-## Gestion d'erreurs
+## Error handling
 
 ```typescript
 import { getErrorMessage, isNetworkError, logErrorInDev } from '@calendraft/react-utils';
@@ -69,7 +69,7 @@ try {
 } catch (error) {
   const message = getErrorMessage(error);
   if (isNetworkError(error)) { /* offline */ }
-  logErrorInDev(error); // Log uniquement en dev
+  logErrorInDev(error); // Log only in dev
 }
 ```
 
@@ -78,14 +78,14 @@ try {
 ```typescript
 import { cn } from '@calendraft/react-utils';
 
-// Merge Tailwind classes avec résolution de conflits
+// Merge Tailwind classes with conflict resolution
 <div className={cn('px-4', isActive && 'bg-blue-500', className)} />
 ```
 
-## Voir aussi
+## See also
 
-- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Architecture globale du projet
-- [@calendraft/core](../core/README.md) - Logique métier et types
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Global project architecture
+- [@calendraft/core](../core/README.md) - Business logic and types
 
 ## License
 

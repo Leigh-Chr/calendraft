@@ -1,38 +1,26 @@
 #!/bin/bash
-# Script pour initialiser la base de données dans Docker
+# Script to initialize the database in Docker
 
 set -e
 
-echo "🚀 Initialisation de la base de données Calendraft..."
+echo "🚀 Initializing Calendraft database..."
 
-# Vérifier que PostgreSQL est démarré
+# Check that PostgreSQL is started
 if ! docker-compose ps db | grep -q "Up"; then
-    echo "❌ PostgreSQL n'est pas démarré. Lancez d'abord: docker-compose up -d db"
+    echo "❌ PostgreSQL is not started. First run: docker-compose up -d db"
     exit 1
 fi
 
-# Attendre que PostgreSQL soit prêt
-echo "⏳ Attente que PostgreSQL soit prêt..."
+# Wait for PostgreSQL to be ready
+echo "⏳ Waiting for PostgreSQL to be ready..."
 until docker-compose exec -T db pg_isready -U ${POSTGRES_USER:-calendraft} > /dev/null 2>&1; do
     sleep 1
 done
 
-echo "✅ PostgreSQL est prêt"
+echo "✅ PostgreSQL is ready"
 
-# Exécuter db:push dans le conteneur server
-echo "📦 Initialisation du schéma..."
+# Run db:push in the server container
+echo "📦 Initializing schema..."
 docker-compose run --rm server bun run db:push
 
-echo "✅ Base de données initialisée avec succès!"
-
-
-
-
-
-
-
-
-
-
-
-
+echo "✅ Database initialized successfully!"

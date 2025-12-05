@@ -124,9 +124,7 @@ export function validateStartDate(
 	// Use Zod schema for validation
 	const result = dateStringSchema.safeParse(startDate);
 	if (!result.success) {
-		return (
-			result.error.issues[0]?.message || "La date de début n'est pas valide"
-		);
+		return result.error.issues[0]?.message || "Start date is not valid";
 	}
 
 	// Check date range if endDate is provided
@@ -137,7 +135,7 @@ export function validateStartDate(
 				(issue) => issue.path[0] === "endDate",
 			);
 			if (endDateError) {
-				return "La date de début doit être avant la date de fin";
+				return "Start date must be before end date";
 			}
 		}
 	}
@@ -155,7 +153,7 @@ export function validateEndDate(
 	// Use Zod schema for validation
 	const result = dateStringSchema.safeParse(endDate);
 	if (!result.success) {
-		return result.error.issues[0]?.message || "La date de fin n'est pas valide";
+		return result.error.issues[0]?.message || "End date is not valid";
 	}
 
 	// Check date range if startDate is provided
@@ -166,10 +164,7 @@ export function validateEndDate(
 				(issue) => issue.path[0] === "endDate",
 			);
 			if (endDateError) {
-				return (
-					endDateError.message ||
-					"La date de fin doit être après la date de début"
-				);
+				return endDateError.message || "End date must be after start date";
 			}
 		}
 	}
@@ -208,7 +203,7 @@ export function validateUID(uid: string | undefined): string | undefined {
 	if (!uid || !uid.trim()) return undefined;
 	const result = uidSchema.safeParse(uid);
 	if (!result.success) {
-		return result.error.issues[0]?.message || "Format d'UID invalide";
+		return result.error.issues[0]?.message || "Invalid UID format";
 	}
 	return undefined;
 }

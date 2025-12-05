@@ -1,5 +1,5 @@
 /**
- * Page Transition - Animations fluides entre les pages
+ * Page Transition - Smooth animations between pages
  */
 
 import { AnimatePresence, motion } from "motion/react";

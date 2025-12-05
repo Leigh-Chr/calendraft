@@ -1,10 +1,10 @@
 /**
- * FileDropZone - Zone de drag & drop améliorée pour les fichiers
- * Supporte le drag & drop et le clic pour sélectionner
+ * FileDropZone - Enhanced drag & drop zone for files
+ * Supports drag & drop and click to select
  */
 
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import {
 	AlertCircle,
 	Calendar,
@@ -114,14 +114,14 @@ interface FileValidation {
 function validateFile(file: File, maxSizeMB: number): FileValidation {
 	const extension = file.name.split(".").pop()?.toLowerCase();
 	if (extension !== "ics") {
-		return { valid: false, error: "Le fichier doit être au format .ics" };
+		return { valid: false, error: "File must be in .ics format" };
 	}
 
 	const maxSizeBytes = maxSizeMB * 1024 * 1024;
 	if (file.size > maxSizeBytes) {
 		return {
 			valid: false,
-			error: `Fichier trop volumineux (max ${maxSizeMB}MB). Taille: ${(file.size / 1024 / 1024).toFixed(2)}MB`,
+			error: `File too large (max ${maxSizeMB}MB). Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`,
 		};
 	}
 
@@ -133,7 +133,7 @@ function ProcessingContent() {
 	return (
 		<>
 			<Loader2 className="mb-4 h-12 w-12 animate-spin text-primary" />
-			<p className="font-medium text-lg">Lecture du fichier...</p>
+			<p className="font-medium text-lg">Reading file...</p>
 		</>
 	);
 }
@@ -152,8 +152,7 @@ function SuccessContent({
 			<CheckCircle2 className="mb-4 h-12 w-12 text-green-500" />
 			<p className="font-medium text-lg">{file.name}</p>
 			<p className="mt-1 text-muted-foreground text-sm">
-				{eventCount} événement{eventCount !== 1 ? "s" : ""} détecté
-				{eventCount !== 1 ? "s" : ""}
+				{eventCount} event{eventCount !== 1 ? "s" : ""} detected
 			</p>
 			<Button
 				type="button"
@@ -166,7 +165,7 @@ function SuccessContent({
 				className="mt-4"
 			>
 				<X className="mr-2 h-4 w-4" />
-				Changer de fichier
+				Change file
 			</Button>
 		</>
 	);
@@ -193,7 +192,7 @@ function ErrorContent({
 				}}
 				className="mt-4"
 			>
-				Réessayer
+				Retry
 			</Button>
 		</>
 	);
@@ -215,15 +214,11 @@ function IdleContent({
 				)}
 			/>
 			<p className="font-medium text-lg">
-				{isDragOver
-					? "Déposez votre fichier ici"
-					: "Glissez votre fichier .ics ici"}
+				{isDragOver ? "Drop your file here" : "Drag your .ics file here"}
 			</p>
-			<p className="mt-1 text-muted-foreground text-sm">
-				ou cliquez pour parcourir
-			</p>
+			<p className="mt-1 text-muted-foreground text-sm">or click to browse</p>
 			<p className="mt-4 text-muted-foreground/60 text-xs">
-				Taille maximale : {maxSizeMB}MB
+				Maximum size: {maxSizeMB}MB
 			</p>
 		</>
 	);
@@ -236,7 +231,7 @@ function EventPreviewItem({ event }: { event: ParsedEvent }) {
 			<div className="min-w-0 flex-1">
 				<p className="truncate font-medium">{event.title}</p>
 				<p className="text-muted-foreground text-sm">
-					{format(event.startDate, "EEEE d MMMM yyyy", { locale: fr })}
+					{format(event.startDate, "EEEE d MMMM yyyy", { locale: enUS })}
 					{" • "}
 					{format(event.startDate, "HH:mm")} - {format(event.endDate, "HH:mm")}
 				</p>
@@ -256,7 +251,7 @@ function EventsPreview({ events }: { events: ParsedEvent[] }) {
 	return (
 		<div className="rounded-lg border bg-card">
 			<div className="border-b px-4 py-3">
-				<h3 className="font-medium">Aperçu des événements</h3>
+				<h3 className="font-medium">Event preview</h3>
 			</div>
 			<div className="max-h-64 divide-y overflow-y-auto">
 				{events.slice(0, 10).map((event, index) => (
@@ -264,7 +259,7 @@ function EventsPreview({ events }: { events: ParsedEvent[] }) {
 				))}
 				{events.length > 10 && (
 					<div className="px-4 py-3 text-center text-muted-foreground text-sm">
-						+ {events.length - 10} autres événements
+						+ {events.length - 10} more events
 					</div>
 				)}
 			</div>
@@ -331,7 +326,7 @@ export function FileDropZone({
 			// Validate file
 			const validation = validateFile(selectedFile, maxSizeMB);
 			if (!validation.valid) {
-				setError(validation.error || "Fichier invalide");
+				setError(validation.error || "Invalid file");
 				setState("error");
 				return;
 			}
@@ -347,7 +342,7 @@ export function FileDropZone({
 				onFileSelect(selectedFile);
 				setState("success");
 			} catch {
-				setError("Erreur lors de la lecture du fichier");
+				setError("Error reading file");
 				setState("error");
 			}
 		},
@@ -476,7 +471,7 @@ export function FileDropZone({
 					onChange={handleInputChange}
 					disabled={disabled}
 					className="hidden"
-					aria-label="Sélectionner un fichier"
+					aria-label="Select a file"
 				/>
 				<DropZoneContent
 					state={state}

@@ -6,12 +6,12 @@ export const TOUR_STEP_IDS = {
 	// Header
 	HELP_BUTTON: "tour-help-button",
 
-	// Page /calendars - Liste des calendriers
+	// Page /calendars - Calendar list
 	NEW_CALENDAR_BUTTON: "tour-new-calendar",
 	IMPORT_BUTTON: "tour-import",
 	CALENDAR_GRID: "tour-calendar-grid",
 
-	// Page /calendars/$calendarId - Vue d'un calendrier
+	// Page /calendars/$calendarId - Calendar view
 	VIEW_TOGGLE: "tour-view-toggle",
 	DATE_FILTERS: "tour-date-filters",
 	SEARCH_BAR: "tour-search-bar",

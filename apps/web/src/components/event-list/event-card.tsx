@@ -64,7 +64,7 @@ export const EventCard = React.memo(function EventCard({
 	}, [onDuplicate, event.id]);
 
 	const handleCheckboxChange = useCallback(
-		(checked: boolean) => {
+		(_checked: boolean) => {
 			onToggleSelect?.(event.id);
 		},
 		[onToggleSelect, event.id],
@@ -99,7 +99,7 @@ export const EventCard = React.memo(function EventCard({
 									checked={isSelected}
 									onCheckedChange={handleCheckboxChange}
 									onClick={(e) => e.stopPropagation()}
-									aria-label={`Sélectionner ${event.title}`}
+									aria-label={`Select ${event.title}`}
 								/>
 							</div>
 						)}
@@ -123,7 +123,7 @@ export const EventCard = React.memo(function EventCard({
 												<Edit className="h-4 w-4" />
 											</Button>
 										</TooltipTrigger>
-										<TooltipContent>Modifier</TooltipContent>
+										<TooltipContent>Edit</TooltipContent>
 									</Tooltip>
 									{onDuplicate && (
 										<Tooltip>
@@ -137,7 +137,7 @@ export const EventCard = React.memo(function EventCard({
 													<Copy className="h-4 w-4" />
 												</Button>
 											</TooltipTrigger>
-											<TooltipContent>Dupliquer</TooltipContent>
+											<TooltipContent>Duplicate</TooltipContent>
 										</Tooltip>
 									)}
 									<Tooltip>
@@ -151,7 +151,7 @@ export const EventCard = React.memo(function EventCard({
 												<Trash2 className="h-4 w-4" />
 											</Button>
 										</TooltipTrigger>
-										<TooltipContent>Supprimer</TooltipContent>
+										<TooltipContent>Delete</TooltipContent>
 									</Tooltip>
 								</div>
 							</TooltipProvider>

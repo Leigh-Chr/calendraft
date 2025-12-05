@@ -15,7 +15,7 @@ import {
 	startOfMonth,
 	startOfWeek,
 } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { Calendar, CheckSquare, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -187,13 +187,11 @@ function useDeleteEvent(calendarId: string) {
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				toast.success("Événement supprimé");
+				toast.success("Event deleted");
 			},
 			onError: (error: unknown) => {
 				const message =
-					error instanceof Error
-						? error.message
-						: "Erreur lors de la suppression";
+					error instanceof Error ? error.message : "Error during deletion";
 				toast.error(message);
 			},
 		}),
@@ -201,7 +199,7 @@ function useDeleteEvent(calendarId: string) {
 
 	const handleDelete = useCallback(
 		(id: string) => {
-			if (confirm("Êtes-vous sûr de vouloir supprimer cet événement ?")) {
+			if (confirm("Are you sure you want to delete this event?")) {
 				mutation.mutate({ id });
 			}
 		},
@@ -221,13 +219,11 @@ function useDuplicateEvent(calendarId: string) {
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				toast.success("Événement dupliqué");
+				toast.success("Event duplicated");
 			},
 			onError: (error: unknown) => {
 				const message =
-					error instanceof Error
-						? error.message
-						: "Erreur lors de la duplication";
+					error instanceof Error ? error.message : "Error during duplication";
 				toast.error(message);
 			},
 		}),
@@ -254,8 +250,8 @@ function getDateRangeForFilter(
 			return { dateFrom: startOfDay(now), dateTo: endOfDay(now) };
 		case "week":
 			return {
-				dateFrom: startOfWeek(now, { locale: fr }),
-				dateTo: endOfWeek(now, { locale: fr }),
+				dateFrom: startOfWeek(now, { locale: enUS }),
+				dateTo: endOfWeek(now, { locale: enUS }),
 			};
 		case "month":
 			return { dateFrom: startOfMonth(now), dateTo: endOfMonth(now) };
@@ -358,7 +354,7 @@ export function EventListView({
 						className="ml-auto"
 					>
 						<CheckSquare className="mr-2 h-4 w-4" />
-						Sélectionner
+						Select
 					</Button>
 				)}
 			</div>
@@ -423,8 +419,8 @@ function DateGroupHeader({
 	date: Date;
 	eventCount: number;
 }) {
-	const isDatePast = isPast(date) && label !== "Aujourd'hui";
-	const isToday = label === "Aujourd'hui";
+	const isDatePast = isPast(date) && label !== "Today";
+	const isToday = label === "Today";
 
 	return (
 		<motion.div
@@ -458,13 +454,13 @@ function DateGroupHeader({
 				</span>
 				{!isToday && (
 					<span className="text-muted-foreground/60 text-xs">
-						{format(date, "d MMMM", { locale: fr })}
+						{format(date, "d MMMM", { locale: enUS })}
 					</span>
 				)}
 			</div>
 			<div className="h-px flex-1 bg-border" />
 			<span className="text-muted-foreground/60 text-xs">
-				{eventCount} événement{eventCount > 1 ? "s" : ""}
+				{eventCount} event{eventCount > 1 ? "s" : ""}
 			</span>
 		</motion.div>
 	);
@@ -504,7 +500,7 @@ function EventsList({
 		return (
 			<Card>
 				<CardContent className="py-10 text-center">
-					<p className="text-muted-foreground">Aucun événement trouvé</p>
+					<p className="text-muted-foreground">No events found</p>
 				</CardContent>
 			</Card>
 		);
@@ -554,10 +550,10 @@ function LoadMoreButton({
 		<div className="mt-4 flex justify-center">
 			<Button variant="outline" onClick={onClick} disabled={isLoading}>
 				{isLoading ? (
-					<>Chargement...</>
+					<>Loading...</>
 				) : (
 					<>
-						Charger plus
+						Load more
 						<ChevronRight className="ml-2 h-4 w-4" />
 					</>
 				)}

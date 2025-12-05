@@ -36,10 +36,10 @@ function buildCalendarsListSteps(): TourStep[] {
 		{
 			content: (
 				<div className="space-y-2">
-					<h3 className="font-semibold text-base">➕ Créer un calendrier</h3>
+					<h3 className="font-semibold text-base">➕ Create a calendar</h3>
 					<p className="text-muted-foreground text-sm leading-relaxed">
-						Cliquez ici pour créer un nouveau calendrier vide. Vous pourrez
-						ensuite y ajouter vos événements.
+						Click here to create a new empty calendar. You can then add your
+						events to it.
 					</p>
 				</div>
 			),
@@ -49,11 +49,10 @@ function buildCalendarsListSteps(): TourStep[] {
 		{
 			content: (
 				<div className="space-y-2">
-					<h3 className="font-semibold text-base">📥 Importer un fichier</h3>
+					<h3 className="font-semibold text-base">📥 Import a file</h3>
 					<p className="text-muted-foreground text-sm leading-relaxed">
-						Importez un fichier <code className="text-primary">.ics</code>{" "}
-						depuis Google Calendar, Apple Calendar, Outlook ou toute autre
-						application.
+						Import a <code className="text-primary">.ics</code> file from Google
+						Calendar, Apple Calendar, Outlook, or any other application.
 					</p>
 				</div>
 			),
@@ -71,13 +70,12 @@ function buildCalendarViewSteps(): TourStep[] {
 		{
 			content: (
 				<div className="space-y-2">
-					<h3 className="font-semibold text-base">📝 Ajouter un événement</h3>
+					<h3 className="font-semibold text-base">📝 Add an event</h3>
 					<p className="text-muted-foreground text-sm leading-relaxed">
-						Créez un nouvel événement avec titre, dates, lieu et description.
+						Create a new event with title, dates, location, and description.
 					</p>
 					<p className="text-muted-foreground text-xs">
-						💡 Vous pouvez aussi cliquer directement sur un créneau dans la vue
-						calendrier !
+						💡 You can also click directly on a time slot in the calendar view!
 					</p>
 				</div>
 			),
@@ -87,11 +85,11 @@ function buildCalendarViewSteps(): TourStep[] {
 		{
 			content: (
 				<div className="space-y-2">
-					<h3 className="font-semibold text-base">🔀 Changer de vue</h3>
+					<h3 className="font-semibold text-base">🔀 Change view</h3>
 					<p className="text-muted-foreground text-sm leading-relaxed">
-						Basculez entre la vue <strong>Liste</strong> pour voir tous vos
-						événements, et la vue <strong>Calendrier</strong> pour une
-						visualisation mensuelle.
+						Switch between the <strong>List</strong> view to see all your
+						events, and the <strong>Calendar</strong> view for a monthly
+						visualization.
 					</p>
 				</div>
 			),
@@ -101,11 +99,11 @@ function buildCalendarViewSteps(): TourStep[] {
 		{
 			content: (
 				<div className="space-y-2">
-					<h3 className="font-semibold text-base">📅 Filtrer par période</h3>
+					<h3 className="font-semibold text-base">📅 Filter by period</h3>
 					<p className="text-muted-foreground text-sm leading-relaxed">
-						Filtrez rapidement vos événements : <strong>Aujourd'hui</strong>,{" "}
-						<strong>Cette semaine</strong>, <strong>Ce mois</strong> ou{" "}
-						<strong>Tout</strong>.
+						Quickly filter your events: <strong>Today</strong>,{" "}
+						<strong>This week</strong>, <strong>This month</strong>, or{" "}
+						<strong>All</strong>.
 					</p>
 				</div>
 			),
@@ -115,9 +113,9 @@ function buildCalendarViewSteps(): TourStep[] {
 		{
 			content: (
 				<div className="space-y-2">
-					<h3 className="font-semibold text-base">🔍 Rechercher et trier</h3>
+					<h3 className="font-semibold text-base">🔍 Search and sort</h3>
 					<p className="text-muted-foreground text-sm leading-relaxed">
-						Recherchez un événement par mot-clé ou triez par date, nom ou durée.
+						Search for an event by keyword or sort by date, name, or duration.
 					</p>
 				</div>
 			),
@@ -127,15 +125,15 @@ function buildCalendarViewSteps(): TourStep[] {
 		{
 			content: (
 				<div className="space-y-2">
-					<h3 className="font-semibold text-base">⚡ Actions rapides</h3>
+					<h3 className="font-semibold text-base">⚡ Quick actions</h3>
 					<p className="text-muted-foreground text-sm leading-relaxed">
-						Depuis ce menu, vous pouvez :
+						From this menu, you can:
 					</p>
 					<ul className="mt-1 space-y-0.5 text-muted-foreground text-sm">
-						<li>📥 Importer des événements</li>
-						<li>✨ Nettoyer les doublons</li>
-						<li>🔀 Fusionner avec d'autres calendriers</li>
-						<li>📤 Exporter au format .ics</li>
+						<li>📥 Import events</li>
+						<li>✨ Clean duplicates</li>
+						<li>🔀 Merge with other calendars</li>
+						<li>📤 Export as .ics</li>
 					</ul>
 				</div>
 			),
@@ -149,12 +147,12 @@ function buildCalendarViewSteps(): TourStep[] {
  * Build steps based on the current page
  */
 function buildStepsForPage(pathname: string): TourStep[] {
-	// Page calendriers (/calendars)
+	// Calendars page (/calendars)
 	if (pathname === "/calendars") {
 		return buildCalendarsListSteps();
 	}
 
-	// Page vue calendrier (/calendars/$calendarId)
+	// Calendar view page (/calendars/$calendarId)
 	if (pathname.match(/^\/calendars\/[^/]+$/)) {
 		return buildCalendarViewSteps();
 	}

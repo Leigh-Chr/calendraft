@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import {
 	Calendar as CalendarIcon,
 	Download,
@@ -135,11 +135,11 @@ export function ExportCalendarDialog({
 			document.body.removeChild(a);
 			URL.revokeObjectURL(url);
 
-			toast.success("Calendrier exporté avec succès");
+			toast.success("Calendar exported successfully");
 			onOpenChange(false);
 		} catch (error) {
 			const message =
-				error instanceof Error ? error.message : "Erreur lors de l'export";
+				error instanceof Error ? error.message : "Error during export";
 			toast.error(message);
 		} finally {
 			setIsExporting(false);
@@ -164,11 +164,11 @@ export function ExportCalendarDialog({
 			document.body.removeChild(a);
 			URL.revokeObjectURL(url);
 
-			toast.success("Calendrier exporté avec succès");
+			toast.success("Calendar exported successfully");
 			onOpenChange(false);
 		} catch (error) {
 			const message =
-				error instanceof Error ? error.message : "Erreur lors de l'export";
+				error instanceof Error ? error.message : "Error during export";
 			toast.error(message);
 		} finally {
 			setIsExporting(false);
@@ -191,11 +191,11 @@ export function ExportCalendarDialog({
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Download className="h-5 w-5" />
-						Exporter « {calendarName} »
+						Export « {calendarName} »
 					</DialogTitle>
 					<DialogDescription>
-						Exportez tout le calendrier ou appliquez des filtres pour n'exporter
-						qu'une partie des événements.
+						Export the entire calendar or apply filters to export only a portion
+						of the events.
 					</DialogDescription>
 				</DialogHeader>
 
@@ -212,12 +212,12 @@ export function ExportCalendarDialog({
 						) : (
 							<Download className="mr-2 h-4 w-4" />
 						)}
-						Exporter tout le calendrier
+						Export entire calendar
 					</Button>
 
 					<div className="flex items-center gap-2">
 						<div className="h-px flex-1 bg-border" />
-						<span className="text-muted-foreground text-xs">ou</span>
+						<span className="text-muted-foreground text-xs">or</span>
 						<div className="h-px flex-1 bg-border" />
 					</div>
 
@@ -226,7 +226,7 @@ export function ExportCalendarDialog({
 						<div className="flex items-center justify-between">
 							<Label className="flex items-center gap-2 font-medium text-sm">
 								<Filter className="h-4 w-4" />
-								Filtres
+								Filters
 							</Label>
 							{hasFilters && (
 								<Button
@@ -235,7 +235,7 @@ export function ExportCalendarDialog({
 									onClick={clearFilters}
 									className="h-auto px-2 py-1 text-xs"
 								>
-									Effacer les filtres
+									Clear filters
 								</Button>
 							)}
 						</div>
@@ -248,14 +248,14 @@ export function ExportCalendarDialog({
 								onCheckedChange={(checked) => setFutureOnly(checked === true)}
 							/>
 							<Label htmlFor="future-only" className="text-sm">
-								Événements futurs uniquement
+								Future events only
 							</Label>
 						</div>
 
 						{/* Date range picker */}
 						{!futureOnly && (
 							<div className="space-y-2">
-								<Label className="text-sm">Période</Label>
+								<Label className="text-sm">Period</Label>
 								<div className="flex gap-2">
 									<Popover>
 										<PopoverTrigger asChild>
@@ -268,8 +268,10 @@ export function ExportCalendarDialog({
 											>
 												<CalendarIcon className="mr-2 h-4 w-4" />
 												{dateRange.from
-													? format(dateRange.from, "d MMM yyyy", { locale: fr })
-													: "Date début"}
+													? format(dateRange.from, "d MMM yyyy", {
+															locale: enUS,
+														})
+													: "Start date"}
 											</Button>
 										</PopoverTrigger>
 										<PopoverContent className="w-auto p-0" align="start">
@@ -279,7 +281,7 @@ export function ExportCalendarDialog({
 												onSelect={(date) =>
 													setDateRange((prev) => ({ ...prev, from: date }))
 												}
-												locale={fr}
+												locale={enUS}
 											/>
 										</PopoverContent>
 									</Popover>
@@ -294,8 +296,8 @@ export function ExportCalendarDialog({
 											>
 												<CalendarIcon className="mr-2 h-4 w-4" />
 												{dateRange.to
-													? format(dateRange.to, "d MMM yyyy", { locale: fr })
-													: "Date fin"}
+													? format(dateRange.to, "d MMM yyyy", { locale: enUS })
+													: "End date"}
 											</Button>
 										</PopoverTrigger>
 										<PopoverContent className="w-auto p-0" align="start">
@@ -305,7 +307,7 @@ export function ExportCalendarDialog({
 												onSelect={(date) =>
 													setDateRange((prev) => ({ ...prev, to: date }))
 												}
-												locale={fr}
+												locale={enUS}
 											/>
 										</PopoverContent>
 									</Popover>
@@ -316,7 +318,7 @@ export function ExportCalendarDialog({
 						{/* Categories filter */}
 						{availableCategories.length > 0 && (
 							<div className="space-y-2">
-								<Label className="text-sm">Catégories</Label>
+								<Label className="text-sm">Categories</Label>
 								<div className="flex flex-wrap gap-2">
 									{availableCategories.map((category) => (
 										<Badge
@@ -333,7 +335,8 @@ export function ExportCalendarDialog({
 								</div>
 								{selectedCategories.size > 0 && (
 									<p className="text-muted-foreground text-xs">
-										{selectedCategories.size} catégorie(s) sélectionnée(s)
+										{selectedCategories.size} categor
+										{selectedCategories.size !== 1 ? "ies" : "y"} selected
 									</p>
 								)}
 							</div>
@@ -343,7 +346,7 @@ export function ExportCalendarDialog({
 
 				<DialogFooter>
 					<Button variant="outline" onClick={() => onOpenChange(false)}>
-						Annuler
+						Cancel
 					</Button>
 					<Button onClick={handleExport} disabled={isExporting || !hasFilters}>
 						{isExporting ? (
@@ -354,7 +357,7 @@ export function ExportCalendarDialog({
 						) : (
 							<>
 								<Download className="mr-2 h-4 w-4" />
-								Exporter avec filtres
+								Export with filters
 							</>
 						)}
 					</Button>

@@ -1,5 +1,5 @@
 import { addDays, addMonths, addWeeks, addYears, format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { AlertCircle, CalendarIcon, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -43,15 +43,15 @@ interface RecurrenceBuilderProps {
 
 // Presets for quick selection
 const RECURRENCE_PRESETS = [
-	{ label: "Quotidien", rrule: "FREQ=DAILY", icon: "📅" },
-	{ label: "Chaque semaine", rrule: "FREQ=WEEKLY", icon: "📆" },
-	{ label: "Chaque mois", rrule: "FREQ=MONTHLY", icon: "🗓️" },
+	{ label: "Daily", rrule: "FREQ=DAILY", icon: "📅" },
+	{ label: "Weekly", rrule: "FREQ=WEEKLY", icon: "📆" },
+	{ label: "Monthly", rrule: "FREQ=MONTHLY", icon: "🗓️" },
 	{
-		label: "Jours ouvrés",
+		label: "Weekdays",
 		rrule: "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
 		icon: "💼",
 	},
-	{ label: "Chaque année", rrule: "FREQ=YEARLY", icon: "🎂" },
+	{ label: "Yearly", rrule: "FREQ=YEARLY", icon: "🎂" },
 ] as const;
 
 // Day code to number mapping
@@ -268,28 +268,28 @@ function generateRRULE(config: RecurrenceConfig): string {
 }
 
 const DAYS_OF_WEEK = [
-	{ value: "MO", label: "Lundi" },
-	{ value: "TU", label: "Mardi" },
-	{ value: "WE", label: "Mercredi" },
-	{ value: "TH", label: "Jeudi" },
-	{ value: "FR", label: "Vendredi" },
-	{ value: "SA", label: "Samedi" },
-	{ value: "SU", label: "Dimanche" },
+	{ value: "MO", label: "Monday" },
+	{ value: "TU", label: "Tuesday" },
+	{ value: "WE", label: "Wednesday" },
+	{ value: "TH", label: "Thursday" },
+	{ value: "FR", label: "Friday" },
+	{ value: "SA", label: "Saturday" },
+	{ value: "SU", label: "Sunday" },
 ];
 
 const MONTHS = [
-	{ value: 1, label: "Janvier" },
-	{ value: 2, label: "Février" },
-	{ value: 3, label: "Mars" },
-	{ value: 4, label: "Avril" },
-	{ value: 5, label: "Mai" },
-	{ value: 6, label: "Juin" },
-	{ value: 7, label: "Juillet" },
-	{ value: 8, label: "Août" },
-	{ value: 9, label: "Septembre" },
-	{ value: 10, label: "Octobre" },
-	{ value: 11, label: "Novembre" },
-	{ value: 12, label: "Décembre" },
+	{ value: 1, label: "January" },
+	{ value: 2, label: "February" },
+	{ value: 3, label: "March" },
+	{ value: 4, label: "April" },
+	{ value: 5, label: "May" },
+	{ value: 6, label: "June" },
+	{ value: 7, label: "July" },
+	{ value: 8, label: "August" },
+	{ value: 9, label: "September" },
+	{ value: 10, label: "October" },
+	{ value: 11, label: "November" },
+	{ value: 12, label: "December" },
 ];
 
 // Supported RRULE keys that can be represented in the simple UI
@@ -305,16 +305,16 @@ const SUPPORTED_RRULE_KEYS = [
 
 // Get interval label prefix
 function getIntervalPrefix(frequency: string | null): string {
-	return frequency === "WEEKLY" ? "Toutes les" : "Tous les";
+	return frequency === "WEEKLY" ? "Every" : "Every";
 }
 
 // Get interval unit label
 function getIntervalUnit(frequency: string | null, interval: number): string {
 	const units: Record<string, string> = {
-		DAILY: `jour${interval > 1 ? "s" : ""}`,
-		WEEKLY: `semaine${interval > 1 ? "s" : ""}`,
-		MONTHLY: "mois",
-		YEARLY: `an${interval > 1 ? "s" : ""}`,
+		DAILY: `day${interval > 1 ? "s" : ""}`,
+		WEEKLY: `week${interval > 1 ? "s" : ""}`,
+		MONTHLY: `month${interval > 1 ? "s" : ""}`,
+		YEARLY: `year${interval > 1 ? "s" : ""}`,
 	};
 	return frequency ? units[frequency] || "" : "";
 }
@@ -325,10 +325,10 @@ function getIntervalDescription(
 	interval: number,
 ): string {
 	const descriptions: Record<string, string> = {
-		DAILY: `L'événement se répétera tous les ${interval} jour${interval > 1 ? "s" : ""}.`,
-		WEEKLY: `L'événement se répétera toutes les ${interval} semaine${interval > 1 ? "s" : ""}.`,
-		MONTHLY: `L'événement se répétera tous les ${interval} mois.`,
-		YEARLY: `L'événement se répétera tous les ${interval} an${interval > 1 ? "s" : ""}.`,
+		DAILY: `The event will repeat every ${interval} day${interval > 1 ? "s" : ""}.`,
+		WEEKLY: `The event will repeat every ${interval} week${interval > 1 ? "s" : ""}.`,
+		MONTHLY: `The event will repeat every ${interval} month${interval > 1 ? "s" : ""}.`,
+		YEARLY: `The event will repeat every ${interval} year${interval > 1 ? "s" : ""}.`,
 	};
 	return frequency ? descriptions[frequency] || "" : "";
 }
@@ -363,7 +363,7 @@ function QuickPresetsSection({
 		<div className="space-y-2">
 			<div className="flex items-center gap-2 text-muted-foreground text-sm">
 				<Sparkles className="h-4 w-4" />
-				<span>Récurrences rapides</span>
+				<span>Quick recurrences</span>
 			</div>
 			<div className="flex flex-wrap gap-2">
 				{RECURRENCE_PRESETS.map((preset) => (
@@ -399,12 +399,12 @@ function ComplexRuleWarning({
 				<AlertCircle className="mt-0.5 h-4 w-4 text-orange-600 dark:text-orange-400" />
 				<div className="flex-1">
 					<p className="font-medium text-orange-800 text-sm dark:text-orange-200">
-						Règle de récurrence complexe détectée
+						Complex recurrence rule detected
 					</p>
 					<p className="mt-1 text-orange-700 text-xs dark:text-orange-300">
-						Cette règle de récurrence contient des paramètres avancés qui ne
-						peuvent pas être modifiés via l'interface simple. Pour la modifier,
-						vous devrez la supprimer et en créer une nouvelle.
+						This recurrence rule contains advanced parameters that cannot be
+						modified via the simple interface. To modify it, you will need to
+						delete it and create a new one.
 					</p>
 					<Button
 						type="button"
@@ -414,7 +414,7 @@ function ComplexRuleWarning({
 						disabled={disabled}
 						className="mt-2"
 					>
-						Supprimer cette règle
+						Remove this rule
 					</Button>
 				</div>
 			</div>
@@ -425,12 +425,12 @@ function ComplexRuleWarning({
 // Get byDay description
 function getByDayDescription(byDay: string[] | undefined): string {
 	if (!byDay || byDay.length === 0) {
-		return "Sélectionnez au moins un jour. Si aucun jour n'est sélectionné, l'événement se répétera le jour de la semaine de la date de début.";
+		return "Select at least one day. If no day is selected, the event will repeat on the weekday of the start date.";
 	}
 	const dayLabels = byDay.map(
 		(d) => DAYS_OF_WEEK.find((day) => day.value === d)?.label,
 	);
-	return `L'événement se répétera chaque ${dayLabels.join(", ")}.`;
+	return `The event will repeat every ${dayLabels.join(", ")}.`;
 }
 
 // Get end type description
@@ -440,16 +440,16 @@ function getEndTypeDescription(
 	until: Date | undefined,
 ): string {
 	if (endType === "never") {
-		return "L'événement se répétera indéfiniment.";
+		return "The event will repeat indefinitely.";
 	}
 	if (endType === "count" && count) {
-		return `L'événement se répétera ${count} fois au total.`;
+		return `The event will repeat ${count} times in total.`;
 	}
 	if (endType === "until" && until) {
-		return `L'événement se répétera jusqu'au ${format(until, "PPP", { locale: fr })}.`;
+		return `The event will repeat until ${format(until, "PPP", { locale: enUS })}.`;
 	}
 	if (endType === "until" && !until) {
-		return "Sélectionnez une date de fin pour la récurrence.";
+		return "Select an end date for the recurrence.";
 	}
 	return "";
 }
@@ -466,7 +466,7 @@ function IntervalInput({
 }) {
 	return (
 		<div className="space-y-2">
-			<Label htmlFor="recurrence-interval">Répéter</Label>
+			<Label htmlFor="recurrence-interval">Repeat</Label>
 			<div className="flex items-center gap-2">
 				<span className="whitespace-nowrap text-muted-foreground text-sm">
 					{getIntervalPrefix(config.frequency)}
@@ -507,7 +507,7 @@ function WeeklyDaysSelector({
 }) {
 	return (
 		<div className="space-y-2">
-			<Label>Quels jours de la semaine ?</Label>
+			<Label>Which days of the week?</Label>
 			<div className="grid grid-cols-2 gap-2">
 				{DAYS_OF_WEEK.map((day) => (
 					<div key={day.value} className="flex items-center space-x-2">
@@ -545,7 +545,7 @@ function MonthlyDaySelector({
 }) {
 	return (
 		<div className="space-y-2">
-			<Label htmlFor="recurrence-month-day">Quel jour du mois ?</Label>
+			<Label htmlFor="recurrence-month-day">Which day of the month?</Label>
 			<Select
 				value={byMonthDay?.toString() || "none"}
 				onValueChange={(value) =>
@@ -557,21 +557,21 @@ function MonthlyDaySelector({
 				disabled={disabled}
 			>
 				<SelectTrigger id="recurrence-month-day">
-					<SelectValue placeholder="Sélectionner un jour" />
+					<SelectValue placeholder="Select a day" />
 				</SelectTrigger>
 				<SelectContent>
-					<SelectItem value="none">Même jour que la date de début</SelectItem>
+					<SelectItem value="none">Same day as start date</SelectItem>
 					{Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
 						<SelectItem key={day} value={day.toString()}>
-							Jour {day}
+							Day {day}
 						</SelectItem>
 					))}
 				</SelectContent>
 			</Select>
 			<p className="text-muted-foreground text-xs">
 				{byMonthDay
-					? `L'événement se répétera le ${byMonthDay} de chaque mois.`
-					: "L'événement se répétera le même jour du mois que la date de début."}
+					? `The event will repeat on the ${byMonthDay} of each month.`
+					: "The event will repeat on the same day of the month as the start date."}
 			</p>
 		</div>
 	);
@@ -593,7 +593,7 @@ function YearlyMonthsSelector({
 
 	return (
 		<div className="space-y-2">
-			<Label>Quels mois ?</Label>
+			<Label>Which months?</Label>
 			<div className="grid grid-cols-3 gap-2">
 				{MONTHS.map((month) => (
 					<div key={month.value} className="flex items-center space-x-2">
@@ -614,8 +614,8 @@ function YearlyMonthsSelector({
 			</div>
 			<p className="text-muted-foreground text-xs">
 				{byMonth && byMonth.length > 0
-					? `L'événement se répétera en ${monthLabels}.`
-					: "Sélectionnez au moins un mois. Si aucun mois n'est sélectionné, l'événement se répétera le même mois que la date de début."}
+					? `The event will repeat in ${monthLabels}.`
+					: "Select at least one month. If no month is selected, the event will repeat in the same month as the start date."}
 			</p>
 		</div>
 	);
@@ -633,7 +633,7 @@ function EndTypeSelector({
 }) {
 	return (
 		<div className="space-y-2">
-			<Label>Quand se termine la récurrence ?</Label>
+			<Label>When does the recurrence end?</Label>
 			<RadioGroup
 				value={config.endType}
 				onValueChange={(value: "never" | "count" | "until") =>
@@ -644,13 +644,13 @@ function EndTypeSelector({
 				<div className="flex items-center space-x-2">
 					<RadioGroupItem value="never" id="end-never" />
 					<Label htmlFor="end-never" className="cursor-pointer font-normal">
-						Jamais (répétition infinie)
+						Never (infinite repetition)
 					</Label>
 				</div>
 				<div className="flex flex-wrap items-center gap-2 space-x-2">
 					<RadioGroupItem value="count" id="end-count" />
 					<Label htmlFor="end-count" className="cursor-pointer font-normal">
-						Après
+						After
 					</Label>
 					{config.endType === "count" && (
 						<>
@@ -674,7 +674,7 @@ function EndTypeSelector({
 				<div className="flex flex-wrap items-center gap-2 space-x-2">
 					<RadioGroupItem value="until" id="end-until" />
 					<Label htmlFor="end-until" className="cursor-pointer font-normal">
-						Jusqu'au
+						Until
 					</Label>
 					{config.endType === "until" && (
 						<Popover>
@@ -682,8 +682,8 @@ function EndTypeSelector({
 								<Button type="button" variant="outline" disabled={disabled}>
 									<CalendarIcon className="mr-2 h-4 w-4" />
 									{config.until
-										? format(config.until, "PPP", { locale: fr })
-										: "Sélectionner une date"}
+										? format(config.until, "PPP", { locale: enUS })
+										: "Select a date"}
 								</Button>
 							</PopoverTrigger>
 							<PopoverContent className="w-auto p-0" align="start">
@@ -720,7 +720,7 @@ function OccurrencesPreview({
 		<div className="rounded-lg border bg-muted/30 p-4">
 			<p className="mb-3 flex items-center gap-2 font-medium text-sm">
 				<CalendarIcon className="h-4 w-4 text-primary" />
-				Prochaines occurrences
+				Next occurrences
 			</p>
 			<div className="flex flex-wrap gap-2">
 				{occurrences.map((date, index) => (
@@ -732,14 +732,12 @@ function OccurrencesPreview({
 							index === 0 && "bg-primary/10 text-primary",
 						)}
 					>
-						{format(date, "EEE d MMM", { locale: fr })}
+						{format(date, "EEE d MMM", { locale: enUS })}
 					</Badge>
 				))}
 			</div>
 			{showInfiniteHint && (
-				<p className="mt-2 text-muted-foreground text-xs">
-					Et ainsi de suite...
-				</p>
+				<p className="mt-2 text-muted-foreground text-xs">And so on...</p>
 			)}
 		</div>
 	);
@@ -854,7 +852,7 @@ export function RecurrenceBuilder({
 
 			{/* Fréquence */}
 			<div className="space-y-2">
-				<Label>Fréquence</Label>
+				<Label>Frequency</Label>
 				<Select
 					value={config.frequency || "none"}
 					onValueChange={(value) =>
@@ -871,14 +869,14 @@ export function RecurrenceBuilder({
 					disabled={disabled}
 				>
 					<SelectTrigger>
-						<SelectValue placeholder="Sélectionner une fréquence" />
+						<SelectValue placeholder="Select a frequency" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="none">Aucune récurrence</SelectItem>
-						<SelectItem value="DAILY">Quotidien</SelectItem>
-						<SelectItem value="WEEKLY">Hebdomadaire</SelectItem>
-						<SelectItem value="MONTHLY">Mensuel</SelectItem>
-						<SelectItem value="YEARLY">Annuel</SelectItem>
+						<SelectItem value="none">No recurrence</SelectItem>
+						<SelectItem value="DAILY">Daily</SelectItem>
+						<SelectItem value="WEEKLY">Weekly</SelectItem>
+						<SelectItem value="MONTHLY">Monthly</SelectItem>
+						<SelectItem value="YEARLY">Yearly</SelectItem>
 					</SelectContent>
 				</Select>
 			</div>

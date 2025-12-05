@@ -48,16 +48,16 @@ function ColorPickerPopover({
 	const [open, setOpen] = useState(false);
 
 	const colors = [
-		{ name: "Rouge", value: "#EF4444" },
+		{ name: "Red", value: "#EF4444" },
 		{ name: "Orange", value: "#F97316" },
-		{ name: "Jaune", value: "#EAB308" },
-		{ name: "Vert", value: "#22C55E" },
-		{ name: "Bleu", value: "#3B82F6" },
+		{ name: "Yellow", value: "#EAB308" },
+		{ name: "Green", value: "#22C55E" },
+		{ name: "Blue", value: "#3B82F6" },
 		{ name: "Indigo", value: "#6366F1" },
-		{ name: "Violet", value: "#8B5CF6" },
-		{ name: "Rose", value: "#EC4899" },
-		{ name: "Gris", value: "#6B7280" },
-		{ name: "Noir", value: "#000000" },
+		{ name: "Purple", value: "#8B5CF6" },
+		{ name: "Pink", value: "#EC4899" },
+		{ name: "Gray", value: "#6B7280" },
+		{ name: "Black", value: "#000000" },
 	];
 
 	return (
@@ -68,15 +68,15 @@ function ColorPickerPopover({
 					variant="outline"
 					className="w-auto"
 					disabled={disabled}
-					aria-label="Sélectionner une couleur prédéfinie"
+					aria-label="Select a predefined color"
 				>
 					<Palette className="mr-2 h-4 w-4" />
-					Couleurs
+					Colors
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-64">
 				<div className="space-y-2">
-					<Label className="font-medium text-xs">Couleurs prédéfinies</Label>
+					<Label className="font-medium text-xs">Predefined colors</Label>
 					<div className="grid grid-cols-6 gap-2">
 						{colors.map((color) => (
 							<button
@@ -121,10 +121,10 @@ export function MetadataSection({
 		<div className="space-y-6">
 			{/* Visual metadata */}
 			<div className="space-y-4">
-				<h4 className="mb-2 font-medium text-sm">Métadonnées visuelles</h4>
+				<h4 className="mb-2 font-medium text-sm">Visual metadata</h4>
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div className="space-y-2">
-						<Label htmlFor="status">Statut de l'événement</Label>
+						<Label htmlFor="status">Event status</Label>
 						<Select
 							value={formData.status || "none"}
 							onValueChange={(value) =>
@@ -133,41 +133,41 @@ export function MetadataSection({
 							disabled={isSubmitting}
 						>
 							<SelectTrigger id="status">
-								<SelectValue placeholder="Non défini" />
+								<SelectValue placeholder="Not defined" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="none">
 									<div className="flex items-center gap-2">
 										<Circle className="h-4 w-4 text-muted-foreground" />
-										<span>Non défini</span>
+										<span>Not defined</span>
 									</div>
 								</SelectItem>
 								<SelectItem value="CONFIRMED">
 									<div className="flex items-center gap-2">
 										<CheckCircle2 className="h-4 w-4 text-green-600" />
-										<span>Confirmé (l'événement aura lieu)</span>
+										<span>Confirmed (the event will take place)</span>
 									</div>
 								</SelectItem>
 								<SelectItem value="TENTATIVE">
 									<div className="flex items-center gap-2">
 										<AlertCircle className="h-4 w-4 text-orange-600" />
-										<span>Tentatif (peut-être annulé ou modifié)</span>
+										<span>Tentative (may be cancelled or modified)</span>
 									</div>
 								</SelectItem>
 								<SelectItem value="CANCELLED">
 									<div className="flex items-center gap-2">
 										<AlertCircle className="h-4 w-4 text-red-600" />
-										<span>Annulé (l'événement n'aura pas lieu)</span>
+										<span>Cancelled (the event will not take place)</span>
 									</div>
 								</SelectItem>
 							</SelectContent>
 						</Select>
 						<p className="text-muted-foreground text-xs">
-							Indiquez si l'événement est confirmé, encore incertain, ou annulé.
+							Indicate if the event is confirmed, still uncertain, or cancelled.
 						</p>
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="priority">Priorité</Label>
+						<Label htmlFor="priority">Priority</Label>
 						<RadioGroup
 							value={formData.priority?.toString() || "0"}
 							onValueChange={(value) =>
@@ -186,7 +186,7 @@ export function MetadataSection({
 									className="flex flex-1 cursor-pointer items-center gap-2 font-normal text-sm"
 								>
 									<Circle className="h-4 w-4 text-muted-foreground" />
-									<span>Non définie</span>
+									<span>Not defined</span>
 								</Label>
 							</div>
 							<div className="flex items-center space-x-2">
@@ -196,7 +196,7 @@ export function MetadataSection({
 									className="flex flex-1 cursor-pointer items-center gap-2 font-normal text-sm"
 								>
 									<AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
-									<span className="text-red-600 dark:text-red-400">Haute</span>
+									<span className="text-red-600 dark:text-red-400">High</span>
 								</Label>
 							</div>
 							<div className="flex items-center space-x-2">
@@ -207,7 +207,7 @@ export function MetadataSection({
 								>
 									<Circle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
 									<span className="text-orange-600 dark:text-orange-400">
-										Moyenne
+										Medium
 									</span>
 								</Label>
 							</div>
@@ -219,32 +219,32 @@ export function MetadataSection({
 								>
 									<CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
 									<span className="text-green-600 dark:text-green-400">
-										Basse
+										Low
 									</span>
 								</Label>
 							</div>
 						</RadioGroup>
 						<p className="text-muted-foreground text-xs">
-							Indiquez l'importance de cet événement. Les événements à haute
-							priorité sont généralement urgents ou très importants.
+							Indicate the importance of this event. High priority events are
+							generally urgent or very important.
 						</p>
 					</div>
 				</div>
 
 				<TagInput
 					id="categories"
-					label="Catégories"
+					label="Categories"
 					value={formData.categories}
 					onChange={(value) => onChange({ categories: value })}
 					disabled={isSubmitting}
-					placeholder="Ex: Travail, Personnel, Sport..."
-					helpText="Organisez vos événements par catégories pour faciliter la recherche et le filtrage"
+					placeholder="Ex: Work, Personal, Sports..."
+					helpText="Organize your events by categories to facilitate search and filtering"
 					maxTagLength={FIELD_LIMITS.CATEGORY}
 					maxTotalLength={500}
 				/>
 
 				<div className="space-y-2">
-					<Label htmlFor="color">Couleur d'affichage</Label>
+					<Label htmlFor="color">Display color</Label>
 					<div className="flex flex-wrap gap-2">
 						<ColorPickerPopover
 							value={formData.color}
@@ -260,7 +260,7 @@ export function MetadataSection({
 							}
 							disabled={isSubmitting}
 							className="h-10 w-16 cursor-pointer"
-							aria-label="Sélecteur de couleur personnalisée"
+							aria-label="Custom color picker"
 						/>
 						<Input
 							value={formData.color || ""}
@@ -271,15 +271,14 @@ export function MetadataSection({
 							placeholder="#FF0000"
 							pattern="^#[0-9A-Fa-f]{6}$"
 							className="min-w-[120px] flex-1"
-							aria-label="Code couleur hexadécimal"
+							aria-label="Hexadecimal color code"
 						/>
 					</div>
 					<p className="text-muted-foreground text-xs">
-						Choisissez une couleur pour identifier facilement cet événement dans
-						votre calendrier.
+						Choose a color to easily identify this event in your calendar.
 						<span className="mt-1 block">
-							Utilisez les couleurs prédéfinies, le sélecteur visuel ou entrez
-							un code hexadécimal.
+							Use predefined colors, the visual picker, or enter a hexadecimal
+							code.
 						</span>
 					</p>
 				</div>
@@ -287,12 +286,10 @@ export function MetadataSection({
 
 			{/* Privacy metadata */}
 			<div className="space-y-4">
-				<h4 className="mb-2 font-medium text-sm">
-					Confidentialité et disponibilité
-				</h4>
+				<h4 className="mb-2 font-medium text-sm">Privacy and availability</h4>
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div className="space-y-2">
-						<Label htmlFor="class">Visibilité</Label>
+						<Label htmlFor="class">Visibility</Label>
 						<Select
 							value={formData.class || "none"}
 							onValueChange={(value) =>
@@ -301,28 +298,27 @@ export function MetadataSection({
 							disabled={isSubmitting}
 						>
 							<SelectTrigger id="class">
-								<SelectValue placeholder="Non défini" />
+								<SelectValue placeholder="Not defined" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="none">Non défini</SelectItem>
+								<SelectItem value="none">Not defined</SelectItem>
 								<SelectItem value="PUBLIC">
-									Public (visible par tous)
+									Public (visible to everyone)
 								</SelectItem>
 								<SelectItem value="PRIVATE">
-									Privé (visible uniquement par vous)
+									Private (visible only to you)
 								</SelectItem>
 								<SelectItem value="CONFIDENTIAL">
-									Confidentiel (informations sensibles)
+									Confidential (sensitive information)
 								</SelectItem>
 							</SelectContent>
 						</Select>
 						<p className="text-muted-foreground text-xs">
-							Contrôle qui peut voir les détails de cet événement dans votre
-							calendrier.
+							Controls who can see the details of this event in your calendar.
 						</p>
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="transp">Disponibilité</Label>
+						<Label htmlFor="transp">Availability</Label>
 						<Select
 							value={formData.transp || "none"}
 							onValueChange={(value) =>
@@ -331,19 +327,19 @@ export function MetadataSection({
 							disabled={isSubmitting}
 						>
 							<SelectTrigger>
-								<SelectValue placeholder="Non défini" />
+								<SelectValue placeholder="Not defined" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="none">Non défini</SelectItem>
-								<SelectItem value="OPAQUE">Occupé (bloque le temps)</SelectItem>
+								<SelectItem value="none">Not defined</SelectItem>
+								<SelectItem value="OPAQUE">Busy (blocks time)</SelectItem>
 								<SelectItem value="TRANSPARENT">
-									Libre (ne bloque pas le temps)
+									Free (does not block time)
 								</SelectItem>
 							</SelectContent>
 						</Select>
 						<p className="text-muted-foreground text-xs">
-							Indique si cet événement bloque votre temps ou si vous restez
-							disponible
+							Indicates if this event blocks your time or if you remain
+							available
 						</p>
 					</div>
 				</div>

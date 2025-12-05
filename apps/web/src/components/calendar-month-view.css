@@ -1,4 +1,4 @@
-/* Styles personnalisés pour react-big-calendar alignés avec shadcn/ui */
+/* Custom styles for react-big-calendar aligned with shadcn/ui */
 
 .rbc-calendar {
 	background: var(--background);
@@ -66,7 +66,7 @@
 	text-align: center;
 }
 
-/* Cellules du calendrier */
+/* Calendar cells */
 .rbc-month-view {
 	border: 1px solid var(--border);
 	border-radius: var(--radius);

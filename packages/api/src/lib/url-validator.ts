@@ -128,14 +128,14 @@ export function validateExternalUrl(urlString: string): UrlValidationResult {
 	try {
 		url = new URL(urlString);
 	} catch {
-		return { valid: false, error: "URL invalide" };
+		return { valid: false, error: "Invalid URL" };
 	}
 
 	// Only allow HTTP and HTTPS
 	if (url.protocol !== "http:" && url.protocol !== "https:") {
 		return {
 			valid: false,
-			error: "Seuls les protocoles HTTP et HTTPS sont autorisés",
+			error: "Only HTTP and HTTPS protocols are allowed",
 		};
 	}
 
@@ -145,7 +145,7 @@ export function validateExternalUrl(urlString: string): UrlValidationResult {
 	if (isCloudMetadata(hostname)) {
 		return {
 			valid: false,
-			error: "Accès aux services de métadonnées cloud non autorisé",
+			error: "Access to cloud metadata services not allowed",
 		};
 	}
 
@@ -157,14 +157,14 @@ export function validateExternalUrl(urlString: string): UrlValidationResult {
 		if (isPrivateIPv4(cleanedIP)) {
 			return {
 				valid: false,
-				error: "Accès aux adresses IP privées non autorisé",
+				error: "Access to private IP addresses not allowed",
 			};
 		}
 
 		if (isPrivateIPv6(cleanedIP)) {
 			return {
 				valid: false,
-				error: "Accès aux adresses IPv6 privées non autorisé",
+				error: "Access to private IPv6 addresses not allowed",
 			};
 		}
 	}
@@ -177,7 +177,7 @@ export function validateExternalUrl(urlString: string): UrlValidationResult {
 	) {
 		return {
 			valid: false,
-			error: "Accès à localhost non autorisé",
+			error: "Access to localhost not allowed",
 		};
 	}
 
@@ -194,7 +194,7 @@ export function assertValidExternalUrl(urlString: string): void {
 		const { TRPCError } = require("@trpc/server");
 		throw new TRPCError({
 			code: "BAD_REQUEST",
-			message: result.error || "URL non autorisée",
+			message: result.error || "URL not allowed",
 		});
 	}
 }

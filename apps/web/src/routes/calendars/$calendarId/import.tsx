@@ -21,7 +21,7 @@ export const Route = createFileRoute("/calendars/$calendarId/import")({
 	component: ImportIntoCalendarComponent,
 	head: () => ({
 		meta: [
-			{ title: "Importer dans le calendrier - Calendraft" },
+			{ title: "Import into calendar - Calendraft" },
 			{ name: "robots", content: "noindex, nofollow" },
 		],
 	}),
@@ -43,9 +43,9 @@ function ImportIntoCalendarComponent() {
 	const importMutation = useMutation(
 		trpc.calendar.importIcsIntoCalendar.mutationOptions({
 			onSuccess: (data) => {
-				const message = `${data.importedEvents} événement(s) importé(s).${
+				const message = `${data.importedEvents} event(s) imported.${
 					data.skippedDuplicates > 0
-						? ` ${data.skippedDuplicates} doublon(s) ignoré(s).`
+						? ` ${data.skippedDuplicates} duplicate(s) skipped.`
 						: ""
 				}`;
 				toast.success(message);
@@ -53,7 +53,7 @@ function ImportIntoCalendarComponent() {
 			},
 			onError: (error: unknown) => {
 				const message =
-					error instanceof Error ? error.message : "Erreur lors de l'import";
+					error instanceof Error ? error.message : "Error during import";
 				toast.error(message);
 			},
 		}),
@@ -69,7 +69,7 @@ function ImportIntoCalendarComponent() {
 
 	const handleImport = async () => {
 		if (!file) {
-			toast.error("Veuillez sélectionner un fichier");
+			toast.error("Please select a file");
 			return;
 		}
 
@@ -91,12 +91,12 @@ function ImportIntoCalendarComponent() {
 			<div className="container mx-auto max-w-2xl px-4 py-10">
 				<Breadcrumb
 					items={[
-						{ label: "Calendriers", href: "/calendars" },
+						{ label: "Calendars", href: "/calendars" },
 						{
-							label: calendar?.name || "Calendrier",
+							label: calendar?.name || "Calendar",
 							href: `/calendars/${calendarId}`,
 						},
-						{ label: "Importer" },
+						{ label: "Import" },
 					]}
 				/>
 
@@ -104,12 +104,12 @@ function ImportIntoCalendarComponent() {
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Upload className="h-5 w-5" />
-							Importer des événements
+							Import events
 						</CardTitle>
 						<CardDescription>
-							Ajoutez des événements d'un fichier .ics à{" "}
+							Add events from a .ics file to{" "}
 							<span className="font-medium text-foreground">
-								{calendar?.name || "ce calendrier"}
+								{calendar?.name || "this calendar"}
 							</span>
 						</CardDescription>
 					</CardHeader>
@@ -136,7 +136,7 @@ function ImportIntoCalendarComponent() {
 									htmlFor="remove-duplicates"
 									className="cursor-pointer font-normal text-sm"
 								>
-									Ignorer les doublons (même titre et mêmes horaires)
+									Ignore duplicates (same title and same times)
 								</Label>
 							</div>
 						)}
@@ -145,10 +145,8 @@ function ImportIntoCalendarComponent() {
 						{file && eventCount > 0 && (
 							<div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
 								<p className="text-sm">
-									<span className="font-medium">{eventCount}</span> événement
-									{eventCount !== 1 ? "s" : ""} sera
-									{eventCount !== 1 ? "ont" : ""} ajouté
-									{eventCount !== 1 ? "s" : ""} à{" "}
+									<span className="font-medium">{eventCount}</span> event
+									{eventCount !== 1 ? "s" : ""} will be added to{" "}
 									<span className="font-medium">{calendar?.name}</span>.
 								</p>
 							</div>
@@ -164,12 +162,12 @@ function ImportIntoCalendarComponent() {
 								{importMutation.isPending ? (
 									<>
 										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-										Import en cours...
+										Importing...
 									</>
 								) : (
 									<>
-										Importer
-										{eventCount > 0 && ` (${eventCount} événements)`}
+										Import
+										{eventCount > 0 && ` (${eventCount} events)`}
 									</>
 								)}
 							</Button>
@@ -178,7 +176,7 @@ function ImportIntoCalendarComponent() {
 								onClick={() => navigate({ to: `/calendars/${calendarId}` })}
 								disabled={importMutation.isPending}
 							>
-								Annuler
+								Cancel
 							</Button>
 						</div>
 					</CardContent>

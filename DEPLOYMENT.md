@@ -1,109 +1,109 @@
-# Guide de déploiement - Calendraft
+# Deployment Guide - Calendraft
 
-Ce guide décrit les étapes pour déployer Calendraft en production.
+This guide describes the steps to deploy Calendraft in production.
 
-## Prérequis
+## Prerequisites
 
-- Node.js 18+ ou Bun 1.3.1+
-- Base de données PostgreSQL
-- Serveur web (Nginx, Caddy, etc.) pour reverse proxy (recommandé)
-- Certificat SSL/TLS (Let's Encrypt recommandé)
+- Node.js 18+ or Bun 1.3.1+
+- PostgreSQL database
+- Web server (Nginx, Caddy, etc.) for reverse proxy (recommended)
+- SSL/TLS certificate (Let's Encrypt recommended)
 
-## Variables d'environnement
+## Environment Variables
 
 ### Backend (`apps/server/.env`)
 
-Créez un fichier `.env` dans `apps/server/` avec les variables suivantes :
+Create a `.env` file in `apps/server/` with the following variables:
 
 ```env
 NODE_ENV=production
 PORT=3000
 
-# Base de données PostgreSQL (obligatoire)
+# PostgreSQL database (required)
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE
 
-CORS_ORIGIN=https://votre-domaine.com
-BETTER_AUTH_SECRET=votre-secret-key-min-32-caracteres
-BETTER_AUTH_URL=https://api.votre-domaine.com
+CORS_ORIGIN=https://your-domain.com
+BETTER_AUTH_SECRET=your-secret-key-min-32-characters
+BETTER_AUTH_URL=https://api.your-domain.com
 
-# Sentry (optionnel - monitoring des erreurs)
+# Sentry (optional - error monitoring)
 SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
 ```
 
-**Important** :
-- `CORS_ORIGIN` : DOIT être défini en production, ne pas utiliser `*`
-- `BETTER_AUTH_SECRET` : Générer une clé sécurisée (ex: `openssl rand -base64 32`)
-- `SENTRY_DSN` : Optionnel, récupérez-le depuis votre projet Sentry
-- Ne jamais commiter le fichier `.env` dans le repository
+**Important**:
+- `CORS_ORIGIN`: MUST be defined in production, do not use `*`
+- `BETTER_AUTH_SECRET`: Generate a secure key (e.g., `openssl rand -base64 32`)
+- `SENTRY_DSN`: Optional, retrieve it from your Sentry project
+- Never commit the `.env` file to the repository
 
 ### Frontend (`apps/web/.env`)
 
-Créez un fichier `.env` dans `apps/web/` :
+Create a `.env` file in `apps/web/`:
 
 ```env
-VITE_SERVER_URL=https://api.votre-domaine.com
+VITE_SERVER_URL=https://api.your-domain.com
 
-# Sentry (optionnel - monitoring des erreurs)
+# Sentry (optional - error monitoring)
 VITE_SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
 ```
 
-### Variables de build (CI/CD)
+### Build Variables (CI/CD)
 
-Pour l'upload des source maps Sentry lors du build :
+For uploading Sentry source maps during build:
 
 ```env
-SENTRY_ORG=votre-organisation-sentry
+SENTRY_ORG=your-sentry-organization
 SENTRY_PROJECT=calendraft-web
 SENTRY_AUTH_TOKEN=sntrys_xxx
 ```
 
-## Déploiement avec Docker (recommandé)
+## Deployment with Docker (recommended)
 
-Le moyen le plus simple de déployer Calendraft est d'utiliser Docker.
+The easiest way to deploy Calendraft is using Docker.
 
-### 1. Configurer les variables d'environnement
+### 1. Configure Environment Variables
 
 ```bash
 cp docker.env.example .env
 ```
 
-Éditez `.env` avec vos valeurs de production :
+Edit `.env` with your production values:
 
 ```env
-# Base de données
+# Database
 POSTGRES_USER=calendraft
-POSTGRES_PASSWORD=votre_mot_de_passe_securise
+POSTGRES_PASSWORD=your_secure_password
 POSTGRES_DB=calendraft
 
 # Backend
-CORS_ORIGIN=https://votre-domaine.com
-BETTER_AUTH_SECRET=votre-secret-min-32-caracteres
-BETTER_AUTH_URL=https://api.votre-domaine.com
+CORS_ORIGIN=https://your-domain.com
+BETTER_AUTH_SECRET=your-secret-min-32-characters
+BETTER_AUTH_URL=https://api.your-domain.com
 
 # Frontend
-VITE_SERVER_URL=https://api.votre-domaine.com
+VITE_SERVER_URL=https://api.your-domain.com
 ```
 
-### 2. Construire et démarrer
+### 2. Build and Start
 
 ```bash
 docker compose up -d --build
 ```
 
-### 3. Vérifier le déploiement
+### 3. Verify Deployment
 
 ```bash
-# Voir l'état des services
+# View service status
 docker compose ps
 
-# Voir les logs
+# View logs
 docker compose logs -f
 
-# Tester le health check
+# Test health check
 curl http://localhost:3000/health
 ```
 
-### Mise à jour
+### Update
 
 ```bash
 git pull
@@ -112,37 +112,37 @@ docker compose up -d --build
 
 ---
 
-## Déploiement manuel (sans Docker)
+## Manual Deployment (without Docker)
 
-### 1. Installer les dépendances
+### 1. Install Dependencies
 
 ```bash
 bun install
 ```
 
-### 2. Générer le client Prisma
+### 2. Generate Prisma Client
 
 ```bash
 bun run db:generate
 ```
 
-### 3. Pousser le schéma de base de données
+### 3. Push Database Schema
 
 ```bash
 bun run db:push
 ```
 
-### 4. Build de l'application
+### 4. Build Application
 
 ```bash
 bun run build
 ```
 
-Cela va :
-- Build le frontend dans `apps/web/dist/`
-- Build le backend dans `apps/server/dist/`
+This will:
+- Build the frontend in `apps/web/dist/`
+- Build the backend in `apps/server/dist/`
 
-## Démarrage (sans Docker)
+## Starting (without Docker)
 
 ### Backend
 
@@ -151,7 +151,7 @@ cd apps/server
 bun run dist/index.js
 ```
 
-Ou avec PM2 (recommandé pour production) :
+Or with PM2 (recommended for production):
 
 ```bash
 pm2 start apps/server/dist/index.js --name calendraft-api
@@ -159,21 +159,21 @@ pm2 start apps/server/dist/index.js --name calendraft-api
 
 ### Frontend
 
-Le frontend peut être servi avec n'importe quel serveur web statique :
+The frontend can be served with any static web server:
 
-- **Nginx** : Configurer pour servir `apps/web/dist/`
-- **Vercel/Netlify** : Déployer le dossier `apps/web/dist/`
-- **Cloudflare Pages** : Déployer le dossier `apps/web/dist/`
+- **Nginx**: Configure to serve `apps/web/dist/`
+- **Vercel/Netlify**: Deploy the `apps/web/dist/` folder
+- **Cloudflare Pages**: Deploy the `apps/web/dist/` folder
 
-## Configuration Nginx (exemple)
+## Nginx Configuration (example)
 
 ```nginx
 # Frontend
 server {
     listen 80;
-    server_name votre-domaine.com;
+    server_name your-domain.com;
     
-    root /chemin/vers/apps/web/dist;
+    root /path/to/apps/web/dist;
     index index.html;
     
     location / {
@@ -184,7 +184,7 @@ server {
 # Backend API
 server {
     listen 80;
-    server_name api.votre-domaine.com;
+    server_name api.your-domain.com;
     
     location / {
         proxy_pass http://localhost:3000;
@@ -197,51 +197,51 @@ server {
 }
 ```
 
-## Checklist pré-déploiement
+## Pre-deployment Checklist
 
 ### Docker
-- [ ] Fichier `.env` créé à partir de `docker.env.example`
-- [ ] `POSTGRES_PASSWORD` modifié avec un mot de passe sécurisé
-- [ ] `BETTER_AUTH_SECRET` généré (min 32 caractères) : `openssl rand -base64 32`
-- [ ] `CORS_ORIGIN` défini avec l'URL du frontend
-- [ ] Docker et Docker Compose installés
-- [ ] Ports 3000 et 3001 disponibles (ou personnalisés dans `.env`)
+- [ ] `.env` file created from `docker.env.example`
+- [ ] `POSTGRES_PASSWORD` changed with a secure password
+- [ ] `BETTER_AUTH_SECRET` generated (min 32 characters): `openssl rand -base64 32`
+- [ ] `CORS_ORIGIN` defined with frontend URL
+- [ ] Docker and Docker Compose installed
+- [ ] Ports 3000 and 3001 available (or customized in `.env`)
 
-### Général
-- [ ] Variables d'environnement configurées
-- [ ] `CORS_ORIGIN` défini et ne contient pas `*` ou `localhost`
-- [ ] `BETTER_AUTH_SECRET` généré et sécurisé (min 32 caractères)
-- [ ] Base de données initialisée
-- [ ] Certificat SSL/TLS configuré (HTTPS)
+### General
+- [ ] Environment variables configured
+- [ ] `CORS_ORIGIN` defined and does not contain `*` or `localhost`
+- [ ] `BETTER_AUTH_SECRET` generated and secured (min 32 characters)
+- [ ] Database initialized
+- [ ] SSL/TLS certificate configured (HTTPS)
 - [ ] Health check accessible (`/health`)
-- [ ] Rate limiting testé
-- [ ] Headers de sécurité vérifiés
-- [ ] Logs configurés et accessibles
-- [ ] Backup de la base de données configuré
-- [ ] Sentry configuré (optionnel mais recommandé)
+- [ ] Rate limiting tested
+- [ ] Security headers verified
+- [ ] Logs configured and accessible
+- [ ] Database backup configured
+- [ ] Sentry configured (optional but recommended)
 
-## Commandes Docker utiles
+## Useful Docker Commands
 
 ```bash
-# Voir les logs d'un service spécifique
+# View logs for a specific service
 docker compose logs -f server
 
-# Accéder au conteneur PostgreSQL
+# Access PostgreSQL container
 docker compose exec db psql -U calendraft -d calendraft
 
-# Backup de la base de données
+# Database backup
 docker compose exec db pg_dump -U calendraft calendraft > backup.sql
 
-# Restaurer la base de données
+# Restore database
 docker compose exec -T db psql -U calendraft calendraft < backup.sql
 
-# Redémarrer un service
+# Restart a service
 docker compose restart server
 
-# Reconstruire un service
+# Rebuild a service
 docker compose up -d --build server
 
-# Supprimer les volumes (ATTENTION: supprime les données)
+# Remove volumes (WARNING: deletes data)
 docker compose down -v
 ```
 
@@ -249,124 +249,124 @@ docker compose down -v
 
 ### Sentry (Error Tracking & Performance)
 
-Sentry est intégré pour le monitoring des erreurs et des performances. Configuration :
+Sentry is integrated for error and performance monitoring. Configuration:
 
-1. **Créer un projet Sentry** : Allez sur [sentry.io](https://sentry.io) et créez deux projets :
-   - Un projet "React" pour le frontend (`calendraft-web`)
-   - Un projet "Node.js" pour le backend (`calendraft-api`)
+1. **Create a Sentry project**: Go to [sentry.io](https://sentry.io) and create two projects:
+   - A "React" project for the frontend (`calendraft-web`)
+   - A "Node.js" project for the backend (`calendraft-api`)
 
-2. **Récupérer les DSN** : Dans chaque projet, allez dans Settings > Client Keys (DSN)
+2. **Retrieve DSNs**: In each project, go to Settings > Client Keys (DSN)
 
-3. **Configurer les variables d'environnement** (voir section ci-dessus)
+3. **Configure environment variables** (see section above)
 
-4. **Upload des source maps** (CI/CD) :
-   - Créez un auth token dans Sentry (Settings > Auth Tokens)
-   - Configurez `SENTRY_ORG`, `SENTRY_PROJECT`, et `SENTRY_AUTH_TOKEN` dans votre CI
+4. **Upload source maps** (CI/CD):
+   - Create an auth token in Sentry (Settings > Auth Tokens)
+   - Configure `SENTRY_ORG`, `SENTRY_PROJECT`, and `SENTRY_AUTH_TOKEN` in your CI
 
-Fonctionnalités activées :
-- ✅ Capture automatique des erreurs (frontend & backend)
-- ✅ Performance monitoring avec TanStack Router
-- ✅ Session Replay (10% des sessions, 100% avec erreurs)
-- ✅ Distributed tracing entre frontend et backend
-- ✅ Source maps pour des stack traces lisibles
+Enabled features:
+- ✅ Automatic error capture (frontend & backend)
+- ✅ Performance monitoring with TanStack Router
+- ✅ Session Replay (10% of sessions, 100% with errors)
+- ✅ Distributed tracing between frontend and backend
+- ✅ Source maps for readable stack traces
 
 ### Health Check
 
-L'endpoint `/health` vérifie :
-- Connexion à la base de données
-- Retourne `200 OK` si tout est OK
-- Retourne `503 Service Unavailable` si problème
+The `/health` endpoint checks:
+- Database connection
+- Returns `200 OK` if everything is OK
+- Returns `503 Service Unavailable` if there's a problem
 
-Utilisez un service de monitoring (UptimeRobot, Pingdom, etc.) pour surveiller cet endpoint.
+Use a monitoring service (UptimeRobot, Pingdom, etc.) to monitor this endpoint.
 
-### Nettoyage automatique
+### Automatic Cleanup
 
-Le serveur exécute automatiquement un job de nettoyage en production qui :
-- Supprime les calendriers anonymes non consultés depuis 60 jours
-- S'exécute toutes les 24 heures
-- Nettoie les données orphelines pour éviter l'accumulation en base de données
-- Note : `updatedAt` est mis à jour lors des consultations (getById/list), donc un calendrier consulté régulièrement ne sera pas supprimé
+The server automatically runs a cleanup job in production that:
+- Deletes anonymous calendars not accessed for 60 days
+- Runs every 24 hours
+- Cleans up orphaned data to prevent database accumulation
+- Note: `updatedAt` is updated on access (getById/list), so a regularly accessed calendar will not be deleted
 
-**Note** : Pour un environnement de production critique, considérez utiliser un scheduler externe (cron, Cloud Scheduler, etc.) au lieu de `setInterval`.
+**Note**: For a critical production environment, consider using an external scheduler (cron, Cloud Scheduler, etc.) instead of `setInterval`.
 
 ### Logs
 
-Les logs sont affichés dans la console. En production, redirigez vers un fichier :
+Logs are displayed in the console. In production, redirect to a file:
 
 ```bash
 bun run dist/src/index.js > logs/app.log 2>&1
 ```
 
-Ou avec PM2 :
+Or with PM2:
 
 ```bash
 pm2 logs calendraft-api
 ```
 
-## Sécurité
+## Security
 
-### Protections actives
+### Active Protections
 
-- ✅ Rate limiting : 100 req/min général, 10 req/min pour auth
-- ✅ Protection SSRF pour imports d'URL externes
-- ✅ Content Security Policy (frontend et backend)
-- ✅ Headers de sécurité HTTP (X-Frame-Options, X-Content-Type-Options, etc.)
-- ✅ Validation des inputs avec Zod
-- ✅ IDs anonymes haute entropie (192 bits)
-- ✅ Limite de 10 liens de partage par calendrier
-- ✅ Logging des événements de sécurité
-- ✅ Sentry configuré sans PII
+- ✅ Rate limiting: 100 req/min general, 10 req/min for auth
+- ✅ SSRF protection for external URL imports
+- ✅ Content Security Policy (frontend and backend)
+- ✅ HTTP security headers (X-Frame-Options, X-Content-Type-Options, etc.)
+- ✅ Input validation with Zod
+- ✅ High entropy anonymous IDs (192 bits)
+- ✅ Limit of 10 sharing links per calendar
+- ✅ Security event logging
+- ✅ Sentry configured without PII
 
-### Checklist de sécurité production
+### Production Security Checklist
 
-Avant de mettre en production, vérifiez :
+Before going to production, verify:
 
 - [ ] `NODE_ENV=production`
-- [ ] `CORS_ORIGIN` défini explicitement (pas de `*`)
-- [ ] `CORS_ORIGIN` ne contient pas `localhost`
-- [ ] `BETTER_AUTH_SECRET` généré avec 32+ caractères (`openssl rand -base64 32`)
-- [ ] HTTPS activé avec certificat valide
-- [ ] Proxy inverse configuré (nginx/Caddy) avec headers X-Forwarded-*
-- [ ] Variables d'environnement non commitées
-- [ ] Backup automatique de la base de données
-- [ ] Monitoring des logs configuré
-- [ ] Alertes sur erreurs critiques (Sentry ou autre)
+- [ ] `CORS_ORIGIN` defined explicitly (no `*`)
+- [ ] `CORS_ORIGIN` does not contain `localhost`
+- [ ] `BETTER_AUTH_SECRET` generated with 32+ characters (`openssl rand -base64 32`)
+- [ ] HTTPS enabled with valid certificate
+- [ ] Reverse proxy configured (nginx/Caddy) with X-Forwarded-* headers
+- [ ] Environment variables not committed
+- [ ] Automatic database backup
+- [ ] Log monitoring configured
+- [ ] Alerts on critical errors (Sentry or other)
 
-### Rotation des secrets
+### Secret Rotation
 
-Il est recommandé de faire une rotation périodique :
+It is recommended to perform periodic rotation:
 
-| Secret | Fréquence | Méthode |
-|--------|-----------|---------|
-| `BETTER_AUTH_SECRET` | 6 mois | `openssl rand -base64 32` |
-| `POSTGRES_PASSWORD` | 6 mois | Modifier dans `.env` et redéployer |
+| Secret | Frequency | Method |
+|--------|-----------|--------|
+| `BETTER_AUTH_SECRET` | 6 months | `openssl rand -base64 32` |
+| `POSTGRES_PASSWORD` | 6 months | Modify in `.env` and redeploy |
 
-**Note** : La rotation de `BETTER_AUTH_SECRET` invalidera toutes les sessions existantes.
+**Note**: Rotating `BETTER_AUTH_SECRET` will invalidate all existing sessions.
 
 ## Troubleshooting
 
-### Erreur "CORS_ORIGIN is required"
-→ Vérifiez que `CORS_ORIGIN` est défini dans `apps/server/.env`
+### Error "CORS_ORIGIN is required"
+→ Check that `CORS_ORIGIN` is defined in `apps/server/.env`
 
-### Health check retourne 503
-→ Vérifiez la connexion à la base de données
-→ Vérifiez que Prisma est correctement configuré
+### Health check returns 503
+→ Check database connection
+→ Check that Prisma is properly configured
 
-### Rate limiting trop strict
-→ Ajustez les limites dans `apps/server/src/middleware/rate-limit.ts`
+### Rate limiting too strict
+→ Adjust limits in `apps/server/src/middleware/rate-limit.ts`
 
-### Erreurs 429 Too Many Requests
-→ Normal si vous dépassez 100 requêtes/minute
-→ Attendez la fin de la fenêtre de temps
+### 429 Too Many Requests errors
+→ Normal if you exceed 100 requests/minute
+→ Wait for the time window to end
 
 ## Support
 
-Pour toute question ou problème, consultez le README.md principal ou ouvrez une issue.
+For any questions or issues, consult the main README.md or open an issue.
 
-## Voir aussi
+## See Also
 
-- [README.md](README.md) - Vue d'ensemble et démarrage rapide
-- [ARCHITECTURE.md](ARCHITECTURE.md) - Architecture des packages
-- [SECURITY.md](SECURITY.md) - Politique de sécurité
-- [CONTRIBUTING.md](CONTRIBUTING.md) - Guide de contribution
+- [README.md](README.md) - Overview and quick start
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Package architecture
+- [SECURITY.md](SECURITY.md) - Security policy
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guide
 

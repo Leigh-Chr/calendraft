@@ -42,9 +42,9 @@ export function isAuthenticatedUser(ctx: Context): boolean {
  */
 function getCalendarLimitMessage(isAuth: boolean): string {
 	if (isAuth) {
-		return `Limite atteinte : vous avez atteint le maximum de ${AUTHENTICATED_LIMITS.calendars} calendriers. Cette limite généreuse permet de maintenir le service gratuit pour tous.`;
+		return `Limit reached: you have reached the maximum of ${AUTHENTICATED_LIMITS.calendars} calendars. This generous limit helps keep the service free for everyone.`;
 	}
-	return `Limite atteinte : vous pouvez créer maximum ${ANONYMOUS_LIMITS.calendars} calendriers en mode anonyme. Créez un compte gratuit pour avoir jusqu'à ${AUTHENTICATED_LIMITS.calendars} calendriers.`;
+	return `Limit reached: you can create a maximum of ${ANONYMOUS_LIMITS.calendars} calendars in anonymous mode. Create a free account to have up to ${AUTHENTICATED_LIMITS.calendars} calendars.`;
 }
 
 /**
@@ -52,9 +52,9 @@ function getCalendarLimitMessage(isAuth: boolean): string {
  */
 function getEventLimitMessage(isAuth: boolean): string {
 	if (isAuth) {
-		return `Limite atteinte : vous avez atteint le maximum de ${AUTHENTICATED_LIMITS.eventsPerCalendar} événements par calendrier. Cette limite généreuse permet de maintenir le service gratuit pour tous.`;
+		return `Limit reached: you have reached the maximum of ${AUTHENTICATED_LIMITS.eventsPerCalendar} events per calendar. This generous limit helps keep the service free for everyone.`;
 	}
-	return `Limite atteinte : vous pouvez créer maximum ${ANONYMOUS_LIMITS.eventsPerCalendar} événements par calendrier en mode anonyme. Créez un compte gratuit pour avoir jusqu'à ${AUTHENTICATED_LIMITS.eventsPerCalendar} événements.`;
+	return `Limit reached: you can create a maximum of ${ANONYMOUS_LIMITS.eventsPerCalendar} events per calendar in anonymous mode. Create a free account to have up to ${AUTHENTICATED_LIMITS.eventsPerCalendar} events.`;
 }
 
 /**
@@ -110,7 +110,7 @@ export async function checkEventLimit(
 	if (!calendar) {
 		throw new TRPCError({
 			code: "NOT_FOUND",
-			message: "Calendrier non trouvé",
+			message: "Calendar not found",
 		});
 	}
 

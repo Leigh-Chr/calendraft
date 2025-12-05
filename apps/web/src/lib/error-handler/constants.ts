@@ -6,34 +6,33 @@ import type { ErrorInfo } from "./types";
 
 export const ERROR_MESSAGES: Record<string, ErrorInfo> = {
 	UNAUTHORIZED: {
-		title: "Authentification requise",
-		description: "Vous devez être connecté pour effectuer cette action.",
+		title: "Authentication Required",
+		description: "You must be logged in to perform this action.",
 	},
 	FORBIDDEN: {
-		title: "Accès refusé",
-		description: "Vous n'avez pas les permissions nécessaires.",
+		title: "Access Denied",
+		description: "You do not have the necessary permissions.",
 	},
 	NOT_FOUND: {
-		title: "Ressource introuvable",
-		description: "La ressource demandée n'existe pas ou a été supprimée.",
+		title: "Resource Not Found",
+		description: "The requested resource does not exist or has been deleted.",
 	},
 	BAD_REQUEST: {
-		title: "Requête invalide",
-		description: "Les données fournies sont incorrectes.",
+		title: "Invalid Request",
+		description: "The provided data is incorrect.",
 	},
 	INTERNAL_SERVER_ERROR: {
-		title: "Erreur serveur",
-		description:
-			"Une erreur est survenue côté serveur. Veuillez réessayer plus tard.",
+		title: "Server Error",
+		description: "An error occurred on the server. Please try again later.",
 	},
 	TIMEOUT: {
-		title: "Délai d'attente dépassé",
-		description: "La requête a pris trop de temps. Vérifiez votre connexion.",
+		title: "Timeout",
+		description: "The request took too long. Check your connection.",
 	},
 	NETWORK_ERROR: {
-		title: "Erreur réseau",
+		title: "Network Error",
 		description:
-			"Impossible de contacter le serveur. Vérifiez votre connexion et que le serveur est démarré.",
+			"Unable to contact the server. Check your connection and that the server is running.",
 	},
 };
 

@@ -22,13 +22,13 @@ describe("validateEventForm", () => {
 		it("should require a title", () => {
 			const formData = { ...validFormData, title: "" };
 			const errors = validateEventForm(formData);
-			expect(errors.title).toBe("Le titre est requis");
+			expect(errors.title).toBe("Title is required");
 		});
 
 		it("should require a non-empty title (trim)", () => {
 			const formData = { ...validFormData, title: "   " };
 			const errors = validateEventForm(formData);
-			expect(errors.title).toBe("Le titre est requis");
+			expect(errors.title).toBe("Title is required");
 		});
 
 		it("should accept valid title", () => {
@@ -45,9 +45,7 @@ describe("validateEventForm", () => {
 				endDate: "2025-01-01T10:00",
 			};
 			const errors = validateEventForm(formData);
-			expect(errors.dates).toBe(
-				"La date de fin doit être après la date de début",
-			);
+			expect(errors.dates).toBe("End date must be after start date");
 		});
 
 		it("should reject equal start and end dates", () => {
@@ -57,9 +55,7 @@ describe("validateEventForm", () => {
 				endDate: "2025-01-01T10:00",
 			};
 			const errors = validateEventForm(formData);
-			expect(errors.dates).toBe(
-				"La date de fin doit être après la date de début",
-			);
+			expect(errors.dates).toBe("End date must be after start date");
 		});
 
 		it("should reject invalid date formats", () => {
@@ -69,9 +65,7 @@ describe("validateEventForm", () => {
 				endDate: "2025-01-01T10:00",
 			};
 			const errors = validateEventForm(formData);
-			expect(errors.dates).toBe(
-				"Les dates de début et de fin doivent être valides",
-			);
+			expect(errors.dates).toBe("Start and end dates must be valid");
 		});
 
 		it("should accept valid date range", () => {
@@ -84,16 +78,14 @@ describe("validateEventForm", () => {
 		it("should reject invalid URL format", () => {
 			const formData = { ...validFormData, url: "not-a-url" };
 			const errors = validateEventForm(formData);
-			expect(errors.url).toBe(
-				"Format d'URL invalide (ex: https://example.com)",
-			);
+			expect(errors.url).toBe("Invalid URL format (ex: https://example.com)");
 		});
 
 		it("should reject unsafe protocols", () => {
 			const formData = { ...validFormData, url: "javascript:alert(1)" };
 			const errors = validateEventForm(formData);
 			expect(errors.url).toBe(
-				"Protocole non autorisé. Utilisez http://, https://, mailto: ou tel:",
+				"Unauthorized protocol. Use http://, https://, mailto: or tel:",
 			);
 		});
 
@@ -120,7 +112,7 @@ describe("validateEventForm", () => {
 		it("should reject invalid email format", () => {
 			const formData = { ...validFormData, organizerEmail: "not-an-email" };
 			const errors = validateEventForm(formData);
-			expect(errors.organizerEmail).toBe("Format d'email invalide");
+			expect(errors.organizerEmail).toBe("Invalid email format");
 		});
 
 		it("should accept valid email", () => {
@@ -144,7 +136,7 @@ describe("validateEventForm", () => {
 			};
 			const errors = validateEventForm(formData);
 			expect(errors.attendeeEmails).toBeDefined();
-			expect(errors.attendeeEmails?.[0]).toBe("Format d'email invalide");
+			expect(errors.attendeeEmails?.[0]).toBe("Invalid email format");
 		});
 
 		it("should reject multiple invalid emails", () => {
@@ -158,9 +150,9 @@ describe("validateEventForm", () => {
 			};
 			const errors = validateEventForm(formData);
 			expect(errors.attendeeEmails).toBeDefined();
-			expect(errors.attendeeEmails?.[0]).toBe("Format d'email invalide");
+			expect(errors.attendeeEmails?.[0]).toBe("Invalid email format");
 			expect(errors.attendeeEmails?.[1]).toBeUndefined();
-			expect(errors.attendeeEmails?.[2]).toBe("Format d'email invalide");
+			expect(errors.attendeeEmails?.[2]).toBe("Invalid email format");
 		});
 
 		it("should accept valid attendee emails", () => {
@@ -240,7 +232,7 @@ describe("email validation edge cases", () => {
 			organizerEmail: "testexample.com",
 		};
 		const errors = validateEventForm(formData);
-		expect(errors.organizerEmail).toBe("Format d'email invalide");
+		expect(errors.organizerEmail).toBe("Invalid email format");
 	});
 
 	it("should reject email without domain", () => {
@@ -253,7 +245,7 @@ describe("email validation edge cases", () => {
 			organizerEmail: "test@",
 		};
 		const errors = validateEventForm(formData);
-		expect(errors.organizerEmail).toBe("Format d'email invalide");
+		expect(errors.organizerEmail).toBe("Invalid email format");
 	});
 
 	it("should reject email with spaces", () => {
@@ -266,7 +258,7 @@ describe("email validation edge cases", () => {
 			organizerEmail: "test @example.com",
 		};
 		const errors = validateEventForm(formData);
-		expect(errors.organizerEmail).toBe("Format d'email invalide");
+		expect(errors.organizerEmail).toBe("Invalid email format");
 	});
 
 	it("should accept email with plus sign", () => {
