@@ -119,20 +119,32 @@ app.use(
 	"/*",
 	cors({
 		origin: env.CORS_ORIGIN || "http://localhost:3001",
-		allowMethods: ["GET", "POST", "OPTIONS"],
-		allowHeaders: ["Content-Type", "Authorization", "x-anonymous-id"],
+		allowMethods: ["GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"],
+		allowHeaders: [
+			"Content-Type",
+			"Authorization",
+			"x-anonymous-id",
+			"Cookie",
+			"Set-Cookie",
+		],
 		credentials: true,
+		exposeHeaders: ["Set-Cookie"],
 	}),
 );
 
 // CSRF protection for state-changing requests
 // Uses Origin and Sec-Fetch-Site header validation
-app.use(
-	"/*",
-	csrf({
+// Exclude auth endpoints as Better-Auth handles CSRF internally
+app.use(async (c, next) => {
+	// Skip CSRF for auth endpoints (Better-Auth handles it)
+	if (c.req.path.startsWith("/api/auth/")) {
+		return next();
+	}
+	// Apply CSRF to all other routes
+	return csrf({
 		origin: env.CORS_ORIGIN || "http://localhost:3001",
-	}),
-);
+	})(c, next);
+});
 
 // Strict rate limiting for auth endpoints (10 requests/minute)
 app.use("/api/auth/*", authRateLimit());

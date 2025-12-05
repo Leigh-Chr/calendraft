@@ -15,7 +15,8 @@
     <meta name="revisit-after" content="7 days" />
     
     <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:* wss://localhost:* https://*.sentry.io wss://*.sentry.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+    <!-- Note: frame-ancestors is not supported in meta tags, it must be set via HTTP headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:* wss://localhost:* https://*.sentry.io wss://*.sentry.io; base-uri 'self'; form-action 'self';" />
     
     <!-- Theme & Colors -->
     <meta name="theme-color" content="#2a2218" media="(prefers-color-scheme: dark)" />

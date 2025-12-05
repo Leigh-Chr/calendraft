@@ -41,14 +41,14 @@ function SharePage() {
 		"idle" | "loading" | "success" | "error"
 	>("idle");
 
-	// Get calendar info
+	// Get calendar info - only query if token exists
 	const {
 		data: info,
 		isLoading,
 		error,
 	} = useQuery({
-		...trpc.share.getInfoByToken.queryOptions({ token }),
-		queryKey: QUERY_KEYS.share.infoByToken(token),
+		...trpc.share.getInfoByToken.queryOptions({ token: token || "" }),
+		enabled: !!token && token.length > 0,
 		retry: false,
 	});
 
