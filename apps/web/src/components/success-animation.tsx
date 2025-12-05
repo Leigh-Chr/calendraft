@@ -139,7 +139,7 @@ export function ConfettiAnimation({ show }: { show: boolean }) {
 		y: Math.random() * -100 - 50,
 		rotation: Math.random() * 360,
 		scale: Math.random() * 0.5 + 0.5,
-		color: ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"][
+		color: ["#c2703c", "#d4915c", "#8b6f47", "#b8956c", "#6b8f71"][
 			Math.floor(Math.random() * 5)
 		],
 	}));

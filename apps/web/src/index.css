@@ -1,15 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@fontsource-variable/geist";
-@import "@fontsource-variable/geist-mono";
+@import "@fontsource-variable/sora";
+@import "@fontsource-variable/jetbrains-mono";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
 	--font-sans:
-		"Geist Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+		"Sora Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
 		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-	--font-mono: "Geist Mono Variable", ui-monospace, monospace;
+	--font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
 }
 
 html,
@@ -24,124 +24,124 @@ body {
 /* ============================================
    CALENDRAFT - DESIGN SYSTEM
    ============================================
-   Palette moderne "Minimal Premium"
-   Inspirée de Linear, Vercel, Notion
+   Palette "Warm Modern"
+   Identité distinctive ambre/crème
    
-   Accent principal : Indigo/Violet
-   Fonds : Neutres purs (blanc/noir)
+   Accent principal : Ambre brûlé
+   Fonds : Crème chaud / Brun nuit
    ============================================ */
 
 :root {
 	--radius: 0.625rem;
 
-	/* Mode clair - Blanc pur et gris neutres */
-	--background: oklch(0.995 0 0);
-	--foreground: oklch(0.141 0.005 286);
+	/* Mode clair - Crème chaud distinctif avec variations subtiles */
+	--background: oklch(0.975 0.018 72);
+	--foreground: oklch(0.18 0.025 48);
 
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.141 0.005 286);
+	--card: oklch(0.985 0.013 68);
+	--card-foreground: oklch(0.18 0.025 48);
 
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.141 0.005 286);
+	--popover: oklch(0.985 0.013 68);
+	--popover-foreground: oklch(0.18 0.025 48);
 
-	/* Accent primaire - Indigo */
-	--primary: oklch(0.55 0.22 270);
-	--primary-foreground: oklch(0.98 0.005 270);
+	/* Accent primaire - Ambre brûlé avec légères variations */
+	--primary: oklch(0.55 0.18 44);
+	--primary-foreground: oklch(0.98 0.01 72);
 
-	/* Secondary - Very light gray */
-	--secondary: oklch(0.965 0.001 286);
-	--secondary-foreground: oklch(0.205 0.005 286);
+	/* Secondary - Crème plus marqué avec variation */
+	--secondary: oklch(0.945 0.021 68);
+	--secondary-foreground: oklch(0.22 0.026 48);
 
-	/* Muted - Gris doux */
-	--muted: oklch(0.955 0.001 286);
-	--muted-foreground: oklch(0.45 0.01 286);
+	/* Muted - Tons chauds doux avec variations harmonieuses */
+	--muted: oklch(0.935 0.023 71);
+	--muted-foreground: oklch(0.4 0.041 52);
 
-	/* Accent */
-	--accent: oklch(0.955 0.001 286);
-	--accent-foreground: oklch(0.205 0.005 286);
+	/* Accent avec variation subtile */
+	--accent: oklch(0.93 0.026 69);
+	--accent-foreground: oklch(0.22 0.026 48);
 
 	/* Destructive */
 	--destructive: oklch(0.55 0.2 25);
 
-	/* Borders & inputs */
-	--border: oklch(0.915 0.002 286);
-	--input: oklch(0.915 0.002 286);
-	--ring: oklch(0.55 0.22 270);
+	/* Borders & inputs avec variations subtiles */
+	--border: oklch(0.88 0.026 71);
+	--input: oklch(0.88 0.026 69);
+	--ring: oklch(0.55 0.18 44);
 
-	/* Charts - Palette harmonieuse basée sur l'indigo */
-	--chart-1: oklch(0.55 0.22 270);
-	--chart-2: oklch(0.6 0.18 230);
-	--chart-3: oklch(0.65 0.15 300);
-	--chart-4: oklch(0.55 0.12 200);
-	--chart-5: oklch(0.5 0.15 320);
+	/* Charts - Palette harmonieuse ambre/terre avec variations */
+	--chart-1: oklch(0.55 0.18 44);
+	--chart-2: oklch(0.58 0.15 142);
+	--chart-3: oklch(0.52 0.17 27);
+	--chart-4: oklch(0.6 0.13 82);
+	--chart-5: oklch(0.48 0.15 198);
 
-	/* Sidebar */
-	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.141 0.005 286);
-	--sidebar-primary: oklch(0.55 0.22 270);
-	--sidebar-primary-foreground: oklch(0.98 0.005 270);
-	--sidebar-accent: oklch(0.955 0.001 286);
-	--sidebar-accent-foreground: oklch(0.205 0.005 286);
-	--sidebar-border: oklch(0.915 0.002 286);
-	--sidebar-ring: oklch(0.55 0.22 270);
+	/* Sidebar avec variations harmonieuses */
+	--sidebar: oklch(0.965 0.021 71);
+	--sidebar-foreground: oklch(0.18 0.025 48);
+	--sidebar-primary: oklch(0.55 0.18 44);
+	--sidebar-primary-foreground: oklch(0.98 0.01 72);
+	--sidebar-accent: oklch(0.935 0.023 71);
+	--sidebar-accent-foreground: oklch(0.22 0.026 48);
+	--sidebar-border: oklch(0.88 0.026 71);
+	--sidebar-ring: oklch(0.55 0.18 44);
 }
 
 /* ============================================
-   MODE SOMBRE - Noir profond et neutre
+   MODE SOMBRE - Brun nuit chaud
    ============================================ */
 .dark {
-	/* Fond principal - Noir profond sans teinte parasite */
-	--background: oklch(0.105 0.005 286);
-	--foreground: oklch(0.965 0.002 286);
+	/* Fond principal - Brun nuit profond et chaud avec variations */
+	--background: oklch(0.12 0.026 52);
+	--foreground: oklch(0.92 0.016 68);
 
-	/* Cards - Élévation subtile */
-	--card: oklch(0.135 0.005 286);
-	--card-foreground: oklch(0.965 0.002 286);
+	/* Cards - Élévation subtile avec variation */
+	--card: oklch(0.15 0.026 51);
+	--card-foreground: oklch(0.92 0.016 68);
 
 	/* Popover */
-	--popover: oklch(0.135 0.005 286);
-	--popover-foreground: oklch(0.965 0.002 286);
+	--popover: oklch(0.15 0.026 51);
+	--popover-foreground: oklch(0.92 0.016 68);
 
-	/* Primary - Indigo plus lumineux en dark */
-	--primary: oklch(0.65 0.22 270);
-	--primary-foreground: oklch(0.15 0.03 270);
+	/* Primary - Ambre lumineux en dark avec variation */
+	--primary: oklch(0.72 0.19 50);
+	--primary-foreground: oklch(0.12 0.026 52);
 
-	/* Secondary */
-	--secondary: oklch(0.185 0.005 286);
-	--secondary-foreground: oklch(0.965 0.002 286);
+	/* Secondary avec variation */
+	--secondary: oklch(0.18 0.026 51);
+	--secondary-foreground: oklch(0.92 0.016 68);
 
-	/* Muted */
-	--muted: oklch(0.205 0.005 286);
-	--muted-foreground: oklch(0.55 0.01 286);
+	/* Muted avec variations harmonieuses */
+	--muted: oklch(0.2 0.026 52);
+	--muted-foreground: oklch(0.58 0.031 53);
 
-	/* Accent */
-	--accent: oklch(0.205 0.005 286);
-	--accent-foreground: oklch(0.965 0.002 286);
+	/* Accent avec variation */
+	--accent: oklch(0.2 0.026 51);
+	--accent-foreground: oklch(0.92 0.016 68);
 
 	/* Destructive */
 	--destructive: oklch(0.6 0.2 25);
 
-	/* Borders */
-	--border: oklch(0.245 0.005 286);
-	--input: oklch(0.205 0.005 286);
-	--ring: oklch(0.65 0.22 270);
+	/* Borders avec variations subtiles */
+	--border: oklch(0.26 0.026 51);
+	--input: oklch(0.2 0.026 52);
+	--ring: oklch(0.72 0.19 50);
 
-	/* Charts */
-	--chart-1: oklch(0.65 0.22 270);
-	--chart-2: oklch(0.68 0.18 230);
-	--chart-3: oklch(0.7 0.15 300);
-	--chart-4: oklch(0.62 0.12 200);
-	--chart-5: oklch(0.58 0.15 320);
+	/* Charts avec variations harmonieuses */
+	--chart-1: oklch(0.72 0.19 50);
+	--chart-2: oklch(0.62 0.13 142);
+	--chart-3: oklch(0.65 0.15 27);
+	--chart-4: oklch(0.68 0.11 82);
+	--chart-5: oklch(0.55 0.13 198);
 
-	/* Sidebar */
-	--sidebar: oklch(0.12 0.005 286);
-	--sidebar-foreground: oklch(0.965 0.002 286);
-	--sidebar-primary: oklch(0.65 0.22 270);
-	--sidebar-primary-foreground: oklch(0.15 0.03 270);
-	--sidebar-accent: oklch(0.185 0.005 286);
-	--sidebar-accent-foreground: oklch(0.965 0.002 286);
-	--sidebar-border: oklch(0.245 0.005 286);
-	--sidebar-ring: oklch(0.65 0.22 270);
+	/* Sidebar avec variations harmonieuses */
+	--sidebar: oklch(0.14 0.026 52);
+	--sidebar-foreground: oklch(0.92 0.016 68);
+	--sidebar-primary: oklch(0.72 0.19 50);
+	--sidebar-primary-foreground: oklch(0.12 0.026 52);
+	--sidebar-accent: oklch(0.18 0.026 51);
+	--sidebar-accent-foreground: oklch(0.92 0.016 68);
+	--sidebar-border: oklch(0.26 0.026 51);
+	--sidebar-ring: oklch(0.72 0.19 50);
 }
 
 @theme inline {
@@ -199,7 +199,7 @@ body {
    TEXTURES & ATMOSPHÈRE
    ============================================ */
 
-/* Noise grain overlay - texture subtile */
+/* Noise grain overlay - texture subtile et naturelle */
 .noise-overlay {
 	position: relative;
 }
@@ -209,13 +209,38 @@ body {
 	position: absolute;
 	inset: 0;
 	pointer-events: none;
-	opacity: 0.025;
-	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+	opacity: 0.15;
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
+	background-size: 200px 200px;
 	z-index: 1;
+	mix-blend-mode: overlay;
 }
 
 .dark .noise-overlay::before {
-	opacity: 0.04;
+	opacity: 0.2;
+	mix-blend-mode: soft-light;
+}
+
+/* Grain texture pour les dégradés */
+.grain-texture {
+	position: relative;
+}
+
+.grain-texture::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	opacity: 0.3;
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+	background-size: 150px 150px;
+	z-index: 1;
+	mix-blend-mode: multiply;
+}
+
+.dark .grain-texture::after {
+	opacity: 0.25;
+	mix-blend-mode: screen;
 }
 
 /* Dot grid pattern amélioré - plus visible et dynamique */
@@ -234,7 +259,7 @@ body {
 .dark .dot-grid {
 	background-image:
 		radial-gradient(circle at center, var(--primary) 0.5px, transparent 0.5px),
-		radial-gradient(circle at center, oklch(0.3 0.01 270) 1px, transparent 1px);
+		radial-gradient(circle at center, oklch(0.3 0.02 55) 1px, transparent 1px);
 }
 
 /* Cross grid pattern - alternative géométrique */
@@ -245,22 +270,39 @@ body {
 	background-size: 40px 40px;
 }
 
-/* Gradient mesh - effet atmosphérique profond */
+/* Ruled paper pattern - thématique agenda */
+.ruled-pattern {
+	background-image: repeating-linear-gradient(
+		to bottom,
+		transparent 0px,
+		transparent 31px,
+		var(--border) 31px,
+		var(--border) 32px
+	);
+	background-size: 100% 32px;
+}
+
+/* Gradient mesh - effet atmosphérique profond avec variations harmonieuses */
 .gradient-mesh {
 	background:
 		radial-gradient(
 			ellipse 80% 50% at 20% 40%,
-			oklch(0.55 0.15 270 / 0.12),
+			oklch(0.66 0.17 48 / 0.25),
 			transparent 50%
 		),
 		radial-gradient(
 			ellipse 60% 40% at 80% 60%,
-			oklch(0.6 0.12 290 / 0.08),
+			oklch(0.69 0.15 62 / 0.18),
 			transparent 50%
 		),
 		radial-gradient(
 			ellipse 50% 30% at 50% 90%,
-			oklch(0.5 0.1 250 / 0.06),
+			oklch(0.61 0.13 38 / 0.15),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 40% 25% at 15% 70%,
+			oklch(0.64 0.14 52 / 0.12),
 			transparent 50%
 		);
 }
@@ -269,67 +311,112 @@ body {
 	background:
 		radial-gradient(
 			ellipse 80% 50% at 20% 40%,
-			oklch(0.55 0.2 270 / 0.15),
+			oklch(0.66 0.19 52 / 0.3),
 			transparent 50%
 		),
 		radial-gradient(
 			ellipse 60% 40% at 80% 60%,
-			oklch(0.6 0.15 290 / 0.1),
+			oklch(0.71 0.16 68 / 0.2),
 			transparent 50%
 		),
 		radial-gradient(
 			ellipse 50% 30% at 50% 90%,
-			oklch(0.5 0.12 250 / 0.08),
+			oklch(0.59 0.13 38 / 0.15),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 40% 25% at 15% 70%,
+			oklch(0.63 0.17 55 / 0.12),
 			transparent 50%
 		);
 }
 
-/* Aurora effect - for hero sections */
+/* Aurora effect - for hero sections avec variations harmonieuses */
 .aurora {
+	position: relative;
 	background:
 		radial-gradient(
 			ellipse 100% 100% at 50% 0%,
-			oklch(0.55 0.18 270 / 0.15),
+			oklch(0.66 0.19 47 / 0.35),
 			transparent 60%
 		),
 		radial-gradient(
 			ellipse 80% 60% at 30% 20%,
-			oklch(0.6 0.14 230 / 0.1),
+			oklch(0.69 0.15 68 / 0.25),
 			transparent 50%
 		),
 		radial-gradient(
 			ellipse 60% 50% at 70% 30%,
-			oklch(0.58 0.16 290 / 0.08),
+			oklch(0.61 0.17 33 / 0.2),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 50% 40% at 10% 50%,
+			oklch(0.67 0.16 55 / 0.15),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 45% 35% at 90% 40%,
+			oklch(0.63 0.14 40 / 0.12),
 			transparent 50%
 		);
+}
+
+.aurora::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	opacity: 0.25;
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+	background-size: 180px 180px;
+	z-index: 1;
+	mix-blend-mode: multiply;
 }
 
 .dark .aurora {
 	background:
 		radial-gradient(
 			ellipse 100% 100% at 50% 0%,
-			oklch(0.5 0.2 270 / 0.2),
+			oklch(0.66 0.21 52 / 0.4),
 			transparent 60%
 		),
 		radial-gradient(
 			ellipse 80% 60% at 30% 20%,
-			oklch(0.55 0.16 230 / 0.12),
+			oklch(0.71 0.17 72 / 0.25),
 			transparent 50%
 		),
 		radial-gradient(
 			ellipse 60% 50% at 70% 30%,
-			oklch(0.52 0.18 290 / 0.1),
+			oklch(0.63 0.19 33 / 0.2),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 50% 40% at 10% 50%,
+			oklch(0.64 0.18 58 / 0.15),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 45% 35% at 90% 40%,
+			oklch(0.6 0.15 42 / 0.12),
 			transparent 50%
 		);
 }
 
-/* Gradient signature - Dégradé indigo amélioré */
+.dark .aurora::after {
+	opacity: 0.2;
+	mix-blend-mode: screen;
+}
+
+/* Gradient signature - Dégradé ambre chaud avec variations harmonieuses */
 .gradient-brand {
 	background: linear-gradient(
 		135deg,
-		oklch(0.55 0.22 270),
-		oklch(0.62 0.2 285),
-		oklch(0.55 0.18 250)
+		oklch(0.57 0.17 47),
+		oklch(0.6 0.15 55),
+		oklch(0.63 0.14 62),
+		oklch(0.58 0.16 50),
+		oklch(0.56 0.13 40)
 	);
 	-webkit-background-clip: text;
 	background-clip: text;
@@ -356,14 +443,14 @@ body {
 .step-number {
 	font-family: var(--font-mono);
 	font-weight: 700;
-	-webkit-text-stroke: 2px var(--primary);
+	-webkit-text-stroke: 2.5px var(--primary);
 	color: transparent;
-	opacity: 0.2;
+	opacity: 0.4;
 	transition: opacity 0.3s ease;
 }
 
 .group:hover .step-number {
-	opacity: 0.35;
+	opacity: 0.6;
 }
 
 /* Header gradient border */
@@ -454,6 +541,26 @@ body {
 		0 0 0 4px var(--ring);
 }
 
+/* Card lift effect - enhanced hover */
+.card-lift {
+	transition:
+		transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+		box-shadow 0.25s ease;
+}
+
+.card-lift:hover {
+	transform: translateY(-6px) scale(1.01);
+	box-shadow:
+		0 20px 40px oklch(0.58 0.1 45 / 0.15),
+		0 8px 16px oklch(0 0 0 / 0.1);
+}
+
+.dark .card-lift:hover {
+	box-shadow:
+		0 20px 40px oklch(0.65 0.12 50 / 0.2),
+		0 8px 16px oklch(0 0 0 / 0.3);
+}
+
 /* Card with gradient border */
 .card-gradient-border {
 	position: relative;
@@ -469,9 +576,9 @@ body {
 	padding: 1px;
 	background: linear-gradient(
 		135deg,
-		oklch(0.55 0.15 270 / 0.3),
-		oklch(0.6 0.12 290 / 0.2),
-		oklch(0.55 0.1 250 / 0.1)
+		oklch(0.58 0.12 45 / 0.3),
+		oklch(0.62 0.1 60 / 0.2),
+		oklch(0.55 0.08 35 / 0.1)
 	);
 	-webkit-mask:
 		linear-gradient(#fff 0 0) content-box,
@@ -524,7 +631,7 @@ body {
 	background: linear-gradient(
 		90deg,
 		transparent 0%,
-		oklch(0.9 0.01 270 / 0.5) 50%,
+		oklch(0.9 0.02 55 / 0.5) 50%,
 		transparent 100%
 	);
 	background-size: 200% 100%;
@@ -535,7 +642,7 @@ body {
 	background: linear-gradient(
 		90deg,
 		transparent 0%,
-		oklch(0.3 0.02 270 / 0.5) 50%,
+		oklch(0.3 0.02 55 / 0.5) 50%,
 		transparent 100%
 	);
 	background-size: 200% 100%;
@@ -556,11 +663,11 @@ body {
 }
 
 .interactive-glow:hover {
-	box-shadow: 0 0 20px oklch(0.55 0.2 270 / 0.15);
+	box-shadow: 0 0 20px oklch(0.58 0.14 45 / 0.15);
 }
 
 .dark .interactive-glow:hover {
-	box-shadow: 0 0 25px oklch(0.6 0.22 270 / 0.2);
+	box-shadow: 0 0 25px oklch(0.65 0.15 50 / 0.2);
 }
 
 /* Floating animation for decorative elements */

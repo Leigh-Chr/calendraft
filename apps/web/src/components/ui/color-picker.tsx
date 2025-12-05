@@ -11,12 +11,12 @@ import {
 import { cn } from "@/lib/utils";
 
 const PREDEFINED_COLORS = [
-	{ name: "Red", value: "#EF4444" },
+	{ name: "Amber", value: "#C2703C" },
 	{ name: "Orange", value: "#F97316" },
+	{ name: "Red", value: "#EF4444" },
 	{ name: "Yellow", value: "#EAB308" },
 	{ name: "Green", value: "#22C55E" },
 	{ name: "Blue", value: "#3B82F6" },
-	{ name: "Indigo", value: "#6366F1" },
 	{ name: "Purple", value: "#8B5CF6" },
 	{ name: "Pink", value: "#EC4899" },
 	{ name: "Cyan", value: "#06B6D4" },

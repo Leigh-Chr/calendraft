@@ -439,7 +439,7 @@ function CalendarCard({
 			{/* Color accent - left border instead of top for more subtle look */}
 			<div
 				className="absolute inset-y-0 left-0 w-1 transition-all duration-200 group-hover:w-1.5"
-				style={{ backgroundColor: calendar.color || "#6366f1" }}
+				style={{ backgroundColor: calendar.color || "#c2703c" }}
 			/>
 
 			<CardHeader className="pb-2 pl-5">
@@ -544,7 +544,7 @@ function CalendarCard({
 									</span>
 									<span
 										className="h-1 w-1 shrink-0 rounded-full"
-										style={{ backgroundColor: calendar.color || "#6366f1" }}
+										style={{ backgroundColor: calendar.color || "#c2703c" }}
 									/>
 									<span className="truncate">{event.title}</span>
 								</div>

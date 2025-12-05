@@ -58,7 +58,7 @@ function LandingPage() {
 			>
 				{/* Background effects - Enhanced */}
 				<div className="-z-10 pointer-events-none absolute inset-0">
-					{/* Aurora gradient mesh */}
+					{/* Aurora gradient mesh avec grain intégré */}
 					<div className="aurora absolute inset-0" />
 					{/* Dot grid pattern - improved */}
 					<div className="dot-grid absolute inset-0 opacity-50 [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_60%,transparent_100%)]" />
@@ -146,10 +146,10 @@ function LandingPage() {
 				className="section-divider relative overflow-hidden bg-muted/30"
 				aria-labelledby="features-heading"
 			>
-				{/* Subtle background pattern */}
+				{/* Subtle background pattern avec grain */}
 				<div className="-z-10 pointer-events-none absolute inset-0">
 					<div className="cross-grid absolute inset-0 opacity-30" />
-					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent" />
+					<div className="grain-texture absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent" />
 				</div>
 				<div className="container mx-auto px-4 py-20 sm:py-28">
 					<div className="mx-auto mb-16 max-w-2xl text-center">
@@ -211,9 +211,10 @@ function LandingPage() {
 				className="section-divider relative"
 				aria-labelledby="how-it-works-heading"
 			>
-				{/* Subtle gradient mesh */}
+				{/* Ruled paper pattern + gradient mesh avec grain */}
 				<div className="-z-10 pointer-events-none absolute inset-0">
-					<div className="gradient-mesh absolute inset-0 opacity-50" />
+					<div className="ruled-pattern absolute inset-0 opacity-40" />
+					<div className="gradient-mesh grain-texture absolute inset-0 opacity-40" />
 				</div>
 				<div className="container mx-auto px-4 py-20 sm:py-28">
 					<div className="mx-auto mb-16 max-w-2xl text-center">
@@ -256,9 +257,10 @@ function LandingPage() {
 				className="section-divider relative overflow-hidden bg-muted/30"
 				aria-label="Usage options"
 			>
-				{/* Background elements */}
+				{/* Background elements avec grain */}
 				<div className="-z-10 pointer-events-none absolute inset-0">
 					<div className="cross-grid absolute inset-0 opacity-20" />
+					<div className="grain-texture absolute inset-0" />
 					<div className="absolute top-1/2 left-1/4 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[100px]" />
 					<div className="absolute right-1/4 bottom-0 h-[300px] w-[300px] rounded-full bg-chart-2/5 blur-[80px]" />
 				</div>
@@ -522,12 +524,12 @@ interface CardProps {
 function BentoCard({ icon: Icon, title, description, delay = 0 }: CardProps) {
 	return (
 		<article
-			className="card-gradient-border group card-glow fade-in slide-in-from-bottom-4 relative animate-in overflow-hidden rounded-xl border bg-card p-6 transition-all duration-200 hover:border-primary/30"
+			className="card-gradient-border group card-lift fade-in slide-in-from-bottom-4 relative animate-in overflow-hidden rounded-xl border bg-card p-6 hover:border-primary/40"
 			style={{ animationDelay: `${delay}ms`, animationFillMode: "backwards" }}
 		>
-			<div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+			<div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-primary/8 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 			<div className="relative">
-				<div className="mb-4 inline-flex size-10 items-center justify-center rounded-lg bg-muted transition-all duration-200 group-hover:bg-primary/10 group-hover:shadow-lg group-hover:shadow-primary/10">
+				<div className="mb-4 inline-flex size-10 items-center justify-center rounded-lg bg-muted transition-all duration-200 group-hover:bg-primary/15 group-hover:shadow-lg group-hover:shadow-primary/20">
 					<Icon
 						className="size-5 text-muted-foreground transition-colors duration-200 group-hover:text-primary"
 						aria-hidden

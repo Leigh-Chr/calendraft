@@ -6,25 +6,57 @@ import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import { handleTRPCError } from "@/lib/error-handler";
 import { getAnonymousId } from "@/lib/storage";
 
+/**
+ * Check if error is a network error
+ */
+function isNetworkErrorType(error: unknown): boolean {
+	if (error instanceof Error) {
+		const message = error.message.toLowerCase();
+		return (
+			error.name === "NetworkError" ||
+			error.name === "TypeError" ||
+			message.includes("network") ||
+			message.includes("fetch")
+		);
+	}
+	return false;
+}
+
+/**
+ * Handle UNAUTHORIZED errors by ensuring anonymous ID exists
+ */
+function handleUnauthorizedError(): boolean {
+	if (typeof window === "undefined") return false;
+	const anonymousId = getAnonymousId();
+	return !!anonymousId;
+}
+
 export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
 		onError: (error) => {
-			// Only handle tRPC errors here, component-level errors are handled in hooks
+			// Handle network errors first (even without data property)
+			if (isNetworkErrorType(error)) {
+				handleTRPCError(error as TRPCClientError<AppRouter>, {
+					fallbackTitle: "Network Error",
+					fallbackDescription:
+						"Unable to contact the server. Make sure the server is running and check your connection.",
+					showToast: true,
+				});
+				return;
+			}
+
+			// Handle tRPC errors with data property
 			if (error && typeof error === "object" && "data" in error) {
 				const trpcError = error as TRPCClientError<AppRouter>;
 
 				// For UNAUTHORIZED errors in anonymous mode, ensure anonymous ID exists
-				// This handles edge cases where localStorage might have been cleared
 				if (
 					trpcError.data?.code === "UNAUTHORIZED" &&
-					typeof window !== "undefined"
+					handleUnauthorizedError()
 				) {
-					const anonymousId = getAnonymousId();
-					if (anonymousId) {
-						// Retry the query after ensuring anonymous ID exists
-						// The query will be retried automatically by React Query
-						return;
-					}
+					// Retry the query after ensuring anonymous ID exists
+					// The query will be retried automatically by React Query
+					return;
 				}
 
 				handleTRPCError(trpcError, {
@@ -32,8 +64,11 @@ export const queryClient = new QueryClient({
 					fallbackDescription: "An error occurred while retrieving data.",
 					showToast: true,
 				});
-			} else if (import.meta.env.DEV) {
-				// Only log in development mode
+				return;
+			}
+
+			// Log other errors in development mode
+			if (import.meta.env.DEV) {
 				console.error("Query error:", error);
 			}
 		},

@@ -14,17 +14,35 @@ import type { ErrorResult } from "./types";
 export function getErrorMessage(error: unknown): string {
 	if (error instanceof Error) return error.message;
 	if (typeof error === "string") return error;
-	return "Une erreur inconnue est survenue";
+	return "An unknown error occurred";
 }
 
 /**
  * Check if error message matches network error patterns
  */
 export function isNetworkError(error: unknown): boolean {
-	if (!(error instanceof Error)) return false;
+	if (!(error instanceof Error)) {
+		// Check if it's a tRPC error with network error in cause
+		if (
+			error &&
+			typeof error === "object" &&
+			"cause" in error &&
+			error.cause instanceof Error
+		) {
+			const causeMessage = error.cause.message.toLowerCase();
+			return (
+				NETWORK_ERROR_PATTERNS.some((p) => causeMessage.includes(p)) ||
+				error.cause.name === "NetworkError" ||
+				error.cause.name === "TypeError"
+			);
+		}
+		return false;
+	}
 	const message = error.message.toLowerCase();
 	const isPattern = NETWORK_ERROR_PATTERNS.some((p) => message.includes(p));
-	return isPattern || error.name === "NetworkError";
+	return (
+		isPattern || error.name === "NetworkError" || error.name === "TypeError"
+	);
 }
 
 /**

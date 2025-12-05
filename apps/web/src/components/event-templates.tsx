@@ -121,7 +121,7 @@ export const EVENT_TEMPLATES: EventTemplate[] = [
 		id: "study",
 		name: "Study",
 		icon: <GraduationCap className="h-4 w-4" />,
-		color: "#6366f1", // indigo
+		color: "#c2703c", // amber
 		duration: 120,
 		title: "Study session",
 		categories: "Study",
