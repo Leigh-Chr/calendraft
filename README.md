@@ -224,10 +224,16 @@ To deploy in production, consult the complete guide: [DEPLOYMENT.md](./DEPLOYMEN
 - Rate limiting: 100 requests/minute per IP
 - HTTP security headers configured automatically
 - Input validation (max file size: 5MB)
-- Anonymous user limitations: 10 calendars, 500 events/calendar
-- Authenticated user limitations: 100 calendars, 2,000 events/calendar
-
-
+- Anonymous user limitations: 
+  - 10 calendars
+  - 500 events per calendar
+  - 50 groups
+  - 15 calendars per group
+- Authenticated user limitations:
+  - 100 calendars
+  - 2,000 events per calendar
+  - 100 groups
+  - 20 calendars per group
 
 
 ## Project Structure
@@ -318,46 +324,6 @@ calendraft/
 - Check that the .ics file is valid and conforms to RFC 5545 format
 - Some optional fields may be ignored, but start and end dates are required
 
-## Sentry MCP (Model Context Protocol)
-
-For advanced integration with AI assistants (like Cursor, Claude, etc.), you can add the official Sentry MCP server. This allows the AI to directly access Sentry errors to help you debug them.
-
-### Sentry MCP Configuration
-
-Add this configuration to your MCP configuration file (e.g., `.cursor/mcp.json` or equivalent):
-
-```json
-{
-  "mcpServers": {
-    "sentry": {
-      "url": "https://mcp.sentry.dev/sse"
-    }
-  }
-}
-```
-
-Or for authentication-enabled configuration:
-
-```json
-{
-  "mcpServers": {
-    "sentry": {
-      "command": "npx",
-      "args": ["-y", "@sentry/mcp-server-stdio"]
-    }
-  }
-}
-```
-
-### Sentry MCP Features
-
-Once configured, the AI assistant will be able to:
-- List Sentry issues for your project
-- Analyze stack traces and errors
-- Propose fixes based on actual errors
-- Correlate errors with source code
-
-For more information: [github.com/getsentry/sentry-mcp](https://github.com/getsentry/sentry-mcp)
 
 ## Documentation
 

@@ -119,11 +119,15 @@ To prevent abuse, limits are applied to all users:
 **Anonymous users:**
 - Maximum 10 calendars
 - Maximum 500 events per calendar
+- Maximum 50 groups
+- Maximum 15 calendars per group
 - Automatic deletion after 60 days of inactivity
 
 **Authenticated users:**
 - Maximum 100 calendars
 - Maximum 2,000 events per calendar
+- Maximum 100 groups
+- Maximum 20 calendars per group
 - No automatic deletion
 
 ### Security Logging

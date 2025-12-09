@@ -121,23 +121,14 @@ protectedProcedure.query(...)   // ctx.session guaranteed
 - Secure cookie management
 
 ### `@calendraft/api`
-- `calendarRouter`: Calendar CRUD, ICS import/export, merge
+- `calendarRouter`: Calendar CRUD, ICS import/export, merge, groups
 - `eventRouter`: Event CRUD
+- `shareRouter`: Share links and bundles (single calendar and multi-calendar)
+- `userRouter`: User profile and usage information
 - **tRPC Procedures**:
-  - `publicProcedure`: Truly public endpoints (health check)
+  - `publicProcedure`: Truly public endpoints (health check, public share access)
   - `authOrAnonProcedure`: Requires session OR anonymous ID (majority of endpoints)
   - `protectedProcedure`: Requires authenticated session only
-
-## Migration from apps/web
-
-```typescript
-// Before
-import { parseTags } from '@/lib/tag-utils';
-import { FIELD_LIMITS } from '@/lib/field-limits';
-
-// After
-import { parseTags, FIELD_LIMITS } from '@calendraft/core';
-```
 
 ## See Also
 

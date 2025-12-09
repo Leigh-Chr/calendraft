@@ -11,21 +11,13 @@ Calendraft utilise **Better-Auth** pour gérer l'authentification des utilisateu
 
 ### Backend (Serveur)
 
-Le serveur expose les endpoints Better-Auth via `/api/auth/*` :
+Le serveur expose les endpoints Better-Auth via `/api/auth/*`.
 
-```12:23:packages/auth/src/index.ts
-	trustedOrigins: [process.env.CORS_ORIGIN || "http://localhost:3001"],
-	emailAndPassword: {
-		enabled: true,
-	},
-	advanced: {
-		defaultCookieAttributes: {
-			sameSite: isProduction ? "none" : "lax",
-			secure: isProduction,
-			httpOnly: true,
-		},
-	},
-```
+**Configuration Better-Auth** (`packages/auth/src/index.ts`) :
+- Utilise Prisma adapter pour PostgreSQL
+- `trustedOrigins` configuré via `CORS_ORIGIN`
+- Authentification email/mot de passe activée
+- Cookies configurés selon l'environnement (development/production)
 
 **Configuration serveur** (`apps/server/src/index.ts`) :
 - Route `/api/auth/*` gérée par `auth.handler()`
@@ -34,7 +26,7 @@ Le serveur expose les endpoints Better-Auth via `/api/auth/*` :
   - 10 requêtes/minute pour les autres endpoints d'authentification
 - CORS configuré pour permettre les cookies cross-origin
 
-**Configuration Better-Auth** (`packages/auth/src/index.ts`) :
+**Fonctionnalités Better-Auth** :
 - Vérification d'email activée avec envoi automatique à l'inscription
 - Plugin `emailHarmony` pour bloquer 55,000+ domaines d'emails temporaires
 - Normalisation d'email activée (permet connexion avec email normalisé)
@@ -42,14 +34,7 @@ Le serveur expose les endpoints Better-Auth via `/api/auth/*` :
 
 ### Frontend (Client)
 
-Le client utilise `better-auth/react` pour l'authentification :
-
-```5:8:apps/web/src/lib/auth-client.ts
-export const authClient = createAuthClient({
-	baseURL: import.meta.env.VITE_SERVER_URL,
-	plugins: [inferAdditionalFields<typeof auth>()],
-});
-```
+Le client utilise `better-auth/react` pour l'authentification. Le client est configuré dans `apps/web/src/lib/auth-client.ts` avec l'URL du serveur backend.
 
 **Composants** :
 - `SignInForm` : Formulaire de connexion (`apps/web/src/components/sign-in-form.tsx`)
@@ -170,96 +155,6 @@ VITE_SERVER_URL=http://localhost:3000
 4. En cas de succès : redirection vers `/calendars`
 5. En cas d'erreur : affichage d'un toast avec le message d'erreur
 
-## Problèmes courants et solutions
-
-### 1. Erreur "Network Error" ou "Failed to fetch"
-
-**Causes possibles** :
-- Le serveur backend n'est pas démarré
-- `VITE_SERVER_URL` est incorrect dans `apps/web/.env`
-- Problème de CORS
-
-**Solutions** :
-```bash
-# Vérifier que le serveur fonctionne
-curl http://localhost:3000/health
-
-# Vérifier la variable d'environnement
-cat apps/web/.env | grep VITE_SERVER_URL
-
-# Vérifier les logs du serveur
-# Les erreurs CORS apparaîtront dans les logs
-```
-
-### 2. Erreur "Invalid credentials" ou "User not found"
-
-**Causes possibles** :
-- Email ou mot de passe incorrect
-- L'utilisateur n'existe pas (pour la connexion)
-- L'email existe déjà (pour l'inscription)
-
-**Solutions** :
-- Vérifier les identifiants
-- Pour l'inscription : utiliser un autre email
-- Pour la connexion : vérifier que le compte existe dans la base de données
-
-### 3. Erreur "BETTER_AUTH_SECRET is required"
-
-**Cause** : La variable d'environnement `BETTER_AUTH_SECRET` n'est pas définie ou est trop courte (< 32 caractères)
-
-**Solution** :
-```bash
-# Générer un secret sécurisé
-openssl rand -base64 32
-
-# Ajouter dans apps/server/.env
-BETTER_AUTH_SECRET=<secret-généré>
-```
-
-### 4. Les cookies ne sont pas définis (session non persistante)
-
-**Causes possibles** :
-- Configuration CORS incorrecte
-- `CORS_ORIGIN` ne correspond pas à l'URL du frontend
-- Problème avec les cookies en développement (SameSite, Secure)
-
-**Solutions** :
-```bash
-# Vérifier que CORS_ORIGIN correspond à l'URL du frontend
-# En développement : http://localhost:3001
-# En production : https://votre-domaine.com
-
-# Vérifier dans les DevTools du navigateur :
-# - Application > Cookies
-# - Vérifier que le cookie de session est présent
-```
-
-### 5. Erreur de base de données
-
-**Causes possibles** :
-- La base de données n'est pas accessible
-- Les tables Better-Auth n'existent pas
-- `DATABASE_URL` est incorrect
-
-**Solutions** :
-```bash
-# Vérifier la connexion à la base de données
-bun run db:push
-
-# Vérifier que les tables existent
-bun run db:studio
-# Vérifier les tables : user, session, account, verification
-
-# Vérifier DATABASE_URL
-cat apps/server/.env | grep DATABASE_URL
-```
-
-### 6. Erreur "Rate limit exceeded"
-
-**Cause** : Trop de tentatives de connexion/inscription (limite : 10 requêtes/minute)
-
-**Solution** : Attendre 1 minute avant de réessayer
-
 ## Diagnostic
 
 Un script de diagnostic est disponible pour vérifier la configuration :
@@ -273,6 +168,8 @@ Ce script vérifie :
 - L'accessibilité du serveur backend
 - La connexion à la base de données
 - Les endpoints Better-Auth
+
+Pour les problèmes courants et leurs solutions, consultez la section "Troubleshooting" du [README principal](README.md#troubleshooting).
 
 ## Base de données
 

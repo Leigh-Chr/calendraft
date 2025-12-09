@@ -89,21 +89,27 @@ import {
 
 ```typescript
 import { 
-  ANONYMOUS_LIMITS,       // { calendars: 10, eventsPerCalendar: 500 }
-  AUTHENTICATED_LIMITS,   // { calendars: 100, eventsPerCalendar: 2000 }
+  ANONYMOUS_LIMITS,       // { calendars: 10, eventsPerCalendar: 500, groups: 50, calendarsPerGroup: 15 }
+  AUTHENTICATED_LIMITS,   // { calendars: 100, eventsPerCalendar: 2000, groups: 100, calendarsPerGroup: 20 }
   hasReachedCalendarLimit,
   hasReachedEventLimit,
+  hasReachedGroupLimit,
   getMaxCalendars,
   getMaxEventsPerCalendar,
+  getMaxGroups,
+  getMaxCalendarsPerGroup,
 } from '@calendraft/core';
 
 // Check if limit reached
 hasReachedCalendarLimit(isAuth, currentCount)  // boolean
 hasReachedEventLimit(isAuth, currentCount)     // boolean
+hasReachedGroupLimit(isAuth, currentCount)     // boolean
 
 // Get limits
 getMaxCalendars(isAuth)           // 10 or 100
 getMaxEventsPerCalendar(isAuth)   // 500 or 2000
+getMaxGroups(isAuth)              // 50 or 100
+getMaxCalendarsPerGroup(isAuth)   // 15 or 20
 ```
 
 ### Recurrence (RRULE)
