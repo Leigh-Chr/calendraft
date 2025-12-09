@@ -20,8 +20,6 @@ import type { FilterState } from "./types";
 interface DateFilterButtonsProps {
 	currentFilter: FilterState["dateFilter"];
 	onFilterChange: (filter: FilterState["dateFilter"]) => void;
-	/** Optional ID for tour targeting */
-	id?: string;
 }
 
 const DATE_FILTER_LABELS = {
@@ -34,10 +32,9 @@ const DATE_FILTER_LABELS = {
 export const DateFilterButtons = React.memo(function DateFilterButtons({
 	currentFilter,
 	onFilterChange,
-	id,
 }: DateFilterButtonsProps) {
 	return (
-		<div id={id} className="flex flex-wrap gap-2">
+		<div className="flex flex-wrap gap-2">
 			{(Object.keys(DATE_FILTER_LABELS) as FilterState["dateFilter"][]).map(
 				(filter) => (
 					<Button
@@ -63,8 +60,6 @@ interface SearchSortBarProps {
 	onKeywordChange: (keyword: string) => void;
 	onSortChange: (sortBy: FilterState["sortBy"]) => void;
 	onSortDirectionChange: (sortDirection: FilterState["sortDirection"]) => void;
-	/** Optional ID for tour targeting */
-	id?: string;
 }
 
 export const SearchSortBar = React.memo(function SearchSortBar({
@@ -74,7 +69,6 @@ export const SearchSortBar = React.memo(function SearchSortBar({
 	onKeywordChange,
 	onSortChange,
 	onSortDirectionChange,
-	id,
 }: SearchSortBarProps) {
 	// Only show direction toggle for "date" sort
 	const showDirectionToggle = sortBy === "date";
@@ -84,7 +78,7 @@ export const SearchSortBar = React.memo(function SearchSortBar({
 	};
 
 	return (
-		<div id={id} className="flex gap-2">
+		<div className="flex gap-2">
 			<div className="flex-1">
 				<div className="relative">
 					<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />

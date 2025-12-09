@@ -24,8 +24,6 @@ interface SearchBarProps {
 	onKeywordChange: (keyword: string) => void;
 	placeholder?: string;
 	ariaLabel?: string;
-	/** Optional ID for tour targeting */
-	id?: string;
 }
 
 export const SearchBar = React.memo(function SearchBar({
@@ -33,10 +31,9 @@ export const SearchBar = React.memo(function SearchBar({
 	onKeywordChange,
 	placeholder = "Search calendars...",
 	ariaLabel = "Search calendars",
-	id,
 }: SearchBarProps) {
 	return (
-		<div id={id} className="flex-1">
+		<div className="flex-1">
 			<div className="relative">
 				<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
 				<Input
@@ -80,8 +77,6 @@ interface SearchSortBarProps {
 	showDirectionToggle?: boolean;
 	/** Custom sort options (defaults to all options) */
 	sortOptions?: Array<{ value: CalendarSortBy; label: string }>;
-	/** Optional ID for tour targeting */
-	id?: string;
 }
 
 const DEFAULT_SORT_OPTIONS: Array<{ value: CalendarSortBy; label: string }> = [

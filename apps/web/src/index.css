@@ -291,7 +291,10 @@ body {
 
 	/* Typographie par défaut pour les éléments HTML */
 	p {
-		@apply text-body;
+		font-size: var(--font-size-body);
+		font-weight: 400;
+		letter-spacing: var(--letter-spacing-body);
+		line-height: var(--line-height-body);
 		margin-bottom: var(--spacing-paragraph);
 	}
 
@@ -300,7 +303,10 @@ body {
 	}
 
 	h1 {
-		@apply text-heading-1;
+		font-size: var(--font-size-h1);
+		font-weight: 700;
+		letter-spacing: var(--letter-spacing-h1);
+		line-height: var(--line-height-h1);
 		margin-bottom: var(--spacing-after-h1);
 	}
 
@@ -309,7 +315,10 @@ body {
 	}
 
 	h2 {
-		@apply text-heading-2;
+		font-size: var(--font-size-h2);
+		font-weight: 600;
+		letter-spacing: var(--letter-spacing-h2);
+		line-height: var(--line-height-h2);
 		margin-bottom: var(--spacing-after-h2);
 	}
 
@@ -318,7 +327,10 @@ body {
 	}
 
 	h3 {
-		@apply text-heading-3;
+		font-size: var(--font-size-h3);
+		font-weight: 600;
+		letter-spacing: var(--letter-spacing-h3);
+		line-height: var(--line-height-h3);
 		margin-bottom: var(--spacing-after-h3);
 	}
 
@@ -327,7 +339,10 @@ body {
 	}
 
 	h4 {
-		@apply text-heading-4;
+		font-size: var(--font-size-h4);
+		font-weight: 500;
+		letter-spacing: var(--letter-spacing-h4);
+		line-height: var(--line-height-h4);
 		margin-bottom: var(--spacing-after-h4);
 	}
 
@@ -336,7 +351,10 @@ body {
 	}
 
 	small {
-		@apply text-small;
+		font-size: var(--font-size-small);
+		font-weight: 400;
+		letter-spacing: var(--letter-spacing-small);
+		line-height: var(--line-height-small);
 	}
 }
 

@@ -48,7 +48,6 @@ import {
 	calendarViewDefaults,
 	calendarViewSearchSchema,
 } from "@/lib/search-params";
-import { TOUR_STEP_IDS } from "@/lib/tour-constants";
 import { trpc } from "@/utils/trpc";
 
 export const Route = createFileRoute("/calendars/$calendarId")({
@@ -227,13 +226,9 @@ function CalendarViewComponent() {
 						<h1 className="text-heading-1">{calendar.name}</h1>
 						<p className="text-muted-foreground">{eventCount} event(s)</p>
 					</div>
-					<div
-						id={TOUR_STEP_IDS.ACTION_BUTTONS}
-						className="ml-auto flex flex-wrap items-center gap-2"
-					>
+					<div className="ml-auto flex flex-wrap items-center gap-2">
 						{/* Primary action */}
 						<Button
-							id={TOUR_STEP_IDS.ADD_EVENT_BUTTON}
 							onClick={() =>
 								navigate({ to: `/calendars/${calendarId}/events/new` })
 							}
@@ -310,10 +305,7 @@ function CalendarViewComponent() {
 					</div>
 				</div>
 
-				<div
-					id={TOUR_STEP_IDS.VIEW_TOGGLE}
-					className="mb-4 flex items-center gap-2"
-				>
+				<div className="mb-4 flex items-center gap-2">
 					{/* Main view toggle: List vs Calendar */}
 					<div className="flex gap-1 rounded-lg border bg-muted/50 p-1">
 						<Button

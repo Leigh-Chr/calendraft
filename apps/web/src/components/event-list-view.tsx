@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { groupEventsByDate } from "@/lib/date-utils";
 import { QUERY_KEYS } from "@/lib/query-keys";
-import { TOUR_STEP_IDS } from "@/lib/tour-constants";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
 import { BulkActionsBar } from "./event-list/bulk-actions-bar";
@@ -376,7 +375,6 @@ export function EventListView({
 		<div className="space-y-4">
 			<div className="flex flex-wrap items-center gap-2">
 				<DateFilterButtons
-					id={TOUR_STEP_IDS.DATE_FILTERS}
 					currentFilter={filters.dateFilter}
 					onFilterChange={handleDateFilterChange}
 				/>
@@ -395,7 +393,6 @@ export function EventListView({
 			</div>
 
 			<SearchSortBar
-				id={TOUR_STEP_IDS.SEARCH_BAR}
 				keyword={filters.keyword}
 				sortBy={filters.sortBy}
 				sortDirection={filters.sortDirection}

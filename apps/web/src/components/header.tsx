@@ -1,8 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Calendar, HelpCircle, Menu } from "lucide-react";
-import { useTour } from "@/components/tour";
-import { resetTourCompletion } from "@/hooks/use-calendraft-tour";
-import { TOUR_STEP_IDS } from "@/lib/tour-constants";
+import { Calendar, Menu } from "lucide-react";
 import { ModeToggle } from "./mode-toggle";
 import { Button } from "./ui/button";
 import {
@@ -12,26 +9,13 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "./ui/tooltip";
 import UserMenu from "./user-menu";
 
 export default function Header() {
 	const location = useLocation();
-	const { startTour, setIsTourCompleted } = useTour();
 	const isLandingPage = location.pathname === "/";
 
 	const appLinks = [{ to: "/calendars", label: "My calendars" }] as const;
-
-	const handleRestartTour = () => {
-		resetTourCompletion();
-		setIsTourCompleted(false);
-		startTour();
-	};
 
 	return (
 		<header className="header-glow sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
@@ -124,26 +108,6 @@ export default function Header() {
 				)}
 
 				<div className="flex items-center gap-2">
-					{!isLandingPage && (
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										id={TOUR_STEP_IDS.HELP_BUTTON}
-										variant="ghost"
-										size="icon"
-										onClick={handleRestartTour}
-										aria-label="Restart guided tour"
-									>
-										<HelpCircle className="size-5" />
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>Restart guided tour</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					)}
 					<ModeToggle />
 					{!isLandingPage && <UserMenu />}
 					{isLandingPage && (

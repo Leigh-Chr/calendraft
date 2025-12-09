@@ -37,7 +37,6 @@ import { CalendarGroupBadges } from "@/components/calendar-list/group-badges";
 import { CalendarGroupCard } from "@/components/calendar-list/group-card";
 import { StaggerContainer, StaggerItem } from "@/components/page-transition";
 import { ShareCalendarsDialog } from "@/components/share-calendars-dialog";
-import { TourAlertDialog } from "@/components/tour";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -68,7 +67,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCalendraftTour } from "@/hooks/use-calendraft-tour";
 import {
 	useCalendars,
 	useDeleteCalendar,
@@ -78,7 +76,6 @@ import {
 	calendarsListDefaults,
 	calendarsListSearchSchema,
 } from "@/lib/search-params";
-import { TOUR_STEP_IDS } from "@/lib/tour-constants";
 import { cn } from "@/lib/utils";
 import { trpc, trpcClient } from "@/utils/trpc";
 
@@ -177,10 +174,6 @@ function CalendarsListComponent() {
 	}, [allCalendars, keyword, sortBy, sortDirection]);
 	const { deleteCalendar, isDeleting } = useDeleteCalendar();
 	const { updateCalendar, isUpdating } = useUpdateCalendar();
-
-	// Tour state
-	const { openDialog: tourOpen, setOpenDialog: setTourOpen } =
-		useCalendraftTour();
 
 	// Single state for all dialogs
 	const [dialog, setDialog] = useState<DialogState>(null);
@@ -508,15 +501,11 @@ function CalendarsListComponent() {
 			</div>
 
 			<div className="container mx-auto max-w-5xl px-4 py-10">
-				{/* Tour dialog */}
-				<TourAlertDialog isOpen={tourOpen} setIsOpen={setTourOpen} />
-
 				<div className="mb-6 flex flex-wrap items-center gap-4">
 					<h1 className="text-heading-1">My calendars</h1>
 					<div className="ml-auto flex flex-wrap items-center gap-2">
 						{/* Primary action */}
 						<Button
-							id={TOUR_STEP_IDS.NEW_CALENDAR_BUTTON}
 							onClick={() => navigate({ to: "/calendars/new" })}
 							size="sm"
 						>
@@ -533,12 +522,7 @@ function CalendarsListComponent() {
 							<Folder className="mr-2 h-4 w-4" />
 							New group
 						</Button>
-						<Button
-							id={TOUR_STEP_IDS.IMPORT_BUTTON}
-							variant="outline"
-							size="sm"
-							asChild
-						>
+						<Button variant="outline" size="sm" asChild>
 							<Link to="/calendars/import">
 								<FileUp className="mr-2 h-4 w-4" />
 								Import
@@ -622,7 +606,7 @@ function CalendarsListComponent() {
 				</div>
 
 				{calendars.length === 0 ? (
-					<Card id={TOUR_STEP_IDS.CALENDAR_GRID}>
+					<Card>
 						<CardContent className="py-16 text-center">
 							<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
 								<Calendar className="h-8 w-8 text-muted-foreground" />
@@ -646,7 +630,7 @@ function CalendarsListComponent() {
 						</CardContent>
 					</Card>
 				) : (
-					<div id={TOUR_STEP_IDS.CALENDAR_GRID}>
+					<div>
 						<StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{calendars.map((calendar) => (
 								<StaggerItem key={calendar.id}>
