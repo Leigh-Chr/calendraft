@@ -147,7 +147,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 				icon: (
 					<div
 						className="h-3 w-3 rounded-full"
-						style={{ backgroundColor: calendar.color || "#c2703c" }}
+						style={{ backgroundColor: calendar.color || "#D4A017" }}
 					/>
 				),
 				action: () => closeAndNavigate(`/calendars/${calendar.id}`),

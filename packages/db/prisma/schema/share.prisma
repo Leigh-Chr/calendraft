@@ -22,3 +22,41 @@ model CalendarShareLink {
   @@map("calendar_share_link")
 }
 
+// Share bundles for sharing multiple calendars at once
+model CalendarShareBundle {
+  id          String    @id @default(uuid())
+  token       String    @unique // Random token for the share URL
+  name        String?   // Name of the bundle (e.g., "Work calendars", "Family bundle")
+  groupId     String?   // Optional: reference to a CalendarGroup (if created from a group)
+  isActive    Boolean   @default(true) // Can be disabled without deleting
+  expiresAt   DateTime? // Optional expiration date
+  removeDuplicates Boolean @default(false) // Option to remove duplicate events when merging
+  accessCount Int       @default(0) // Track how many times the bundle was accessed
+  lastAccessedAt DateTime? // When the bundle was last accessed
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  calendars   ShareBundleCalendar[] // Many-to-many relation with calendars
+  group       CalendarGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull) // If group is deleted, bundle remains but groupId becomes null
+  
+  @@index([token]) // Fast lookups by token for public access
+  @@index([isActive]) // Filter active bundles
+  @@index([groupId]) // Fast lookups for bundles of a group
+  @@map("calendar_share_bundle")
+}
+
+// Junction table for calendars in a share bundle
+model ShareBundleCalendar {
+  id          String    @id @default(uuid())
+  bundleId    String
+  calendarId  String
+  order       Int       @default(0) // Order for custom sorting (future feature)
+  
+  bundle      CalendarShareBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  
+  @@unique([bundleId, calendarId]) // Prevent duplicate calendars in same bundle
+  @@index([bundleId]) // Fast lookups for calendars in a bundle
+  @@index([calendarId]) // Fast lookups for bundles containing a calendar
+  @@map("share_bundle_calendar")
+}
+

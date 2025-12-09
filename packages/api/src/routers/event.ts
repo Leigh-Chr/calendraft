@@ -61,6 +61,20 @@ async function verifyCalendarAccess(
 	sessionUserId?: string,
 	anonymousId?: string,
 ) {
+	// First check if calendar exists (without ownership filter)
+	const calendarExists = await prisma.calendar.findUnique({
+		where: { id: calendarId },
+		select: { id: true, userId: true },
+	});
+
+	if (!calendarExists) {
+		throw new TRPCError({
+			code: "NOT_FOUND",
+			message: "Calendar not found",
+		});
+	}
+
+	// Check if user has access to this calendar
 	const calendar = await prisma.calendar.findFirst({
 		where: {
 			id: calendarId,
@@ -73,8 +87,8 @@ async function verifyCalendarAccess(
 
 	if (!calendar) {
 		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: "Calendar not found or access denied",
+			code: "FORBIDDEN",
+			message: "Access denied to this calendar",
 		});
 	}
 
@@ -193,6 +207,7 @@ export const eventRouter = router({
 			z.object({
 				calendarId: z.string(),
 				sortBy: z.enum(["date", "name", "duration"]).optional().default("date"),
+				sortDirection: z.enum(["asc", "desc"]).optional().default("asc"),
 				filterDateFrom: z.coerce.date().optional(),
 				filterDateTo: z.coerce.date().optional(),
 				filterKeyword: z.string().optional(),
@@ -201,6 +216,19 @@ export const eventRouter = router({
 			}),
 		)
 		.query(async ({ ctx, input }) => {
+			// First check if calendar exists (without ownership filter)
+			const calendarExists = await prisma.calendar.findUnique({
+				where: { id: input.calendarId },
+				select: { id: true, userId: true },
+			});
+
+			if (!calendarExists) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Calendar not found",
+				});
+			}
+
 			// Verify calendar belongs to user
 			const calendar = await prisma.calendar.findFirst({
 				where: {
@@ -214,8 +242,8 @@ export const eventRouter = router({
 
 			if (!calendar) {
 				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Calendar not found",
+					code: "FORBIDDEN",
+					message: "Access denied to this calendar",
 				});
 			}
 
@@ -224,7 +252,11 @@ export const eventRouter = router({
 				calendarId: string;
 				id?: { gt: string };
 				startDate?: { gte?: Date; lte?: Date };
-				title?: { contains: string; mode: "insensitive" };
+				OR?: Array<{
+					title?: { contains: string; mode: "insensitive" };
+					description?: { contains: string; mode: "insensitive" };
+					location?: { contains: string; mode: "insensitive" };
+				}>;
 			} = {
 				calendarId: input.calendarId,
 			};
@@ -245,27 +277,34 @@ export const eventRouter = router({
 				}
 			}
 
-			if (input.filterKeyword) {
-				where.title = {
-					contains: input.filterKeyword,
-					mode: "insensitive",
-				};
+			// Multi-field search: title, description, location
+			// Trim keyword and only search if non-empty
+			const trimmedKeyword = input.filterKeyword?.trim();
+			if (trimmedKeyword && trimmedKeyword.length > 0) {
+				where.OR = [
+					{ title: { contains: trimmedKeyword, mode: "insensitive" } },
+					{ description: { contains: trimmedKeyword, mode: "insensitive" } },
+					{ location: { contains: trimmedKeyword, mode: "insensitive" } },
+				];
 			}
 
 			// Build orderBy
+			// sortDirection is only used for "date" sort
+			// "name" and "duration" are always unidirectional (ignoring sortDirection)
 			let orderBy: { title?: "asc" | "desc"; startDate?: "asc" | "desc" } = {};
 			switch (input.sortBy) {
 				case "name":
-					orderBy = { title: "asc" };
+					orderBy = { title: "asc" }; // Always A-Z, sortDirection is ignored
 					break;
 				case "duration":
 					orderBy = {
 						// Sort by duration (endDate - startDate)
-						startDate: "asc",
+						startDate: "asc", // Always ascending, sortDirection is ignored
 					};
 					break;
-				default:
-					orderBy = { startDate: "asc" };
+				default: // date
+					// Use sortDirection for date sorting (asc = future first, desc = past first)
+					orderBy = { startDate: input.sortDirection || "asc" };
 					break;
 			}
 
@@ -278,6 +317,7 @@ export const eventRouter = router({
 					attendees: true,
 					alarms: true,
 					categories: true,
+					resources: true,
 				},
 			});
 

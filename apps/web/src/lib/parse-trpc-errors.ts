@@ -51,12 +51,12 @@ function parseTrpcErrorMessage(message: string): ZodErrorIssue[] {
  */
 function handleAttendeeError(
 	errors: ValidationErrors,
-	path: (string | number)[],
+	_path: (string | number)[],
 	message: string,
 ) {
-	const index = path[1];
+	const index = _path[1];
 	if (typeof index === "number") {
-		const field = path[2];
+		const field = _path[2];
 		if (field === "email") {
 			if (!errors.attendeeEmails) {
 				errors.attendeeEmails = {};
@@ -71,12 +71,12 @@ function handleAttendeeError(
  */
 function handleAlarmError(
 	errors: ValidationErrors,
-	path: (string | number)[],
+	_path: (string | number)[],
 	message: string,
 ) {
-	const index = path[1];
+	const index = _path[1];
 	if (typeof index === "number") {
-		const field = path[2];
+		const field = _path[2];
 		if (!errors.alarms) {
 			errors.alarms = {};
 		}

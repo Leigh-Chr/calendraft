@@ -133,7 +133,9 @@ export function AccountPrompt({
 			<CardHeader className="pb-3">
 				<div className="flex items-start justify-between">
 					<div>
-						<CardTitle className="text-lg">Save your calendars</CardTitle>
+						<CardTitle className="text-heading-3">
+							Save your calendars
+						</CardTitle>
 						<CardDescription>
 							Create a free account to never lose your data
 						</CardDescription>
@@ -184,7 +186,7 @@ function BenefitItem({
 	label: string;
 }) {
 	return (
-		<div className="flex flex-col items-center gap-1.5 rounded-lg bg-muted/50 p-3 text-center">
+		<div className="flex flex-col items-center gap-3 rounded-lg bg-muted/50 p-3 text-center">
 			<Icon className="h-4 w-4 text-primary" />
 			<span className="text-muted-foreground text-xs">{label}</span>
 		</div>

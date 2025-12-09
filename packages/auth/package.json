@@ -22,9 +22,11 @@
 		"typescript": "^5"
 	},
 	"dependencies": {
+		"@calendraft/db": "workspace:*",
 		"better-auth": "catalog:",
+		"better-auth-harmony": "^1.2.5",
 		"dotenv": "catalog:",
-		"zod": "catalog:",
-		"@calendraft/db": "workspace:*"
+		"resend": "^6.5.2",
+		"zod": "catalog:"
 	}
 }

@@ -24,131 +24,150 @@ body {
 /* ============================================
    CALENDRAFT - DESIGN SYSTEM
    ============================================
-   Palette "Warm Modern"
-   Identité distinctive ambre/crème
+   Palette "Solar Warm"
+   Identité distinctive jaune solaire/crème
    
-   Accent principal : Ambre brûlé
+   Accent principal : Jaune solaire chaleureux
    Fonds : Crème chaud / Brun nuit
    ============================================ */
 
 :root {
 	--radius: 0.625rem;
 
+	/* Courbes d'animation personnalisées - transitions fluides et naturelles */
+	--ease-solar: cubic-bezier(
+		0.34,
+		1.56,
+		0.64,
+		1
+	); /* Bounce léger pour interactions joyeuses */
+	--ease-smooth: cubic-bezier(0.4, 0, 0.2, 1); /* Smooth standard */
+	--ease-spring: cubic-bezier(
+		0.68,
+		-0.55,
+		0.265,
+		1.55
+	); /* Spring effect dynamique */
+
 	/* Mode clair - Crème chaud distinctif avec variations subtiles */
-	--background: oklch(0.975 0.018 72);
-	--foreground: oklch(0.18 0.025 48);
+	--background: oklch(0.975 0.018 68);
+	--foreground: oklch(0.18 0.025 55);
 
-	--card: oklch(0.985 0.013 68);
-	--card-foreground: oklch(0.18 0.025 48);
+	--card: oklch(0.985 0.013 65);
+	--card-foreground: oklch(0.18 0.025 55);
 
-	--popover: oklch(0.985 0.013 68);
-	--popover-foreground: oklch(0.18 0.025 48);
+	--popover: oklch(0.985 0.013 65);
+	--popover-foreground: oklch(0.18 0.025 55);
 
-	/* Accent primaire - Ambre brûlé avec légères variations */
-	--primary: oklch(0.55 0.18 44);
-	--primary-foreground: oklch(0.98 0.01 72);
+	/* Accent primaire - Jaune solaire chaleureux (hue 65-70, pas trop clair pour contraste) */
+	--primary: oklch(0.52 0.21 68);
+	--primary-foreground: oklch(0.98 0.01 68);
 
 	/* Secondary - Crème plus marqué avec variation */
-	--secondary: oklch(0.945 0.021 68);
-	--secondary-foreground: oklch(0.22 0.026 48);
+	--secondary: oklch(0.945 0.021 65);
+	--secondary-foreground: oklch(0.22 0.026 55);
 
 	/* Muted - Tons chauds doux avec variations harmonieuses */
-	--muted: oklch(0.935 0.023 71);
-	--muted-foreground: oklch(0.4 0.041 52);
+	--muted: oklch(0.935 0.023 68);
+	--muted-foreground: oklch(0.4 0.041 58);
 
 	/* Accent avec variation subtile */
-	--accent: oklch(0.93 0.026 69);
-	--accent-foreground: oklch(0.22 0.026 48);
+	--accent: oklch(0.93 0.026 66);
+	--accent-foreground: oklch(0.22 0.026 55);
 
 	/* Destructive */
 	--destructive: oklch(0.55 0.2 25);
+	--destructive-foreground: oklch(0.98 0.01 25);
 
 	/* Borders & inputs avec variations subtiles */
-	--border: oklch(0.88 0.026 71);
-	--input: oklch(0.88 0.026 69);
-	--ring: oklch(0.55 0.18 44);
+	--border: oklch(0.88 0.026 68);
+	--input: oklch(0.88 0.026 66);
+	--ring: oklch(0.52 0.21 68);
 
-	/* Charts - Palette harmonieuse ambre/terre avec variations */
-	--chart-1: oklch(0.55 0.18 44);
-	--chart-2: oklch(0.58 0.15 142);
-	--chart-3: oklch(0.52 0.17 27);
-	--chart-4: oklch(0.6 0.13 82);
-	--chart-5: oklch(0.48 0.15 198);
+	/* Charts - Palette harmonieuse jaune solaire/terre avec variations */
+	--chart-1: oklch(0.52 0.21 68);
+	--chart-2: oklch(0.58 0.16 72);
+	--chart-3: oklch(0.5 0.18 64);
+	--chart-4: oklch(0.6 0.14 75);
+	--chart-5: oklch(0.48 0.17 62);
 
 	/* Sidebar avec variations harmonieuses */
-	--sidebar: oklch(0.965 0.021 71);
-	--sidebar-foreground: oklch(0.18 0.025 48);
-	--sidebar-primary: oklch(0.55 0.18 44);
-	--sidebar-primary-foreground: oklch(0.98 0.01 72);
-	--sidebar-accent: oklch(0.935 0.023 71);
-	--sidebar-accent-foreground: oklch(0.22 0.026 48);
-	--sidebar-border: oklch(0.88 0.026 71);
-	--sidebar-ring: oklch(0.55 0.18 44);
+	--sidebar: oklch(0.965 0.021 68);
+	--sidebar-foreground: oklch(0.18 0.025 55);
+	--sidebar-primary: oklch(0.52 0.21 68);
+	--sidebar-primary-foreground: oklch(0.98 0.01 68);
+	--sidebar-accent: oklch(0.935 0.023 68);
+	--sidebar-accent-foreground: oklch(0.22 0.026 55);
+	--sidebar-border: oklch(0.88 0.026 68);
+	--sidebar-ring: oklch(0.52 0.21 68);
 }
 
 /* ============================================
-   MODE SOMBRE - Brun nuit chaud
+   MODE SOMBRE - Fond neutre avec accents solaires
    ============================================ */
 .dark {
-	/* Fond principal - Brun nuit profond et chaud avec variations */
-	--background: oklch(0.12 0.026 52);
-	--foreground: oklch(0.92 0.016 68);
+	/* Fond principal - Neutre désaturé (équivalent à #121212, pas du noir pur) */
+	--background: oklch(0.12 0.008 0);
+	--foreground: oklch(0.9 0.008 0);
 
-	/* Cards - Élévation subtile avec variation */
-	--card: oklch(0.15 0.026 51);
-	--card-foreground: oklch(0.92 0.016 68);
+	/* Cards - Élévation subtile avec fond neutre */
+	--card: oklch(0.15 0.008 0);
+	--card-foreground: oklch(0.9 0.008 0);
 
 	/* Popover */
-	--popover: oklch(0.15 0.026 51);
-	--popover-foreground: oklch(0.92 0.016 68);
+	--popover: oklch(0.15 0.008 0);
+	--popover-foreground: oklch(0.9 0.008 0);
 
-	/* Primary - Ambre lumineux en dark avec variation */
-	--primary: oklch(0.72 0.19 50);
-	--primary-foreground: oklch(0.12 0.026 52);
+	/* Primary - Jaune solaire adapté pour dark mode (saturation réduite de ~40%) */
+	--primary: oklch(0.75 0.14 70);
+	--primary-foreground: oklch(0.12 0.008 0);
 
-	/* Secondary avec variation */
-	--secondary: oklch(0.18 0.026 51);
-	--secondary-foreground: oklch(0.92 0.016 68);
+	/* Secondary - Neutre désaturé */
+	--secondary: oklch(0.18 0.008 0);
+	--secondary-foreground: oklch(0.9 0.008 0);
 
-	/* Muted avec variations harmonieuses */
-	--muted: oklch(0.2 0.026 52);
-	--muted-foreground: oklch(0.58 0.031 53);
+	/* Muted - Neutre désaturé */
+	--muted: oklch(0.2 0.008 0);
+	--muted-foreground: oklch(0.58 0.012 0);
 
-	/* Accent avec variation */
-	--accent: oklch(0.2 0.026 51);
-	--accent-foreground: oklch(0.92 0.016 68);
+	/* Accent - Neutre désaturé */
+	--accent: oklch(0.2 0.008 0);
+	--accent-foreground: oklch(0.9 0.008 0);
 
-	/* Destructive */
-	--destructive: oklch(0.6 0.2 25);
+	/* Destructive - Saturation réduite pour dark mode */
+	--destructive: oklch(0.6 0.12 25);
+	--destructive-foreground: oklch(0.98 0.01 25);
 
-	/* Borders avec variations subtiles */
-	--border: oklch(0.26 0.026 51);
-	--input: oklch(0.2 0.026 52);
-	--ring: oklch(0.72 0.19 50);
+	/* Borders - Neutres désaturés */
+	--border: oklch(0.26 0.008 0);
+	--input: oklch(0.2 0.008 0);
+	--ring: oklch(0.75 0.14 70);
 
-	/* Charts avec variations harmonieuses */
-	--chart-1: oklch(0.72 0.19 50);
-	--chart-2: oklch(0.62 0.13 142);
-	--chart-3: oklch(0.65 0.15 27);
-	--chart-4: oklch(0.68 0.11 82);
-	--chart-5: oklch(0.55 0.13 198);
+	/* Charts - Saturation réduite pour dark mode (40-50% de réduction) */
+	--chart-1: oklch(0.75 0.14 70);
+	--chart-2: oklch(0.68 0.1 72);
+	--chart-3: oklch(0.7 0.11 68);
+	--chart-4: oklch(0.72 0.09 75);
+	--chart-5: oklch(0.65 0.1 65);
 
-	/* Sidebar avec variations harmonieuses */
-	--sidebar: oklch(0.14 0.026 52);
-	--sidebar-foreground: oklch(0.92 0.016 68);
-	--sidebar-primary: oklch(0.72 0.19 50);
-	--sidebar-primary-foreground: oklch(0.12 0.026 52);
-	--sidebar-accent: oklch(0.18 0.026 51);
-	--sidebar-accent-foreground: oklch(0.92 0.016 68);
-	--sidebar-border: oklch(0.26 0.026 51);
-	--sidebar-ring: oklch(0.72 0.19 50);
+	/* Sidebar - Neutre désaturé */
+	--sidebar: oklch(0.14 0.008 0);
+	--sidebar-foreground: oklch(0.9 0.008 0);
+	--sidebar-primary: oklch(0.75 0.14 70);
+	--sidebar-primary-foreground: oklch(0.12 0.008 0);
+	--sidebar-accent: oklch(0.18 0.008 0);
+	--sidebar-accent-foreground: oklch(0.9 0.008 0);
+	--sidebar-border: oklch(0.26 0.008 0);
+	--sidebar-ring: oklch(0.75 0.14 70);
 }
 
 @theme inline {
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) + 4px);
+	/* Border radius organique - système hiérarchique */
+	--radius-sm: 0.375rem; /* Petits éléments (badges, tags) */
+	--radius-md: 0.625rem; /* Éléments standards (cards, inputs) */
+	--radius-lg: 0.875rem; /* Grands éléments (modals, sections) */
+	--radius-xl: 1.25rem; /* Hero sections, grandes cards */
+	--radius-2xl: 1.5rem; /* Éléments très grands */
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -164,6 +183,7 @@ body {
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
@@ -180,6 +200,85 @@ body {
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
+
+	/* Système d'élévation hiérarchique - profondeur et relief */
+	--elevation-0: none;
+	--elevation-1: 0 1px 2px oklch(0 0 0 / 0.05), 0 1px 3px oklch(0 0 0 / 0.1);
+	--elevation-2: 0 2px 4px oklch(0 0 0 / 0.06), 0 4px 8px oklch(0 0 0 / 0.08);
+	--elevation-3: 0 4px 8px oklch(0 0 0 / 0.08), 0 8px 16px oklch(0 0 0 / 0.1);
+	--elevation-4: 0 8px 16px oklch(0 0 0 / 0.1), 0 16px 32px oklch(0 0 0 / 0.12);
+	--elevation-solar:
+		0 0 0 1px var(--primary) / 0.1, 0 4px 12px var(--primary) / 0.15, 0 8px 24px
+		var(--primary) / 0.1; /* Glow solaire chaleureux */
+	--elevation-card-hover:
+		0 2px 4px oklch(0 0 0 / 0.06), 0 4px 8px oklch(0 0 0 / 0.08),
+		0 0 0 1px var(--primary) / 0.1,
+		0 4px 12px var(--primary) / 0.15,
+		0 8px 24px var(--primary) / 0.1; /* Élévation 2 + glow solaire */
+
+	/* ============================================
+	   SYSTÈME TYPOGRAPHIQUE SOLAIRE
+	   Échelle modulaire (ratio 1.25 - Major Third)
+	   ============================================ */
+
+	/* Tailles de police - échelle modulaire responsive */
+	--font-size-hero: clamp(2.5rem, 5vw, 4.5rem); /* 40px - 72px */
+	--font-size-display: clamp(2rem, 4vw, 3rem); /* 32px - 48px */
+	--font-size-h1: clamp(1.75rem, 3vw, 2.5rem); /* 28px - 40px */
+	--font-size-h2: clamp(1.5rem, 2.5vw, 1.875rem); /* 24px - 30px */
+	--font-size-h3: clamp(1.25rem, 2vw, 1.5rem); /* 20px - 24px */
+	--font-size-h4: clamp(1.125rem, 1.5vw, 1.25rem); /* 18px - 20px */
+	--font-size-card-title: clamp(
+		1rem,
+		1.2vw,
+		1.125rem
+	); /* 16px - 18px - Pour titres de cards de liste */
+	--font-size-body-large: 1.125rem; /* 18px */
+	--font-size-body: 1rem; /* 16px */
+	--font-size-small: 0.875rem; /* 14px */
+	--font-size-xs: 0.75rem; /* 12px */
+
+	/* Letter-spacing - tracking optimisé par niveau */
+	--letter-spacing-hero: -0.03em; /* Très serré pour impact */
+	--letter-spacing-display: -0.025em;
+	--letter-spacing-h1: -0.02em;
+	--letter-spacing-h2: -0.015em;
+	--letter-spacing-h3: -0.01em;
+	--letter-spacing-h4: 0em;
+	--letter-spacing-card-title: 0em; /* Normal pour cards */
+	--letter-spacing-body: 0em;
+	--letter-spacing-small: 0.01em;
+	--letter-spacing-uppercase: 0.05em;
+
+	/* Line-height - interlignage adaptatif */
+	--line-height-hero: 1.1; /* Serré pour impact visuel */
+	--line-height-display: 1.1;
+	--line-height-h1: 1.15;
+	--line-height-h2: 1.2;
+	--line-height-h3: 1.25;
+	--line-height-h4: 1.3;
+	--line-height-card-title: 1.4; /* Légèrement plus aéré pour cards */
+	--line-height-body-large: 1.6;
+	--line-height-body: 1.6;
+	--line-height-small: 1.5;
+
+	/* ============================================
+	   SYSTÈME D'ESPACEMENT TYPOGRAPHIQUE
+	   Espacements calculés dynamiquement basés sur line-height
+	   Utilisés uniquement dans @layer base pour les éléments HTML (p, h1-h4)
+	   Pour les espacements standards, utiliser les classes Tailwind (p-4, gap-2, etc.)
+	   ============================================ */
+
+	/* Espacements typographiques - basés sur line-height (0.5 × line-height) */
+	--spacing-after-h1: calc(var(--font-size-h1) * var(--line-height-h1) * 0.5);
+	--spacing-after-h2: calc(var(--font-size-h2) * var(--line-height-h2) * 0.5);
+	--spacing-after-h3: calc(var(--font-size-h3) * var(--line-height-h3) * 0.5);
+	--spacing-after-h4: calc(var(--font-size-h4) * var(--line-height-h4) * 0.5);
+	--spacing-paragraph: calc(
+		var(--font-size-body) *
+		var(--line-height-body) *
+		0.5
+	);
 }
 
 @layer base {
@@ -188,6 +287,56 @@ body {
 	}
 	body {
 		@apply bg-background text-foreground;
+	}
+
+	/* Typographie par défaut pour les éléments HTML */
+	p {
+		@apply text-body;
+		margin-bottom: var(--spacing-paragraph);
+	}
+
+	p:last-child {
+		margin-bottom: 0;
+	}
+
+	h1 {
+		@apply text-heading-1;
+		margin-bottom: var(--spacing-after-h1);
+	}
+
+	h1:last-child {
+		margin-bottom: 0;
+	}
+
+	h2 {
+		@apply text-heading-2;
+		margin-bottom: var(--spacing-after-h2);
+	}
+
+	h2:last-child {
+		margin-bottom: 0;
+	}
+
+	h3 {
+		@apply text-heading-3;
+		margin-bottom: var(--spacing-after-h3);
+	}
+
+	h3:last-child {
+		margin-bottom: 0;
+	}
+
+	h4 {
+		@apply text-heading-4;
+		margin-bottom: var(--spacing-after-h4);
+	}
+
+	h4:last-child {
+		margin-bottom: 0;
+	}
+
+	small {
+		@apply text-small;
 	}
 }
 
@@ -198,28 +347,6 @@ body {
 /* ============================================
    TEXTURES & ATMOSPHÈRE
    ============================================ */
-
-/* Noise grain overlay - texture subtile et naturelle */
-.noise-overlay {
-	position: relative;
-}
-
-.noise-overlay::before {
-	content: "";
-	position: absolute;
-	inset: 0;
-	pointer-events: none;
-	opacity: 0.15;
-	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
-	background-size: 200px 200px;
-	z-index: 1;
-	mix-blend-mode: overlay;
-}
-
-.dark .noise-overlay::before {
-	opacity: 0.2;
-	mix-blend-mode: soft-light;
-}
 
 /* Grain texture pour les dégradés */
 .grain-texture {
@@ -243,7 +370,128 @@ body {
 	mix-blend-mode: screen;
 }
 
-/* Dot grid pattern amélioré - plus visible et dynamique */
+/* Cross grid pattern - alternative géométrique */
+.cross-grid {
+	background-image:
+		linear-gradient(var(--border) 1px, transparent 1px),
+		linear-gradient(90deg, var(--border) 1px, transparent 1px);
+	background-size: 40px 40px;
+}
+
+/* Gradient mesh - effet atmosphérique profond avec variations harmonieuses */
+.gradient-mesh {
+	background:
+		radial-gradient(
+			ellipse 80% 50% at 20% 40%,
+			oklch(0.68 0.18 68 / 0.25),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 60% 40% at 80% 60%,
+			oklch(0.71 0.16 72 / 0.18),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 50% 30% at 50% 90%,
+			oklch(0.64 0.15 64 / 0.15),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 40% 25% at 15% 70%,
+			oklch(0.66 0.17 70 / 0.12),
+			transparent 50%
+		);
+}
+
+.dark .gradient-mesh {
+	background:
+		radial-gradient(
+			ellipse 80% 50% at 20% 40%,
+			oklch(0.7 0.12 70 / 0.3),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 60% 40% at 80% 60%,
+			oklch(0.73 0.11 72 / 0.2),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 50% 30% at 50% 90%,
+			oklch(0.67 0.1 66 / 0.15),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 40% 25% at 15% 70%,
+			oklch(0.69 0.12 68 / 0.12),
+			transparent 50%
+		);
+}
+
+/* ============================================
+   ÉLÉMENTS DE MARQUE
+   ============================================ */
+
+/* Aurora effect - for hero sections */
+.aurora {
+	position: relative;
+	background:
+		radial-gradient(
+			ellipse 100% 100% at 50% 0%,
+			oklch(0.68 0.2 68 / 0.35),
+			transparent 60%
+		),
+		radial-gradient(
+			ellipse 80% 60% at 30% 20%,
+			oklch(0.71 0.17 72 / 0.25),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 60% 50% at 70% 30%,
+			oklch(0.64 0.18 64 / 0.2),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 50% 40% at 10% 50%,
+			oklch(0.69 0.19 70 / 0.15),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 45% 35% at 90% 40%,
+			oklch(0.66 0.16 66 / 0.12),
+			transparent 50%
+		);
+}
+
+.dark .aurora {
+	background:
+		radial-gradient(
+			ellipse 100% 100% at 50% 0%,
+			oklch(0.72 0.13 70 / 0.4),
+			transparent 60%
+		),
+		radial-gradient(
+			ellipse 80% 60% at 30% 20%,
+			oklch(0.75 0.11 72 / 0.25),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 60% 50% at 70% 30%,
+			oklch(0.7 0.12 68 / 0.2),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 50% 40% at 10% 50%,
+			oklch(0.73 0.11 70 / 0.15),
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse 45% 35% at 90% 40%,
+			oklch(0.68 0.1 66 / 0.12),
+			transparent 50%
+		);
+}
+
+/* Dot grid pattern */
 .dot-grid {
 	background-image:
 		radial-gradient(circle at center, var(--primary) 0.5px, transparent 0.5px),
@@ -259,18 +507,50 @@ body {
 .dark .dot-grid {
 	background-image:
 		radial-gradient(circle at center, var(--primary) 0.5px, transparent 0.5px),
-		radial-gradient(circle at center, oklch(0.3 0.02 55) 1px, transparent 1px);
+		radial-gradient(circle at center, oklch(0.3 0.008 0) 1px, transparent 1px);
 }
 
-/* Cross grid pattern - alternative géométrique */
-.cross-grid {
-	background-image:
-		linear-gradient(var(--border) 1px, transparent 1px),
-		linear-gradient(90deg, var(--border) 1px, transparent 1px);
-	background-size: 40px 40px;
+/* Noise overlay */
+.noise-overlay {
+	position: relative;
 }
 
-/* Ruled paper pattern - thématique agenda */
+.noise-overlay::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	opacity: 0.15;
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
+	background-size: 200px 200px;
+	z-index: 1;
+	mix-blend-mode: overlay;
+}
+
+.dark .noise-overlay::before {
+	opacity: 0.2;
+	mix-blend-mode: soft-light;
+}
+
+/* Section divider */
+.section-divider {
+	position: relative;
+	border-top: 1px solid var(--border);
+}
+
+.section-divider::before {
+	content: "";
+	position: absolute;
+	top: -1px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 200px;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, var(--primary), transparent);
+	opacity: 0.5;
+}
+
+/* Ruled pattern */
 .ruled-pattern {
 	background-image: repeating-linear-gradient(
 		to bottom,
@@ -282,164 +562,7 @@ body {
 	background-size: 100% 32px;
 }
 
-/* Gradient mesh - effet atmosphérique profond avec variations harmonieuses */
-.gradient-mesh {
-	background:
-		radial-gradient(
-			ellipse 80% 50% at 20% 40%,
-			oklch(0.66 0.17 48 / 0.25),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 60% 40% at 80% 60%,
-			oklch(0.69 0.15 62 / 0.18),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 50% 30% at 50% 90%,
-			oklch(0.61 0.13 38 / 0.15),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 40% 25% at 15% 70%,
-			oklch(0.64 0.14 52 / 0.12),
-			transparent 50%
-		);
-}
-
-.dark .gradient-mesh {
-	background:
-		radial-gradient(
-			ellipse 80% 50% at 20% 40%,
-			oklch(0.66 0.19 52 / 0.3),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 60% 40% at 80% 60%,
-			oklch(0.71 0.16 68 / 0.2),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 50% 30% at 50% 90%,
-			oklch(0.59 0.13 38 / 0.15),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 40% 25% at 15% 70%,
-			oklch(0.63 0.17 55 / 0.12),
-			transparent 50%
-		);
-}
-
-/* Aurora effect - for hero sections avec variations harmonieuses */
-.aurora {
-	position: relative;
-	background:
-		radial-gradient(
-			ellipse 100% 100% at 50% 0%,
-			oklch(0.66 0.19 47 / 0.35),
-			transparent 60%
-		),
-		radial-gradient(
-			ellipse 80% 60% at 30% 20%,
-			oklch(0.69 0.15 68 / 0.25),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 60% 50% at 70% 30%,
-			oklch(0.61 0.17 33 / 0.2),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 50% 40% at 10% 50%,
-			oklch(0.67 0.16 55 / 0.15),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 45% 35% at 90% 40%,
-			oklch(0.63 0.14 40 / 0.12),
-			transparent 50%
-		);
-}
-
-.aurora::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	pointer-events: none;
-	opacity: 0.25;
-	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
-	background-size: 180px 180px;
-	z-index: 1;
-	mix-blend-mode: multiply;
-}
-
-.dark .aurora {
-	background:
-		radial-gradient(
-			ellipse 100% 100% at 50% 0%,
-			oklch(0.66 0.21 52 / 0.4),
-			transparent 60%
-		),
-		radial-gradient(
-			ellipse 80% 60% at 30% 20%,
-			oklch(0.71 0.17 72 / 0.25),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 60% 50% at 70% 30%,
-			oklch(0.63 0.19 33 / 0.2),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 50% 40% at 10% 50%,
-			oklch(0.64 0.18 58 / 0.15),
-			transparent 50%
-		),
-		radial-gradient(
-			ellipse 45% 35% at 90% 40%,
-			oklch(0.6 0.15 42 / 0.12),
-			transparent 50%
-		);
-}
-
-.dark .aurora::after {
-	opacity: 0.2;
-	mix-blend-mode: screen;
-}
-
-/* Gradient signature - Dégradé ambre chaud avec variations harmonieuses */
-.gradient-brand {
-	background: linear-gradient(
-		135deg,
-		oklch(0.57 0.17 47),
-		oklch(0.6 0.15 55),
-		oklch(0.63 0.14 62),
-		oklch(0.58 0.16 50),
-		oklch(0.56 0.13 40)
-	);
-	-webkit-background-clip: text;
-	background-clip: text;
-	color: transparent;
-	animation: gradient-shift 8s ease-in-out infinite;
-	background-size: 200% 200%;
-}
-
-@keyframes gradient-shift {
-	0%,
-	100% {
-		background-position: 0% 50%;
-	}
-	50% {
-		background-position: 100% 50%;
-	}
-}
-
-/* ============================================
-   ÉLÉMENTS DE MARQUE
-   ============================================ */
-
-/* Step numbers en outline - améliorés */
+/* Step number */
 .step-number {
 	font-family: var(--font-mono);
 	font-weight: 700;
@@ -453,7 +576,7 @@ body {
 	opacity: 0.6;
 }
 
-/* Header gradient border */
+/* Header glow */
 .header-glow {
 	position: relative;
 }
@@ -507,123 +630,139 @@ body {
 }
 
 /* ============================================
-   CARDS & COMPOSANTS
+   SOLAR ELEVATION SYSTEM
    ============================================ */
 
-/* Glow effect for cards - improved */
-.card-glow {
-	transition:
-		box-shadow 0.3s ease,
-		border-color 0.3s ease,
-		transform 0.2s ease;
+/* ============================================
+   SYSTÈME TYPOGRAPHIQUE SOLAIRE
+   ============================================ */
+
+/* Classes typographiques complètes - hiérarchie claire */
+
+/* Hero - Titre principal de page */
+.text-hero {
+	font-size: var(--font-size-hero);
+	font-weight: 700;
+	letter-spacing: var(--letter-spacing-hero);
+	line-height: var(--line-height-hero);
 }
 
-.card-glow:hover {
-	transform: translateY(-2px);
-	box-shadow:
-		0 0 0 1px var(--ring) / 0.15,
-		0 10px 30px oklch(0 0 0 / 0.1),
-		0 0 50px var(--ring) / 0.08;
+/* Display - Titres de section majeure */
+.text-display {
+	font-size: var(--font-size-display);
+	font-weight: 700;
+	letter-spacing: var(--letter-spacing-display);
+	line-height: var(--line-height-display);
 }
 
-.dark .card-glow:hover {
-	box-shadow:
-		0 0 0 1px var(--ring) / 0.3,
-		0 10px 30px oklch(0 0 0 / 0.4),
-		0 0 50px var(--ring) / 0.12;
+/* Heading 1 - Titres principaux */
+.text-heading-1 {
+	font-size: var(--font-size-h1);
+	font-weight: 700;
+	letter-spacing: var(--letter-spacing-h1);
+	line-height: var(--line-height-h1);
 }
 
-/* Focus states for interactive cards */
-.card-glow:focus-visible {
-	outline: none;
-	box-shadow:
-		0 0 0 2px var(--background),
-		0 0 0 4px var(--ring);
+/* Heading 2 - Sous-titres de section */
+.text-heading-2 {
+	font-size: var(--font-size-h2);
+	font-weight: 600;
+	letter-spacing: var(--letter-spacing-h2);
+	line-height: var(--line-height-h2);
 }
 
-/* Card lift effect - enhanced hover */
-.card-lift {
-	transition:
-		transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-		box-shadow 0.25s ease;
+/* Heading 3 - Titres de sous-section */
+.text-heading-3 {
+	font-size: var(--font-size-h3);
+	font-weight: 600;
+	letter-spacing: var(--letter-spacing-h3);
+	line-height: var(--line-height-h3);
 }
 
-.card-lift:hover {
-	transform: translateY(-6px) scale(1.01);
-	box-shadow:
-		0 20px 40px oklch(0.58 0.1 45 / 0.15),
-		0 8px 16px oklch(0 0 0 / 0.1);
+/* Heading 4 - Titres mineurs */
+.text-heading-4 {
+	font-size: var(--font-size-h4);
+	font-weight: 500;
+	letter-spacing: var(--letter-spacing-h4);
+	line-height: var(--line-height-h4);
 }
 
-.dark .card-lift:hover {
-	box-shadow:
-		0 20px 40px oklch(0.65 0.12 50 / 0.2),
-		0 8px 16px oklch(0 0 0 / 0.3);
+/* Card Title - Pour titres de cards de liste (calendriers, groupes, etc.) */
+.text-card-title {
+	font-size: var(--font-size-card-title);
+	font-weight: 500;
+	letter-spacing: var(--letter-spacing-card-title);
+	line-height: var(--line-height-card-title);
 }
 
-/* Card with gradient border */
-.card-gradient-border {
-	position: relative;
-	background: var(--card);
-	border-radius: var(--radius);
+/* Body Large - Texte courant important */
+.text-body-large {
+	font-size: var(--font-size-body-large);
+	font-weight: 400;
+	letter-spacing: var(--letter-spacing-body);
+	line-height: var(--line-height-body-large);
 }
 
-.card-gradient-border::before {
-	content: "";
-	position: absolute;
-	inset: -1px;
-	border-radius: calc(var(--radius) + 1px);
-	padding: 1px;
-	background: linear-gradient(
-		135deg,
-		oklch(0.58 0.12 45 / 0.3),
-		oklch(0.62 0.1 60 / 0.2),
-		oklch(0.55 0.08 35 / 0.1)
-	);
-	-webkit-mask:
-		linear-gradient(#fff 0 0) content-box,
-		linear-gradient(#fff 0 0);
-	mask:
-		linear-gradient(#fff 0 0) content-box,
-		linear-gradient(#fff 0 0);
-	-webkit-mask-composite: xor;
-	mask-composite: exclude;
-	pointer-events: none;
-	opacity: 0;
-	transition: opacity 0.3s ease;
+/* Body - Texte courant standard */
+.text-body {
+	font-size: var(--font-size-body);
+	font-weight: 400;
+	letter-spacing: var(--letter-spacing-body);
+	line-height: var(--line-height-body);
 }
 
-.card-gradient-border:hover::before {
-	opacity: 1;
+/* Small - Petits textes */
+.text-small {
+	font-size: var(--font-size-small);
+	font-weight: 400;
+	letter-spacing: var(--letter-spacing-small);
+	line-height: var(--line-height-small);
 }
 
-/* Section divider with gradient */
-.section-divider {
-	position: relative;
-	border-top: 1px solid var(--border);
+/* XSmall - Très petits textes */
+.text-xs {
+	font-size: var(--font-size-xs);
+	font-weight: 400;
+	letter-spacing: var(--letter-spacing-small);
+	line-height: var(--line-height-small);
 }
 
-.section-divider::before {
-	content: "";
-	position: absolute;
-	top: -1px;
-	left: 50%;
-	transform: translateX(-50%);
-	width: 200px;
-	height: 1px;
-	background: linear-gradient(90deg, transparent, var(--primary), transparent);
-	opacity: 0.5;
-}
+/* ============================================
+   CARDS & COMPOSANTS
+   ============================================ */
 
 /* ============================================
    UTILITAIRES
    ============================================ */
 
-/* Technical text styling (for .ics) */
-.text-technical {
-	font-family: var(--font-mono);
-	color: var(--primary);
-	letter-spacing: -0.02em;
+/* Classes utilitaires pour transitions avec courbes solaires */
+.transition-solar {
+	transition-timing-function: var(--ease-solar);
+}
+
+.transition-smooth {
+	transition-timing-function: var(--ease-smooth);
+}
+
+.transition-spring {
+	transition-timing-function: var(--ease-spring);
+}
+
+/* Interactive glow */
+.interactive-glow {
+	transition: box-shadow 0.3s var(--ease-smooth);
+}
+
+.interactive-glow:hover {
+	box-shadow:
+		0 0 20px oklch(0.6 0.16 68 / 0.15),
+		0 0 40px oklch(0.6 0.12 68 / 0.08);
+}
+
+.dark .interactive-glow:hover {
+	box-shadow:
+		0 0 25px oklch(0.72 0.18 70 / 0.2),
+		0 0 50px oklch(0.72 0.14 70 / 0.1);
 }
 
 /* Shimmer effect for loading states */
@@ -631,7 +770,7 @@ body {
 	background: linear-gradient(
 		90deg,
 		transparent 0%,
-		oklch(0.9 0.02 55 / 0.5) 50%,
+		oklch(0.9 0.02 68 / 0.5) 50%,
 		transparent 100%
 	);
 	background-size: 200% 100%;
@@ -642,7 +781,7 @@ body {
 	background: linear-gradient(
 		90deg,
 		transparent 0%,
-		oklch(0.3 0.02 55 / 0.5) 50%,
+		oklch(0.3 0.02 68 / 0.5) 50%,
 		transparent 100%
 	);
 	background-size: 200% 100%;
@@ -657,34 +796,44 @@ body {
 	}
 }
 
-/* Subtle glow for interactive elements */
-.interactive-glow {
-	transition: box-shadow 0.3s ease;
+/* Separator avec gradient solaire subtil */
+.separator-solar {
+	background: linear-gradient(
+		to right,
+		transparent 0%,
+		var(--border) 20%,
+		oklch(0.52 0.21 68 / 0.15) 50%,
+		var(--border) 80%,
+		transparent 100%
+	);
+	height: 1px;
 }
 
-.interactive-glow:hover {
-	box-shadow: 0 0 20px oklch(0.58 0.14 45 / 0.15);
+.dark .separator-solar {
+	background: linear-gradient(
+		to right,
+		transparent 0%,
+		var(--border) 20%,
+		oklch(0.75 0.14 70 / 0.2) 50%,
+		var(--border) 80%,
+		transparent 100%
+	);
 }
 
-.dark .interactive-glow:hover {
-	box-shadow: 0 0 25px oklch(0.65 0.15 50 / 0.2);
+/* ============================================
+   INPUTS & FORM ELEMENTS - Améliorations solaires
+   ============================================ */
+
+/* Input focus avec glow solaire */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+	outline: none;
+	box-shadow:
+		0 0 0 2px var(--background),
+		0 0 0 4px var(--ring),
+		0 0 12px var(--ring) / 0.2;
+	transition: box-shadow 0.2s var(--ease-smooth);
 }
 
-/* Floating animation for decorative elements */
-@keyframes float {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-10px);
-	}
-}
-
-.float {
-	animation: float 6s ease-in-out infinite;
-}
-
-.float-delayed {
-	animation: float 6s ease-in-out infinite 2s;
-}
+/* Note: Les effets hover des boutons sont maintenant gérés directement dans button.tsx via les classes Tailwind */

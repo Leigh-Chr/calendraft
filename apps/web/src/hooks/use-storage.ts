@@ -21,11 +21,13 @@ export function useIsAuthenticated() {
  * Hook to get calendars (works for both authenticated and anonymous users)
  * Note: Anonymous users' calendars are stored server-side, not in localStorage
  */
-export function useCalendars() {
+export function useCalendars(filterGroups?: string[]) {
 	// Use tRPC for both authenticated and anonymous users
 	// The anonymous ID is sent via header in trpc.ts
 	const trpcCalendars = useQuery({
-		...trpc.calendar.list.queryOptions(undefined),
+		...trpc.calendar.list.queryOptions(
+			filterGroups && filterGroups.length > 0 ? { filterGroups } : undefined,
+		),
 		enabled: true, // Always enabled - works for both authenticated and anonymous
 	});
 

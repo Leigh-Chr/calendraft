@@ -18,10 +18,18 @@ export interface EventItem {
 	color?: string | null;
 	attendees?: Array<{ email: string; name?: string | null }>;
 	alarms?: Array<{ action: string; trigger: string }>;
+	// Additional fields
+	resources?: Array<{ resource: string }> | string | null;
+	organizerName?: string | null;
+	organizerEmail?: string | null;
+	contact?: string | null;
+	transp?: string | null;
+	comment?: string | null;
 }
 
 export interface FilterState {
 	sortBy: "date" | "name" | "duration";
+	sortDirection: "asc" | "desc"; // Only used when sortBy is "date"
 	keyword: string;
 	dateFrom: Date | undefined;
 	dateTo: Date | undefined;
@@ -31,6 +39,7 @@ export interface FilterState {
 
 export const INITIAL_FILTER_STATE: FilterState = {
 	sortBy: "date",
+	sortDirection: "asc",
 	keyword: "",
 	dateFrom: undefined,
 	dateTo: undefined,

@@ -37,6 +37,10 @@ Calendraft takes security very seriously. If you discover a security vulnerabili
 ### Authentication
 
 - Authentication via [Better-Auth](https://better-auth.com/)
+- **Email verification required** - Prevents fake accounts and spam
+- **Temporary email blocking** - 55,000+ disposable email domains blocked via `better-auth-harmony`
+- **Email normalization** - Prevents duplicate accounts (gmail.com = googlemail.com)
+- **Password reset** - Secure password reset flow via email with token expiration (1 hour)
 - Secure cookies (HttpOnly, Secure, SameSite)
 - Support for anonymous users with high entropy unique ID (192 bits)
 - Server-side validation of anonymous IDs (injection protection)
@@ -58,6 +62,7 @@ Protection against brute force and denial of service attacks:
 |-------|-------|--------|
 | General (`/*`) | 100 requests | 1 minute |
 | Authentication (`/api/auth/*`) | 10 requests | 1 minute |
+| Sign-up (`/api/auth/sign-up/email`) | 5 requests | 1 minute |
 
 Rate limiting events are logged for audit.
 

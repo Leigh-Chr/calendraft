@@ -12,7 +12,11 @@ import { secureHeaders } from "hono/secure-headers";
 import { z } from "zod";
 import { startCleanupJob } from "./jobs/cleanup";
 import { logger } from "./lib/logger";
-import { authRateLimit, rateLimit } from "./middleware/rate-limit";
+import {
+	authRateLimit,
+	rateLimit,
+	signupRateLimit,
+} from "./middleware/rate-limit";
 
 // Validate environment variables
 const envSchema = z.object({
@@ -21,6 +25,15 @@ const envSchema = z.object({
 	BETTER_AUTH_SECRET: z.string().min(1).optional(),
 	PORT: z.string().optional(),
 	SENTRY_DSN: z.string().optional(),
+	// Email configuration
+	RESEND_API_KEY: z.string().optional(),
+	EMAIL_FROM: z.string().optional(),
+	// SMTP (alternative)
+	SMTP_HOST: z.string().optional(),
+	SMTP_PORT: z.string().optional(),
+	SMTP_SECURE: z.string().optional(),
+	SMTP_USER: z.string().optional(),
+	SMTP_PASSWORD: z.string().optional(),
 });
 
 const env = envSchema.parse(process.env);
@@ -84,37 +97,8 @@ if (!isProduction) {
 	app.use(honoLogger());
 }
 
-// Security headers - using Hono's built-in secure headers middleware
-app.use(
-	"/*",
-	secureHeaders({
-		// X-Frame-Options
-		xFrameOptions: "DENY",
-		// X-Content-Type-Options
-		xContentTypeOptions: "nosniff",
-		// Referrer-Policy
-		referrerPolicy: "strict-origin-when-cross-origin",
-		// Strict-Transport-Security (only sent over HTTPS)
-		strictTransportSecurity: "max-age=31536000; includeSubDomains",
-		// Permissions-Policy
-		permissionsPolicy: {
-			geolocation: [],
-			microphone: [],
-			camera: [],
-		},
-		// Content-Security-Policy for API
-		contentSecurityPolicy: {
-			defaultSrc: ["'none'"],
-			frameAncestors: ["'none'"],
-			baseUri: ["'none'"],
-		},
-	}),
-);
-
-// Rate limiting: 100 requests per minute for general routes
-app.use("/*", rateLimit(100, 60000));
-
-// CORS configuration
+// CORS configuration - apply FIRST before security headers
+// This ensures CORS preflight requests are handled correctly
 app.use(
 	"/*",
 	cors({
@@ -126,11 +110,68 @@ app.use(
 			"x-anonymous-id",
 			"Cookie",
 			"Set-Cookie",
+			"User-Agent",
+			"Accept",
+			"Accept-Language",
+			"Accept-Encoding",
 		],
 		credentials: true,
 		exposeHeaders: ["Set-Cookie"],
 	}),
 );
+
+// Security headers - using Hono's built-in secure headers middleware
+// Exclude auth endpoints from restrictive cross-origin policies
+app.use(async (c, next) => {
+	// For auth endpoints, use less restrictive headers to allow cross-origin requests
+	if (c.req.path.startsWith("/api/auth/")) {
+		return secureHeaders({
+			xFrameOptions: "DENY",
+			xContentTypeOptions: "nosniff",
+			referrerPolicy: "strict-origin-when-cross-origin",
+			strictTransportSecurity: "max-age=31536000; includeSubDomains",
+			permissionsPolicy: {
+				geolocation: [],
+				microphone: [],
+				camera: [],
+			},
+			contentSecurityPolicy: {
+				defaultSrc: ["'none'"],
+				frameAncestors: ["'none'"],
+				baseUri: ["'none'"],
+			},
+			// Allow cross-origin requests for auth endpoints
+			crossOriginResourcePolicy: "cross-origin",
+			crossOriginOpenerPolicy: "same-origin-allow-popups",
+		})(c, next);
+	}
+	// For other endpoints, use default restrictive headers
+	return secureHeaders({
+		xFrameOptions: "DENY",
+		xContentTypeOptions: "nosniff",
+		referrerPolicy: "strict-origin-when-cross-origin",
+		strictTransportSecurity: "max-age=31536000; includeSubDomains",
+		permissionsPolicy: {
+			geolocation: [],
+			microphone: [],
+			camera: [],
+		},
+		contentSecurityPolicy: {
+			defaultSrc: ["'none'"],
+			frameAncestors: ["'none'"],
+			baseUri: ["'none'"],
+		},
+	})(c, next);
+});
+
+// Rate limiting: 100 requests per minute for general routes
+// Exclude auth endpoints as they have their own rate limiting
+app.use(async (c, next) => {
+	if (c.req.path.startsWith("/api/auth/")) {
+		return next();
+	}
+	return rateLimit(100, 60000)(c, next);
+});
 
 // CSRF protection for state-changing requests
 // Uses Origin and Sec-Fetch-Site header validation
@@ -146,9 +187,19 @@ app.use(async (c, next) => {
 	})(c, next);
 });
 
-// Strict rate limiting for auth endpoints (10 requests/minute)
+// Rate limiting spécifique pour les inscriptions (5 par minute)
+// IMPORTANT: Doit être appliqué AVANT le rate limit général et AVANT le handler Better-Auth
+app.use("/api/auth/sign-up/email", signupRateLimit());
+
+// Rate limiting général pour les autres endpoints auth (10 par minute)
 app.use("/api/auth/*", authRateLimit());
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+// Better-Auth handler pour les endpoints auth (tous les méthodes)
+// CORS is already handled by the global middleware above
+app.all("/api/auth/*", async (c) => {
+	const response = await auth.handler(c.req.raw);
+	return response;
+});
 
 app.use(
 	"/trpc/*",

@@ -96,6 +96,9 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 # Generate Prisma client and push schema
 bun run db:push
 
+# (Optional) Seed database with test data (development only)
+bun run db:seed
+
 # (Optional) Open Prisma Studio
 bun run db:studio
 ```
@@ -286,6 +289,7 @@ calendraft/
 - `bun run db:studio` - Open Prisma Studio to visualize the database
 - `bun run db:generate` - Generate Prisma client
 - `bun run db:migrate` - Apply database migrations
+- `bun run db:seed` - Seed database with test data (development only)
 - `bun run check` - Run formatting and linting with Biome
 - `cd apps/web && bun run generate-pwa-assets` - Generate PWA assets
 

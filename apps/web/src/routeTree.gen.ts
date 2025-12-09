@@ -9,8 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CheckEmailRouteImport } from './routes/check-email'
 import { Route as CalendarsRouteImport } from './routes/calendars'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareTokenRouteImport } from './routes/share/$token'
@@ -18,18 +22,39 @@ import { Route as CalendarsNewRouteImport } from './routes/calendars/new'
 import { Route as CalendarsMergeRouteImport } from './routes/calendars/merge'
 import { Route as CalendarsImportRouteImport } from './routes/calendars/import'
 import { Route as CalendarsCalendarIdRouteImport } from './routes/calendars/$calendarId'
+import { Route as CalendarsGroupsGroupIdRouteImport } from './routes/calendars/groups/$groupId'
 import { Route as CalendarsCalendarIdImportRouteImport } from './routes/calendars/$calendarId/import'
 import { Route as CalendarsCalendarIdEventsNewRouteImport } from './routes/calendars/$calendarId/events/new'
 import { Route as CalendarsCalendarIdEventsEventIdRouteImport } from './routes/calendars/$calendarId/events/$eventId'
 
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckEmailRoute = CheckEmailRouteImport.update({
+  id: '/check-email',
+  path: '/check-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendarsRoute = CalendarsRouteImport.update({
@@ -67,6 +92,11 @@ const CalendarsCalendarIdRoute = CalendarsCalendarIdRouteImport.update({
   path: '/$calendarId',
   getParentRoute: () => CalendarsRoute,
 } as any)
+const CalendarsGroupsGroupIdRoute = CalendarsGroupsGroupIdRouteImport.update({
+  id: '/groups/$groupId',
+  path: '/groups/$groupId',
+  getParentRoute: () => CalendarsRoute,
+} as any)
 const CalendarsCalendarIdImportRoute =
   CalendarsCalendarIdImportRouteImport.update({
     id: '/import',
@@ -89,28 +119,38 @@ const CalendarsCalendarIdEventsEventIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendars': typeof CalendarsRouteWithChildren
+  '/check-email': typeof CheckEmailRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
   '/calendars/import': typeof CalendarsImportRoute
   '/calendars/merge': typeof CalendarsMergeRoute
   '/calendars/new': typeof CalendarsNewRoute
   '/share/$token': typeof ShareTokenRoute
   '/calendars/$calendarId/import': typeof CalendarsCalendarIdImportRoute
+  '/calendars/groups/$groupId': typeof CalendarsGroupsGroupIdRoute
   '/calendars/$calendarId/events/$eventId': typeof CalendarsCalendarIdEventsEventIdRoute
   '/calendars/$calendarId/events/new': typeof CalendarsCalendarIdEventsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendars': typeof CalendarsRouteWithChildren
+  '/check-email': typeof CheckEmailRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
   '/calendars/import': typeof CalendarsImportRoute
   '/calendars/merge': typeof CalendarsMergeRoute
   '/calendars/new': typeof CalendarsNewRoute
   '/share/$token': typeof ShareTokenRoute
   '/calendars/$calendarId/import': typeof CalendarsCalendarIdImportRoute
+  '/calendars/groups/$groupId': typeof CalendarsGroupsGroupIdRoute
   '/calendars/$calendarId/events/$eventId': typeof CalendarsCalendarIdEventsEventIdRoute
   '/calendars/$calendarId/events/new': typeof CalendarsCalendarIdEventsNewRoute
 }
@@ -118,14 +158,19 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calendars': typeof CalendarsRouteWithChildren
+  '/check-email': typeof CheckEmailRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
   '/calendars/import': typeof CalendarsImportRoute
   '/calendars/merge': typeof CalendarsMergeRoute
   '/calendars/new': typeof CalendarsNewRoute
   '/share/$token': typeof ShareTokenRoute
   '/calendars/$calendarId/import': typeof CalendarsCalendarIdImportRoute
+  '/calendars/groups/$groupId': typeof CalendarsGroupsGroupIdRoute
   '/calendars/$calendarId/events/$eventId': typeof CalendarsCalendarIdEventsEventIdRoute
   '/calendars/$calendarId/events/new': typeof CalendarsCalendarIdEventsNewRoute
 }
@@ -134,42 +179,57 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/calendars'
+    | '/check-email'
     | '/dashboard'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
+    | '/verify-email'
     | '/calendars/$calendarId'
     | '/calendars/import'
     | '/calendars/merge'
     | '/calendars/new'
     | '/share/$token'
     | '/calendars/$calendarId/import'
+    | '/calendars/groups/$groupId'
     | '/calendars/$calendarId/events/$eventId'
     | '/calendars/$calendarId/events/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/calendars'
+    | '/check-email'
     | '/dashboard'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
+    | '/verify-email'
     | '/calendars/$calendarId'
     | '/calendars/import'
     | '/calendars/merge'
     | '/calendars/new'
     | '/share/$token'
     | '/calendars/$calendarId/import'
+    | '/calendars/groups/$groupId'
     | '/calendars/$calendarId/events/$eventId'
     | '/calendars/$calendarId/events/new'
   id:
     | '__root__'
     | '/'
     | '/calendars'
+    | '/check-email'
     | '/dashboard'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
+    | '/verify-email'
     | '/calendars/$calendarId'
     | '/calendars/import'
     | '/calendars/merge'
     | '/calendars/new'
     | '/share/$token'
     | '/calendars/$calendarId/import'
+    | '/calendars/groups/$groupId'
     | '/calendars/$calendarId/events/$eventId'
     | '/calendars/$calendarId/events/new'
   fileRoutesById: FileRoutesById
@@ -177,13 +237,31 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarsRoute: typeof CalendarsRouteWithChildren
+  CheckEmailRoute: typeof CheckEmailRoute
   DashboardRoute: typeof DashboardRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
   ShareTokenRoute: typeof ShareTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -191,11 +269,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check-email': {
+      id: '/check-email'
+      path: '/check-email'
+      fullPath: '/check-email'
+      preLoaderRoute: typeof CheckEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calendars': {
@@ -247,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalendarsCalendarIdRouteImport
       parentRoute: typeof CalendarsRoute
     }
+    '/calendars/groups/$groupId': {
+      id: '/calendars/groups/$groupId'
+      path: '/groups/$groupId'
+      fullPath: '/calendars/groups/$groupId'
+      preLoaderRoute: typeof CalendarsGroupsGroupIdRouteImport
+      parentRoute: typeof CalendarsRoute
+    }
     '/calendars/$calendarId/import': {
       id: '/calendars/$calendarId/import'
       path: '/import'
@@ -291,6 +390,7 @@ interface CalendarsRouteChildren {
   CalendarsImportRoute: typeof CalendarsImportRoute
   CalendarsMergeRoute: typeof CalendarsMergeRoute
   CalendarsNewRoute: typeof CalendarsNewRoute
+  CalendarsGroupsGroupIdRoute: typeof CalendarsGroupsGroupIdRoute
 }
 
 const CalendarsRouteChildren: CalendarsRouteChildren = {
@@ -298,6 +398,7 @@ const CalendarsRouteChildren: CalendarsRouteChildren = {
   CalendarsImportRoute: CalendarsImportRoute,
   CalendarsMergeRoute: CalendarsMergeRoute,
   CalendarsNewRoute: CalendarsNewRoute,
+  CalendarsGroupsGroupIdRoute: CalendarsGroupsGroupIdRoute,
 }
 
 const CalendarsRouteWithChildren = CalendarsRoute._addFileChildren(
@@ -307,8 +408,12 @@ const CalendarsRouteWithChildren = CalendarsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarsRoute: CalendarsRouteWithChildren,
+  CheckEmailRoute: CheckEmailRoute,
   DashboardRoute: DashboardRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
   ShareTokenRoute: ShareTokenRoute,
 }
 export const routeTree = rootRouteImport

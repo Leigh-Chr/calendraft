@@ -11,7 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const PREDEFINED_COLORS = [
-	{ name: "Amber", value: "#C2703C" },
+	{ name: "Solar Yellow", value: "#D4A017" },
 	{ name: "Orange", value: "#F97316" },
 	{ name: "Red", value: "#EF4444" },
 	{ name: "Yellow", value: "#EAB308" },

@@ -34,6 +34,9 @@ export type CalendarDateFilter = (typeof calendarDateFilters)[number];
 export const calendarSortOptions = ["date", "name", "duration"] as const;
 export type CalendarSortBy = (typeof calendarSortOptions)[number];
 
+export const calendarSortDirections = ["asc", "desc"] as const;
+export type CalendarSortDirection = (typeof calendarSortDirections)[number];
+
 export const calendarViewSearchSchema = z.object({
 	/** View mode: list or calendar */
 	view: fallback(z.enum(calendarViewModes), "list").default("list"),
@@ -43,6 +46,8 @@ export const calendarViewSearchSchema = z.object({
 	dateFilter: fallback(z.enum(calendarDateFilters), "all").default("all"),
 	/** Sort by field */
 	sortBy: fallback(z.enum(calendarSortOptions), "date").default("date"),
+	/** Sort direction (only used when sortBy is "date") */
+	sortDirection: fallback(z.enum(calendarSortDirections), "asc").default("asc"),
 	/** Search keyword */
 	q: fallback(z.string(), "").default(""),
 	/** Selected date for calendar view (ISO date string YYYY-MM-DD) */
@@ -61,6 +66,7 @@ export const calendarViewDefaults: CalendarViewSearch = {
 	calendarView: "month",
 	dateFilter: "all",
 	sortBy: "date",
+	sortDirection: "asc",
 	q: "",
 	date: undefined,
 };
@@ -125,4 +131,42 @@ export type NewEventSearch = z.infer<typeof newEventSearchSchema>;
 export const newEventDefaults: NewEventSearch = {
 	start: undefined,
 	end: undefined,
+};
+
+// ============================================================================
+// Calendars List Search Params
+// Used in /calendars
+// ============================================================================
+
+export const calendarsListSortOptions = [
+	"name",
+	"updatedAt",
+	"createdAt",
+	"eventCount",
+] as const;
+export type CalendarsListSortBy = (typeof calendarsListSortOptions)[number];
+
+export const calendarsListSortDirections = ["asc", "desc"] as const;
+export type CalendarsListSortDirection =
+	(typeof calendarsListSortDirections)[number];
+
+export const calendarsListSearchSchema = z.object({
+	/** Search keyword for calendar names */
+	q: fallback(z.string(), "").default(""),
+	/** Sort by field */
+	sortBy: fallback(z.enum(calendarsListSortOptions), "updatedAt").default(
+		"updatedAt",
+	),
+	/** Sort direction (only used for date-based sorts: updatedAt, createdAt) */
+	sortDirection: fallback(z.enum(calendarsListSortDirections), "desc").default(
+		"desc",
+	),
+});
+
+export type CalendarsListSearch = z.infer<typeof calendarsListSearchSchema>;
+
+export const calendarsListDefaults: CalendarsListSearch = {
+	q: "",
+	sortBy: "updatedAt",
+	sortDirection: "desc",
 };

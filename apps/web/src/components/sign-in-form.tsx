@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
-import { Calendar } from "lucide-react";
+import { Calendar, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
@@ -22,6 +23,7 @@ export default function SignInForm({
 		from: "/",
 	});
 	const { isPending } = authClient.useSession();
+	const [showPassword, setShowPassword] = useState(false);
 
 	const form = useForm({
 		defaultValues: {
@@ -45,7 +47,65 @@ export default function SignInForm({
 						toast.success("Login successful");
 					},
 					onError: (error) => {
-						toast.error(error.error.message || error.error.statusText);
+						// Gestion spécifique des erreurs
+						const errorMessage =
+							error.error.message || error.error.statusText || "";
+
+						// Erreur email non vérifié
+						if (
+							errorMessage.includes("email") &&
+							(errorMessage.includes("not verified") ||
+								errorMessage.includes("unverified") ||
+								errorMessage.includes("verify"))
+						) {
+							toast.error(
+								"Please verify your email address before signing in.",
+								{
+									action: {
+										label: "Resend email",
+										onClick: async () => {
+											try {
+												await authClient.sendVerificationEmail({
+													email: value.email,
+													callbackURL: "/verify-email",
+												});
+												toast.success(
+													"Verification email sent! Please check your inbox.",
+												);
+												navigate({
+													to: "/check-email",
+													search: { email: value.email },
+												});
+											} catch {
+												toast.error(
+													"Failed to send verification email. Please try again.",
+												);
+											}
+										},
+									},
+								},
+							);
+						}
+						// Erreur credentials invalides
+						else if (
+							errorMessage.includes("invalid") ||
+							errorMessage.includes("incorrect") ||
+							error.error.status === 401
+						) {
+							toast.error(
+								"Invalid email or password. Please check your credentials and try again.",
+							);
+						}
+						// Erreur de rate limiting
+						else if (error.error.status === 429) {
+							toast.error(
+								"Too many login attempts. Please wait a moment and try again.",
+							);
+						}
+						// Autres erreurs
+						else {
+							toast.error(errorMessage || "Login failed. Please try again.");
+						}
 					},
 				},
 			);
@@ -78,14 +138,14 @@ export default function SignInForm({
 					<div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 shadow-lg shadow-primary/20">
 						<Calendar className="size-7 text-primary" />
 					</div>
-					<h1 className="text-center font-bold text-3xl">Welcome back!</h1>
+					<h1 className="text-center text-heading-1">Welcome back!</h1>
 					<p className="mt-2 text-center text-muted-foreground text-sm">
 						Sign in to access your calendars
 					</p>
 				</div>
 
 				{/* Form card */}
-				<div className="card-gradient-border rounded-xl border bg-card/80 p-6 shadow-black/5 shadow-xl backdrop-blur-sm">
+				<div className="rounded-xl border bg-card/80 p-6 shadow-black/5 shadow-xl backdrop-blur-sm">
 					<form
 						onSubmit={(e) => {
 							e.preventDefault();
@@ -103,12 +163,24 @@ export default function SignInForm({
 											id={field.name}
 											name={field.name}
 											type="email"
+											autoComplete="email"
 											value={field.state.value}
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
+											aria-describedby={
+												field.state.meta.errors.length > 0
+													? `${field.name}-error`
+													: undefined
+											}
+											aria-invalid={
+												field.state.meta.errors.length > 0 ? true : undefined
+											}
 										/>
 										{field.state.meta.errors.map((error) => (
-											<FormMessage key={error?.message}>
+											<FormMessage
+												key={error?.message}
+												id={`${field.name}-error`}
+											>
 												{error?.message}
 											</FormMessage>
 										))}
@@ -122,16 +194,44 @@ export default function SignInForm({
 								{(field) => (
 									<div className="space-y-2">
 										<Label htmlFor={field.name}>Password</Label>
-										<Input
-											id={field.name}
-											name={field.name}
-											type="password"
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-										/>
+										<div className="relative">
+											<Input
+												id={field.name}
+												name={field.name}
+												type={showPassword ? "text" : "password"}
+												autoComplete="current-password"
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												aria-describedby={
+													field.state.meta.errors.length > 0
+														? `${field.name}-error`
+														: undefined
+												}
+												aria-invalid={
+													field.state.meta.errors.length > 0 ? true : undefined
+												}
+											/>
+											<button
+												type="button"
+												onClick={() => setShowPassword(!showPassword)}
+												className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground transition-colors hover:text-foreground"
+												aria-label={
+													showPassword ? "Hide password" : "Show password"
+												}
+											>
+												{showPassword ? (
+													<EyeOff className="h-4 w-4" />
+												) : (
+													<Eye className="h-4 w-4" />
+												)}
+											</button>
+										</div>
 										{field.state.meta.errors.map((error) => (
-											<FormMessage key={error?.message}>
+											<FormMessage
+												key={error?.message}
+												id={`${field.name}-error`}
+											>
 												{error?.message}
 											</FormMessage>
 										))}
@@ -153,10 +253,21 @@ export default function SignInForm({
 						</form.Subscribe>
 					</form>
 
-					<div className="mt-4 text-center">
-						<Button variant="link" onClick={onSwitchToSignUp}>
-							Don't have an account? Sign up
+					<div className="mt-4 space-y-2 text-center">
+						<Button
+							variant="link"
+							onClick={() => {
+								navigate({ to: "/forgot-password" });
+							}}
+							className="text-sm"
+						>
+							Forgot password?
 						</Button>
+						<div>
+							<Button variant="link" onClick={onSwitchToSignUp}>
+								Don't have an account? Sign up
+							</Button>
+						</div>
 					</div>
 				</div>
 			</div>

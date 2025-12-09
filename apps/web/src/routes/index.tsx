@@ -73,7 +73,7 @@ function LandingPage() {
 				<div className="container mx-auto px-4 py-24 sm:py-32">
 					<div className="mx-auto max-w-3xl text-center">
 						{/* Badge */}
-						<div className="fade-in slide-in-from-bottom-3 mb-8 inline-flex animate-in items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm duration-500">
+						<div className="fade-in slide-in-from-bottom-3 mb-8 inline-flex animate-in items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-small duration-500">
 							<Sparkles className="size-4 text-primary" aria-hidden="true" />
 							<span className="text-foreground/80">
 								PWA Application • Works offline
@@ -83,21 +83,29 @@ function LandingPage() {
 						{/* Main heading */}
 						<h1
 							id="hero-heading"
-							className="fade-in slide-in-from-bottom-4 mb-6 animate-in font-bold text-4xl tracking-tight duration-700 sm:text-5xl lg:text-6xl"
+							className="fade-in slide-in-from-bottom-4 mb-6 animate-in text-hero duration-700"
 						>
 							Your <span className="font-mono text-primary">.ics</span>{" "}
 							calendars
 							<br />
-							<span className="gradient-brand">simplified</span>
+							<span className="bg-gradient-to-r from-primary via-primary/90 to-primary bg-clip-text text-transparent">
+								simplified
+							</span>
 						</h1>
 
 						{/* Subtitle */}
-						<p className="fade-in slide-in-from-bottom-5 mx-auto mb-10 max-w-2xl animate-in text-lg text-muted-foreground leading-relaxed duration-1000">
+						<p className="fade-in slide-in-from-bottom-5 mx-auto mb-10 max-w-2xl animate-in text-body-large text-muted-foreground duration-1000">
 							Import, create, edit, and merge your calendars in just a few
 							clicks. Compatible with{" "}
-							<span className="text-foreground">Google Calendar</span>,{" "}
-							<span className="text-foreground">Apple Calendar</span>, and{" "}
-							<span className="text-foreground">Outlook</span>.
+							<span className="font-medium text-foreground">
+								Google Calendar
+							</span>
+							,{" "}
+							<span className="font-medium text-foreground">
+								Apple Calendar
+							</span>
+							, and <span className="font-medium text-foreground">Outlook</span>
+							.
 						</p>
 
 						{/* CTA buttons */}
@@ -120,7 +128,7 @@ function LandingPage() {
 						</div>
 
 						{/* Trust indicators */}
-						<div className="fade-in mt-14 flex animate-in flex-wrap items-center justify-center gap-x-8 gap-y-4 text-muted-foreground text-sm duration-1000">
+						<div className="fade-in mt-14 flex animate-in flex-wrap items-center justify-center gap-x-8 gap-y-4 text-muted-foreground text-small duration-1000">
 							<div className="flex items-center gap-2.5">
 								<Lock className="size-4 text-primary/70" aria-hidden="true" />
 								<span>Secure data</span>
@@ -151,12 +159,9 @@ function LandingPage() {
 					<div className="cross-grid absolute inset-0 opacity-30" />
 					<div className="grain-texture absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent" />
 				</div>
-				<div className="container mx-auto px-4 py-20 sm:py-28">
+				<div className="container mx-auto px-4 py-20 sm:py-24">
 					<div className="mx-auto mb-16 max-w-2xl text-center">
-						<h2
-							id="features-heading"
-							className="mb-4 font-bold text-3xl tracking-tight sm:text-4xl"
-						>
+						<h2 id="features-heading" className="mb-8 text-display">
 							Everything you need
 						</h2>
 						<p className="text-muted-foreground">
@@ -216,12 +221,9 @@ function LandingPage() {
 					<div className="ruled-pattern absolute inset-0 opacity-40" />
 					<div className="gradient-mesh grain-texture absolute inset-0 opacity-40" />
 				</div>
-				<div className="container mx-auto px-4 py-20 sm:py-28">
-					<div className="mx-auto mb-16 max-w-2xl text-center">
-						<h2
-							id="how-it-works-heading"
-							className="mb-4 font-bold text-3xl tracking-tight sm:text-4xl"
-						>
+				<div className="container mx-auto px-4 py-20 sm:py-24">
+					<div className="mx-auto mb-12 max-w-2xl text-center">
+						<h2 id="how-it-works-heading" className="mb-8 text-display">
 							How it works
 						</h2>
 						<p className="text-muted-foreground">
@@ -264,23 +266,23 @@ function LandingPage() {
 					<div className="absolute top-1/2 left-1/4 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[100px]" />
 					<div className="absolute right-1/4 bottom-0 h-[300px] w-[300px] rounded-full bg-chart-2/5 blur-[80px]" />
 				</div>
-				<div className="container mx-auto px-4 py-20 sm:py-28">
+				<div className="container mx-auto px-4 py-20 sm:py-24">
 					<div className="mx-auto max-w-4xl">
 						<div className="grid gap-6 md:grid-cols-2">
 							{/* Anonymous card */}
-							<article className="group card-glow relative overflow-hidden rounded-2xl border bg-card p-8 transition-[border-color,box-shadow] duration-200 hover:border-muted-foreground/20">
+							<article className="group relative overflow-hidden rounded-2xl border bg-card p-8 transition-all duration-200 hover:border-muted-foreground/20 hover:shadow-lg">
 								<div className="mb-6 inline-flex size-12 items-center justify-center rounded-xl bg-muted">
 									<Zap
 										className="size-6 text-muted-foreground"
 										aria-hidden="true"
 									/>
 								</div>
-								<h3 className="mb-3 font-semibold text-xl">Anonymous Mode</h3>
-								<p className="mb-6 text-muted-foreground text-sm leading-relaxed">
+								<h3 className="mb-4 text-heading-3">Anonymous Mode</h3>
+								<p className="mb-6 text-body text-muted-foreground">
 									Use Calendraft immediately without creating an account. Your
 									data stays in your browser.
 								</p>
-								<ul className="space-y-3 text-muted-foreground text-sm">
+								<ul className="space-y-3 text-body text-muted-foreground">
 									<li className="flex items-center gap-3">
 										<CalendarCheck
 											className="size-4 text-primary"
@@ -306,7 +308,7 @@ function LandingPage() {
 							</article>
 
 							{/* Account card - Featured */}
-							<article className="group card-glow relative overflow-hidden rounded-2xl border-2 border-primary/20 bg-card p-8 transition-[border-color,box-shadow] duration-200 hover:border-primary/40">
+							<article className="group relative overflow-hidden rounded-2xl border-2 border-primary/20 bg-card p-8 transition-all duration-200 hover:border-primary/40 hover:shadow-lg">
 								{/* Recommended badge */}
 								<div className="absolute top-6 right-6">
 									<span className="rounded-full bg-primary/10 px-3 py-1 font-medium text-primary text-xs">
@@ -316,12 +318,12 @@ function LandingPage() {
 								<div className="mb-6 inline-flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
 									<Layers className="size-6" aria-hidden="true" />
 								</div>
-								<h3 className="mb-3 font-semibold text-xl">With an account</h3>
-								<p className="mb-6 text-muted-foreground text-sm leading-relaxed">
+								<h3 className="mb-4 text-heading-3">With an account</h3>
+								<p className="mb-6 text-body text-muted-foreground">
 									Create a free account to sync your calendars across all your
 									devices.
 								</p>
-								<ul className="space-y-3 text-muted-foreground text-sm">
+								<ul className="space-y-3 text-body text-muted-foreground">
 									<li className="flex items-center gap-3">
 										<CalendarCheck
 											className="size-4 text-primary"
@@ -369,12 +371,9 @@ function LandingPage() {
 					<div className="dot-grid absolute inset-0 opacity-30 [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_40%,transparent_100%)]" />
 				</div>
 
-				<div className="container mx-auto px-4 py-20 sm:py-28">
+				<div className="container mx-auto px-4 py-20 sm:py-24">
 					<div className="mx-auto max-w-2xl text-center">
-						<h2
-							id="cta-heading"
-							className="mb-6 font-bold text-3xl tracking-tight sm:text-4xl"
-						>
+						<h2 id="cta-heading" className="mb-8 text-display">
 							Ready to simplify your calendars?
 						</h2>
 						<p className="mb-10 text-muted-foreground">
@@ -418,7 +417,7 @@ function LandingPage() {
 								<Calendar className="size-5 text-primary" aria-hidden="true" />
 								<span>Calendraft</span>
 							</Link>
-							<p className="text-muted-foreground text-sm leading-relaxed">
+							<p className="text-body text-muted-foreground">
 								Manage your <span className="font-mono text-primary">.ics</span>{" "}
 								calendars simply.
 							</p>
@@ -426,11 +425,11 @@ function LandingPage() {
 
 						{/* Product navigation */}
 						<nav aria-label="Product links">
-							<p className="mb-4 font-medium text-sm" id="footer-product">
+							<p className="mb-4 font-medium text-small" id="footer-product">
 								Product
 							</p>
 							<ul
-								className="space-y-2.5 text-muted-foreground text-sm"
+								className="space-y-3 text-muted-foreground text-sm"
 								aria-labelledby="footer-product"
 							>
 								<li>
@@ -462,11 +461,11 @@ function LandingPage() {
 
 						{/* Account navigation */}
 						<nav aria-label="Account links">
-							<p className="mb-4 font-medium text-sm" id="footer-account">
+							<p className="mb-4 font-medium text-small" id="footer-account">
 								Account
 							</p>
 							<ul
-								className="space-y-2.5 text-muted-foreground text-sm"
+								className="space-y-3 text-muted-foreground text-sm"
 								aria-labelledby="footer-account"
 							>
 								<li>
@@ -492,8 +491,8 @@ function LandingPage() {
 
 						{/* Open Source info */}
 						<div>
-							<p className="mb-4 font-medium text-sm">Open Source</p>
-							<p className="text-muted-foreground text-sm leading-relaxed">
+							<p className="mb-4 font-medium text-small">Open Source</p>
+							<p className="text-body text-muted-foreground">
 								Calendraft is 100% free and open-source under the MIT license.
 							</p>
 						</div>
@@ -524,7 +523,7 @@ interface CardProps {
 function BentoCard({ icon: Icon, title, description, delay = 0 }: CardProps) {
 	return (
 		<article
-			className="card-gradient-border group card-lift fade-in slide-in-from-bottom-4 relative animate-in overflow-hidden rounded-xl border bg-card p-6 hover:border-primary/40"
+			className="group fade-in slide-in-from-bottom-4 hover:-translate-y-1 relative animate-in overflow-hidden rounded-xl border bg-card p-6 transition-all duration-200 hover:border-primary/40 hover:shadow-lg"
 			style={{ animationDelay: `${delay}ms`, animationFillMode: "backwards" }}
 		>
 			<div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-primary/8 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -535,10 +534,8 @@ function BentoCard({ icon: Icon, title, description, delay = 0 }: CardProps) {
 						aria-hidden
 					/>
 				</div>
-				<h3 className="mb-2 font-semibold">{title}</h3>
-				<p className="text-muted-foreground text-sm leading-relaxed">
-					{description}
-				</p>
+				<h3 className="mb-4 text-heading-3">{title}</h3>
+				<p className="text-body text-muted-foreground">{description}</p>
 			</div>
 		</article>
 	);
@@ -567,10 +564,8 @@ function StepCard({
 				{number}
 			</div>
 			<div className="mx-auto mb-4 h-1 w-12 rounded-full bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-			<h3 className="mb-2 font-semibold text-lg">{title}</h3>
-			<p className="text-muted-foreground text-sm leading-relaxed">
-				{description}
-			</p>
+			<h3 className="mb-4 text-heading-3">{title}</h3>
+			<p className="text-body text-muted-foreground">{description}</p>
 		</div>
 	);
 }

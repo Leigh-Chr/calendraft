@@ -100,7 +100,7 @@ function ImportIntoCalendarComponent() {
 					]}
 				/>
 
-				<Card className="card-glow mt-6">
+				<Card className="mt-6 transition-all duration-200 hover:shadow-lg">
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Upload className="h-5 w-5" />

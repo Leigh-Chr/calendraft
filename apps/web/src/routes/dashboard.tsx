@@ -159,7 +159,7 @@ function RouteComponent() {
 
 			<div className="container mx-auto max-w-6xl px-4 py-10">
 				<div className="mb-8">
-					<h1 className="mb-2 font-bold text-3xl">My account</h1>
+					<h1 className="mb-2 text-heading-1">My account</h1>
 					<p className="text-muted-foreground">
 						Hello {session.data?.user.name?.split(" ")[0] || "there"} 👋
 					</p>

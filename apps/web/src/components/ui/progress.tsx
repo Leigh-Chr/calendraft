@@ -1,5 +1,3 @@
-"use client";
-
 import * as ProgressPrimitive from "@radix-ui/react-progress";
 import type * as React from "react";
 
@@ -21,7 +19,7 @@ function Progress({
 		>
 			<ProgressPrimitive.Indicator
 				data-slot="progress-indicator"
-				className="h-full w-full flex-1 bg-primary transition-all"
+				className="h-full w-full flex-1 bg-primary transition-all transition-smooth duration-300"
 				style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
 			/>
 		</ProgressPrimitive.Root>

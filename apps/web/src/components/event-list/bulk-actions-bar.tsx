@@ -2,15 +2,8 @@
  * Bulk actions toolbar for selected events
  */
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-	ArrowRight,
-	CheckSquare,
-	Loader2,
-	Square,
-	Trash2,
-	X,
-} from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CheckSquare, Loader2, Square, Trash2, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -25,15 +18,9 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { QUERY_KEYS } from "@/lib/query-keys";
 import { trpc } from "@/utils/trpc";
+import { MoveEventDialog } from "./move-event-dialog";
 
 interface BulkActionsBarProps {
 	selectedCount: number;
@@ -56,10 +43,7 @@ export function BulkActionsBar({
 }: BulkActionsBarProps) {
 	const queryClient = useQueryClient();
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-	const [moveCalendarId, setMoveCalendarId] = useState<string>("");
-
-	// Get calendars for move destination
-	const { data: calendars } = useQuery(trpc.calendar.list.queryOptions());
+	const [moveDialogOpen, setMoveDialogOpen] = useState(false);
 
 	// Bulk delete mutation
 	const bulkDeleteMutation = useMutation(
@@ -76,42 +60,13 @@ export function BulkActionsBar({
 		}),
 	);
 
-	// Bulk move mutation
-	const bulkMoveMutation = useMutation(
-		trpc.event.bulkMove.mutationOptions({
-			onSuccess: (data) => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.all });
-				toast.success(
-					`${data.movedCount} event(s) moved to "${data.targetCalendarName}"`,
-				);
-				onExitSelectionMode();
-			},
-			onError: (error) => {
-				toast.error(error.message || "Error during move");
-			},
-		}),
-	);
-
 	const handleDelete = useCallback(() => {
 		bulkDeleteMutation.mutate({ eventIds: Array.from(selectedIds) });
 		setDeleteDialogOpen(false);
 	}, [bulkDeleteMutation, selectedIds]);
 
-	const handleMove = useCallback(() => {
-		if (!moveCalendarId) return;
-		bulkMoveMutation.mutate({
-			eventIds: Array.from(selectedIds),
-			targetCalendarId: moveCalendarId,
-		});
-		setMoveCalendarId("");
-	}, [bulkMoveMutation, selectedIds, moveCalendarId]);
-
 	const isAllSelected = selectedCount === totalCount;
-	const isPending = bulkDeleteMutation.isPending || bulkMoveMutation.isPending;
-
-	// Filter calendars to exclude current one for move
-	const moveDestinations = calendars?.filter((c) => c.id !== currentCalendarId);
+	const isPending = bulkDeleteMutation.isPending;
 
 	return (
 		<>
@@ -146,40 +101,16 @@ export function BulkActionsBar({
 				{/* Actions */}
 				<div className="flex items-center gap-2">
 					{/* Move to calendar */}
-					{moveDestinations && moveDestinations.length > 0 && (
-						<div className="flex items-center gap-2">
-							<Select
-								value={moveCalendarId}
-								onValueChange={setMoveCalendarId}
-								disabled={isPending || selectedCount === 0}
-							>
-								<SelectTrigger className="h-8 w-[180px]">
-									<SelectValue placeholder="Move to..." />
-								</SelectTrigger>
-								<SelectContent>
-									{moveDestinations.map((cal) => (
-										<SelectItem key={cal.id} value={cal.id}>
-											{cal.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={handleMove}
-								disabled={!moveCalendarId || isPending || selectedCount === 0}
-								className="h-8"
-							>
-								{bulkMoveMutation.isPending ? (
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-								) : (
-									<ArrowRight className="mr-2 h-4 w-4" />
-								)}
-								Move
-							</Button>
-						</div>
-					)}
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => setMoveDialogOpen(true)}
+						disabled={isPending || selectedCount === 0}
+						className="h-8"
+						aria-label={`Move ${selectedCount} selected event${selectedCount !== 1 ? "s" : ""} to another calendar`}
+					>
+						Move
+					</Button>
 
 					{/* Delete */}
 					<Button
@@ -210,6 +141,15 @@ export function BulkActionsBar({
 				</div>
 			</motion.div>
 
+			{/* Move dialog */}
+			<MoveEventDialog
+				open={moveDialogOpen}
+				onOpenChange={setMoveDialogOpen}
+				eventIds={Array.from(selectedIds)}
+				currentCalendarId={currentCalendarId}
+				eventCount={selectedCount}
+			/>
+
 			{/* Delete confirmation dialog */}
 			<AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
 				<AlertDialogContent>
@@ -224,10 +164,7 @@ export function BulkActionsBar({
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction
-							onClick={handleDelete}
-							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-						>
+						<AlertDialogAction onClick={handleDelete} variant="destructive">
 							Delete
 						</AlertDialogAction>
 					</AlertDialogFooter>

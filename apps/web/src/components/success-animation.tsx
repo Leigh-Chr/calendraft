@@ -89,7 +89,7 @@ export function SuccessAnimation({
 								initial={{ opacity: 0, y: 10 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ delay: 0.2 }}
-								className="font-medium text-lg"
+								className="font-medium text-body-large"
 							>
 								{message}
 							</motion.p>
@@ -139,7 +139,7 @@ export function ConfettiAnimation({ show }: { show: boolean }) {
 		y: Math.random() * -100 - 50,
 		rotation: Math.random() * 360,
 		scale: Math.random() * 0.5 + 0.5,
-		color: ["#c2703c", "#d4915c", "#8b6f47", "#b8956c", "#6b8f71"][
+		color: ["#D4A017", "#E6B020", "#C9A015", "#F0C020", "#B89012"][
 			Math.floor(Math.random() * 5)
 		],
 	}));

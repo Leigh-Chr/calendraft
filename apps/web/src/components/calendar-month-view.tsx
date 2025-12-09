@@ -119,7 +119,7 @@ function EventWithHover({
 				<div className="space-y-3">
 					{/* Event title */}
 					<div>
-						<h4 className="font-semibold text-base">{event.title}</h4>
+						<h4 className="text-heading-4">{event.title}</h4>
 						<p className="mt-1 text-muted-foreground text-sm">
 							{format(event.start, "EEEE d MMMM yyyy", { locale: enUS })}
 						</p>

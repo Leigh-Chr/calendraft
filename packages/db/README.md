@@ -43,6 +43,45 @@ bun run db:migrate
 
 # Open Prisma Studio
 bun run db:studio
+
+# Seed database with test data (development only)
+bun run db:seed
+```
+
+### Database Seeding
+
+The project includes a seed script that populates the database with realistic test data for development. This includes:
+
+- **Users**: 3 test users (authenticated)
+- **Calendars**: 5 calendars with different colors and sources
+- **Events**: 10+ events with various types:
+  - Regular meetings with attendees
+  - Recurring events (daily, weekly)
+  - Events with alarms (single and multiple)
+  - Events with categories and resources
+  - Events with location coordinates
+  - Cancelled and tentative events
+- **Share links**: 2 public share links
+- **Share bundles**: 1 bundle with multiple calendars
+- **Accounts and sessions**: Authentication data
+
+**⚠️ Warning**: The seed script will **delete all existing data** before seeding. Only use this in development environments!
+
+**Usage**:
+
+```bash
+# From the root of the project
+bun run db:seed
+
+# Or from the db package
+cd packages/db
+bun run db:seed
+```
+
+The seed script is automatically configured in `package.json` with the `prisma.seed` field, so it can also be run via Prisma CLI:
+
+```bash
+bunx prisma db seed
 ```
 
 ## Schemas

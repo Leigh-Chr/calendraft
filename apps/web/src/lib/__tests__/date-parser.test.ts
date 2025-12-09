@@ -12,7 +12,7 @@ describe("parseDateArray", () => {
 		const result = parseDateArray(jsonString, "RDATE");
 		expect(result).toHaveLength(2);
 		expect(result[0]).toBeInstanceOf(Date);
-		expect(result[1]).toBeInstanceOf(Date);
+		expect(result1).toBeInstanceOf(Date);
 	});
 
 	it("should return empty array for undefined", () => {
@@ -103,7 +103,7 @@ describe("round-trip conversion", () => {
 		const parsed = parseDateArray(stringified, "RDATE");
 		expect(parsed).toHaveLength(3);
 		expect(parsed[0].toISOString()).toBe(original[0].toISOString());
-		expect(parsed[1].toISOString()).toBe(original[1].toISOString());
-		expect(parsed[2].toISOString()).toBe(original[2].toISOString());
+		expect(parsed1.toISOString()).toBe(original1.toISOString());
+		expect(parsed2.toISOString()).toBe(original2.toISOString());
 	});
 });

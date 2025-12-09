@@ -11,6 +11,8 @@
 export const ANONYMOUS_LIMITS = {
 	calendars: 10,
 	eventsPerCalendar: 500,
+	groups: 50, // Increased limit for simple groups (tags) + advanced groups
+	calendarsPerGroup: 15, // Increased limit
 } as const;
 
 /**
@@ -20,6 +22,8 @@ export const ANONYMOUS_LIMITS = {
 export const AUTHENTICATED_LIMITS = {
 	calendars: 100,
 	eventsPerCalendar: 2000,
+	groups: 100, // Increased limit for simple groups (tags) + advanced groups
+	calendarsPerGroup: 20, // Increased limit
 } as const;
 
 export type AnonymousLimits = typeof ANONYMOUS_LIMITS;
@@ -76,4 +80,32 @@ export function getMaxEventsPerCalendar(isAuth: boolean): number {
 	return isAuth
 		? AUTHENTICATED_LIMITS.eventsPerCalendar
 		: ANONYMOUS_LIMITS.eventsPerCalendar;
+}
+
+/**
+ * Check if user has reached group limit
+ * Returns true if limit is reached (user cannot create more)
+ */
+export function hasReachedGroupLimit(
+	isAuth: boolean,
+	currentCount: number,
+): boolean {
+	const limit = isAuth ? AUTHENTICATED_LIMITS.groups : ANONYMOUS_LIMITS.groups;
+	return currentCount >= limit;
+}
+
+/**
+ * Get the maximum number of groups for a user
+ */
+export function getMaxGroups(isAuth: boolean): number {
+	return isAuth ? AUTHENTICATED_LIMITS.groups : ANONYMOUS_LIMITS.groups;
+}
+
+/**
+ * Get the maximum number of calendars per group for a user
+ */
+export function getMaxCalendarsPerGroup(isAuth: boolean): number {
+	return isAuth
+		? AUTHENTICATED_LIMITS.calendarsPerGroup
+		: ANONYMOUS_LIMITS.calendarsPerGroup;
 }

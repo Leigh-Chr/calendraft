@@ -7,9 +7,14 @@ import {
 	Bell,
 	Calendar as CalendarIcon,
 	Clock,
+	Eye,
 	Link as LinkIcon,
 	MapPin,
+	MessageSquare,
+	Package,
+	Phone,
 	Tag,
+	User,
 	Users,
 } from "lucide-react";
 import React from "react";
@@ -62,11 +67,11 @@ export const DateTimeRow = React.memo(function DateTimeRow({
 			)}
 		>
 			<div className="flex items-center gap-2">
-				<CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-				<span className="font-medium text-foreground">{date}</span>
+				<CalendarIcon className="h-[18px] w-[18px] shrink-0 text-muted-foreground" />
+				<span className="font-semibold text-foreground">{date}</span>
 			</div>
 			<div className="flex items-center gap-2">
-				<Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
+				<Clock className="h-[18px] w-[18px] shrink-0 text-muted-foreground" />
 				<span className="text-muted-foreground">{time}</span>
 			</div>
 			{timeStatus && (
@@ -211,4 +216,100 @@ export const DescriptionRow = React.memo(function DescriptionRow({
 	description: string;
 }) {
 	return <p className="mt-2 line-clamp-2">{description}</p>;
+});
+
+export const OrganizerRow = React.memo(function OrganizerRow({
+	organizerName,
+	organizerEmail,
+}: {
+	organizerName?: string | null;
+	organizerEmail?: string | null;
+}) {
+	if (!organizerName && !organizerEmail) return null;
+
+	const displayText = organizerName
+		? organizerEmail
+			? `${organizerName} (${organizerEmail})`
+			: organizerName
+		: organizerEmail || "";
+
+	return (
+		<div className="flex items-center gap-2">
+			<User className="h-4 w-4" />
+			<span>
+				<span className="text-muted-foreground">Organisé par: </span>
+				{organizerEmail ? (
+					<a
+						href={`mailto:${organizerEmail}`}
+						className="text-primary hover:underline"
+					>
+						{displayText}
+					</a>
+				) : (
+					<span>{displayText}</span>
+				)}
+			</span>
+		</div>
+	);
+});
+
+export const ContactRow = React.memo(function ContactRow({
+	contact,
+}: {
+	contact: string;
+}) {
+	return (
+		<div className="flex items-center gap-2">
+			<Phone className="h-4 w-4" />
+			<span>
+				<span className="text-muted-foreground">Contact: </span>
+				{contact}
+			</span>
+		</div>
+	);
+});
+
+export const ResourcesRow = React.memo(function ResourcesRow({
+	resources,
+}: {
+	resources: string;
+}) {
+	return (
+		<div className="flex items-center gap-2">
+			<Package className="h-4 w-4" />
+			<span>
+				<span className="text-muted-foreground">Ressources: </span>
+				{resources}
+			</span>
+		</div>
+	);
+});
+
+export const TransparencyRow = React.memo(function TransparencyRow({
+	transp,
+}: {
+	transp: string;
+}) {
+	const isTransparent = transp === "TRANSPARENT";
+	return (
+		<div className="flex items-center gap-2">
+			<Eye className="h-4 w-4" />
+			<span className="text-muted-foreground text-xs">
+				{isTransparent ? "Disponible" : "Occupé"}
+			</span>
+		</div>
+	);
+});
+
+export const CommentRow = React.memo(function CommentRow({
+	comment,
+}: {
+	comment: string;
+}) {
+	return (
+		<div className="flex items-start gap-2">
+			<MessageSquare className="mt-0.5 h-4 w-4" />
+			<span className="text-muted-foreground italic">{comment}</span>
+		</div>
+	);
 });

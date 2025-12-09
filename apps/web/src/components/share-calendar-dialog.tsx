@@ -13,6 +13,16 @@ import {
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/utils/trpc";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "./ui/alert-dialog";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
@@ -42,6 +52,8 @@ export function ShareCalendarDialog({
 	const queryClient = useQueryClient();
 	const [newLinkName, setNewLinkName] = useState("");
 	const [copiedId, setCopiedId] = useState<string | null>(null);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [linkIdToDelete, setLinkIdToDelete] = useState<string | null>(null);
 
 	// Query existing share links
 	const { data: shareLinks, isLoading } = useQuery({
@@ -134,14 +146,18 @@ export function ShareCalendarDialog({
 	);
 
 	// Delete link
-	const handleDelete = useCallback(
-		(linkId: string) => {
-			if (confirm("Are you sure you want to delete this sharing link?")) {
-				deleteMutation.mutate({ id: linkId });
-			}
-		},
-		[deleteMutation],
-	);
+	const handleDelete = useCallback((linkId: string) => {
+		setLinkIdToDelete(linkId);
+		setDeleteDialogOpen(true);
+	}, []);
+
+	const confirmDelete = useCallback(() => {
+		if (linkIdToDelete) {
+			deleteMutation.mutate({ id: linkIdToDelete });
+			setDeleteDialogOpen(false);
+			setLinkIdToDelete(null);
+		}
+	}, [linkIdToDelete, deleteMutation]);
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -302,6 +318,29 @@ export function ShareCalendarDialog({
 					)}
 				</div>
 			</DialogContent>
+
+			{/* Delete confirmation dialog */}
+			<AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Delete sharing link?</AlertDialogTitle>
+						<AlertDialogDescription>
+							Are you sure you want to delete this sharing link? This action is
+							irreversible.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={confirmDelete}
+							variant="destructive"
+							disabled={deleteMutation.isPending}
+						>
+							{deleteMutation.isPending ? "Deleting..." : "Delete"}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</Dialog>
 	);
 }

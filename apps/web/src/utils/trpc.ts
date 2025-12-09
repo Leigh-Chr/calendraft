@@ -33,14 +33,18 @@ function handleUnauthorizedError(): boolean {
 
 export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
-		onError: (error) => {
+		onError: (error, query) => {
+			// Check if this query should suppress error logging
+			const suppressErrorLog = query.meta?.suppressErrorLog === true;
+
 			// Handle network errors first (even without data property)
 			if (isNetworkErrorType(error)) {
 				handleTRPCError(error as TRPCClientError<AppRouter>, {
 					fallbackTitle: "Network Error",
 					fallbackDescription:
 						"Unable to contact the server. Make sure the server is running and check your connection.",
-					showToast: true,
+					showToast: !suppressErrorLog,
+					logError: !suppressErrorLog,
 				});
 				return;
 			}
@@ -59,6 +63,11 @@ export const queryClient = new QueryClient({
 					return;
 				}
 
+				// If error logging is suppressed, skip logging and toasts
+				if (suppressErrorLog) {
+					return;
+				}
+
 				handleTRPCError(trpcError, {
 					fallbackTitle: "Request error",
 					fallbackDescription: "An error occurred while retrieving data.",
@@ -67,8 +76,8 @@ export const queryClient = new QueryClient({
 				return;
 			}
 
-			// Log other errors in development mode
-			if (import.meta.env.DEV) {
+			// Log other errors in development mode (unless suppressed)
+			if (import.meta.env.DEV && !suppressErrorLog) {
 				console.error("Query error:", error);
 			}
 		},

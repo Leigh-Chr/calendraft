@@ -48,7 +48,7 @@ function ColorPickerPopover({
 	const [open, setOpen] = useState(false);
 
 	const colors = [
-		{ name: "Amber", value: "#C2703C" },
+		{ name: "Solar Yellow", value: "#D4A017" },
 		{ name: "Orange", value: "#F97316" },
 		{ name: "Red", value: "#EF4444" },
 		{ name: "Yellow", value: "#EAB308" },
@@ -121,7 +121,7 @@ export function MetadataSection({
 		<div className="space-y-6">
 			{/* Visual metadata */}
 			<div className="space-y-4">
-				<h4 className="mb-2 font-medium text-sm">Visual metadata</h4>
+				<h4 className="mb-2 text-heading-4">Visual metadata</h4>
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div className="space-y-2">
 						<Label htmlFor="status">Event status</Label>
@@ -286,7 +286,7 @@ export function MetadataSection({
 
 			{/* Privacy metadata */}
 			<div className="space-y-4">
-				<h4 className="mb-2 font-medium text-sm">Privacy and availability</h4>
+				<h4 className="mb-2 text-heading-4">Privacy and availability</h4>
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div className="space-y-2">
 						<Label htmlFor="class">Visibility</Label>

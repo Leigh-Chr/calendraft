@@ -4,18 +4,19 @@
  */
 
 import { useNavigate } from "@tanstack/react-router";
-import { Copy, Edit, Trash2 } from "lucide-react";
+import { ArrowRight, Copy, Edit, MoreHorizontal, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import React, { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { EventBadges } from "./event-badges";
 import { EventDetails } from "./event-details";
@@ -26,6 +27,7 @@ interface EventCardProps {
 	calendarId: string;
 	onDelete: (id: string) => void;
 	onDuplicate?: (id: string) => void;
+	onMove?: (id: string) => void;
 	isDeleting: boolean;
 	isDuplicating?: boolean;
 	/** Selection mode props */
@@ -39,6 +41,7 @@ export const EventCard = React.memo(function EventCard({
 	calendarId,
 	onDelete,
 	onDuplicate,
+	onMove,
 	isDeleting,
 	isDuplicating,
 	selectionMode = false,
@@ -63,6 +66,10 @@ export const EventCard = React.memo(function EventCard({
 		onDuplicate?.(event.id);
 	}, [onDuplicate, event.id]);
 
+	const handleMove = useCallback(() => {
+		onMove?.(event.id);
+	}, [onMove, event.id]);
+
 	const handleCheckboxChange = useCallback(
 		(_checked: boolean) => {
 			onToggleSelect?.(event.id);
@@ -84,17 +91,23 @@ export const EventCard = React.memo(function EventCard({
 		>
 			<Card
 				className={cn(
-					"transition-all duration-200 hover:shadow-md",
+					"group relative overflow-hidden transition-all duration-200 hover:shadow-md",
 					selectionMode && "cursor-pointer",
 					isSelected && "bg-primary/5 ring-2 ring-primary",
 				)}
 				onClick={selectionMode ? handleNavigate : undefined}
 			>
-				<CardContent className="p-4">
+				{/* Color accent bar - left border like CalendarCard */}
+				<div
+					className="absolute inset-y-0 left-0 w-1 transition-all duration-200 group-hover:w-1.5"
+					style={{ backgroundColor: event.color || "#D4A017" }}
+				/>
+
+				<CardContent className="py-4 pr-6 pl-6">
 					<div className="flex items-start gap-3">
 						{/* Selection checkbox */}
 						{selectionMode && (
-							<div className="flex items-center pt-0.5">
+							<div className="flex items-center">
 								<Checkbox
 									checked={isSelected}
 									onCheckedChange={handleCheckboxChange}
@@ -104,57 +117,55 @@ export const EventCard = React.memo(function EventCard({
 							</div>
 						)}
 
-						<div className="flex-1">
+						<div className="min-w-0 flex-1">
 							<EventBadges event={event} />
 							<EventDetails event={event} />
 						</div>
 
-						{/* Action buttons - hide in selection mode */}
+						{/* Action menu - hide in selection mode */}
 						{!selectionMode && (
-							<TooltipProvider>
-								<div className="flex gap-2">
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button
-												variant="outline"
-												size="icon"
-												onClick={handleNavigate}
-											>
-												<Edit className="h-4 w-4" />
-											</Button>
-										</TooltipTrigger>
-										<TooltipContent>Edit</TooltipContent>
-									</Tooltip>
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="h-8 w-8 shrink-0"
+									>
+										<MoreHorizontal className="h-4 w-4" />
+										<span className="sr-only">More options</span>
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end">
+									<DropdownMenuItem onClick={handleNavigate}>
+										<Edit className="mr-2 h-4 w-4" />
+										Edit
+									</DropdownMenuItem>
 									{onDuplicate && (
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<Button
-													variant="outline"
-													size="icon"
-													onClick={handleDuplicate}
-													disabled={isDuplicating}
-												>
-													<Copy className="h-4 w-4" />
-												</Button>
-											</TooltipTrigger>
-											<TooltipContent>Duplicate</TooltipContent>
-										</Tooltip>
+										<DropdownMenuItem
+											onClick={handleDuplicate}
+											disabled={isDuplicating}
+										>
+											<Copy className="mr-2 h-4 w-4" />
+											Duplicate
+										</DropdownMenuItem>
 									)}
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button
-												variant="outline"
-												size="icon"
-												onClick={handleDelete}
-												disabled={isDeleting}
-											>
-												<Trash2 className="h-4 w-4" />
-											</Button>
-										</TooltipTrigger>
-										<TooltipContent>Delete</TooltipContent>
-									</Tooltip>
-								</div>
-							</TooltipProvider>
+									{onMove && (
+										<DropdownMenuItem onClick={handleMove}>
+											<ArrowRight className="mr-2 h-4 w-4" />
+											Move to calendar...
+										</DropdownMenuItem>
+									)}
+									<DropdownMenuSeparator />
+									<DropdownMenuItem
+										onClick={handleDelete}
+										disabled={isDeleting}
+										className="text-destructive focus:text-destructive"
+									>
+										<Trash2 className="mr-2 h-4 w-4" />
+										Delete
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
 						)}
 					</div>
 				</CardContent>

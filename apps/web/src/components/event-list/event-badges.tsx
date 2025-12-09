@@ -164,13 +164,13 @@ export const EventBadges = React.memo(function EventBadges({
 		event.rrule || event.priority || (event.class && event.class !== "PUBLIC");
 
 	return (
-		<div className="mb-1.5 flex items-start gap-2">
+		<div className="mb-3 flex items-start gap-2">
 			{showColor && <ColorDot color={event.color} size="md" />}
 			<div className="min-w-0 flex-1">
 				<div className="flex flex-wrap items-center gap-2">
 					<h3
 						className={cn(
-							"font-semibold text-base leading-tight",
+							"text-heading-4",
 							isCancelled && "text-muted-foreground line-through",
 						)}
 					>

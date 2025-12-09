@@ -1,0 +1,34 @@
+// Calendar groups for organizing calendars
+// Allows users to group calendars together for easier management and bulk operations
+
+model CalendarGroup {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  color       String?  // Group color for UI (hex format like #3B82F6)
+  userId      String?  // User ID (authenticated) or anonymous ID (anon-xxx format). Same pattern as Calendar
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  calendars   CalendarGroupMember[] // Many-to-many relation with calendars
+  bundles     CalendarShareBundle[] // Bundles created from this group
+  
+  @@index([userId]) // Fast lookups for groups by user
+  @@map("calendar_group")
+}
+
+// Junction table for calendars in a group
+model CalendarGroupMember {
+  id          String   @id @default(uuid())
+  groupId     String
+  calendarId  String
+  order       Int      @default(0) // Order for custom sorting within the group
+  
+  group       CalendarGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@unique([groupId, calendarId]) // Prevent duplicate calendars in same group
+  @@index([groupId]) // Fast lookups for calendars in a group
+  @@index([calendarId]) // Fast lookups for groups containing a calendar
+  @@map("calendar_group_member")
+}
+

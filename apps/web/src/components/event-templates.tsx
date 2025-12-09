@@ -73,7 +73,7 @@ export const EVENT_TEMPLATES: EventTemplate[] = [
 		id: "work",
 		name: "Work",
 		icon: <Briefcase className="h-4 w-4" />,
-		color: "#f59e0b", // amber
+		color: "#D4A017", // solar yellow
 		duration: 480, // 8 hours
 		title: "Work day",
 		rrule: "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
@@ -121,7 +121,7 @@ export const EVENT_TEMPLATES: EventTemplate[] = [
 		id: "study",
 		name: "Study",
 		icon: <GraduationCap className="h-4 w-4" />,
-		color: "#c2703c", // amber
+		color: "#D4A017", // solar yellow
 		duration: 120,
 		title: "Study session",
 		categories: "Study",

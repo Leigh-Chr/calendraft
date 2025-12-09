@@ -9,9 +9,14 @@ import {
 	AlarmsRow,
 	AttendeesRow,
 	CategoriesRow,
+	CommentRow,
+	ContactRow,
 	DateTimeRow,
 	DescriptionRow,
 	LocationRow,
+	OrganizerRow,
+	ResourcesRow,
+	TransparencyRow,
 	UrlRow,
 } from "./event-info-rows";
 import type { EventItem } from "./types";
@@ -38,8 +43,21 @@ function formatCategories(
 	return typeof categories === "string" ? categories : "";
 }
 
+function formatResources(
+	resources: Array<{ resource: string }> | string | null | undefined,
+): string {
+	if (!resources) return "";
+	if (Array.isArray(resources)) {
+		return resources
+			.map((r) => (typeof r === "string" ? r : r.resource))
+			.join(", ");
+	}
+	return typeof resources === "string" ? resources : "";
+}
+
 function buildRowConfigs(event: EventItem): RowConfig[] {
 	const categoriesStr = formatCategories(event.categories);
+	const resourcesStr = formatResources(event.resources);
 
 	return [
 		{
@@ -48,9 +66,29 @@ function buildRowConfigs(event: EventItem): RowConfig[] {
 			render: () => <LocationRow location={event.location as string} />,
 		},
 		{
+			key: "org",
+			value: event.organizerName || event.organizerEmail,
+			render: () => (
+				<OrganizerRow
+					organizerName={event.organizerName}
+					organizerEmail={event.organizerEmail}
+				/>
+			),
+		},
+		{
+			key: "contact",
+			value: event.contact,
+			render: () => <ContactRow contact={event.contact as string} />,
+		},
+		{
 			key: "cat",
 			value: categoriesStr,
 			render: () => <CategoriesRow categories={categoriesStr} />,
+		},
+		{
+			key: "res",
+			value: resourcesStr,
+			render: () => <ResourcesRow resources={resourcesStr} />,
 		},
 		{
 			key: "url",
@@ -66,6 +104,16 @@ function buildRowConfigs(event: EventItem): RowConfig[] {
 			key: "alm",
 			value: event.alarms?.length,
 			render: () => <AlarmsRow count={event.alarms?.length || 0} />,
+		},
+		{
+			key: "transp",
+			value: event.transp,
+			render: () => <TransparencyRow transp={event.transp as string} />,
+		},
+		{
+			key: "comment",
+			value: event.comment,
+			render: () => <CommentRow comment={event.comment as string} />,
 		},
 		{
 			key: "desc",
@@ -84,23 +132,41 @@ export const EventDetails = React.memo(function EventDetails({
 }: {
 	event: EventItem;
 }) {
-	const optionalRows = useMemo(() => {
-		return buildRowConfigs(event)
-			.filter((row) => Boolean(row.value))
-			.map((row) => (
+	const { secondaryRows, descriptionRow } = useMemo(() => {
+		const allRows = buildRowConfigs(event).filter((row) => Boolean(row.value));
+
+		// Separate description from other rows
+		const descRow = allRows.find((row) => row.key === "desc");
+		const otherRows = allRows.filter((row) => row.key !== "desc");
+
+		return {
+			secondaryRows: otherRows.map((row) => (
 				<React.Fragment key={row.key}>{row.render()}</React.Fragment>
-			));
+			)),
+			descriptionRow: descRow ? (
+				<React.Fragment key={descRow.key}>{descRow.render()}</React.Fragment>
+			) : null,
+		};
 	}, [event]);
 
 	return (
-		<div className="space-y-2 text-sm">
+		<div className="space-y-3 text-sm">
 			{/* Primary info: Date/Time - most important */}
 			<DateTimeRow startDate={event.startDate} endDate={event.endDate} />
 
 			{/* Secondary info: location, categories, etc. */}
-			{optionalRows.length > 0 && (
-				<div className="space-y-1.5 text-muted-foreground">{optionalRows}</div>
+			{secondaryRows.length > 0 && (
+				<>
+					{/* Separator between primary and secondary info */}
+					<div className="border-border/40 border-t" />
+					<div className="flex flex-col gap-3 text-muted-foreground lg:grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-3">
+						{secondaryRows}
+					</div>
+				</>
 			)}
+
+			{/* Description - separate section with spacing */}
+			{descriptionRow && <div className="pt-3">{descriptionRow}</div>}
 		</div>
 	);
 });

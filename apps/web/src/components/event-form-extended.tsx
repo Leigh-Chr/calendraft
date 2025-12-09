@@ -395,7 +395,7 @@ export function EventFormExtended({
 			<Card>
 				<CardHeader>
 					<div className="flex items-start justify-between">
-						<div className="space-y-1.5">
+						<div className="space-y-2">
 							<CardTitle className="flex items-center gap-2">
 								{mode === "create" ? "Create an event" : "Edit event"}
 								{hasModifications && mode === "edit" && (

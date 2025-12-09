@@ -24,8 +24,8 @@ function handleAttendeeError(
 	const match = path.match(/attendees\.(\d+)\.(.+)/);
 	if (!match) return;
 
-	const index = Number.parseInt(match[1] || "0", 10);
-	const field = match[2];
+	const index = Number.parseInt(match1 || "0", 10);
+	const field = match2;
 	if (!errors.attendeeEmails) {
 		errors.attendeeEmails = {};
 	}
@@ -45,8 +45,8 @@ function handleAlarmError(
 	const match = path.match(/alarms\.(\d+)\.(.+)/);
 	if (!match) return;
 
-	const index = Number.parseInt(match[1] || "0", 10);
-	const field = match[2];
+	const index = Number.parseInt(match1 || "0", 10);
+	const field = match2;
 	if (!errors.alarms) {
 		errors.alarms = {};
 	}

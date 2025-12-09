@@ -44,7 +44,7 @@ model Account {
   accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
   scope                 String?
-  password              String?   // Hashed password with bcrypt/argon2 - NEVER store plaintext
+  password              String?   // Hashed password with scrypt (Better-Auth format: salt:key) - NEVER store plaintext
   createdAt             DateTime
   updatedAt             DateTime
 

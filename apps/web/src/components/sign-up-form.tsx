@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
-import { Calendar, Sparkles } from "lucide-react";
+import { Calendar, Eye, EyeOff, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
@@ -12,7 +13,7 @@ import { Label } from "./ui/label";
 
 export default function SignUpForm({
 	onSwitchToSignIn,
-	redirectTo,
+	redirectTo: _redirectTo,
 }: {
 	onSwitchToSignIn: () => void;
 	/** URL to redirect to after successful registration */
@@ -22,6 +23,7 @@ export default function SignUpForm({
 		from: "/",
 	});
 	const { isPending } = authClient.useSession();
+	const [showPassword, setShowPassword] = useState(false);
 
 	const form = useForm({
 		defaultValues: {
@@ -38,16 +40,48 @@ export default function SignUpForm({
 				},
 				{
 					onSuccess: () => {
-						// Redirect to specified URL or default to calendars list
-						if (redirectTo) {
-							navigate({ to: redirectTo });
-						} else {
-							navigate({ to: "/calendars" });
-						}
-						toast.success("Registration successful");
+						// Rediriger vers la page "check your email" avec l'email en paramètre
+						navigate({
+							to: "/check-email",
+							search: { email: value.email },
+						});
+						toast.success(
+							"Registration successful! Please check your email to verify your account.",
+						);
 					},
 					onError: (error) => {
-						toast.error(error.error.message || error.error.statusText);
+						// Gestion spécifique des erreurs
+						const errorMessage =
+							error.error.message || error.error.statusText || "";
+
+						// Erreur pour email temporaire bloqué (via better-auth-harmony)
+						if (
+							errorMessage.includes("temporary") ||
+							errorMessage.includes("disposable") ||
+							errorMessage.includes("not allowed")
+						) {
+							toast.error(
+								"Temporary email addresses are not allowed. Please use a permanent email address.",
+							);
+						}
+						// Erreur de rate limiting
+						else if (error.error.status === 429) {
+							toast.error("Too many signup attempts. Please try again later.");
+						}
+						// Erreur email déjà utilisé
+						else if (
+							errorMessage.includes("already") ||
+							errorMessage.includes("exists") ||
+							errorMessage.includes("duplicate")
+						) {
+							toast.error("This email address is already registered.");
+						}
+						// Autres erreurs
+						else {
+							toast.error(
+								errorMessage || "Registration failed. Please try again.",
+							);
+						}
 					},
 				},
 			);
@@ -81,7 +115,7 @@ export default function SignUpForm({
 					<div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 shadow-lg shadow-primary/20">
 						<Calendar className="size-7 text-primary" />
 					</div>
-					<h1 className="text-center font-bold text-3xl">Create an account</h1>
+					<h1 className="text-center text-heading-1">Create an account</h1>
 					<p className="mt-2 flex items-center gap-2 text-center text-muted-foreground text-sm">
 						<Sparkles className="size-4 text-primary" />
 						Synchronize your calendars everywhere
@@ -89,7 +123,7 @@ export default function SignUpForm({
 				</div>
 
 				{/* Form card */}
-				<div className="card-gradient-border rounded-xl border bg-card/80 p-6 shadow-black/5 shadow-xl backdrop-blur-sm">
+				<div className="rounded-xl border bg-card/80 p-6 shadow-black/5 shadow-xl backdrop-blur-sm">
 					<form
 						onSubmit={(e) => {
 							e.preventDefault();
@@ -109,9 +143,20 @@ export default function SignUpForm({
 											value={field.state.value}
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
+											aria-describedby={
+												field.state.meta.errors.length > 0
+													? `${field.name}-error`
+													: undefined
+											}
+											aria-invalid={
+												field.state.meta.errors.length > 0 ? true : undefined
+											}
 										/>
 										{field.state.meta.errors.map((error) => (
-											<FormMessage key={error?.message}>
+											<FormMessage
+												key={error?.message}
+												id={`${field.name}-error`}
+											>
 												{error?.message}
 											</FormMessage>
 										))}
@@ -129,12 +174,24 @@ export default function SignUpForm({
 											id={field.name}
 											name={field.name}
 											type="email"
+											autoComplete="email"
 											value={field.state.value}
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
+											aria-describedby={
+												field.state.meta.errors.length > 0
+													? `${field.name}-error`
+													: undefined
+											}
+											aria-invalid={
+												field.state.meta.errors.length > 0 ? true : undefined
+											}
 										/>
 										{field.state.meta.errors.map((error) => (
-											<FormMessage key={error?.message}>
+											<FormMessage
+												key={error?.message}
+												id={`${field.name}-error`}
+											>
 												{error?.message}
 											</FormMessage>
 										))}
@@ -148,22 +205,58 @@ export default function SignUpForm({
 								{(field) => (
 									<div className="space-y-2">
 										<Label htmlFor={field.name}>Password</Label>
-										<Input
-											id={field.name}
-											name={field.name}
-											type="password"
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-										/>
+										<div className="relative">
+											<Input
+												id={field.name}
+												name={field.name}
+												type={showPassword ? "text" : "password"}
+												autoComplete="new-password"
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												aria-describedby={
+													field.state.meta.errors.length > 0
+														? `${field.name}-error`
+														: undefined
+												}
+												aria-invalid={
+													field.state.meta.errors.length > 0 ? true : undefined
+												}
+											/>
+											<button
+												type="button"
+												onClick={() => setShowPassword(!showPassword)}
+												className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground transition-colors hover:text-foreground"
+												aria-label={
+													showPassword ? "Hide password" : "Show password"
+												}
+											>
+												{showPassword ? (
+													<EyeOff className="h-4 w-4" />
+												) : (
+													<Eye className="h-4 w-4" />
+												)}
+											</button>
+										</div>
 										{field.state.meta.errors.map((error) => (
-											<FormMessage key={error?.message}>
+											<FormMessage
+												key={error?.message}
+												id={`${field.name}-error`}
+											>
 												{error?.message}
 											</FormMessage>
 										))}
 									</div>
 								)}
 							</form.Field>
+						</div>
+
+						{/* Info message about email verification */}
+						<div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-muted-foreground text-sm">
+							<p>
+								After signing up, you'll receive a verification email. Please
+								check your inbox to activate your account.
+							</p>
 						</div>
 
 						<form.Subscribe>

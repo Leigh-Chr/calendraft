@@ -138,7 +138,7 @@ function ImportCalendarComponent() {
 			</div>
 
 			<div className="container mx-auto max-w-2xl px-4 py-10">
-				<Card className="card-glow">
+				<Card className="transition-all duration-200 hover:shadow-lg">
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Upload className="h-5 w-5" />

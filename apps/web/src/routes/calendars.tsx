@@ -1,26 +1,42 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	createFileRoute,
 	Link,
 	Outlet,
+	stripSearchParams,
 	useLocation,
 	useNavigate,
 } from "@tanstack/react-router";
+import { zodValidator } from "@tanstack/zod-adapter";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import {
 	Calendar,
+	CheckSquare,
 	Edit,
 	ExternalLink,
 	FileUp,
+	Folder,
 	Globe,
 	MoreHorizontal,
 	Plus,
 	Trash2,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { AnimatePresence } from "motion/react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AccountPrompt } from "@/components/account-prompt";
+import { CalendarBulkActionsBar } from "@/components/calendar-list/bulk-actions-bar";
+import {
+	CalendarSearchSortBar,
+	type CalendarSortBy,
+	type CalendarSortDirection,
+} from "@/components/calendar-list/calendar-filters";
+import { CreateGroupDialog } from "@/components/calendar-list/create-group-dialog";
+import { CalendarGroupBadges } from "@/components/calendar-list/group-badges";
+import { CalendarGroupCard } from "@/components/calendar-list/group-card";
 import { StaggerContainer, StaggerItem } from "@/components/page-transition";
+import { ShareCalendarsDialog } from "@/components/share-calendars-dialog";
 import { TourAlertDialog } from "@/components/tour";
 import {
 	AlertDialog,
@@ -40,6 +56,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ColorPicker } from "@/components/ui/color-picker";
 import {
 	DropdownMenu,
@@ -57,13 +74,22 @@ import {
 	useDeleteCalendar,
 	useUpdateCalendar,
 } from "@/hooks/use-storage";
+import {
+	calendarsListDefaults,
+	calendarsListSearchSchema,
+} from "@/lib/search-params";
 import { TOUR_STEP_IDS } from "@/lib/tour-constants";
 import { cn } from "@/lib/utils";
+import { trpc, trpcClient } from "@/utils/trpc";
 
 const BASE_URL = "https://calendraft.app";
 
 export const Route = createFileRoute("/calendars")({
 	component: CalendarsListComponent,
+	validateSearch: zodValidator(calendarsListSearchSchema),
+	search: {
+		middlewares: [stripSearchParams(calendarsListDefaults)],
+	},
 	head: () => ({
 		meta: [
 			{ title: "My calendars - Calendraft" },
@@ -98,7 +124,57 @@ type DialogState =
 function CalendarsListComponent() {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { calendars, isLoading } = useCalendars();
+	const queryClient = useQueryClient();
+	const search = Route.useSearch();
+
+	// Parse filters from URL
+	const keyword = search.q || "";
+	const sortBy = search.sortBy || "updatedAt";
+	const sortDirection = search.sortDirection || "desc";
+
+	// Get calendars
+	const { calendars: allCalendars, isLoading } = useCalendars();
+
+	// Filter and sort calendars
+	const calendars = useMemo(() => {
+		let filtered = allCalendars;
+
+		// Filter by keyword (name search)
+		if (keyword.trim()) {
+			const searchLower = keyword.trim().toLowerCase();
+			filtered = filtered.filter((cal) =>
+				cal.name.toLowerCase().includes(searchLower),
+			);
+		}
+
+		// Sort calendars
+		const sorted = [...filtered].sort((a, b) => {
+			switch (sortBy) {
+				case "name":
+					return a.name.localeCompare(b.name);
+				case "updatedAt": {
+					const aUpdated = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+					const bUpdated = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+					return sortDirection === "asc"
+						? aUpdated - bUpdated
+						: bUpdated - aUpdated;
+				}
+				case "createdAt": {
+					const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+					const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+					return sortDirection === "asc"
+						? aCreated - bCreated
+						: bCreated - aCreated;
+				}
+				case "eventCount":
+					return a.eventCount - b.eventCount;
+				default:
+					return 0;
+			}
+		});
+
+		return sorted;
+	}, [allCalendars, keyword, sortBy, sortDirection]);
 	const { deleteCalendar, isDeleting } = useDeleteCalendar();
 	const { updateCalendar, isUpdating } = useUpdateCalendar();
 
@@ -108,6 +184,50 @@ function CalendarsListComponent() {
 
 	// Single state for all dialogs
 	const [dialog, setDialog] = useState<DialogState>(null);
+
+	// Selection mode state
+	const [selectionMode, setSelectionMode] = useState(false);
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+	// Groups state
+	const [createGroupDialogOpen, setCreateGroupDialogOpen] = useState(false);
+	const [editGroupDialogOpen, setEditGroupDialogOpen] = useState(false);
+	const [groupToEdit, setGroupToEdit] = useState<{
+		id: string;
+		name: string;
+		description?: string | null;
+		color?: string | null;
+	} | null>(null);
+	const [shareGroupDialogOpen, setShareGroupDialogOpen] = useState(false);
+	const [groupToShare, setGroupToShare] = useState<string | null>(null);
+	const [deleteGroupDialogOpen, setDeleteGroupDialogOpen] = useState(false);
+	const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
+
+	// Get groups
+	const { data: groups, isLoading: isLoadingGroups } = useQuery({
+		...trpc.calendar.group.list.queryOptions(),
+	});
+
+	// Get group details for sharing
+	const { data: groupDetailsForShare } = useQuery({
+		...trpc.calendar.group.getById.queryOptions({ id: groupToShare || "" }),
+		enabled: !!groupToShare && shareGroupDialogOpen,
+	});
+
+	// Delete group mutation
+	const deleteGroupMutation = useMutation(
+		trpc.calendar.group.delete.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: [["calendar", "group"]],
+				});
+				toast.success("Group deleted");
+			},
+			onError: (error) => {
+				toast.error(error.message || "Error deleting group");
+			},
+		}),
+	);
 
 	const openDeleteDialog = useCallback((id: string, name: string) => {
 		setDialog({ type: "delete", calendar: { id, name } });
@@ -154,21 +274,189 @@ function CalendarsListComponent() {
 		}
 	}, [dialog, deleteCalendar, closeDialog]);
 
-	const confirmEdit = useCallback(() => {
+	const confirmEdit = useCallback(async () => {
 		if (dialog?.type === "edit") {
 			const trimmedName = dialog.newName.trim();
 			if (trimmedName) {
-				updateCalendar({
+				// Update calendar name and color
+				await updateCalendar({
 					id: dialog.calendar.id,
 					name: trimmedName,
 					color: dialog.newColor,
 				});
+
 				closeDialog();
 			} else {
 				toast.error("Name cannot be empty");
 			}
 		}
 	}, [dialog, updateCalendar, closeDialog]);
+
+	// Selection handlers
+	const handleToggleSelect = useCallback((id: string) => {
+		setSelectedIds((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) {
+				next.delete(id);
+			} else {
+				next.add(id);
+			}
+			return next;
+		});
+	}, []);
+
+	const handleSelectAll = useCallback(() => {
+		setSelectedIds(new Set(calendars.map((c) => c.id)));
+	}, [calendars]);
+
+	const handleDeselectAll = useCallback(() => {
+		setSelectedIds(new Set());
+	}, []);
+
+	const handleExitSelectionMode = useCallback(() => {
+		setSelectionMode(false);
+		setSelectedIds(new Set());
+	}, []);
+
+	const handleEnterSelectionMode = useCallback(() => {
+		setSelectionMode(true);
+	}, []);
+
+	// Search and sort handlers
+	const handleKeywordChange = useCallback(
+		(newKeyword: string) => {
+			navigate({
+				search: {
+					...search,
+					q: newKeyword || undefined,
+				},
+			});
+		},
+		[navigate, search],
+	);
+
+	const handleSortChange = useCallback(
+		(newSortBy: CalendarSortBy) => {
+			// Reset sortDirection to "desc" when changing sort type (except for date-based sorts)
+			const shouldShowDirection =
+				newSortBy === "updatedAt" || newSortBy === "createdAt";
+			navigate({
+				search: {
+					...search,
+					sortBy: newSortBy,
+					sortDirection: shouldShowDirection ? sortDirection : "desc",
+				},
+			});
+		},
+		[navigate, search, sortDirection],
+	);
+
+	const handleSortDirectionChange = useCallback(
+		(newDirection: CalendarSortDirection) => {
+			navigate({
+				search: {
+					...search,
+					sortDirection: newDirection,
+				},
+			});
+		},
+		[navigate, search],
+	);
+
+	// Group handlers
+	const handleCreateGroup = useCallback(() => {
+		setCreateGroupDialogOpen(true);
+	}, []);
+
+	const handleEditGroup = useCallback(
+		(group: {
+			id: string;
+			name: string;
+			description?: string | null;
+			color?: string | null;
+		}) => {
+			setGroupToEdit(group);
+			setEditGroupDialogOpen(true);
+		},
+		[],
+	);
+
+	const handleDeleteGroup = useCallback((groupId: string) => {
+		setGroupToDelete(groupId);
+		setDeleteGroupDialogOpen(true);
+	}, []);
+
+	const handleShareGroup = useCallback((groupId: string) => {
+		setGroupToShare(groupId);
+		setShareGroupDialogOpen(true);
+	}, []);
+
+	const handleMergeGroup = useCallback(
+		async (groupId: string) => {
+			try {
+				// Get group details and navigate to merge page
+				const group = await trpcClient.calendar.group.getById.query({
+					id: groupId,
+				});
+				const calendarIds = group.calendars.map((c) => c.id).join(",");
+				navigate({
+					to: "/calendars/merge",
+					search: { selected: calendarIds },
+				});
+			} catch (_error) {
+				toast.error("Error loading group details");
+			}
+		},
+		[navigate],
+	);
+
+	const handleExportGroup = useCallback(async (groupId: string) => {
+		try {
+			const group = await trpcClient.calendar.group.getById.query({
+				id: groupId,
+			});
+			if (group.calendars.length === 0) {
+				toast.error("No calendars to export");
+				return;
+			}
+
+			// Create a temporary bundle for export
+			const bundle = await trpcClient.share.bundle.create.mutate({
+				groupId: groupId,
+				removeDuplicates: false,
+			});
+
+			// Get the ICS content
+			const data = await trpcClient.share.bundle.getByToken.query({
+				token: bundle.token,
+			});
+
+			// Create blob and download
+			const blob = new Blob([data.icsContent], { type: "text/calendar" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `${group.name.replace(/[^a-z0-9]/gi, "_")}.ics`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+
+			// Clean up the temporary bundle
+			await trpcClient.share.bundle.delete.mutate({ id: bundle.id });
+
+			toast.success("Group exported successfully");
+		} catch (_error) {
+			toast.error("Error exporting group");
+		}
+	}, []);
+
+	const handleViewGroup = useCallback(
+		(groupId: string) => {
+			navigate({ to: `/calendars/groups/${groupId}` });
+		},
+		[navigate],
+	);
 
 	// If we're on a child route (like /calendars/new), render the child route
 	// TanStack Router will handle this automatically via Outlet
@@ -223,26 +511,115 @@ function CalendarsListComponent() {
 				{/* Tour dialog */}
 				<TourAlertDialog isOpen={tourOpen} setIsOpen={setTourOpen} />
 
-				<div className="mb-6 flex items-center justify-between">
-					<h1 className="font-bold text-3xl">My calendars</h1>
-					<div className="flex items-center gap-2">
+				<div className="mb-6 flex flex-wrap items-center gap-4">
+					<h1 className="text-heading-1">My calendars</h1>
+					<div className="ml-auto flex flex-wrap items-center gap-2">
+						{/* Primary action */}
 						<Button
 							id={TOUR_STEP_IDS.NEW_CALENDAR_BUTTON}
 							onClick={() => navigate({ to: "/calendars/new" })}
+							size="sm"
 						>
 							<Plus className="mr-2 h-4 w-4" />
 							New calendar
 						</Button>
-						<Button id={TOUR_STEP_IDS.IMPORT_BUTTON} variant="outline" asChild>
+						{/* Secondary actions */}
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={handleCreateGroup}
+							disabled={calendars.length === 0}
+						>
+							<Folder className="mr-2 h-4 w-4" />
+							New group
+						</Button>
+						<Button
+							id={TOUR_STEP_IDS.IMPORT_BUTTON}
+							variant="outline"
+							size="sm"
+							asChild
+						>
 							<Link to="/calendars/import">
 								<FileUp className="mr-2 h-4 w-4" />
 								Import
 							</Link>
 						</Button>
+						{/* Selection mode toggle - pushed to the right when space allows */}
+						{calendars.length > 0 && !selectionMode && (
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleEnterSelectionMode}
+							>
+								<CheckSquare className="mr-2 h-4 w-4" />
+								Select
+							</Button>
+						)}
 					</div>
 				</div>
 
 				<AccountPrompt variant="banner" />
+
+				{/* Search and sort */}
+				{calendars.length > 0 && (
+					<div className="mb-4">
+						<CalendarSearchSortBar
+							keyword={keyword}
+							sortBy={sortBy as CalendarSortBy}
+							sortDirection={sortDirection as CalendarSortDirection}
+							onKeywordChange={handleKeywordChange}
+							onSortChange={handleSortChange}
+							onSortDirectionChange={handleSortDirectionChange}
+							showDirectionToggle={
+								sortBy === "updatedAt" || sortBy === "createdAt"
+							}
+						/>
+					</div>
+				)}
+
+				{/* Bulk actions bar */}
+				<AnimatePresence>
+					{selectionMode && (
+						<CalendarBulkActionsBar
+							selectedCount={selectedIds.size}
+							totalCount={calendars.length}
+							selectedIds={selectedIds}
+							onSelectAll={handleSelectAll}
+							onDeselectAll={handleDeselectAll}
+							onExitSelectionMode={handleExitSelectionMode}
+						/>
+					)}
+				</AnimatePresence>
+
+				{/* Groups section */}
+				{!isLoadingGroups && groups && groups.length > 0 && (
+					<div className="mb-8">
+						<div className="mb-4 flex items-center justify-between">
+							<h2 className="text-heading-2">Groups</h2>
+						</div>
+						<StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+							{groups.map((group) => (
+								<StaggerItem key={group.id}>
+									<CalendarGroupCard
+										group={group}
+										onOpen={() => handleViewGroup(group.id)}
+										onEdit={() => handleEditGroup(group)}
+										onDelete={() => handleDeleteGroup(group.id)}
+										onMerge={() => handleMergeGroup(group.id)}
+										onExport={() => handleExportGroup(group.id)}
+										onShare={() => handleShareGroup(group.id)}
+										isDeleting={deleteGroupMutation.isPending}
+									/>
+								</StaggerItem>
+							))}
+						</StaggerContainer>
+					</div>
+				)}
+
+				{/* Calendars section */}
+				<div className="mb-4 flex items-center justify-between">
+					<h2 className="text-heading-2">Calendars</h2>
+				</div>
 
 				{calendars.length === 0 ? (
 					<Card id={TOUR_STEP_IDS.CALENDAR_GRID}>
@@ -250,7 +627,7 @@ function CalendarsListComponent() {
 							<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
 								<Calendar className="h-8 w-8 text-muted-foreground" />
 							</div>
-							<h3 className="mb-2 font-semibold text-lg">No calendars yet</h3>
+							<h3 className="mb-2 text-heading-3">No calendars yet</h3>
 							<p className="mb-6 text-muted-foreground">
 								Create your first calendar or import an existing .ics file.
 							</p>
@@ -284,6 +661,9 @@ function CalendarsListComponent() {
 										}
 										isDeleting={isDeleting}
 										isUpdating={isUpdating}
+										selectionMode={selectionMode}
+										isSelected={selectedIds.has(calendar.id)}
+										onToggleSelect={handleToggleSelect}
 									/>
 								</StaggerItem>
 							))}
@@ -310,7 +690,7 @@ function CalendarsListComponent() {
 							<AlertDialogAction
 								onClick={confirmDelete}
 								disabled={isDeleting}
-								className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+								variant="destructive"
 							>
 								{isDeleting ? "Deleting..." : "Delete"}
 							</AlertDialogAction>
@@ -360,6 +740,72 @@ function CalendarsListComponent() {
 						</AlertDialogFooter>
 					</AlertDialogContent>
 				</AlertDialog>
+
+				{/* Create group dialog */}
+				<CreateGroupDialog
+					open={createGroupDialogOpen}
+					onOpenChange={setCreateGroupDialogOpen}
+				/>
+
+				{/* Edit group dialog */}
+				{groupToEdit && (
+					<CreateGroupDialog
+						open={editGroupDialogOpen}
+						onOpenChange={(open) => {
+							setEditGroupDialogOpen(open);
+							if (!open) {
+								setGroupToEdit(null);
+							}
+						}}
+						groupToEdit={groupToEdit}
+					/>
+				)}
+
+				{/* Share group dialog */}
+				{groupDetailsForShare && (
+					<ShareCalendarsDialog
+						calendarIds={groupDetailsForShare.calendars.map((c) => c.id)}
+						groupId={groupToShare || undefined}
+						open={shareGroupDialogOpen}
+						onOpenChange={(open) => {
+							setShareGroupDialogOpen(open);
+							if (!open) {
+								setGroupToShare(null);
+							}
+						}}
+					/>
+				)}
+
+				{/* Delete group dialog */}
+				<AlertDialog
+					open={deleteGroupDialogOpen}
+					onOpenChange={setDeleteGroupDialogOpen}
+				>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle>Delete group?</AlertDialogTitle>
+							<AlertDialogDescription>
+								This will delete the group. The calendars in this group will not
+								be deleted, only the group itself.
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogFooter>
+							<AlertDialogCancel>Cancel</AlertDialogCancel>
+							<AlertDialogAction
+								onClick={() => {
+									if (groupToDelete) {
+										deleteGroupMutation.mutate({ id: groupToDelete });
+										setDeleteGroupDialogOpen(false);
+										setGroupToDelete(null);
+									}
+								}}
+								variant="destructive"
+							>
+								Delete
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
 			</div>
 		</div>
 	);
@@ -385,6 +831,10 @@ interface CalendarCardProps {
 	onDelete: () => void;
 	isDeleting: boolean;
 	isUpdating: boolean;
+	/** Selection mode props */
+	selectionMode?: boolean;
+	isSelected?: boolean;
+	onToggleSelect?: (id: string) => void;
 }
 
 /**
@@ -415,7 +865,24 @@ function CalendarCard({
 	onDelete,
 	isDeleting,
 	isUpdating,
+	selectionMode = false,
+	isSelected = false,
+	onToggleSelect,
 }: CalendarCardProps) {
+	const handleNavigate = useCallback(() => {
+		if (selectionMode) {
+			onToggleSelect?.(calendar.id);
+		} else {
+			onOpen();
+		}
+	}, [selectionMode, onToggleSelect, calendar.id, onOpen]);
+
+	const handleCheckboxChange = useCallback(
+		(_checked: boolean) => {
+			onToggleSelect?.(calendar.id);
+		},
+		[onToggleSelect, calendar.id],
+	);
 	// Get upcoming events (up to 3)
 	const now = new Date();
 	const upcomingEvents =
@@ -433,21 +900,35 @@ function CalendarCard({
 			className={cn(
 				"group relative cursor-pointer overflow-hidden transition-all duration-200",
 				"hover:border-primary/30 hover:shadow-lg",
+				selectionMode && "cursor-pointer",
+				isSelected && "bg-primary/5 ring-2 ring-primary",
 			)}
-			onClick={onOpen}
+			onClick={selectionMode ? handleNavigate : onOpen}
 		>
 			{/* Color accent - left border instead of top for more subtle look */}
 			<div
 				className="absolute inset-y-0 left-0 w-1 transition-all duration-200 group-hover:w-1.5"
-				style={{ backgroundColor: calendar.color || "#c2703c" }}
+				style={{ backgroundColor: calendar.color || "#D4A017" }}
 			/>
 
 			<CardHeader className="pb-2 pl-5">
 				<div className="flex items-start justify-between">
+					{/* Selection checkbox */}
+					{selectionMode && (
+						<div className="mr-3 flex items-center pt-0.5">
+							<Checkbox
+								checked={isSelected}
+								onCheckedChange={handleCheckboxChange}
+								onClick={(e) => e.stopPropagation()}
+								aria-label={`Select ${calendar.name}`}
+							/>
+						</div>
+					)}
 					<div className="min-w-0 flex-1 pr-8">
-						<CardTitle className="line-clamp-1 text-base">
+						<CardTitle className="line-clamp-1 text-card-title">
 							{calendar.name}
 						</CardTitle>
+						<CalendarGroupBadges calendarId={calendar.id} />
 						<CardDescription className="mt-0.5 flex items-center gap-2">
 							<span>
 								{calendar.eventCount} event
@@ -471,51 +952,53 @@ function CalendarCard({
 						</CardDescription>
 					</div>
 
-					{/* Actions Menu */}
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="absolute top-2 right-2 h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
-							>
-								<MoreHorizontal className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem
-								onClick={(e) => {
-									e.stopPropagation();
-									onOpen();
-								}}
-							>
-								<ExternalLink className="mr-2 h-4 w-4" />
-								Open
-							</DropdownMenuItem>
-							<DropdownMenuItem
-								onClick={(e) => {
-									e.stopPropagation();
-									onEdit();
-								}}
-								disabled={isUpdating}
-							>
-								<Edit className="mr-2 h-4 w-4" />
-								Edit
-							</DropdownMenuItem>
-							<DropdownMenuSeparator />
-							<DropdownMenuItem
-								onClick={(e) => {
-									e.stopPropagation();
-									onDelete();
-								}}
-								disabled={isDeleting}
-								className="text-destructive focus:text-destructive"
-							>
-								<Trash2 className="mr-2 h-4 w-4" />
-								Delete
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+					{/* Actions Menu - hide in selection mode */}
+					{!selectionMode && (
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="absolute top-2 right-2 h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+								>
+									<MoreHorizontal className="h-4 w-4" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								<DropdownMenuItem
+									onClick={(e) => {
+										e.stopPropagation();
+										onOpen();
+									}}
+								>
+									<ExternalLink className="mr-2 h-4 w-4" />
+									Open
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={(e) => {
+										e.stopPropagation();
+										onEdit();
+									}}
+									disabled={isUpdating}
+								>
+									<Edit className="mr-2 h-4 w-4" />
+									Edit
+								</DropdownMenuItem>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem
+									onClick={(e) => {
+										e.stopPropagation();
+										onDelete();
+									}}
+									disabled={isDeleting}
+									className="text-destructive focus:text-destructive"
+								>
+									<Trash2 className="mr-2 h-4 w-4" />
+									Delete
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					)}
 				</div>
 			</CardHeader>
 
@@ -544,7 +1027,7 @@ function CalendarCard({
 									</span>
 									<span
 										className="h-1 w-1 shrink-0 rounded-full"
-										style={{ backgroundColor: calendar.color || "#c2703c" }}
+										style={{ backgroundColor: calendar.color || "#D4A017" }}
 									/>
 									<span className="truncate">{event.title}</span>
 								</div>

@@ -1,5 +1,12 @@
+import path from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
+import dotenv from "dotenv";
 import { PrismaClient } from "../prisma/generated/client";
+
+// Load .env file from apps/server (same as prisma.config.ts)
+dotenv.config({
+	path: path.join(__dirname, "../../../apps/server/.env"),
+});
 
 const connectionString = process.env.DATABASE_URL;
 

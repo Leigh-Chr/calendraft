@@ -30,6 +30,7 @@ import { trpc } from "@/utils/trpc";
 import { BulkActionsBar } from "./event-list/bulk-actions-bar";
 import { EventCard } from "./event-list/event-card";
 import { DateFilterButtons, SearchSortBar } from "./event-list/event-filters";
+import { MoveEventDialog } from "./event-list/move-event-dialog";
 import {
 	type EventItem,
 	type FilterState,
@@ -42,6 +43,7 @@ import {
 export interface InitialFilters {
 	dateFilter?: FilterState["dateFilter"];
 	sortBy?: FilterState["sortBy"];
+	sortDirection?: FilterState["sortDirection"];
 	keyword?: string;
 }
 
@@ -49,6 +51,7 @@ export interface InitialFilters {
 export interface FiltersChangePayload {
 	dateFilter: FilterState["dateFilter"];
 	sortBy: FilterState["sortBy"];
+	sortDirection: FilterState["sortDirection"];
 	keyword: string;
 }
 
@@ -75,6 +78,9 @@ function useEventFilters(
 			...getDateRangeForFilter(initialFilters.dateFilter, new Date()),
 		}),
 		...(initialFilters?.sortBy && { sortBy: initialFilters.sortBy }),
+		...(initialFilters?.sortDirection && {
+			sortDirection: initialFilters.sortDirection,
+		}),
 		...(initialFilters?.keyword && { keyword: initialFilters.keyword }),
 	};
 
@@ -86,6 +92,7 @@ function useEventFilters(
 
 		const newDateFilter = initialFilters.dateFilter ?? "all";
 		const newSortBy = initialFilters.sortBy ?? "date";
+		const newSortDirection = initialFilters.sortDirection ?? "asc";
 		const newKeyword = initialFilters.keyword ?? "";
 
 		setFilters((prev) => {
@@ -93,6 +100,7 @@ function useEventFilters(
 			const unchanged =
 				prev.dateFilter === newDateFilter &&
 				prev.sortBy === newSortBy &&
+				prev.sortDirection === newSortDirection &&
 				prev.keyword === newKeyword;
 
 			if (unchanged) return prev;
@@ -101,6 +109,7 @@ function useEventFilters(
 				...prev,
 				dateFilter: newDateFilter,
 				sortBy: newSortBy,
+				sortDirection: newSortDirection,
 				keyword: newKeyword,
 				...getDateRangeForFilter(newDateFilter, new Date()),
 				cursor: undefined,
@@ -124,6 +133,7 @@ function useEventFilters(
 					onFiltersChange({
 						dateFilter: next.dateFilter,
 						sortBy: next.sortBy,
+						sortDirection: next.sortDirection,
 						keyword: next.keyword,
 					});
 				}
@@ -151,6 +161,7 @@ function useEventFilters(
 					onFiltersChange({
 						dateFilter: next.dateFilter,
 						sortBy: next.sortBy,
+						sortDirection: next.sortDirection,
 						keyword: next.keyword,
 					});
 				}
@@ -239,6 +250,27 @@ function useDuplicateEvent(calendarId: string) {
 	return { handleDuplicate, isDuplicating: mutation.isPending };
 }
 
+/**
+ * Hook to manage event move dialog state
+ * @param _calendarId - The current calendar ID (for filtering out from destination list)
+ */
+function useMoveEvent(_calendarId: string) {
+	const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+	const [eventIdToMove, setEventIdToMove] = useState<string | null>(null);
+
+	const handleMove = useCallback((id: string) => {
+		setEventIdToMove(id);
+		setMoveDialogOpen(true);
+	}, []);
+
+	return {
+		handleMove,
+		moveDialogOpen,
+		setMoveDialogOpen,
+		eventIdToMove,
+	};
+}
+
 // ----- Helper Functions -----
 
 function getDateRangeForFilter(
@@ -276,6 +308,8 @@ export function EventListView({
 	} = useEventFilters(initialFilters, onFiltersChange);
 	const { handleDelete, isDeleting } = useDeleteEvent(calendarId);
 	const { handleDuplicate, isDuplicating } = useDuplicateEvent(calendarId);
+	const { handleMove, moveDialogOpen, setMoveDialogOpen, eventIdToMove } =
+		useMoveEvent(calendarId);
 
 	// Selection mode state
 	const [selectionMode, setSelectionMode] = useState(false);
@@ -286,6 +320,7 @@ export function EventListView({
 		...trpc.event.list.queryOptions({
 			calendarId,
 			sortBy: filters.sortBy,
+			sortDirection: filters.sortDirection,
 			filterKeyword: filters.keyword || undefined,
 			filterDateFrom: filters.dateFrom,
 			filterDateTo: filters.dateTo,
@@ -363,8 +398,18 @@ export function EventListView({
 				id={TOUR_STEP_IDS.SEARCH_BAR}
 				keyword={filters.keyword}
 				sortBy={filters.sortBy}
+				sortDirection={filters.sortDirection}
 				onKeywordChange={(keyword) => updateFilterWithReset({ keyword })}
-				onSortChange={(sortBy) => updateFilterWithReset({ sortBy })}
+				onSortChange={(sortBy) => {
+					// Reset sortDirection to "asc" when changing sort type (except for date)
+					updateFilterWithReset({
+						sortBy,
+						sortDirection: sortBy === "date" ? filters.sortDirection : "asc",
+					});
+				}}
+				onSortDirectionChange={(sortDirection) =>
+					updateFilterWithReset({ sortDirection })
+				}
 			/>
 
 			{/* Bulk actions bar */}
@@ -387,12 +432,24 @@ export function EventListView({
 				calendarId={calendarId}
 				onDelete={handleDelete}
 				onDuplicate={handleDuplicate}
+				onMove={handleMove}
 				isDeleting={isDeleting}
 				isDuplicating={isDuplicating}
 				selectionMode={selectionMode}
 				selectedIds={selectedIds}
 				onToggleSelect={handleToggleSelect}
 			/>
+
+			{/* Move event dialog */}
+			{eventIdToMove && (
+				<MoveEventDialog
+					open={moveDialogOpen}
+					onOpenChange={setMoveDialogOpen}
+					eventIds={[eventIdToMove]}
+					currentCalendarId={calendarId}
+					eventCount={1}
+				/>
+			)}
 
 			{nextCursor && (
 				<LoadMoreButton
@@ -475,6 +532,7 @@ function EventsList({
 	calendarId,
 	onDelete,
 	onDuplicate,
+	onMove,
 	isDeleting,
 	isDuplicating,
 	selectionMode = false,
@@ -485,6 +543,7 @@ function EventsList({
 	calendarId: string;
 	onDelete: (id: string) => void;
 	onDuplicate: (id: string) => void;
+	onMove?: (id: string) => void;
 	isDeleting: boolean;
 	isDuplicating: boolean;
 	selectionMode?: boolean;
@@ -524,6 +583,7 @@ function EventsList({
 									calendarId={calendarId}
 									onDelete={onDelete}
 									onDuplicate={onDuplicate}
+									onMove={onMove}
 									isDeleting={isDeleting}
 									isDuplicating={isDuplicating}
 									selectionMode={selectionMode}

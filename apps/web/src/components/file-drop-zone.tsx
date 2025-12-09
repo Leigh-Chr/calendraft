@@ -133,7 +133,7 @@ function ProcessingContent() {
 	return (
 		<>
 			<Loader2 className="mb-4 h-12 w-12 animate-spin text-primary" />
-			<p className="font-medium text-lg">Reading file...</p>
+			<p className="font-medium text-body-large">Reading file...</p>
 		</>
 	);
 }
@@ -150,7 +150,7 @@ function SuccessContent({
 	return (
 		<>
 			<CheckCircle2 className="mb-4 h-12 w-12 text-green-500" />
-			<p className="font-medium text-lg">{file.name}</p>
+			<p className="font-medium text-body-large">{file.name}</p>
 			<p className="mt-1 text-muted-foreground text-sm">
 				{eventCount} event{eventCount !== 1 ? "s" : ""} detected
 			</p>
@@ -181,7 +181,7 @@ function ErrorContent({
 	return (
 		<>
 			<AlertCircle className="mb-4 h-12 w-12 text-destructive" />
-			<p className="font-medium text-destructive text-lg">{error}</p>
+			<p className="font-medium text-body-large text-destructive">{error}</p>
 			<Button
 				type="button"
 				variant="ghost"
@@ -213,7 +213,7 @@ function IdleContent({
 					isDragOver ? "scale-110 text-primary" : "text-muted-foreground",
 				)}
 			/>
-			<p className="font-medium text-lg">
+			<p className="font-medium text-body-large">
 				{isDragOver ? "Drop your file here" : "Drag your .ics file here"}
 			</p>
 			<p className="mt-1 text-muted-foreground text-sm">or click to browse</p>
@@ -227,7 +227,7 @@ function IdleContent({
 function EventPreviewItem({ event }: { event: ParsedEvent }) {
 	return (
 		<div className="flex items-start gap-3 px-4 py-3">
-			<Calendar className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+			<Calendar className="h-4 w-4 shrink-0 text-primary" />
 			<div className="min-w-0 flex-1">
 				<p className="truncate font-medium">{event.title}</p>
 				<p className="text-muted-foreground text-sm">
@@ -236,7 +236,7 @@ function EventPreviewItem({ event }: { event: ParsedEvent }) {
 					{format(event.startDate, "HH:mm")} - {format(event.endDate, "HH:mm")}
 				</p>
 				{event.location && (
-					<p className="mt-0.5 truncate text-muted-foreground text-xs">
+					<p className="truncate text-muted-foreground text-xs">
 						📍 {event.location}
 					</p>
 				)}
