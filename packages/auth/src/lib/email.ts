@@ -2,8 +2,8 @@
 import { Resend } from "resend";
 
 // Initialiser Resend seulement si la clé API est fournie
-const resend = process.env.RESEND_API_KEY
-	? new Resend(process.env.RESEND_API_KEY)
+const resend = process.env["RESEND_API_KEY"]
+	? new Resend(process.env["RESEND_API_KEY"])
 	: null;
 
 /**
@@ -36,7 +36,7 @@ export async function sendVerificationEmail({
 	// Ne pas await pour éviter les timing attacks
 	// L'URL contient déjà le token et le callbackURL configuré par Better-Auth
 	void resend.emails.send({
-		from: process.env.EMAIL_FROM || "Calendraft <noreply@calendraft.com>",
+		from: process.env["EMAIL_FROM"] || "Calendraft <noreply@calendraft.com>",
 		to,
 		subject: "Verify your email address - Calendraft",
 		html: `
@@ -101,7 +101,7 @@ export async function sendResetPasswordEmail({
 	// Ne pas await pour éviter les timing attacks
 	// L'URL contient déjà le token et le callbackURL configuré par Better-Auth
 	void resend.emails.send({
-		from: process.env.EMAIL_FROM || "Calendraft <noreply@calendraft.com>",
+		from: process.env["EMAIL_FROM"] || "Calendraft <noreply@calendraft.com>",
 		to,
 		subject: "Reset your password - Calendraft",
 		html: `

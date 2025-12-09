@@ -25,20 +25,20 @@ export interface AlarmTrigger {
 export interface ParsedAlarm {
 	trigger: string;
 	action: string;
-	summary?: string;
-	description?: string;
-	duration?: string;
-	repeat?: number;
+	summary?: string | undefined;
+	description?: string | undefined;
+	duration?: string | undefined;
+	repeat?: number | undefined;
 }
 
 // ----- Attendee Types -----
 
 export interface ParsedAttendee {
-	name?: string;
+	name?: string | undefined;
 	email: string;
-	role?: string;
-	status?: string;
-	rsvp?: boolean;
+	role?: string | undefined;
+	status?: string | undefined;
+	rsvp?: boolean | undefined;
 }
 
 // ----- Event Types -----
@@ -47,48 +47,48 @@ export interface ParsedEvent {
 	title: string;
 	startDate: Date;
 	endDate: Date;
-	description?: string;
-	location?: string;
+	description?: string | undefined;
+	location?: string | undefined;
 
 	// Basic metadata
-	status?: string;
-	priority?: number;
-	categories?: string[];
-	url?: string;
-	class?: string;
-	comment?: string;
-	contact?: string;
-	resources?: string[];
-	sequence?: number;
-	transp?: string;
+	status?: string | undefined;
+	priority?: number | undefined;
+	categories?: string[] | undefined;
+	url?: string | undefined;
+	class?: string | undefined;
+	comment?: string | undefined;
+	contact?: string | undefined;
+	resources?: string[] | undefined;
+	sequence?: number | undefined;
+	transp?: string | undefined;
 
 	// Recurrence
-	rrule?: string;
-	rdate?: Date[];
-	exdate?: Date[];
+	rrule?: string | undefined;
+	rdate?: Date[] | undefined;
+	exdate?: Date[] | undefined;
 
 	// Geography
-	geoLatitude?: number;
-	geoLongitude?: number;
+	geoLatitude?: number | undefined;
+	geoLongitude?: number | undefined;
 
 	// Organizer
-	organizerName?: string;
-	organizerEmail?: string;
+	organizerName?: string | undefined;
+	organizerEmail?: string | undefined;
 
 	// Additional properties (RFC 5545)
-	uid?: string;
-	dtstamp?: Date;
-	created?: Date;
-	lastModified?: Date;
-	recurrenceId?: string;
-	relatedTo?: string;
+	uid?: string | undefined;
+	dtstamp?: Date | undefined;
+	created?: Date | undefined;
+	lastModified?: Date | undefined;
+	recurrenceId?: string | undefined;
+	relatedTo?: string | undefined;
 
 	// Extensions (RFC 7986)
-	color?: string;
+	color?: string | undefined;
 
 	// Relations
-	attendees?: ParsedAttendee[];
-	alarms?: ParsedAlarm[];
+	attendees?: ParsedAttendee[] | undefined;
+	alarms?: ParsedAlarm[] | undefined;
 }
 
 // ----- Parser Result -----

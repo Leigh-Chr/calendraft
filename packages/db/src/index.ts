@@ -8,7 +8,7 @@ dotenv.config({
 	path: path.join(__dirname, "../../../apps/server/.env"),
 });
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = process.env["DATABASE_URL"];
 
 if (!connectionString) {
 	throw new Error("DATABASE_URL environment variable is required");

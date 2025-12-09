@@ -12,6 +12,30 @@ const ReactCompilerConfig = {
 };
 
 export default defineConfig({
+	server: {
+		port: 3001,
+		strictPort: true,
+		hmr: {
+			protocol: "ws",
+			host: "localhost",
+		},
+		proxy: {
+			"/trpc": {
+				target: process.env.VITE_SERVER_URL || "http://localhost:3000",
+				changeOrigin: true,
+				secure: false,
+			},
+			"/api": {
+				target: process.env.VITE_SERVER_URL || "http://localhost:3000",
+				changeOrigin: true,
+				secure: false,
+			},
+		},
+	},
+	preview: {
+		port: 3001,
+		strictPort: true,
+	},
 	plugins: [
 		tailwindcss(),
 		tanstackRouter({}),
@@ -163,6 +187,10 @@ export default defineConfig({
 	},
 	build: {
 		sourcemap: true, // Required for Sentry source maps
+		minify: "esbuild", // Fast and efficient minification
+		cssCodeSplit: true, // Split CSS for better caching
+		chunkSizeWarningLimit: 1000, // Warn if chunk exceeds 1MB
+		target: "esnext", // Modern browsers only
 		rollupOptions: {
 			output: {
 				manualChunks: (id) => {

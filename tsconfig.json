@@ -1,0 +1,14 @@
+{
+	"files": [],
+	"references": [
+		{ "path": "./packages/core" },
+		{ "path": "./packages/schemas" },
+		{ "path": "./packages/db" },
+		{ "path": "./packages/auth" },
+		{ "path": "./packages/ics-utils" },
+		{ "path": "./packages/react-utils" },
+		{ "path": "./packages/api" },
+		{ "path": "./apps/web" },
+		{ "path": "./apps/server" }
+	]
+}

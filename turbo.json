@@ -1,17 +1,75 @@
 {
 	"$schema": "https://turbo.build/schema.json",
 	"ui": "tui",
+	"remoteCache": {
+		"enabled": true,
+		"signature": true
+	},
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
-			"inputs": ["$TURBO_DEFAULT$", ".env*"],
-			"outputs": ["dist/**"]
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				".env*",
+				"src/**/*.{ts,tsx,js,jsx}",
+				"tsconfig.json",
+				"tsdown.config.ts",
+				"vite.config.ts",
+				"package.json"
+			],
+			"outputs": ["dist/**", "build/**", "*.tsbuildinfo"],
+			"env": ["NODE_ENV", "VITE_*"]
+		},
+		"test": {
+			"dependsOn": ["^build"],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"src/**/*.{ts,tsx,js,jsx}",
+				"**/*.test.{ts,tsx,js,jsx}",
+				"**/*.spec.{ts,tsx,js,jsx}",
+				"vitest.config.ts",
+				"package.json"
+			],
+			"outputs": ["coverage/**"],
+			"cache": true
 		},
 		"lint": {
-			"dependsOn": ["^lint"]
+			"dependsOn": ["^lint"],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"src/**/*.{ts,tsx,js,jsx,json}",
+				"biome.json",
+				"package.json"
+			],
+			"outputs": [],
+			"cache": true
 		},
 		"check-types": {
-			"dependsOn": ["^check-types"]
+			"dependsOn": ["^check-types"],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"src/**/*.{ts,tsx}",
+				"tsconfig.json",
+				"package.json"
+			],
+			"outputs": ["*.tsbuildinfo"],
+			"cache": true
+		},
+		"typecheck": {
+			"dependsOn": ["^check-types"],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"src/**/*.{ts,tsx}",
+				"tsconfig.json",
+				"package.json"
+			],
+			"outputs": ["*.tsbuildinfo"],
+			"cache": true
+		},
+		"clean": {
+			"cache": false,
+			"inputs": [],
+			"outputs": []
 		},
 		"dev": {
 			"cache": false,

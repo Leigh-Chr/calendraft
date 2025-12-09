@@ -5,11 +5,11 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { emailHarmony } from "better-auth-harmony";
 import { sendResetPasswordEmail, sendVerificationEmail } from "./lib/email";
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = process.env["NODE_ENV"] === "production";
 
 // URL du frontend pour les redirections après vérification
 // Better-Auth redirige vers le callbackURL côté client
-const frontendURL = process.env.CORS_ORIGIN || "http://localhost:3001";
+const frontendURL = process.env["CORS_ORIGIN"] || "http://localhost:3001";
 
 export const auth = betterAuth<BetterAuthOptions>({
 	database: prismaAdapter(prisma, {

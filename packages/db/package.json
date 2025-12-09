@@ -13,6 +13,8 @@
 	},
 	"scripts": {
 		"build": "tsdown",
+		"typecheck": "echo 'Skipping typecheck for @calendraft/db (Prisma generated files)'",
+		"clean": "rm -rf dist *.tsbuildinfo",
 		"db:push": "prisma db push",
 		"db:studio": "prisma studio",
 		"db:generate": "prisma generate",

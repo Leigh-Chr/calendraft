@@ -1,24 +1,44 @@
 {
 	"$schema": "https://json.schemastore.org/tsconfig",
 	"compilerOptions": {
+		// Language and Environment
 		"target": "ESNext",
+		"lib": ["ESNext"],
 		"module": "ESNext",
 		"moduleResolution": "bundler",
-		"lib": ["ESNext"],
 		"verbatimModuleSyntax": true,
+		"types": ["bun"],
+
+		// Emit
+		"declaration": false,
+		"declarationMap": false,
+		"sourceMap": false,
+
+		// Type Checking - Strict Mode
 		"strict": true,
-		"skipLibCheck": true,
-		"resolveJsonModule": true,
-		"allowSyntheticDefaultImports": true,
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"isolatedModules": true,
 		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"noPropertyAccessFromIndexSignature": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
-		"noPropertyAccessFromIndexSignature": true,
-		"types": ["bun"]
+		"exactOptionalPropertyTypes": true,
+		"noImplicitThis": true,
+		"alwaysStrict": true,
+		"strictNullChecks": true,
+		"strictFunctionTypes": true,
+		"strictBindCallApply": true,
+		"strictPropertyInitialization": true,
+
+		// Modules
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"isolatedModules": true,
+
+		// Interop Constraints
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true
 	}
 }

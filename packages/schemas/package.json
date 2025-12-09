@@ -14,7 +14,9 @@
 		}
 	},
 	"scripts": {
-		"build": "tsdown"
+		"build": "tsdown",
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf dist *.tsbuildinfo"
 	},
 	"devDependencies": {
 		"tsdown": "catalog:",

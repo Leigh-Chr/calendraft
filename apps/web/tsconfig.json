@@ -1,19 +1,20 @@
 {
+	"extends": "@calendraft/config/tsconfig.base.json",
 	"compilerOptions": {
-		"strict": true,
-		"esModuleInterop": true,
-		"jsx": "react-jsx",
-		"target": "ESNext",
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
-		"verbatimModuleSyntax": true,
-		"skipLibCheck": true,
+		// Override for web app
 		"lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"],
 		"types": ["vite/client", "vite-plugin-pwa/client"],
-		"rootDirs": ["."],
+		"jsx": "react-jsx",
 		"baseUrl": ".",
+		"rootDirs": ["."],
 		"paths": {
 			"@/*": ["./src/*"]
-		}
-	}
+		},
+		// Disable declaration for app
+		"declaration": false,
+		"declarationMap": false,
+		"composite": false
+	},
+	"include": ["src/**/*", "vite.config.ts", "vitest.config.ts"],
+	"exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]
 }

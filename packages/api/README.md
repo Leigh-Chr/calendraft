@@ -5,24 +5,36 @@ tRPC API for Calendraft with routers, procedures, and authentication middleware.
 ## Installation
 
 ```bash
-bun add @calendraft/api
+bun add @calendraft/api @hono/trpc-server
 ```
+
+**Peer dependencies:**
+- `@trpc/server` ^11.5.0
+- `hono` ^4.0.0
+- `@calendraft/auth` (workspace package)
+- `@calendraft/db` (workspace package)
+- `@calendraft/core` (workspace package)
+- `@calendraft/schemas` (workspace package)
 
 ## Quick usage
 
 ```typescript
 import { appRouter, createContext } from '@calendraft/api';
-import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
+import { trpcServer } from '@hono/trpc-server';
+import { Hono } from 'hono';
 
-// In a Hono handler
-app.use('/trpc/*', async (c) => {
-  return fetchRequestHandler({
-    endpoint: '/trpc',
-    req: c.req.raw,
+const app = new Hono();
+
+// Mount tRPC router
+app.use(
+  '/trpc/*',
+  trpcServer({
     router: appRouter,
-    createContext: () => createContext({ context: c }),
-  });
-});
+    createContext: (_opts, context) => {
+      return createContext({ context });
+    },
+  }),
+);
 ```
 
 ## Architecture

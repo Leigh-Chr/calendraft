@@ -38,7 +38,8 @@
 		"dev": "tsdown --watch",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"clean": "rm -rf dist *.tsbuildinfo"
 	},
 	"keywords": [
 		"calendar",
@@ -50,7 +51,7 @@
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
-		"date-fns": "^4.1.0",
+		"date-fns": "catalog:",
 		"dequal": "^2.0.3"
 	},
 	"devDependencies": {

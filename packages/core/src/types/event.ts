@@ -6,11 +6,11 @@
 // ----- Attendee Types -----
 
 export interface AttendeeData {
-	name?: string;
+	name?: string | undefined;
 	email: string;
-	role?: string;
-	status?: string;
-	rsvp?: boolean;
+	role?: string | undefined;
+	status?: string | undefined;
+	rsvp?: boolean | undefined;
 }
 
 // ----- Alarm Types -----
@@ -18,10 +18,10 @@ export interface AttendeeData {
 export interface AlarmData {
 	trigger: string;
 	action: string;
-	summary?: string;
-	description?: string;
-	duration?: string;
-	repeat?: number;
+	summary?: string | undefined;
+	description?: string | undefined;
+	duration?: string | undefined;
+	repeat?: number | undefined;
 }
 
 // ----- Event Form Types -----
@@ -30,45 +30,45 @@ export interface EventFormData {
 	title: string;
 	startDate: string;
 	endDate: string;
-	description?: string;
-	location?: string;
+	description?: string | undefined;
+	location?: string | undefined;
 
 	// Basic metadata
-	status?: string;
-	priority?: number;
-	categories?: string;
-	url?: string;
-	class?: string;
-	resources?: string;
-	transp?: string;
+	status?: string | undefined;
+	priority?: number | undefined;
+	categories?: string | undefined;
+	url?: string | undefined;
+	class?: string | undefined;
+	resources?: string | undefined;
+	transp?: string | undefined;
 
 	// Recurrence
-	rrule?: string;
-	rdate?: string; // JSON array
-	exdate?: string; // JSON array
+	rrule?: string | undefined;
+	rdate?: string | undefined; // JSON array
+	exdate?: string | undefined; // JSON array
 
 	// Geography
-	geoLatitude?: number;
-	geoLongitude?: number;
+	geoLatitude?: number | undefined;
+	geoLongitude?: number | undefined;
 
 	// Organizer
-	organizerName?: string;
-	organizerEmail?: string;
+	organizerName?: string | undefined;
+	organizerEmail?: string | undefined;
 
 	// Additional properties (RFC 5545)
-	uid?: string;
-	recurrenceId?: string;
-	relatedTo?: string;
-	comment?: string;
-	contact?: string;
-	sequence?: number;
+	uid?: string | undefined;
+	recurrenceId?: string | undefined;
+	relatedTo?: string | undefined;
+	comment?: string | undefined;
+	contact?: string | undefined;
+	sequence?: number | undefined;
 
 	// Extensions (RFC 7986)
-	color?: string;
+	color?: string | undefined;
 
 	// Relations
-	attendees?: AttendeeData[];
-	alarms?: AlarmData[];
+	attendees?: AttendeeData[] | undefined;
+	alarms?: AlarmData[] | undefined;
 }
 
 // ----- Event Entity -----

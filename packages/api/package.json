@@ -12,7 +12,9 @@
 	},
 	"type": "module",
 	"scripts": {
-		"build": "tsdown"
+		"build": "tsdown",
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf dist *.tsbuildinfo"
 	},
 	"devDependencies": {
 		"tsdown": "catalog:",
@@ -32,7 +34,7 @@
 		"@types/node": "^24.10.1",
 		"dotenv": "catalog:",
 		"hono": "catalog:",
-		"ical.js": "^2.2.1",
+		"ical.js": "catalog:",
 		"zod": "catalog:"
 	}
 }

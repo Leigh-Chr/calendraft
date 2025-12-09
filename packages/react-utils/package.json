@@ -33,7 +33,8 @@
 		"dev": "tsdown --watch",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"clean": "rm -rf dist *.tsbuildinfo"
 	},
 	"keywords": [
 		"react",
@@ -44,8 +45,8 @@
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
-		"clsx": "^2.1.1",
-		"tailwind-merge": "^3.4.0",
+		"clsx": "catalog:",
+		"tailwind-merge": "catalog:",
 		"usehooks-ts": "^3.1.1"
 	},
 	"peerDependencies": {

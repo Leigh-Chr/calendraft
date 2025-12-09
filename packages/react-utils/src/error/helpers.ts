@@ -15,7 +15,7 @@ export function createAppError(
 	return {
 		code,
 		message,
-		details,
+		details: details ?? undefined,
 		timestamp: new Date(),
 	};
 }
@@ -70,20 +70,18 @@ export function getErrorMessage(error: unknown): string {
  */
 export function getErrorCode(error: unknown): string | undefined {
 	if (error && typeof error === "object") {
-		if ("code" in error) {
-			return String((error as Record<string, unknown>).code);
+		const errorRecord = error as Record<string, unknown>;
+		if ("code" in errorRecord) {
+			return String(errorRecord["code"]);
 		}
 		if (
-			"data" in error &&
-			(error as Record<string, unknown>).data &&
-			typeof (error as Record<string, unknown>).data === "object"
+			"data" in errorRecord &&
+			errorRecord["data"] &&
+			typeof errorRecord["data"] === "object"
 		) {
-			const data = (error as Record<string, unknown>).data as Record<
-				string,
-				unknown
-			>;
+			const data = errorRecord["data"] as Record<string, unknown>;
 			if ("code" in data) {
-				return String(data.code);
+				return String(data["code"]);
 			}
 		}
 	}
@@ -138,7 +136,7 @@ export function logErrorInDev(error: unknown, context?: ErrorContext): void {
 	try {
 		// Check Vite's import.meta.env
 		if (typeof import.meta !== "undefined" && import.meta.env) {
-			isDev = Boolean(import.meta.env.DEV);
+			isDev = Boolean(import.meta.env["DEV"]);
 		}
 	} catch {
 		// Ignore if import.meta is not available

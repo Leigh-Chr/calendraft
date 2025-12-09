@@ -11,13 +11,17 @@
 		"catalog": {
 			"hono": "^4.10.7",
 			"@trpc/server": "^11.5.0",
+			"@trpc/client": "^11.5.0",
 			"better-auth": "^1.4.0",
 			"dotenv": "^17.2.3",
 			"zod": "^4.1.13",
 			"typescript": "^5.8.2",
 			"tsdown": "^0.16.8",
-			"@trpc/client": "^11.5.0",
-			"@prisma/client": "^7.0.1"
+			"@prisma/client": "^7.0.1",
+			"date-fns": "^4.1.0",
+			"ical.js": "^2.2.1",
+			"clsx": "^2.1.1",
+			"tailwind-merge": "^3.4.0"
 		}
 	},
 	"scripts": {
@@ -26,7 +30,12 @@
 		"ruler:apply": "bunx @intellectronica/ruler@latest apply --local-only",
 		"dev": "turbo dev",
 		"build": "turbo build",
+		"test": "turbo test",
+		"test:watch": "turbo test --watch",
+		"lint": "turbo lint",
 		"check-types": "turbo check-types",
+		"typecheck": "turbo typecheck",
+		"clean": "turbo clean && rm -rf node_modules/.cache .turbo",
 		"dev:native": "turbo -F native dev",
 		"dev:web": "turbo -F web dev",
 		"dev:server": "turbo -F server dev",
