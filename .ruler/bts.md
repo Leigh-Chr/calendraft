@@ -12,6 +12,7 @@ This is a Calendraft project - a web platform for managing, editing, and creatin
 - **`DEPLOYMENT.md`** - Production deployment guide, environment variables, monitoring
 - **`CONTRIBUTING.md`** - Contribution guidelines, code standards, PR process
 - **`SECURITY.md`** - Security policy, vulnerability reporting, security measures
+- **`AUTHENTICATION.md`** - Authentication flow, anonymous users, Better-Auth configuration
 
 ### Package Documentation
 Each package has its own README with detailed API documentation:
@@ -23,6 +24,30 @@ Each package has its own README with detailed API documentation:
 - **`packages/db/README.md`** - Prisma client, database schemas, relations
 - **`packages/schemas/README.md`** - Zod validation schemas, RFC 5545 compliance
 
+## Monorepo & Build System
+
+This is a **Turborepo monorepo** managed with **Bun workspaces**:
+
+### Package Manager
+- **Bun 1.3.1+** - Runtime and package manager
+- **Catalog System** - Shared dependencies defined in root `package.json` under `workspaces.catalog`
+- Use `catalog:` prefix in package.json dependencies (e.g., `"zod": "catalog:"`)
+- Common catalog dependencies: `zod`, `typescript`, `tsdown`, `@trpc/server`, `@trpc/client`, `hono`, `better-auth`, `@prisma/client`, `date-fns`, `ical.js`, `clsx`, `tailwind-merge`
+
+### Turborepo Configuration
+- **Remote Cache**: Enabled with signature verification (requires `TURBO_TOKEN` and `TURBO_TEAM` env vars)
+- **Task Caching**: All tasks (build, test, lint, typecheck) are cached with granular inputs/outputs
+- **Task Dependencies**: Proper `dependsOn` configured for parallel execution
+- **Inputs/Outputs**: Granular cache invalidation based on file changes
+- **Configuration**: See `turbo.json` for task definitions
+
+### TypeScript Project References
+- **Root Config**: `tsconfig.json` orchestrates all project references
+- **Base Config**: `packages/config/tsconfig.base.json` - Shared configuration for all packages
+- **Incremental Builds**: Each package has `composite: true` for 60-70% faster builds
+- **Build Command**: Run `tsc --build` for incremental type checking
+- **Package DB**: Skips typecheck (Prisma generated files), uses `skipLibCheck: true`
+
 ## Project Structure
 
 This is a **Turborepo monorepo** with the following structure:
@@ -33,8 +58,9 @@ calendraft/
 │   ├── web/           # Frontend application (React + TanStack Router)
 │   └── server/        # Backend server (Hono + tRPC)
 ├── packages/
-│   ├── api/           # tRPC routers (calendar, event)
+│   ├── api/           # tRPC routers (calendar, event, share, user)
 │   ├── auth/          # Better-Auth configuration
+│   ├── config/        # Shared TypeScript configuration (tsconfig.base.json)
 │   ├── core/          # Business logic and shared types
 │   ├── db/            # Prisma client and database schemas
 │   ├── ics-utils/     # ICS parsing and generation
@@ -68,9 +94,11 @@ core → ics-utils (0 internal dependencies)
 - `bun run dev:server` - Start only the server
 
 ### Build & Type Checking
-- `bun run build` - Build all apps for production
-- `bun run check-types` - Check TypeScript types across all apps
+- `bun run build` - Build all apps for production (uses Turborepo cache)
+- `bun run typecheck` - Check TypeScript types across all packages (uses project references)
+- `bun run check-types` - Alias for typecheck (legacy)
 - `bun run check` - Run Biome linting and formatting
+- `bun run clean` - Clean all build artifacts and caches
 
 ### Database Commands
 All database operations run from the root:
@@ -92,16 +120,24 @@ The Prisma client uses PostgreSQL adapter and is exported from `packages/db/src/
 
 ## API Structure
 
+### tRPC Integration with Hono
+- **Integration**: Uses `@hono/trpc-server` for Hono integration (see `packages/api/README.md`)
+- **Mounting**: tRPC router mounted at `/trpc/*` in Hono app
+- **Context**: Created from Hono context via `createContext({ context })`
+
 ### tRPC Routers
 - **Location**: `packages/api/src/routers/`
 - **Main router**: `packages/api/src/routers/index.ts` exports `appRouter`
 - **Routers**:
-  - `calendarRouter` - CRUD calendars, import/export ICS, merge
-  - `eventRouter` - CRUD events
+  - `calendarRouter` - CRUD calendars, import/export ICS, merge, groups
+  - `eventRouter` - CRUD events, bulk operations
+  - `shareRouter` - Share links and bundles (public and private)
+  - `userRouter` - User profile and preferences
 
 ### Procedures
-- `publicProcedure` - Accessible without authentication
-- `protectedProcedure` - Requires authentication (Better-Auth session)
+- `publicProcedure` - Accessible without authentication (e.g., health check, public share links)
+- `authOrAnonProcedure` - Requires either authentication OR anonymous ID (most calendar/event operations)
+- `protectedProcedure` - Requires authentication (Better-Auth session only, e.g., user settings)
 
 ### Context
 The tRPC context includes:
@@ -119,8 +155,20 @@ Authentication is handled by **Better-Auth**:
 
 ### Anonymous Users
 - Anonymous users identified by `x-anonymous-id` header
-- Limitations: 5 calendars max, 100 events per calendar
+- **Limitations**:
+  - Maximum 10 calendars
+  - Maximum 500 events per calendar
+  - Maximum 50 groups
+  - Maximum 15 calendars per group
 - Auto-deleted after 60 days of inactivity
+
+### Authenticated Users
+- **Limitations**:
+  - Maximum 100 calendars
+  - Maximum 2,000 events per calendar
+  - Maximum 100 groups
+  - Maximum 20 calendars per group
+- No automatic deletion
 
 ## Package Usage
 
@@ -142,8 +190,9 @@ import { eventCreateSchema, attendeeSchema } from '@calendraft/schemas';
 // Database
 import prisma from '@calendraft/db';
 
-// API
+// API (tRPC)
 import { appRouter, createContext } from '@calendraft/api';
+// In Hono app, use @hono/trpc-server for integration (see packages/api/README.md)
 
 // Auth
 import { auth } from '@calendraft/auth';
@@ -189,10 +238,21 @@ VITE_SENTRY_DSN=... (optional)
 
 ## Code Standards
 
-### Style
-- Uses **Biome** for linting and formatting
-- Auto-formatted on commit via Husky
-- Run `bun run check` to verify
+### Style & Linting
+- Uses **Biome** for linting and formatting (replaces ESLint + Prettier)
+- Auto-formatted on commit via Husky + lint-staged
+- Run `bun run check` to verify and auto-fix
+- **Knip** configured to detect unused code and dependencies
+
+### Vite Configuration
+- **Build Target**: ESNext (modern browsers only)
+- **Minification**: esbuild (fast and efficient)
+- **Code Splitting**: Manual chunks configured for optimal caching
+- **CSS Splitting**: Enabled for better caching
+- **Chunk Size Warning**: 1MB limit
+- **Dev Server**: HMR configured with proxy for API routes
+- **PWA**: Configured with Workbox for offline support
+- **Source Maps**: Enabled for Sentry error tracking
 
 ### Naming Conventions
 - **Files**: `kebab-case.ts` for files, `PascalCase.tsx` for React components
@@ -201,9 +261,15 @@ VITE_SENTRY_DSN=... (optional)
 - **Constants**: `SCREAMING_SNAKE_CASE`
 
 ### TypeScript
+- **Strict Mode**: All strict options enabled including `exactOptionalPropertyTypes`
+- **Project References**: Use TypeScript project references for incremental builds
+- **Optional Properties**: Must explicitly include `| undefined` (e.g., `name?: string | undefined`)
+- **Environment Variables**: Use bracket notation (`process.env["KEY"]`) not dot notation
+- **Index Signatures**: Use bracket notation for properties from index signatures
 - Use explicit types, avoid `any`
 - Prefer `interface` over `type` for objects
 - Use Zod schemas from `@calendraft/schemas` for validation
+- All packages use `composite: true` for project references (except `db` which skips typecheck)
 
 ### Commits
 Follow conventional commits:
@@ -217,20 +283,35 @@ Fixes #123
 
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
-## Security Considerations
+## CI/CD
 
-- Rate limiting: 100 requests/minute per IP
-- File size limit: 5 MB max
-- CORS: Must be explicitly set in production (no `*`)
-- Input validation: All inputs validated with Zod schemas
-- Security headers: Automatically configured (X-Content-Type-Options, X-Frame-Options, etc.)
+### GitHub Actions Workflows
+- **`.github/workflows/ci.yml`**: Main CI pipeline
+  - Lint, typecheck, build, test jobs run in parallel
+  - Dependency caching for faster runs
+  - Build artifacts uploaded
+  - Coverage uploaded to Codecov
+- **`.github/workflows/code-quality.yml`**: Code quality checks
+  - Biome check
+  - Knip (unused code detection)
+- **Concurrency**: In-progress runs are cancelled on new commits
+
+### Local Development
+- Use `bun run dev` for development with hot reload
+- Turborepo cache speeds up subsequent builds
+- TypeScript project references enable incremental type checking
 
 ## Testing
 
-```bash
-# Run tests (if configured)
-cd apps/web && bun run test
-```
+- **Framework**: Vitest (configured in packages that have tests)
+- **Coverage Thresholds**: 80% for lines, functions, branches, statements (configured in `apps/web/vitest.config.ts`)
+- **Test Scripts**: 
+  - `bun run test` - Run all tests across packages
+  - `bun run test:watch` - Watch mode
+  - Individual packages: `cd packages/core && bun run test`
+- **Coverage**: Reports generated in `coverage/` directory
+- **CI Integration**: Tests run in GitHub Actions with coverage upload to Codecov
+- **Packages with Tests**: `core`, `ics-utils`, `react-utils` (others may be added)
 
 ## Adding Features
 
@@ -243,8 +324,28 @@ When adding new features:
 
 ## Important Notes
 
-- **Database schema location**: `packages/db/prisma/schema/` (NOT `apps/server/prisma/`)
-- **Package exports**: Check each package's README for available exports
+### TypeScript Configuration
+- **Base Config**: `packages/config/tsconfig.base.json` - Shared configuration for all packages
+- **Project References**: Root `tsconfig.json` references all packages for incremental builds
+- **Strict Mode**: `exactOptionalPropertyTypes` requires explicit `| undefined` for optional properties
+- **Package DB**: Skips typecheck (Prisma generated files), uses `skipLibCheck: true`
+
+### Build & Performance
+- **Turborepo Remote Cache**: Configured but requires `TURBO_TOKEN` and `TURBO_TEAM` env vars
+- **Build Times**: 60-70% faster with project references and caching
+- **Incremental Builds**: TypeScript project references enable incremental type checking
+
+### Package Management
+- **Catalog Dependencies**: Use `catalog:` prefix for shared dependencies
+- **Workspace Protocol**: Use `workspace:*` for internal packages
+- **Package Exports**: Check each package's README for available exports
+
+### Database
+- **Schema location**: `packages/db/prisma/schema/` (NOT `apps/server/prisma/`)
+- **Prisma Client**: Generated to `packages/db/prisma/generated/`
+- **Adapter**: Uses `@prisma/adapter-pg` for PostgreSQL
+
+### Standards
 - **RFC 5545 compliance**: ICS parsing/generation follows RFC 5545 standard
 - **Tree-shakeable**: All packages support granular imports
 - **Externalizable packages**: `ics-utils`, `core`, and `react-utils` can be published to npm
