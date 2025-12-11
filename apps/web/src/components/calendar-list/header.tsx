@@ -6,7 +6,6 @@ import { Link, type useNavigate } from "@tanstack/react-router";
 import { CheckSquare, FileUp, Folder, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TOUR_STEP_IDS } from "@/lib/tour-constants";
-import type { CalendarSortBy } from "./calendar-filters";
 
 interface CalendarsListHeaderProps {
 	calendars: Array<{

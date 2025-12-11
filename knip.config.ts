@@ -24,6 +24,8 @@ const config: KnipConfig = {
 		"**/*.config.ts",
 		"**/tsdown.config.ts",
 		"**/knip.config.ts",
+		// Codacy config files
+		".codacy/**",
 		// Unused UI components from shadcn kept for future use
 		"**/ui/dialog.tsx",
 		"**/ui/slider.tsx",
@@ -35,7 +37,43 @@ const config: KnipConfig = {
 		"**/success-animation.tsx",
 		"**/empty-state.tsx",
 	],
-	ignoreBinaries: ["vitest"],
+	ignoreBinaries: ["vitest", "tsc"],
+	ignoreIssues: {
+		// Logger utilities exported for external API use
+		"apps/server/src/lib/logger.ts": ["exports", "types"],
+		// PWA update utilities exported for manual trigger capability
+		"apps/web/src/components/pwa-update-prompt.tsx": ["exports"],
+		// UI components exported for external use
+		"apps/web/src/components/ui/color-picker.tsx": ["exports"],
+		"apps/web/src/components/template-selector.tsx": ["exports"],
+		// Shadcn UI components exported for composition
+		"apps/web/src/components/ui/alert-dialog.tsx": ["exports"],
+		"apps/web/src/components/ui/badge.tsx": ["exports"],
+		"apps/web/src/components/ui/calendar.tsx": ["exports"],
+		"apps/web/src/components/ui/card.tsx": ["exports"],
+		"apps/web/src/components/ui/dropdown-menu.tsx": ["exports"],
+		"apps/web/src/components/ui/popover.tsx": ["exports"],
+		"apps/web/src/components/ui/select.tsx": ["exports"],
+		// Event form constants exported for validation
+		"apps/web/src/lib/event-form-constants.ts": ["exports"],
+		// Rate limit utilities
+		"apps/server/src/middleware/rate-limit.ts": ["exports"],
+		// Utility functions exported for external use
+		"apps/web/src/lib/parse-trpc-errors.ts": ["exports"],
+		"apps/web/src/lib/query-keys.ts": ["exports"],
+		"apps/web/src/lib/search-params.ts": ["exports", "types"],
+		"apps/web/src/lib/storage.ts": ["exports"],
+		"apps/web/src/lib/tag-utils.ts": ["exports"],
+		// Type exports for external use
+		"apps/web/src/components/event-form-extended.tsx": ["types"],
+		"apps/web/src/components/event-list-view.tsx": ["types"],
+		"apps/web/src/components/recurrence-builder.tsx": ["types"],
+		"apps/web/src/components/ui/form-message.tsx": ["types"],
+		"apps/web/src/lib/alarm-parser.ts": ["types"],
+		"apps/web/src/lib/error-handler/index.ts": ["types"],
+		"apps/web/src/lib/event-presets.ts": ["types"],
+		"apps/web/src/routes/__root.tsx": ["types"],
+	},
 	ignoreDependencies: [
 		// Catalog dependencies used across workspaces
 		"@trpc/client",

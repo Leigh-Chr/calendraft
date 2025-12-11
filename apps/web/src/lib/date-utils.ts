@@ -20,10 +20,7 @@ import { enUS } from "date-fns/locale";
 /**
  * Calculate duration between two dates and format it
  */
-export function formatDuration(
-	start: Date | string,
-	end: Date | string,
-): string {
+function formatDuration(start: Date | string, end: Date | string): string {
 	const startDate = typeof start === "string" ? new Date(start) : start;
 	const endDate = typeof end === "string" ? new Date(end) : end;
 	const diff = endDate.getTime() - startDate.getTime();
@@ -47,7 +44,7 @@ export function normalizeDate(date: Date | string): Date {
  * Format date with contextual label (Today, Tomorrow, etc.)
  * Returns a user-friendly date string that adapts to context
  */
-export function formatDateContextual(date: Date | string): string {
+function formatDateContextual(date: Date | string): string {
 	const dateObj = normalizeDate(date);
 
 	if (isToday(dateObj)) {
@@ -71,7 +68,7 @@ export function formatDateContextual(date: Date | string): string {
 /**
  * Format time only (e.g., "14:30")
  */
-export function formatTime(date: Date | string): string {
+function formatTime(date: Date | string): string {
 	const dateObj = normalizeDate(date);
 	return format(dateObj, "HH:mm");
 }
@@ -80,7 +77,7 @@ export function formatTime(date: Date | string): string {
  * Format a time range for same-day events
  * Returns: "14:00 - 16:00" or "14:00 - 16:00 (2h)"
  */
-export function formatTimeRange(
+function formatTimeRange(
 	start: Date | string,
 	end: Date | string,
 	showDuration = false,

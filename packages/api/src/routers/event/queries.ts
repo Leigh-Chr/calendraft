@@ -2,8 +2,6 @@
  * Event query building utilities
  */
 
-import { Prisma } from "@calendraft/db";
-
 /**
  * Build WHERE clause for event queries
  */

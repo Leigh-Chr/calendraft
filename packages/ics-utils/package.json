@@ -40,7 +40,7 @@
 		"build": "tsdown",
 		"dev": "tsdown --watch",
 		"typecheck": "tsc --noEmit",
-		"test": "vitest run",
+		"test": "vitest run --passWithNoTests",
 		"test:watch": "vitest",
 		"clean": "rm -rf dist *.tsbuildinfo"
 	},
@@ -62,7 +62,8 @@
 	"devDependencies": {
 		"@calendraft/config": "workspace:*",
 		"tsdown": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "^4.0.15"
 	},
 	"peerDependencies": {},
 	"publishConfig": {

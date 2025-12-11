@@ -2,20 +2,24 @@
  * Tests for verifyCalendarAccess utility function
  */
 
-import prisma from "@calendraft/db";
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Context } from "../../context";
-import { verifyCalendarAccess } from "../../middleware";
 
-// Mock Prisma
+// Mock Prisma (must be before importing from @calendraft/db or middleware)
+// This prevents the env validation from running
 vi.mock("@calendraft/db", () => ({
 	default: {
 		calendar: {
 			findUnique: vi.fn(),
 		},
 	},
+	Prisma: {},
 }));
+
+// Import after mocks are set up
+import prisma from "@calendraft/db";
+import type { Context } from "../../context";
+import { verifyCalendarAccess } from "../../middleware";
 
 describe("verifyCalendarAccess", () => {
 	beforeEach(() => {
@@ -23,7 +27,9 @@ describe("verifyCalendarAccess", () => {
 	});
 
 	it("should throw NOT_FOUND if calendar does not exist", async () => {
-		vi.mocked(prisma.calendar.findUnique).mockResolvedValue(null);
+		(prisma.calendar.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
+			null,
+		);
 
 		const ctx: Context = {
 			session: null,
@@ -41,7 +47,7 @@ describe("verifyCalendarAccess", () => {
 	});
 
 	it("should throw FORBIDDEN if user does not have access", async () => {
-		vi.mocked(prisma.calendar.findUnique).mockResolvedValue({
+		(prisma.calendar.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
 			id: "calendar-id",
 			userId: "other-user-id",
 		});
@@ -66,7 +72,9 @@ describe("verifyCalendarAccess", () => {
 			id: "calendar-id",
 			userId: "anon-test123",
 		};
-		vi.mocked(prisma.calendar.findUnique).mockResolvedValue(calendar);
+		(prisma.calendar.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
+			calendar,
+		);
 
 		const ctx: Context = {
 			session: null,

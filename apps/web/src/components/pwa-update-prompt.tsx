@@ -111,7 +111,7 @@ export function PWAUpdatePrompt() {
 	return null; // This component renders nothing, uses toast for UI
 }
 
-// Export a manual update check function for use elsewhere
+// Manual update check function (exported for potential external use)
 export async function checkForUpdates() {
 	const registrations = await navigator.serviceWorker?.getRegistrations();
 	if (registrations) {

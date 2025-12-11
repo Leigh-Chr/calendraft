@@ -34,7 +34,7 @@ const STATUS_CONFIG = {
 /**
  * Status indicator - now a subtle dot instead of loud badge
  */
-export function StatusBadge({ status }: { status: string | null | undefined }) {
+function StatusBadge({ status }: { status: string | null | undefined }) {
 	if (!status) return null;
 	const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG];
 	if (!config || !config.show) return null;
@@ -58,11 +58,7 @@ export function StatusBadge({ status }: { status: string | null | undefined }) {
 /**
  * Privacy indicator - icon-based for compact display
  */
-export function ClassBadge({
-	classValue,
-}: {
-	classValue: string | null | undefined;
-}) {
+function ClassBadge({ classValue }: { classValue: string | null | undefined }) {
 	// Only show for non-public events
 	if (!classValue || classValue === "PUBLIC") return null;
 
@@ -79,11 +75,7 @@ export function ClassBadge({
 /**
  * Priority indicator - only show high priority (1-4)
  */
-export function PriorityBadge({
-	priority,
-}: {
-	priority: number | null | undefined;
-}) {
+function PriorityBadge({ priority }: { priority: number | null | undefined }) {
 	if (priority === null || priority === undefined || priority <= 0) return null;
 
 	// Only show for high priority (1-4)
@@ -102,11 +94,7 @@ export function PriorityBadge({
 /**
  * Recurrence indicator - subtle icon
  */
-export function RecurrenceBadge({
-	rrule,
-}: {
-	rrule: string | null | undefined;
-}) {
+function RecurrenceBadge({ rrule }: { rrule: string | null | undefined }) {
 	if (!rrule) return null;
 	return (
 		<span
@@ -121,7 +109,7 @@ export function RecurrenceBadge({
 /**
  * Color indicator dot
  */
-export function ColorDot({
+function ColorDot({
 	color,
 	size = "md",
 }: {

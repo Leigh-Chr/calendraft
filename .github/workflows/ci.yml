@@ -59,6 +59,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: bun run db:generate
+
       - name: Type check
         run: bun run typecheck
 
@@ -89,6 +92,9 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: bun run db:generate
 
       - name: Build
         run: bun run build
@@ -133,8 +139,13 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: bun run db:generate
+
       - name: Run tests
         run: bun run test
+        env:
+          DATABASE_URL: "postgresql://test:test@localhost:5432/test"
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4

@@ -3,7 +3,18 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
+
+// Mock logger before importing date-parser
+vi.mock("../logger", () => ({
+	logger: {
+		warn: vi.fn(),
+		error: vi.fn(),
+		info: vi.fn(),
+	},
+}));
+
 import { parseDateArray, stringifyDateArray } from "../date-parser";
+import { logger } from "../logger";
 
 describe("parseDateArray", () => {
 	it("should parse valid date array", () => {
@@ -12,7 +23,7 @@ describe("parseDateArray", () => {
 		const result = parseDateArray(jsonString, "RDATE");
 		expect(result).toHaveLength(2);
 		expect(result[0]).toBeInstanceOf(Date);
-		expect(result1).toBeInstanceOf(Date);
+		expect(result[1]).toBeInstanceOf(Date);
 	});
 
 	it("should return empty array for undefined", () => {
@@ -25,32 +36,33 @@ describe("parseDateArray", () => {
 		expect(result).toEqual([]);
 	});
 
-	it("should filter out invalid dates", () => {
-		const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+	it("should filter out invalid dates", async () => {
+		const loggerModule = await import("../logger");
+		const warnSpy = vi
+			.spyOn(loggerModule.logger, "warn")
+			.mockImplementation(() => {});
 		const jsonString =
 			'["2025-01-15T10:00:00.000Z","invalid-date","2025-01-22T10:00:00.000Z"]';
 		const result = parseDateArray(jsonString, "RDATE");
 		expect(result).toHaveLength(2);
-		expect(consoleSpy).toHaveBeenCalledWith("Some dates in RDATE were invalid");
-		consoleSpy.mockRestore();
+		expect(warnSpy).toHaveBeenCalledWith("Some dates in RDATE were invalid");
+		warnSpy.mockRestore();
 	});
 
 	it("should handle malformed JSON", () => {
-		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		vi.clearAllMocks();
 		const jsonString = "not-json";
 		const result = parseDateArray(jsonString, "RDATE");
 		expect(result).toEqual([]);
-		expect(consoleSpy).toHaveBeenCalled();
-		consoleSpy.mockRestore();
+		expect(logger.error).toHaveBeenCalled();
 	});
 
 	it("should reject non-array JSON", () => {
-		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		vi.clearAllMocks();
 		const jsonString = '{"not":"an array"}';
 		const result = parseDateArray(jsonString, "RDATE");
 		expect(result).toEqual([]);
-		expect(consoleSpy).toHaveBeenCalled();
-		consoleSpy.mockRestore();
+		expect(logger.error).toHaveBeenCalled();
 	});
 
 	it("should parse ISO date strings correctly", () => {
@@ -103,7 +115,7 @@ describe("round-trip conversion", () => {
 		const parsed = parseDateArray(stringified, "RDATE");
 		expect(parsed).toHaveLength(3);
 		expect(parsed[0].toISOString()).toBe(original[0].toISOString());
-		expect(parsed1.toISOString()).toBe(original1.toISOString());
-		expect(parsed2.toISOString()).toBe(original2.toISOString());
+		expect(parsed[1].toISOString()).toBe(original[1].toISOString());
+		expect(parsed[2].toISOString()).toBe(original[2].toISOString());
 	});
 });

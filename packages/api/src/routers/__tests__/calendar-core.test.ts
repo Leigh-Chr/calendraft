@@ -2,13 +2,11 @@
  * Tests for calendar core router
  */
 
-import prisma from "@calendraft/db";
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Context } from "../../context";
-import { calendarCoreRouter } from "../calendar/core";
 
-// Mock Prisma
+// Mock Prisma (must be before importing from @calendraft/db)
+// This prevents the env validation from running
 vi.mock("@calendraft/db", () => ({
 	default: {
 		calendar: {
@@ -25,32 +23,38 @@ vi.mock("@calendraft/db", () => ({
 			findMany: vi.fn(),
 		},
 	},
+	Prisma: {},
 }));
 
+import prisma from "@calendraft/db";
+import type { Context } from "../../context";
+import { calendarCoreRouter } from "../calendar/core";
+
 // Mock middleware
-vi.mock("../../middleware", async () => {
-	const actual = await vi.importActual("../../middleware");
-	return {
-		...actual,
-		buildOwnershipFilter: vi.fn((ctx: Context) => ({
-			OR: ctx.session?.user?.id
-				? [{ userId: ctx.session.user.id }]
-				: ctx.anonymousId
-					? [{ userId: ctx.anonymousId }]
-					: [],
-		})),
-		checkCalendarLimit: vi.fn(),
-		getUserUsage: vi.fn(),
-	};
-});
+vi.mock("../../middleware", () => ({
+	buildOwnershipFilter: vi.fn((ctx: Context) => ({
+		OR: ctx.session?.user?.id
+			? [{ userId: ctx.session.user.id }]
+			: ctx.anonymousId
+				? [{ userId: ctx.anonymousId }]
+				: [],
+	})),
+	checkCalendarLimit: vi.fn(),
+	getUserUsage: vi.fn(),
+	isAnonymousUser: vi.fn(
+		(ctx: Context) => !ctx.session?.user?.id && !!ctx.anonymousId,
+	),
+	isAuthenticatedUser: vi.fn((ctx: Context) => !!ctx.session?.user?.id),
+	verifyCalendarAccess: vi.fn(),
+}));
 
 describe("calendarCoreRouter", () => {
 	const mockContext: Context = {
 		session: null,
 		anonymousId: "anon-test123",
 		correlationId: "test-correlation-id",
-		userId: "anon-test123",
-	};
+		userId: "anon-test123", // Explicitly set userId for anonymous user
+	} as Context;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -58,7 +62,7 @@ describe("calendarCoreRouter", () => {
 
 	describe("list", () => {
 		it("should return calendars for authenticated user", async () => {
-			vi.mocked(prisma.calendar.findMany).mockResolvedValue([
+			(prisma.calendar.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([
 				{
 					id: "cal-1",
 					name: "Test Calendar",
@@ -71,9 +75,7 @@ describe("calendarCoreRouter", () => {
 				},
 			]);
 
-			const caller = calendarCoreRouter.createCaller({
-				ctx: mockContext,
-			});
+			const caller = calendarCoreRouter.createCaller(mockContext);
 
 			const result = await caller.list({});
 
@@ -82,7 +84,7 @@ describe("calendarCoreRouter", () => {
 		});
 
 		it("should support pagination with cursor", async () => {
-			vi.mocked(prisma.calendar.findMany).mockResolvedValue([
+			(prisma.calendar.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([
 				{
 					id: "cal-2",
 					name: "Second Calendar",
@@ -95,13 +97,11 @@ describe("calendarCoreRouter", () => {
 				},
 			]);
 
-			const caller = calendarCoreRouter.createCaller({
-				ctx: mockContext,
-			});
+			const caller = calendarCoreRouter.createCaller(mockContext);
 
 			const _result = await caller.list({ cursor: "cal-1", limit: 10 });
 
-			expect(vi.mocked(prisma.calendar.findMany)).toHaveBeenCalledWith(
+			expect(prisma.calendar.findMany).toHaveBeenCalledWith(
 				expect.objectContaining({
 					where: expect.objectContaining({
 						id: { gt: "cal-1" },
@@ -114,11 +114,11 @@ describe("calendarCoreRouter", () => {
 
 	describe("getById", () => {
 		it("should throw NOT_FOUND if calendar does not exist", async () => {
-			vi.mocked(prisma.calendar.findUnique).mockResolvedValue(null);
+			(
+				prisma.calendar.findUnique as ReturnType<typeof vi.fn>
+			).mockResolvedValue(null);
 
-			const caller = calendarCoreRouter.createCaller({
-				ctx: mockContext,
-			});
+			const caller = calendarCoreRouter.createCaller(mockContext);
 
 			await expect(caller.getById({ id: "non-existent" })).rejects.toThrow(
 				TRPCError,

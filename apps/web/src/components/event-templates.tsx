@@ -161,7 +161,7 @@ export const EVENT_TEMPLATES: EventTemplate[] = [
 /**
  * Get default start/end dates for a template
  */
-export function getTemplateDates(
+function getTemplateDates(
 	template: EventTemplate,
 	baseDate?: Date,
 ): { startDate: Date; endDate: Date } {

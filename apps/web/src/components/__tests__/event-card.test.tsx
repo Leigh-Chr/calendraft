@@ -2,7 +2,22 @@
  * Tests for EventCard component
  */
 
-import { render, screen } from "@testing-library/react";
+// Setup DOM environment for Bun test BEFORE any other imports
+import { JSDOM } from "jsdom";
+
+const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
+	url: "http://localhost",
+	pretendToBeVisual: true,
+});
+// Set global document before any testing-library imports
+// biome-ignore lint/suspicious/noExplicitAny: jsdom types don't match globalThis types
+(globalThis as any).document = dom.window.document;
+// biome-ignore lint/suspicious/noExplicitAny: jsdom types don't match globalThis types
+(globalThis as any).window = dom.window;
+// biome-ignore lint/suspicious/noExplicitAny: jsdom types don't match globalThis types
+(globalThis as any).navigator = dom.window.navigator;
+
+import { render } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { EventCard } from "../event-list/event-card";
@@ -44,8 +59,11 @@ describe("EventCard", () => {
 	};
 
 	it("should render event title", () => {
-		render(<EventCard {...defaultProps} />);
-		expect(screen.getByText("Test Event")).toBeInTheDocument();
+		const { container } = render(<EventCard {...defaultProps} />);
+		const titleElement =
+			container.querySelector("text") || container.textContent;
+		expect(titleElement).toBeTruthy();
+		expect(container.textContent).toContain("Test Event");
 	});
 
 	it("should call onDelete when delete is clicked", () => {

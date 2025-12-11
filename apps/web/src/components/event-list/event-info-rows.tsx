@@ -18,11 +18,7 @@ import {
 	Users,
 } from "lucide-react";
 // React Compiler will automatically memoize these components
-import {
-	formatDuration,
-	formatEventDateTime,
-	getEventTimeStatus,
-} from "@/lib/date-utils";
+import { formatEventDateTime, getEventTimeStatus } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 
 // ----- Row Components -----
@@ -167,29 +163,6 @@ export function AlarmsRow({ count }: { count: number }) {
 			<span>
 				{count} alert{count > 1 ? "s" : ""}
 			</span>
-		</div>
-	);
-}
-
-/**
- * Duration display - only shown when relevant (long events, multi-day)
- * Now more subtle and integrated
- */
-export function DurationRow({
-	startDate,
-	endDate,
-	showIcon = false,
-}: {
-	startDate: Date | string;
-	endDate: Date | string;
-	showIcon?: boolean;
-}) {
-	const duration = formatDuration(startDate, endDate);
-
-	return (
-		<div className="flex items-center gap-1.5 text-muted-foreground text-xs">
-			{showIcon && <Clock className="h-3 w-3" />}
-			<span>{duration}</span>
 		</div>
 	);
 }

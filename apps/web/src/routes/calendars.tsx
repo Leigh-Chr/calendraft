@@ -369,9 +369,9 @@ function CalendarsListComponent() {
 	const search = Route.useSearch();
 
 	// Parse filters from URL
-	const keyword = search["q"] || "";
-	const sortBy = search["sortBy"] || "updatedAt";
-	const sortDirection = search["sortDirection"] || "desc";
+	const keyword = search.q || "";
+	const sortBy = search.sortBy || "updatedAt";
+	const sortDirection = search.sortDirection || "desc";
 
 	// Get calendars
 	const { calendars: allCalendars, isLoading } = useCalendars();
