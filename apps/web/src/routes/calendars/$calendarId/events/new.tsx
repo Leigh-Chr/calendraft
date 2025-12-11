@@ -6,7 +6,7 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Breadcrumb } from "@/components/breadcrumb";
 import {
@@ -90,22 +90,20 @@ function NewEventComponent() {
 		createMutation.mutate(transformEventFormDataToAPI(data, calendarId));
 	};
 
-	const handleTemplateSelect = useCallback(
-		(data: {
-			title: string;
-			startDate: string;
-			endDate: string;
-			description?: string;
-			location?: string;
-			categories?: string;
-			rrule?: string;
-			color?: string;
-		}) => {
-			setTemplateData(data);
-			toast.success(`Template "${data.title}" applied`);
-		},
-		[],
-	);
+	// React Compiler will automatically memoize this callback
+	const handleTemplateSelect = (data: {
+		title: string;
+		startDate: string;
+		endDate: string;
+		description?: string;
+		location?: string;
+		categories?: string;
+		rrule?: string;
+		color?: string;
+	}) => {
+		setTemplateData(data);
+		toast.success(`Template "${data.title}" applied`);
+	};
 
 	// Build initial data from template or search params
 	const initialData = templateData

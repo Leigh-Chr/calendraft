@@ -4,7 +4,7 @@
  */
 
 import { AlertCircle, Lock, Repeat } from "lucide-react";
-import React from "react";
+// React Compiler will automatically memoize these components
 import { cn } from "@/lib/utils";
 import type { EventItem } from "./types";
 
@@ -34,11 +34,7 @@ const STATUS_CONFIG = {
 /**
  * Status indicator - now a subtle dot instead of loud badge
  */
-export const StatusBadge = React.memo(function StatusBadge({
-	status,
-}: {
-	status: string | null | undefined;
-}) {
+export function StatusBadge({ status }: { status: string | null | undefined }) {
 	if (!status) return null;
 	const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG];
 	if (!config || !config.show) return null;
@@ -57,12 +53,12 @@ export const StatusBadge = React.memo(function StatusBadge({
 			{config.label}
 		</span>
 	);
-});
+}
 
 /**
  * Privacy indicator - icon-based for compact display
  */
-export const ClassBadge = React.memo(function ClassBadge({
+export function ClassBadge({
 	classValue,
 }: {
 	classValue: string | null | undefined;
@@ -78,12 +74,12 @@ export const ClassBadge = React.memo(function ClassBadge({
 			<Lock className="h-3 w-3" />
 		</span>
 	);
-});
+}
 
 /**
  * Priority indicator - only show high priority (1-4)
  */
-export const PriorityBadge = React.memo(function PriorityBadge({
+export function PriorityBadge({
 	priority,
 }: {
 	priority: number | null | undefined;
@@ -101,12 +97,12 @@ export const PriorityBadge = React.memo(function PriorityBadge({
 			<AlertCircle className="h-3.5 w-3.5" />
 		</span>
 	);
-});
+}
 
 /**
  * Recurrence indicator - subtle icon
  */
-export const RecurrenceBadge = React.memo(function RecurrenceBadge({
+export function RecurrenceBadge({
 	rrule,
 }: {
 	rrule: string | null | undefined;
@@ -120,12 +116,12 @@ export const RecurrenceBadge = React.memo(function RecurrenceBadge({
 			<Repeat className="h-3.5 w-3.5" />
 		</span>
 	);
-});
+}
 
 /**
  * Color indicator dot
  */
-export const ColorDot = React.memo(function ColorDot({
+export function ColorDot({
 	color,
 	size = "md",
 }: {
@@ -146,13 +142,13 @@ export const ColorDot = React.memo(function ColorDot({
 			style={{ backgroundColor: color }}
 		/>
 	);
-});
+}
 
 /**
  * Event header with title and inline indicators
  * Improved visual hierarchy: title prominent, indicators subtle
  */
-export const EventBadges = React.memo(function EventBadges({
+export function EventBadges({
 	event,
 	showColor = false,
 }: {
@@ -190,4 +186,4 @@ export const EventBadges = React.memo(function EventBadges({
 			</div>
 		</div>
 	);
-});
+}

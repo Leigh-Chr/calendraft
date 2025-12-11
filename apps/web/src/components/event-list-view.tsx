@@ -18,7 +18,7 @@ import {
 import { enUS } from "date-fns/locale";
 import { Calendar, CheckSquare, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -117,67 +117,62 @@ function useEventFilters(
 	}, [initialFilters]);
 
 	// Update filters with automatic cursor reset when filter criteria change
-	const updateFilters = useCallback(
-		(updates: Partial<FilterState>, resetCursor = false) => {
-			setFilters((prev) => {
-				const next = {
-					...prev,
-					...updates,
-					// Reset cursor when filter criteria change (not when loading more)
-					...(resetCursor ? { cursor: undefined } : {}),
-				};
+	// React Compiler will automatically memoize these callbacks
+	const updateFilters = (
+		updates: Partial<FilterState>,
+		resetCursor = false,
+	) => {
+		setFilters((prev) => {
+			const next = {
+				...prev,
+				...updates,
+				// Reset cursor when filter criteria change (not when loading more)
+				...(resetCursor ? { cursor: undefined } : {}),
+			};
 
-				// Notify parent of filter changes (for URL sync)
-				if (resetCursor && onFiltersChange) {
-					onFiltersChange({
-						dateFilter: next.dateFilter,
-						sortBy: next.sortBy,
-						sortDirection: next.sortDirection,
-						keyword: next.keyword,
-					});
-				}
+			// Notify parent of filter changes (for URL sync)
+			if (resetCursor && onFiltersChange) {
+				onFiltersChange({
+					dateFilter: next.dateFilter,
+					sortBy: next.sortBy,
+					sortDirection: next.sortDirection,
+					keyword: next.keyword,
+				});
+			}
 
-				return next;
-			});
-		},
-		[onFiltersChange],
-	);
+			return next;
+		});
+	};
 
-	const handleDateFilterChange = useCallback(
-		(filter: FilterState["dateFilter"]) => {
-			const now = new Date();
-			const dateRange = getDateRangeForFilter(filter, now);
-			setFilters((prev) => {
-				const next = {
-					...prev,
-					dateFilter: filter,
-					...dateRange,
-					cursor: undefined, // Always reset cursor on date filter change
-				};
+	const handleDateFilterChange = (filter: FilterState["dateFilter"]) => {
+		const now = new Date();
+		const dateRange = getDateRangeForFilter(filter, now);
+		setFilters((prev) => {
+			const next = {
+				...prev,
+				dateFilter: filter,
+				...dateRange,
+				cursor: undefined, // Always reset cursor on date filter change
+			};
 
-				// Notify parent of filter changes (for URL sync)
-				if (onFiltersChange) {
-					onFiltersChange({
-						dateFilter: next.dateFilter,
-						sortBy: next.sortBy,
-						sortDirection: next.sortDirection,
-						keyword: next.keyword,
-					});
-				}
+			// Notify parent of filter changes (for URL sync)
+			if (onFiltersChange) {
+				onFiltersChange({
+					dateFilter: next.dateFilter,
+					sortBy: next.sortBy,
+					sortDirection: next.sortDirection,
+					keyword: next.keyword,
+				});
+			}
 
-				return next;
-			});
-		},
-		[onFiltersChange],
-	);
+			return next;
+		});
+	};
 
 	// Convenience wrappers that auto-reset cursor
-	const updateFilterWithReset = useCallback(
-		(updates: Partial<FilterState>) => {
-			updateFilters(updates, true);
-		},
-		[updateFilters],
-	);
+	const updateFilterWithReset = (updates: Partial<FilterState>) => {
+		updateFilters(updates, true);
+	};
 
 	return {
 		filters,
@@ -207,14 +202,12 @@ function useDeleteEvent(calendarId: string) {
 		}),
 	);
 
-	const handleDelete = useCallback(
-		(id: string) => {
-			if (confirm("Are you sure you want to delete this event?")) {
-				mutation.mutate({ id });
-			}
-		},
-		[mutation],
-	);
+	// React Compiler will automatically memoize this callback
+	const handleDelete = (id: string) => {
+		if (confirm("Are you sure you want to delete this event?")) {
+			mutation.mutate({ id });
+		}
+	};
 
 	return { handleDelete, isDeleting: mutation.isPending };
 }
@@ -239,12 +232,10 @@ function useDuplicateEvent(calendarId: string) {
 		}),
 	);
 
-	const handleDuplicate = useCallback(
-		(id: string) => {
-			mutation.mutate({ id, dayOffset: 0 });
-		},
-		[mutation],
-	);
+	// React Compiler will automatically memoize this callback
+	const handleDuplicate = (id: string) => {
+		mutation.mutate({ id, dayOffset: 0 });
+	};
 
 	return { handleDuplicate, isDuplicating: mutation.isPending };
 }
@@ -257,10 +248,11 @@ function useMoveEvent(_calendarId: string) {
 	const [moveDialogOpen, setMoveDialogOpen] = useState(false);
 	const [eventIdToMove, setEventIdToMove] = useState<string | null>(null);
 
-	const handleMove = useCallback((id: string) => {
+	// React Compiler will automatically memoize this callback
+	const handleMove = (id: string) => {
 		setEventIdToMove(id);
 		setMoveDialogOpen(true);
-	}, []);
+	};
 
 	return {
 		handleMove,
@@ -328,21 +320,19 @@ export function EventListView({
 		}),
 	});
 
-	// Memoized events list
-	const events = useMemo(
-		() => eventsQuery.data?.events || initialEvents,
-		[eventsQuery.data?.events, initialEvents],
-	);
+	// React Compiler will automatically memoize this computation
+	const events = eventsQuery.data?.events || initialEvents;
 	const nextCursor = eventsQuery.data?.nextCursor;
 
-	const handleLoadMore = useCallback(() => {
+	// React Compiler will automatically memoize these callbacks
+	const handleLoadMore = () => {
 		if (nextCursor) {
 			updateFilters({ cursor: nextCursor });
 		}
-	}, [nextCursor, updateFilters]);
+	};
 
 	// Selection handlers
-	const handleToggleSelect = useCallback((id: string) => {
+	const handleToggleSelect = (id: string) => {
 		setSelectedIds((prev) => {
 			const next = new Set(prev);
 			if (next.has(id)) {
@@ -352,24 +342,24 @@ export function EventListView({
 			}
 			return next;
 		});
-	}, []);
+	};
 
-	const handleSelectAll = useCallback(() => {
+	const handleSelectAll = () => {
 		setSelectedIds(new Set(events.map((e) => e.id)));
-	}, [events]);
+	};
 
-	const handleDeselectAll = useCallback(() => {
+	const handleDeselectAll = () => {
 		setSelectedIds(new Set());
-	}, []);
+	};
 
-	const handleExitSelectionMode = useCallback(() => {
+	const handleExitSelectionMode = () => {
 		setSelectionMode(false);
 		setSelectedIds(new Set());
-	}, []);
+	};
 
-	const handleEnterSelectionMode = useCallback(() => {
+	const handleEnterSelectionMode = () => {
 		setSelectionMode(true);
-	}, []);
+	};
 
 	return (
 		<div className="space-y-4">
@@ -427,14 +417,24 @@ export function EventListView({
 			<EventsList
 				events={events}
 				calendarId={calendarId}
-				onDelete={handleDelete}
-				onDuplicate={handleDuplicate}
-				onMove={handleMove}
-				isDeleting={isDeleting}
-				isDuplicating={isDuplicating}
-				selectionMode={selectionMode}
-				selectedIds={selectedIds}
-				onToggleSelect={handleToggleSelect}
+				handlers={{
+					onDelete: handleDelete,
+					onDuplicate: handleDuplicate,
+					onMove: handleMove,
+				}}
+				loading={{
+					isDeleting,
+					isDuplicating,
+				}}
+				selection={
+					selectionMode
+						? {
+								mode: selectionMode,
+								selectedIds,
+								onToggleSelect: handleToggleSelect,
+							}
+						: undefined
+				}
 			/>
 
 			{/* Move event dialog */}
@@ -523,34 +523,35 @@ function DateGroupHeader({
 /**
  * Events list with date-based grouping
  * Groups events by day with contextual headers
+ * React Compiler will automatically memoize this component
  */
 function EventsList({
 	events,
 	calendarId,
-	onDelete,
-	onDuplicate,
-	onMove,
-	isDeleting,
-	isDuplicating,
-	selectionMode = false,
-	selectedIds,
-	onToggleSelect,
+	handlers,
+	loading,
+	selection,
 }: {
 	events: EventItem[];
 	calendarId: string;
-	onDelete: (id: string) => void;
-	onDuplicate: (id: string) => void;
-	onMove?: (id: string) => void;
-	isDeleting: boolean;
-	isDuplicating: boolean;
-	selectionMode?: boolean;
-	selectedIds?: Set<string>;
-	onToggleSelect?: (id: string) => void;
+	handlers: {
+		onDelete: (id: string) => void;
+		onDuplicate: (id: string) => void;
+		onMove?: (id: string) => void;
+	};
+	loading: {
+		isDeleting: boolean;
+		isDuplicating: boolean;
+	};
+	selection?: {
+		mode: boolean;
+		selectedIds?: Set<string>;
+		onToggleSelect?: (id: string) => void;
+	};
 }) {
 	// Group events by date
-	const groupedEvents = useMemo(() => {
-		return groupEventsByDate(events);
-	}, [events]);
+	// React Compiler will automatically memoize this computation
+	const groupedEvents = groupEventsByDate(events);
 
 	if (events.length === 0) {
 		return (
@@ -578,14 +579,14 @@ function EventsList({
 									key={event.id}
 									event={event}
 									calendarId={calendarId}
-									onDelete={onDelete}
-									onDuplicate={onDuplicate}
-									onMove={onMove}
-									isDeleting={isDeleting}
-									isDuplicating={isDuplicating}
-									selectionMode={selectionMode}
-									isSelected={selectedIds?.has(event.id)}
-									onToggleSelect={onToggleSelect}
+									onDelete={handlers.onDelete}
+									onDuplicate={handlers.onDuplicate}
+									onMove={handlers.onMove}
+									isDeleting={loading.isDeleting}
+									isDuplicating={loading.isDuplicating}
+									selectionMode={selection?.mode ?? false}
+									isSelected={selection?.selectedIds?.has(event.id)}
+									onToggleSelect={selection?.onToggleSelect}
 								/>
 							))}
 						</div>

@@ -14,7 +14,7 @@ import {
 	Users,
 	X,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AdditionalInfoSection } from "@/components/event-form/additional-info-section";
 import { AlarmsSection } from "@/components/event-form/alarms-section";
@@ -228,18 +228,16 @@ export function EventFormExtended({
 		};
 	}, [hasModifications, mode]);
 
-	const toggleSection = useCallback(
-		(section: string) => {
-			const newExpanded = new Set(expandedSections);
-			if (newExpanded.has(section)) {
-				newExpanded.delete(section);
-			} else {
-				newExpanded.add(section);
-			}
-			setExpandedSections(newExpanded);
-		},
-		[expandedSections],
-	);
+	// React Compiler will automatically memoize these callbacks
+	const toggleSection = (section: string) => {
+		const newExpanded = new Set(expandedSections);
+		if (newExpanded.has(section)) {
+			newExpanded.delete(section);
+		} else {
+			newExpanded.add(section);
+		}
+		setExpandedSections(newExpanded);
+	};
 
 	const getFirstError = (errors: ValidationErrors): string | null => {
 		// Priority order for error display
@@ -297,34 +295,30 @@ export function EventFormExtended({
 		onSubmit(formData);
 	};
 
-	const addAttendee = useCallback(() => {
+	const addAttendee = () => {
 		setFormData((prev) => ({
 			...prev,
 			attendees: [...(prev.attendees || []), { email: "", rsvp: false }],
 		}));
-	}, []);
+	};
 
-	const removeAttendee = useCallback((index: number) => {
+	const removeAttendee = (index: number) => {
 		setFormData((prev) => ({
 			...prev,
 			attendees: prev.attendees?.filter((_, i) => i !== index) || [],
 		}));
-	}, []);
+	};
 
-	const updateAttendee = useCallback(
-		(index: number, data: Partial<AttendeeFormData>) => {
-			setFormData((prev) => {
-				const updated =
-					prev.attendees?.map((a, i) =>
-						i === index ? { ...a, ...data } : a,
-					) || [];
-				return { ...prev, attendees: updated };
-			});
-		},
-		[],
-	);
+	const updateAttendee = (index: number, data: Partial<AttendeeFormData>) => {
+		setFormData((prev) => {
+			const updated =
+				prev.attendees?.map((a, i) => (i === index ? { ...a, ...data } : a)) ||
+				[];
+			return { ...prev, attendees: updated };
+		});
+	};
 
-	const addAlarm = useCallback(() => {
+	const addAlarm = () => {
 		setFormData((prev) => ({
 			...prev,
 			alarms: [
@@ -332,63 +326,56 @@ export function EventFormExtended({
 				{ trigger: "-PT15M", action: "DISPLAY" },
 			],
 		}));
-	}, []);
+	};
 
-	const removeAlarm = useCallback((index: number) => {
+	const removeAlarm = (index: number) => {
 		setFormData((prev) => ({
 			...prev,
 			alarms: prev.alarms?.filter((_, i) => i !== index) || [],
 		}));
-	}, []);
+	};
 
-	const updateAlarm = useCallback(
-		(index: number, data: Partial<AlarmFormData>) => {
-			setFormData((prev) => {
-				const updated =
-					prev.alarms?.map((a, i) => (i === index ? { ...a, ...data } : a)) ||
-					[];
-				return { ...prev, alarms: updated };
-			});
-		},
-		[],
-	);
+	const updateAlarm = (index: number, data: Partial<AlarmFormData>) => {
+		setFormData((prev) => {
+			const updated =
+				prev.alarms?.map((a, i) => (i === index ? { ...a, ...data } : a)) || [];
+			return { ...prev, alarms: updated };
+		});
+	};
 
-	const updateAlarmTrigger = useCallback(
-		(
-			index: number,
-			when: "before" | "at" | "after",
-			value: number,
-			unit: "minutes" | "hours" | "days",
-		) => {
-			// For "at" triggers, we need to use the event start date as absolute time
-			// For now, we'll use an empty string or a special format
-			// The ICS format for "at" is an absolute date-time
-			if (when === "at") {
-				// Use the event start date as absolute time trigger
-				// Format: YYYYMMDDTHHmmssZ
-				if (formData.startDate) {
-					const startDate = new Date(formData.startDate);
-					const year = startDate.getUTCFullYear();
-					const month = String(startDate.getUTCMonth() + 1).padStart(2, "0");
-					const day = String(startDate.getUTCDate()).padStart(2, "0");
-					const hours = String(startDate.getUTCHours()).padStart(2, "0");
-					const minutes = String(startDate.getUTCMinutes()).padStart(2, "0");
-					const seconds = String(startDate.getUTCSeconds()).padStart(2, "0");
-					const triggerStr = `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
-					updateAlarm(index, { trigger: triggerStr });
-				} else {
-					// If no start date, use empty string (will be set when start date is available)
-					updateAlarm(index, { trigger: "" });
-				}
+	const updateAlarmTrigger = (
+		index: number,
+		when: "before" | "at" | "after",
+		value: number,
+		unit: "minutes" | "hours" | "days",
+	) => {
+		// For "at" triggers, we need to use the event start date as absolute time
+		// For now, we'll use an empty string or a special format
+		// The ICS format for "at" is an absolute date-time
+		if (when === "at") {
+			// Use the event start date as absolute time trigger
+			// Format: YYYYMMDDTHHmmssZ
+			if (formData.startDate) {
+				const startDate = new Date(formData.startDate);
+				const year = startDate.getUTCFullYear();
+				const month = String(startDate.getUTCMonth() + 1).padStart(2, "0");
+				const day = String(startDate.getUTCDate()).padStart(2, "0");
+				const hours = String(startDate.getUTCHours()).padStart(2, "0");
+				const minutes = String(startDate.getUTCMinutes()).padStart(2, "0");
+				const seconds = String(startDate.getUTCSeconds()).padStart(2, "0");
+				const triggerStr = `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
+				updateAlarm(index, { trigger: triggerStr });
 			} else {
-				const triggerStr = formatDuration(when, value, unit);
-				if (triggerStr) {
-					updateAlarm(index, { trigger: triggerStr });
-				}
+				// If no start date, use empty string (will be set when start date is available)
+				updateAlarm(index, { trigger: "" });
 			}
-		},
-		[updateAlarm, formData.startDate],
-	);
+		} else {
+			const triggerStr = formatDuration(when, value, unit);
+			if (triggerStr) {
+				updateAlarm(index, { trigger: triggerStr });
+			}
+		}
+	};
 
 	return (
 		<TooltipProvider>

@@ -86,7 +86,7 @@ export async function seedEvents(calendars: SeedCalendars): Promise<void> {
 	// 3. Cancelled event (with sequence > 0)
 	const cancelledStart = createDate(now, 8, 9, 0);
 	const cancelledEnd = createDate(now, 8, 17, 0);
-	const cancelledEvent = await prisma.event.create({
+	const _cancelledEvent = await prisma.event.create({
 		data: {
 			calendarId: calendars.calAliceTraining.id,
 			title: "Formation annulée",
@@ -121,7 +121,7 @@ export async function seedEvents(calendars: SeedCalendars): Promise<void> {
 	// 4. Tentative event
 	const tentativeStart = createDate(now, 11, 12, 0);
 	const tentativeEnd = createDate(now, 11, 13, 30);
-	const tentativeEvent = await prisma.event.create({
+	const _tentativeEvent = await prisma.event.create({
 		data: {
 			calendarId: calendars.calAlicePersonal.id,
 			title: "Déjeuner avec partenaire (à confirmer)",
@@ -190,7 +190,7 @@ export async function seedEvents(calendars: SeedCalendars): Promise<void> {
 	// 6. Event with priority: 0 (undefined) and TRANSPARENT
 	const casualStart = createDate(now, 2, 15, 0);
 	const casualEnd = createDate(now, 2, 15, 30);
-	const casualEvent = await prisma.event.create({
+	const _casualEvent = await prisma.event.create({
 		data: {
 			calendarId: calendars.calAliceWorkMeetings.id,
 			title: "Discussion informelle",
@@ -395,7 +395,7 @@ export async function seedEvents(calendars: SeedCalendars): Promise<void> {
 	// 12. Recurring biweekly event
 	const biweeklyStart = createDate(now, 4, 10, 0);
 	const biweeklyEnd = createDate(now, 4, 11, 0);
-	const biweeklyEvent = await prisma.event.create({
+	const _biweeklyEvent = await prisma.event.create({
 		data: {
 			calendarId: calendars.calBobTeam.id,
 			title: "Réunion bimensuelle",
@@ -463,7 +463,7 @@ export async function seedEvents(calendars: SeedCalendars): Promise<void> {
 	// 14. Event with RECURRENCE-ID (recurrence exception)
 	const standupExceptionStart = createDate(now, 10, 9, 0);
 	const standupExceptionEnd = createDate(now, 10, 9, 15);
-	const standupExceptionEvent = await prisma.event.create({
+	const _standupExceptionEvent = await prisma.event.create({
 		data: {
 			calendarId: calendars.calAliceWorkMeetings.id,
 			title: "Daily Standup (Exception)",
@@ -497,7 +497,7 @@ export async function seedEvents(calendars: SeedCalendars): Promise<void> {
 	// 15. Event with RELATED-TO
 	const followUpStart = createDate(now, 39, 10, 0);
 	const followUpEnd = createDate(now, 39, 10, 30);
-	const followUpEvent = await prisma.event.create({
+	const _followUpEvent = await prisma.event.create({
 		data: {
 			calendarId: calendars.calAliceWorkMeetings.id,
 			title: "Follow-up Présentation client",
@@ -531,7 +531,7 @@ export async function seedEvents(calendars: SeedCalendars): Promise<void> {
 	// 16. Event for Bob
 	const bobTrainingStart = createDate(now, 3, 14, 0);
 	const bobTrainingEnd = createDate(now, 3, 17, 0);
-	const bobTrainingEvent = await prisma.event.create({
+	const _bobTrainingEvent = await prisma.event.create({
 		data: {
 			calendarId: calendars.calBobTeam.id,
 			title: "Formation technique",

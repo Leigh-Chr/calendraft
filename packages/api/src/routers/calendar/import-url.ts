@@ -10,10 +10,7 @@ import { authOrAnonProcedure, router } from "../../index";
 import { findDuplicatesAgainstExisting } from "../../lib/duplicate-detection";
 import { parseIcsFile } from "../../lib/ics-parser";
 import { assertValidExternalUrl } from "../../lib/url-validator";
-import {
-	buildOwnershipFilter,
-	checkAnonymousCalendarLimit,
-} from "../../middleware";
+import { checkCalendarLimit, verifyCalendarAccess } from "../../middleware";
 import { createEventFromParsed, validateFileSize } from "./helpers";
 
 export const calendarImportUrlRouter = router({
@@ -26,35 +23,22 @@ export const calendarImportUrlRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			// First check if calendar exists (without ownership filter)
-			const calendarExists = await prisma.calendar.findUnique({
+			// Verify calendar access (optimized single query)
+			await verifyCalendarAccess(input.calendarId, ctx);
+
+			// Fetch calendar with events (access already verified)
+			const calendar = await prisma.calendar.findUnique({
 				where: { id: input.calendarId },
-				select: { id: true, userId: true },
-			});
-
-			if (!calendarExists) {
-				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Calendar not found",
-				});
-			}
-
-			// Verify calendar ownership
-			const calendar = await prisma.calendar.findFirst({
-				where: {
-					id: input.calendarId,
-					...buildOwnershipFilter(ctx),
-				},
 				include: {
 					events: true,
 				},
 			});
 
 			if (!calendar) {
-				// Calendar exists but user doesn't have access
+				// Should not happen after verifyCalendarAccess, but TypeScript safety
 				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Access denied to this calendar",
+					code: "NOT_FOUND",
+					message: "Calendar not found",
 				});
 			}
 
@@ -77,20 +61,20 @@ export const calendarImportUrlRouter = router({
 				// Adapt parsed events to the duplicate check interface
 				const newEventsForCheck = parseResult.events.map((e, idx) => ({
 					id: `new-${idx}`,
-					uid: e.uid,
+					uid: e.uid ?? null,
 					title: e.title,
 					startDate: e.startDate,
 					endDate: e.endDate,
-					location: e.location,
+					location: e.location ?? null,
 				}));
 
 				const existingEventsForCheck = calendar.events.map((e) => ({
 					id: e.id,
-					uid: e.uid,
+					uid: e.uid ?? null,
 					title: e.title,
 					startDate: e.startDate,
 					endDate: e.endDate,
-					location: e.location,
+					location: e.location ?? null,
 				}));
 
 				const { unique, duplicates } = findDuplicatesAgainstExisting(
@@ -139,7 +123,7 @@ export const calendarImportUrlRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			await checkAnonymousCalendarLimit(ctx);
+			await checkCalendarLimit(ctx);
 
 			// Validate URL against SSRF attacks
 			assertValidExternalUrl(input.url);
@@ -223,32 +207,20 @@ export const calendarImportUrlRouter = router({
 		)
 		.mutation(async ({ ctx, input }) => {
 			// First check if calendar exists (without ownership filter)
-			const calendarExists = await prisma.calendar.findUnique({
+			// Verify calendar access (optimized single query)
+			await verifyCalendarAccess(input.calendarId, ctx);
+
+			// Fetch calendar with events (access already verified)
+			const calendar = await prisma.calendar.findUnique({
 				where: { id: input.calendarId },
-				select: { id: true, userId: true },
-			});
-
-			if (!calendarExists) {
-				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Calendar not found",
-				});
-			}
-
-			// Find the calendar
-			const calendar = await prisma.calendar.findFirst({
-				where: {
-					id: input.calendarId,
-					...buildOwnershipFilter(ctx),
-				},
 				include: { events: true },
 			});
 
 			if (!calendar) {
-				// Calendar exists but user doesn't have access
+				// Should not happen after verifyCalendarAccess, but TypeScript safety
 				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Access denied to this calendar",
+					code: "NOT_FOUND",
+					message: "Calendar not found",
 				});
 			}
 
@@ -316,20 +288,20 @@ export const calendarImportUrlRouter = router({
 			if (!input.replaceAll && input.skipDuplicates) {
 				const newEventsForCheck = parseResult.events.map((e, idx) => ({
 					id: `new-${idx}`,
-					uid: e.uid,
+					uid: e.uid ?? null,
 					title: e.title,
 					startDate: e.startDate,
 					endDate: e.endDate,
-					location: e.location,
+					location: e.location ?? null,
 				}));
 
 				const existingEventsForCheck = calendar.events.map((e) => ({
 					id: e.id,
-					uid: e.uid,
+					uid: e.uid ?? null,
 					title: e.title,
 					startDate: e.startDate,
 					endDate: e.endDate,
-					location: e.location,
+					location: e.location ?? null,
 				}));
 
 				const { unique, duplicates } = findDuplicatesAgainstExisting(

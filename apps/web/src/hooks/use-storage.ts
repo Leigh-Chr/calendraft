@@ -32,7 +32,7 @@ export function useCalendars(filterGroups?: string[]) {
 	});
 
 	return {
-		calendars: trpcCalendars.data || [],
+		calendars: trpcCalendars.data?.calendars || [],
 		isLoading: trpcCalendars.isLoading,
 		isError: trpcCalendars.isError,
 	};

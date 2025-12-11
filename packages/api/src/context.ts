@@ -28,9 +28,13 @@ export async function createContext({ context }: CreateContextOptions) {
 			? rawAnonymousId
 			: null;
 
+	// Extract correlation ID from header (set by correlationIdMiddleware)
+	const correlationId = context.req.header("x-correlation-id");
+
 	return {
 		session,
 		anonymousId,
+		correlationId,
 		// Use userId if authenticated, otherwise use anonymousId
 		userId: session?.user?.id || anonymousId,
 	};

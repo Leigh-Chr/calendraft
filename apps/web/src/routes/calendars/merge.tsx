@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { Loader2, Merge } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { SearchBar } from "@/components/calendar-list/calendar-filters";
 import { Button } from "@/components/ui/button";
@@ -63,15 +63,18 @@ function MergeCalendarsComponent() {
 	const [searchKeyword, setSearchKeyword] = useState("");
 
 	// Filter calendars by search keyword
-	const calendars = useMemo(() => {
+	// React Compiler will automatically memoize this computation
+	const calendars = (() => {
+		// Ensure allCalendars is always an array
+		const calendarsArray = Array.isArray(allCalendars) ? allCalendars : [];
 		if (!searchKeyword.trim()) {
-			return allCalendars;
+			return calendarsArray;
 		}
 		const searchLower = searchKeyword.trim().toLowerCase();
-		return allCalendars.filter((cal) =>
+		return calendarsArray.filter((cal) =>
 			cal.name.toLowerCase().includes(searchLower),
 		);
-	}, [allCalendars, searchKeyword]);
+	})();
 
 	// Sync URL changes to local state (browser back/forward)
 	useEffect(() => {
@@ -152,7 +155,7 @@ function MergeCalendarsComponent() {
 					<CardContent className="space-y-4">
 						<div className="space-y-2">
 							<Label>Select calendars to merge (minimum 2)</Label>
-							{allCalendars.length > 3 && (
+							{allCalendars && allCalendars.length > 3 && (
 								<div className="mb-2">
 									<SearchBar
 										keyword={searchKeyword}
@@ -163,7 +166,7 @@ function MergeCalendarsComponent() {
 								</div>
 							)}
 							<div className="max-h-64 space-y-2 overflow-y-auto rounded-md border p-4">
-								{allCalendars.length === 0 ? (
+								{!allCalendars || allCalendars.length === 0 ? (
 									<p className="text-muted-foreground text-sm">
 										No calendars available
 									</p>

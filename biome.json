@@ -59,7 +59,11 @@
 					}
 				},
 				"noExcessiveNestedTestSuites": "warn",
-				"noForEach": "off"
+				"noForEach": "off",
+				"useLiteralKeys": {
+					"level": "warn",
+					"fix": "unsafe"
+				}
 			},
 			"nursery": {
 				"useSortedClasses": {

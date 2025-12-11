@@ -1,4 +1,4 @@
-import prisma from "@calendraft/db";
+import prisma, { Prisma } from "@calendraft/db";
 import { eventCreateSchema, eventUpdateSchema } from "@calendraft/schemas";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
@@ -11,194 +11,165 @@ import {
 	prepareRecurrenceDatesData,
 	prepareResourcesData,
 } from "../lib/event-helpers";
-import { checkAnonymousEventLimit } from "../middleware";
+import { checkEventLimit } from "../middleware";
+import {
+	verifyCalendarAccess,
+	verifyCalendarAccessForList,
+	verifyEventAccess,
+} from "./event/access";
+import { buildEventOrderBy, buildEventWhereClause } from "./event/queries";
+import {
+	updateEventAlarms,
+	updateEventAttendees,
+	updateEventCategories,
+	updateEventRecurrenceDates,
+	updateEventResources,
+} from "./event/updates";
+import { validateRelatedToChange, validateUidChange } from "./event/validation";
 
 /**
- * Verify event access permissions
+ * Type helper for event update input
  */
-async function verifyEventAccess(
-	eventId: string,
-	userId: string,
-	sessionUserId?: string,
-) {
-	const event = await prisma.event.findFirst({
-		where: { id: eventId },
-		include: { calendar: true },
-	});
+type EventUpdateInput = z.infer<typeof eventUpdateSchema>;
 
-	if (!event) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: "Event not found",
-		});
+/**
+ * Group event relations by eventId
+ */
+function groupEventRelations<T extends { eventId: string }>(
+	items: T[],
+): Map<string, T[]> {
+	const map = new Map<string, T[]>();
+	for (const item of items) {
+		if (!map.has(item.eventId)) {
+			map.set(item.eventId, []);
+		}
+		map.get(item.eventId)?.push(item);
 	}
+	return map;
+}
 
-	const calendar = await prisma.calendar.findFirst({
-		where: {
-			id: event.calendarId,
-			OR: [
-				...(sessionUserId ? [{ userId: sessionUserId }] : []),
-				...(userId ? [{ userId }] : []),
-			],
+/**
+ * Get events sorted by duration using raw SQL
+ */
+async function getEventsSortedByDuration(
+	calendarId: string,
+	cursor: string | undefined,
+	filterDateFrom: Date | undefined,
+	filterDateTo: Date | undefined,
+	limit: number,
+) {
+	const eventsRaw = await prisma.$queryRaw<
+		Array<{
+			id: string;
+			calendarId: string;
+			title: string;
+			startDate: Date;
+			endDate: Date;
+			description: string | null;
+			location: string | null;
+			status: string | null;
+			priority: number | null;
+			url: string | null;
+			class: string | null;
+			comment: string | null;
+			contact: string | null;
+			sequence: number;
+			transp: string | null;
+			rrule: string | null;
+			geoLatitude: number | null;
+			geoLongitude: number | null;
+			organizerName: string | null;
+			organizerEmail: string | null;
+			uid: string | null;
+			dtstamp: Date | null;
+			created: Date | null;
+			lastModified: Date | null;
+			recurrenceId: string | null;
+			relatedTo: string | null;
+			color: string | null;
+			createdAt: Date;
+			updatedAt: Date;
+		}>
+	>`
+		SELECT e.*
+		FROM event e
+		WHERE e."calendarId" = ${calendarId}
+			${cursor ? Prisma.sql`AND e.id > ${cursor}` : Prisma.empty}
+			${filterDateFrom ? Prisma.sql`AND e."startDate" >= ${filterDateFrom}` : Prisma.empty}
+			${filterDateTo ? Prisma.sql`AND e."startDate" <= ${filterDateTo}` : Prisma.empty}
+		ORDER BY (e."endDate" - e."startDate") DESC
+		LIMIT ${limit + 1}
+	`;
+
+	const eventIds = eventsRaw.map((e) => e.id);
+	const [attendees, alarms, categories, resources] = await Promise.all([
+		prisma.eventAttendee.findMany({ where: { eventId: { in: eventIds } } }),
+		prisma.eventAlarm.findMany({ where: { eventId: { in: eventIds } } }),
+		prisma.eventCategory.findMany({ where: { eventId: { in: eventIds } } }),
+		prisma.eventResource.findMany({ where: { eventId: { in: eventIds } } }),
+	]);
+
+	const attendeesMap = groupEventRelations(attendees);
+	const alarmsMap = groupEventRelations(alarms);
+	const categoriesMap = groupEventRelations(categories);
+	const resourcesMap = groupEventRelations(resources);
+
+	const events = eventsRaw.map((event) => ({
+		...event,
+		attendees: attendeesMap.get(event.id) || [],
+		alarms: alarmsMap.get(event.id) || [],
+		categories: categoriesMap.get(event.id) || [],
+		resources: resourcesMap.get(event.id) || [],
+	}));
+
+	return events;
+}
+
+/**
+ * Fetch events with pagination and sorting
+ */
+async function fetchEventsWithPagination(input: {
+	calendarId: string;
+	where: Prisma.EventWhereInput;
+	orderBy: { title?: "asc" | "desc"; startDate?: "asc" | "desc" };
+	limit: number;
+	sortBy: "date" | "name" | "duration";
+	trimmedKeyword?: string;
+}) {
+	const events = await prisma.event.findMany({
+		where: input.where,
+		orderBy:
+			input.sortBy === "duration" && input.trimmedKeyword
+				? { startDate: "asc" }
+				: input.orderBy,
+		take: input.limit + 1,
+		include: {
+			attendees: true,
+			alarms: true,
+			categories: true,
+			resources: true,
 		},
 	});
 
-	if (!calendar) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: "Access denied",
+	// If sorting by duration with keyword filter, sort in memory
+	if (input.sortBy === "duration" && input.trimmedKeyword) {
+		events.sort((a, b) => {
+			const durationA =
+				b.endDate.getTime() -
+				b.startDate.getTime() -
+				(a.endDate.getTime() - a.startDate.getTime());
+			return durationA;
 		});
 	}
 
-	return event;
-}
-
-/**
- * Verify calendar access for duplication
- */
-async function verifyCalendarAccess(
-	calendarId: string,
-	sessionUserId?: string,
-	anonymousId?: string,
-) {
-	// First check if calendar exists (without ownership filter)
-	const calendarExists = await prisma.calendar.findUnique({
-		where: { id: calendarId },
-		select: { id: true, userId: true },
-	});
-
-	if (!calendarExists) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: "Calendar not found",
-		});
+	// Determine next cursor
+	let nextCursor: string | undefined;
+	if (events.length > input.limit) {
+		const nextItem = events.pop();
+		nextCursor = nextItem?.id;
 	}
 
-	// Check if user has access to this calendar
-	const calendar = await prisma.calendar.findFirst({
-		where: {
-			id: calendarId,
-			OR: [
-				...(sessionUserId ? [{ userId: sessionUserId }] : []),
-				...(anonymousId ? [{ userId: anonymousId }] : []),
-			],
-		},
-	});
-
-	if (!calendar) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: "Access denied to this calendar",
-		});
-	}
-
-	return calendar;
-}
-
-/**
- * Validate UID uniqueness if being changed
- */
-async function validateUidChange(
-	newUid: string | null | undefined,
-	currentUid: string | null,
-	eventId: string,
-	calendarId: string,
-) {
-	if (newUid !== undefined && newUid !== currentUid) {
-		if (newUid) {
-			const existingEvent = await prisma.event.findFirst({
-				where: {
-					uid: newUid,
-					calendarId,
-					id: { not: eventId },
-				},
-			});
-			if (existingEvent) {
-				throw new TRPCError({
-					code: "CONFLICT",
-					message: "An event with this UID already exists in this calendar",
-				});
-			}
-		}
-	}
-}
-
-/**
- * Validate RELATED-TO if being changed
- */
-async function validateRelatedToChange(
-	newRelatedTo: string | null | undefined,
-	currentRelatedTo: string | null,
-	eventId: string,
-	calendarId: string,
-) {
-	if (newRelatedTo !== undefined && newRelatedTo !== currentRelatedTo) {
-		if (newRelatedTo) {
-			const relatedEvent = await prisma.event.findFirst({
-				where: {
-					uid: newRelatedTo,
-					calendarId,
-				},
-			});
-			if (!relatedEvent) {
-				throw new TRPCError({
-					code: "BAD_REQUEST",
-					message:
-						"The related event (RELATED-TO) does not exist in this calendar",
-				});
-			}
-			if (relatedEvent.id === eventId) {
-				throw new TRPCError({
-					code: "BAD_REQUEST",
-					message: "An event cannot be related to itself",
-				});
-			}
-		}
-	}
-}
-
-/**
- * Update event relations (attendees, alarms, categories, resources, recurrenceDates)
- */
-async function updateEventRelations(
-	eventId: string,
-	input: {
-		attendees?: unknown;
-		alarms?: unknown;
-		categories?: unknown;
-		resources?: unknown;
-		rdate?: unknown;
-		exdate?: unknown;
-	},
-	updateData: Record<string, unknown>,
-) {
-	if (input.attendees !== undefined) {
-		await prisma.eventAttendee.deleteMany({ where: { eventId } });
-		updateData.attendees = prepareAttendeeData(input.attendees as never);
-	}
-
-	if (input.alarms !== undefined) {
-		await prisma.eventAlarm.deleteMany({ where: { eventId } });
-		updateData.alarms = prepareAlarmData(input.alarms as never);
-	}
-
-	if (input.categories !== undefined) {
-		await prisma.eventCategory.deleteMany({ where: { eventId } });
-		updateData.categories = prepareCategoriesData(input.categories as never);
-	}
-
-	if (input.resources !== undefined) {
-		await prisma.eventResource.deleteMany({ where: { eventId } });
-		updateData.resources = prepareResourcesData(input.resources as never);
-	}
-
-	if (input.rdate !== undefined || input.exdate !== undefined) {
-		await prisma.recurrenceDate.deleteMany({ where: { eventId } });
-		updateData.recurrenceDates = prepareRecurrenceDatesData(
-			input.rdate as never,
-			input.exdate as never,
-		);
-	}
+	return { events, nextCursor };
 }
 
 export const eventRouter = router({
@@ -216,133 +187,54 @@ export const eventRouter = router({
 			}),
 		)
 		.query(async ({ ctx, input }) => {
-			// First check if calendar exists (without ownership filter)
-			const calendarExists = await prisma.calendar.findUnique({
-				where: { id: input.calendarId },
-				select: { id: true, userId: true },
-			});
-
-			if (!calendarExists) {
-				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Calendar not found",
-				});
-			}
-
-			// Verify calendar belongs to user
-			const calendar = await prisma.calendar.findFirst({
-				where: {
-					id: input.calendarId,
-					OR: [
-						...(ctx.session?.user?.id ? [{ userId: ctx.session.user.id }] : []),
-						...(ctx.anonymousId ? [{ userId: ctx.anonymousId }] : []),
-					],
-				},
-			});
-
-			if (!calendar) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Access denied to this calendar",
-				});
-			}
+			// Verify calendar access
+			await verifyCalendarAccessForList(input.calendarId, ctx);
 
 			// Build where clause
-			const where: {
-				calendarId: string;
-				id?: { gt: string };
-				startDate?: { gte?: Date; lte?: Date };
-				OR?: Array<{
-					title?: { contains: string; mode: "insensitive" };
-					description?: { contains: string; mode: "insensitive" };
-					location?: { contains: string; mode: "insensitive" };
-				}>;
-			} = {
+			const { where, trimmedKeyword } = buildEventWhereClause({
 				calendarId: input.calendarId,
-			};
+				cursor: input.cursor,
+				filterDateFrom: input.filterDateFrom,
+				filterDateTo: input.filterDateTo,
+				filterKeyword: input.filterKeyword,
+			});
 
-			if (input.cursor) {
-				where.id = {
-					gt: input.cursor,
+			// Handle duration sorting with SQL calculation (more efficient than in-memory)
+			// Note: If filterKeyword is provided, we fall back to Prisma query for full-text search
+			if (input.sortBy === "duration" && !trimmedKeyword) {
+				const events = await getEventsSortedByDuration(
+					input.calendarId,
+					input.cursor,
+					input.filterDateFrom,
+					input.filterDateTo,
+					input.limit,
+				);
+
+				// Determine next cursor
+				let nextCursor: string | undefined;
+				if (events.length > input.limit) {
+					const nextItem = events.pop();
+					nextCursor = nextItem?.id;
+				}
+
+				return {
+					events,
+					nextCursor,
 				};
 			}
 
-			if (input.filterDateFrom || input.filterDateTo) {
-				where.startDate = {};
-				if (input.filterDateFrom) {
-					where.startDate.gte = input.filterDateFrom;
-				}
-				if (input.filterDateTo) {
-					where.startDate.lte = input.filterDateTo;
-				}
-			}
+			// Build orderBy for non-duration sorts, or duration with keyword filter
+			const orderBy = buildEventOrderBy(input.sortBy, input.sortDirection);
 
-			// Multi-field search: title, description, location
-			// Trim keyword and only search if non-empty
-			const trimmedKeyword = input.filterKeyword?.trim();
-			if (trimmedKeyword && trimmedKeyword.length > 0) {
-				where.OR = [
-					{ title: { contains: trimmedKeyword, mode: "insensitive" } },
-					{ description: { contains: trimmedKeyword, mode: "insensitive" } },
-					{ location: { contains: trimmedKeyword, mode: "insensitive" } },
-				];
-			}
-
-			// Build orderBy
-			// sortDirection is only used for "date" sort
-			// "name" and "duration" are always unidirectional (ignoring sortDirection)
-			let orderBy: { title?: "asc" | "desc"; startDate?: "asc" | "desc" } = {};
-			switch (input.sortBy) {
-				case "name":
-					orderBy = { title: "asc" }; // Always A-Z, sortDirection is ignored
-					break;
-				case "duration":
-					orderBy = {
-						// Sort by duration (endDate - startDate)
-						startDate: "asc", // Always ascending, sortDirection is ignored
-					};
-					break;
-				default: // date
-					// Use sortDirection for date sorting (asc = future first, desc = past first)
-					orderBy = { startDate: input.sortDirection || "asc" };
-					break;
-			}
-
-			// Fetch one extra to determine if there's a next page
-			const events = await prisma.event.findMany({
+			// Fetch events with pagination
+			return fetchEventsWithPagination({
+				calendarId: input.calendarId,
 				where,
 				orderBy,
-				take: input.limit + 1,
-				include: {
-					attendees: true,
-					alarms: true,
-					categories: true,
-					resources: true,
-				},
+				limit: input.limit,
+				sortBy: input.sortBy,
+				trimmedKeyword,
 			});
-
-			// If sorting by duration, sort in memory
-			if (input.sortBy === "duration") {
-				events.sort((a, b) => {
-					const durationA =
-						b.endDate.getTime() -
-						b.startDate.getTime() -
-						(a.endDate.getTime() - a.startDate.getTime());
-					return durationA;
-				});
-			}
-
-			// Determine next cursor
-			let nextCursor: string | undefined;
-			if (events.length > input.limit) {
-				const nextItem = events.pop();
-				nextCursor = nextItem?.id;
-			}
-
-			return {
-				events,
-				nextCursor,
-			};
 		}),
 
 	getById: authOrAnonProcedure
@@ -392,7 +284,7 @@ export const eventRouter = router({
 		.input(eventCreateSchema)
 		.mutation(async ({ ctx, input }) => {
 			// Check event limit for anonymous users
-			await checkAnonymousEventLimit(ctx, input.calendarId);
+			await checkEventLimit(ctx, input.calendarId);
 
 			// Verify calendar belongs to user
 			const calendar = await prisma.calendar.findFirst({
@@ -515,19 +407,37 @@ export const eventRouter = router({
 		.input(eventUpdateSchema)
 		.mutation(async ({ ctx, input }) => {
 			// Verify access
-			const event = await verifyEventAccess(
+			await verifyEventAccess(
 				input.id,
-				ctx.anonymousId || "",
 				ctx.session?.user?.id,
+				ctx.anonymousId || undefined,
 			);
 
+			// Fetch full event data for validation
+			const event = await prisma.event.findUnique({
+				where: { id: input.id },
+				select: {
+					id: true,
+					calendarId: true,
+					uid: true,
+					relatedTo: true,
+					sequence: true,
+				},
+			});
+
+			if (!event) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Event not found",
+				});
+			}
+
 			// Validate changes
-			await validateUidChange(input.uid, event.uid, input.id, event.calendarId);
+			await validateUidChange(input.uid, event.uid, event.calendarId, input.id);
 			await validateRelatedToChange(
 				input.relatedTo,
-				event.relatedTo,
-				input.id,
 				event.calendarId,
+				input.id,
 			);
 
 			// Prevent manual sequence manipulation
@@ -570,22 +480,63 @@ export const eventRouter = router({
 				color: input.color,
 			});
 
-			// Update relations
-			await updateEventRelations(input.id, input, updateData);
-
-			return await prisma.event.update({
-				where: { id: input.id },
-				data: {
+			// Update relations and event in a transaction to ensure atomicity
+			return await prisma.$transaction(async (tx) => {
+				// Prepare Prisma update data with relations
+				// Use type annotation to work around Prisma's complex nested types
+				type PrismaEventUpdateData = Parameters<
+					typeof tx.event.update
+				>[0]["data"];
+				const prismaUpdateData: PrismaEventUpdateData = {
 					...updateData,
 					dtstamp: new Date(),
-				},
-				include: {
-					attendees: true,
-					alarms: true,
-					categories: true,
-					resources: true,
-					recurrenceDates: true,
-				},
+				};
+
+				// Update relations first
+				await updateEventAttendees(
+					tx,
+					input.id,
+					input.attendees as EventUpdateInput["attendees"],
+					prismaUpdateData,
+				);
+				await updateEventAlarms(
+					tx,
+					input.id,
+					input.alarms as EventUpdateInput["alarms"],
+					prismaUpdateData,
+				);
+				await updateEventCategories(
+					tx,
+					input.id,
+					input.categories as EventUpdateInput["categories"],
+					prismaUpdateData,
+				);
+				await updateEventResources(
+					tx,
+					input.id,
+					input.resources as EventUpdateInput["resources"],
+					prismaUpdateData,
+				);
+				await updateEventRecurrenceDates(
+					tx,
+					input.id,
+					input.rdate as EventUpdateInput["rdate"],
+					input.exdate as EventUpdateInput["exdate"],
+					prismaUpdateData,
+				);
+
+				// Update event
+				return await tx.event.update({
+					where: { id: input.id },
+					data: prismaUpdateData,
+					include: {
+						attendees: true,
+						alarms: true,
+						categories: true,
+						resources: true,
+						recurrenceDates: true,
+					},
+				});
 			});
 		}),
 
@@ -595,8 +546,8 @@ export const eventRouter = router({
 			// Verify access
 			await verifyEventAccess(
 				input.id,
-				ctx.anonymousId || "",
 				ctx.session?.user?.id,
+				ctx.anonymousId || undefined,
 			);
 
 			await prisma.event.delete({
@@ -652,7 +603,7 @@ export const eventRouter = router({
 				);
 			}
 
-			await checkAnonymousEventLimit(ctx, targetCalendarId);
+			await checkEventLimit(ctx, targetCalendarId);
 
 			// Calculate new dates with offset
 			const offsetMs = input.dayOffset * 24 * 60 * 60 * 1000;

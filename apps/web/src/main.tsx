@@ -69,7 +69,9 @@ if (!rootElement) {
 	throw new Error("Root element not found");
 }
 
-if (!rootElement.innerHTML) {
+// Check if root is empty by checking child nodes instead of innerHTML
+// This is safer and avoids XSS concerns
+if (rootElement.childNodes.length === 0) {
 	const root = ReactDOM.createRoot(rootElement);
 	root.render(<RouterProvider router={router} />);
 }

@@ -10,7 +10,7 @@ import {
 	Plus,
 	Trash2,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { AccountPrompt } from "@/components/account-prompt";
 import {
@@ -29,7 +29,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -38,6 +38,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { trpc, trpcClient } from "@/utils/trpc";
 
 export const Route = createFileRoute("/calendars/groups/$groupId")({
@@ -49,6 +50,157 @@ export const Route = createFileRoute("/calendars/groups/$groupId")({
 		],
 	}),
 });
+
+type CalendarForGroupSort = {
+	id: string;
+	name: string;
+	color?: string | null;
+	eventCount: number;
+};
+
+/**
+ * Filter calendars by keyword
+ */
+function filterGroupCalendarsByKeyword(
+	calendars: CalendarForGroupSort[],
+	keyword: string,
+): CalendarForGroupSort[] {
+	if (!keyword.trim()) {
+		return calendars;
+	}
+	const searchLower = keyword.trim().toLowerCase();
+	return calendars.filter((cal) =>
+		cal.name.toLowerCase().includes(searchLower),
+	);
+}
+
+/**
+ * Sort calendars in group
+ */
+function sortGroupCalendars(
+	calendars: CalendarForGroupSort[],
+	sortBy: CalendarSortBy,
+): CalendarForGroupSort[] {
+	const sorted = [...calendars];
+	if (sortBy === "name") {
+		sorted.sort((a, b) => a.name.localeCompare(b.name));
+	} else if (sortBy === "eventCount") {
+		sorted.sort((a, b) => a.eventCount - b.eventCount);
+	}
+	return sorted;
+}
+
+/**
+ * Export group as ICS file
+ */
+async function exportGroupAsICS(
+	groupId: string,
+	groupName: string,
+): Promise<void> {
+	// Create a temporary bundle for export
+	const bundle = await trpcClient.share.bundle.create.mutate({
+		groupId: groupId,
+		removeDuplicates: false,
+	});
+
+	// Get the ICS content
+	const data = await trpcClient.share.bundle.getByToken.query({
+		token: bundle.token,
+	});
+
+	// Create blob and download
+	const blob = new Blob([data.icsContent], { type: "text/calendar" });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = `${groupName.replace(/[^a-z0-9]/gi, "_")}.ics`;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
+
+	// Clean up the temporary bundle
+	await trpcClient.share.bundle.delete.mutate({ id: bundle.id });
+}
+
+/**
+ * Render calendars grid or empty states
+ */
+function renderCalendarsGrid(
+	calendarsArray: Array<{
+		id: string;
+		name: string;
+		color?: string | null;
+		eventCount: number;
+	}>,
+	filteredCalendars: Array<{
+		id: string;
+		name: string;
+		color?: string | null;
+		eventCount: number;
+	}>,
+	onCalendarClick: (id: string) => void,
+	onEdit: () => void,
+) {
+	if (calendarsArray.length === 0) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>No calendars in this group</CardTitle>
+					<CardDescription>
+						Add calendars to this group to get started.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<Button onClick={onEdit} variant="outline">
+						<Plus className="mr-2 h-4 w-4" />
+						Add calendars
+					</Button>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	if (filteredCalendars.length === 0) {
+		return (
+			<Card>
+				<CardContent className="py-10 text-center">
+					<p className="text-muted-foreground">
+						No calendars match your search
+					</p>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	return (
+		<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+			{filteredCalendars.map((calendar) => (
+				<Card
+					key={calendar.id}
+					className="group relative cursor-pointer overflow-hidden transition-all duration-200 hover:border-primary/30 hover:shadow-lg"
+					onClick={() => onCalendarClick(calendar.id)}
+				>
+					{/* Color accent */}
+					<div
+						className="absolute inset-y-0 left-0 w-1 transition-all duration-200 group-hover:w-1.5"
+						style={{ backgroundColor: calendar.color || "#D4A017" }}
+					/>
+
+					<CardHeader className="pb-2 pl-6">
+						<CardTitle className="line-clamp-1 text-card-title">
+							{calendar.name}
+						</CardTitle>
+						<CardDescription>
+							{calendar.eventCount} event
+							{calendar.eventCount !== 1 ? "s" : ""}
+						</CardDescription>
+					</CardHeader>
+				</Card>
+			))}
+		</div>
+	);
+}
 
 function GroupDetailComponent() {
 	const { groupId } = Route.useParams();
@@ -67,34 +219,19 @@ function GroupDetailComponent() {
 		...trpc.calendar.group.getById.queryOptions({ id: groupId }),
 	});
 
+	// Ensure calendars is always an array
+	const calendarsArray = Array.isArray(group?.calendars) ? group.calendars : [];
+
 	// Filter and sort calendars in the group
-	const filteredCalendars = useMemo(() => {
-		if (!group?.calendars) return [];
-
-		let filtered = group.calendars;
-
-		// Filter by keyword
-		if (searchKeyword.trim()) {
-			const searchLower = searchKeyword.trim().toLowerCase();
-			filtered = filtered.filter((cal) =>
-				cal.name.toLowerCase().includes(searchLower),
-			);
-		}
-
-		// Sort calendars
-		const sorted = [...filtered].sort((a, b) => {
-			switch (sortBy) {
-				case "name":
-					return a.name.localeCompare(b.name);
-				case "eventCount":
-					return a.eventCount - b.eventCount;
-				default:
-					return 0;
-			}
-		});
-
-		return sorted;
-	}, [group?.calendars, searchKeyword, sortBy]);
+	// React Compiler will automatically memoize this computation
+	const filteredCalendars = (() => {
+		if (!calendarsArray.length) return [];
+		const filtered = filterGroupCalendarsByKeyword(
+			calendarsArray,
+			searchKeyword,
+		);
+		return sortGroupCalendars(filtered, sortBy);
+	})();
 
 	// Delete mutation
 	const deleteMutation = useMutation(
@@ -112,67 +249,44 @@ function GroupDetailComponent() {
 		}),
 	);
 
-	const handleEdit = useCallback(() => {
+	// React Compiler will automatically memoize these callbacks
+	const handleEdit = () => {
 		if (group) {
 			setEditDialogOpen(true);
 		}
-	}, [group]);
+	};
 
-	const handleDelete = useCallback(() => {
+	const handleDelete = () => {
 		setDeleteDialogOpen(true);
-	}, []);
+	};
 
-	const handleShare = useCallback(() => {
+	const handleShare = () => {
 		setShareDialogOpen(true);
-	}, []);
+	};
 
-	const handleMerge = useCallback(() => {
-		if (group) {
-			const calendarIds = group.calendars.map((c) => c.id).join(",");
+	const handleMerge = () => {
+		if (group && calendarsArray.length > 0) {
+			const calendarIds = calendarsArray.map((c) => c.id).join(",");
 			navigate({
 				to: "/calendars/merge",
 				search: { selected: calendarIds },
 			});
 		}
-	}, [group, navigate]);
+	};
 
-	const handleExport = useCallback(async () => {
-		if (!group || group.calendars.length === 0) {
+	const handleExport = async () => {
+		if (!group || calendarsArray.length === 0) {
 			toast.error("No calendars to export");
 			return;
 		}
 
 		try {
-			// Create a temporary bundle for export
-			const bundle = await trpcClient.share.bundle.create.mutate({
-				groupId: groupId,
-				removeDuplicates: false,
-			});
-
-			// Get the ICS content
-			const data = await trpcClient.share.bundle.getByToken.query({
-				token: bundle.token,
-			});
-
-			// Create blob and download
-			const blob = new Blob([data.icsContent], { type: "text/calendar" });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = `${group.name.replace(/[^a-z0-9]/gi, "_")}.ics`;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
-
-			// Clean up the temporary bundle
-			await trpcClient.share.bundle.delete.mutate({ id: bundle.id });
-
+			await exportGroupAsICS(groupId, group.name);
 			toast.success("Group exported successfully");
 		} catch (_error) {
 			toast.error("Error exporting group");
 		}
-	}, [group, groupId]);
+	};
 
 	if (isLoading) {
 		return (
@@ -208,7 +322,7 @@ function GroupDetailComponent() {
 		);
 	}
 
-	const totalEvents = group.calendars.reduce(
+	const totalEvents = calendarsArray.reduce(
 		(sum, cal) => sum + cal.eventCount,
 		0,
 	);
@@ -243,8 +357,8 @@ function GroupDetailComponent() {
 							<p className="mt-1 text-muted-foreground">{group.description}</p>
 						)}
 						<p className="mt-1 text-muted-foreground text-sm">
-							{group.calendars.length} calendar
-							{group.calendars.length !== 1 ? "s" : ""} • {totalEvents} event
+							{calendarsArray.length} calendar
+							{calendarsArray.length !== 1 ? "s" : ""} • {totalEvents} event
 							{totalEvents !== 1 ? "s" : ""}
 						</p>
 					</div>
@@ -259,7 +373,7 @@ function GroupDetailComponent() {
 							variant="outline"
 							size="sm"
 							onClick={handleShare}
-							disabled={group.calendars.length === 0}
+							disabled={calendarsArray.length === 0}
 						>
 							<Link2 className="mr-2 h-4 w-4" />
 							Share
@@ -268,7 +382,7 @@ function GroupDetailComponent() {
 							variant="outline"
 							size="sm"
 							onClick={handleExport}
-							disabled={group.calendars.length === 0}
+							disabled={calendarsArray.length === 0}
 						>
 							<Download className="mr-2 h-4 w-4" />
 							Export
@@ -277,7 +391,7 @@ function GroupDetailComponent() {
 							variant="outline"
 							size="sm"
 							onClick={handleMerge}
-							disabled={group.calendars.length < 2}
+							disabled={calendarsArray.length < 2}
 						>
 							<GitMerge className="mr-2 h-4 w-4" />
 							Merge
@@ -300,7 +414,7 @@ function GroupDetailComponent() {
 				</div>
 
 				{/* Search and sort */}
-				{group.calendars.length > 0 && (
+				{calendarsArray.length > 0 && (
 					<div className="mb-4">
 						<CalendarSearchSortBar
 							keyword={searchKeyword}
@@ -319,55 +433,11 @@ function GroupDetailComponent() {
 				)}
 
 				{/* Calendars grid */}
-				{group.calendars.length === 0 ? (
-					<Card>
-						<CardHeader>
-							<CardTitle>No calendars in this group</CardTitle>
-							<CardDescription>
-								Add calendars to this group to get started.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<Button onClick={handleEdit} variant="outline">
-								<Plus className="mr-2 h-4 w-4" />
-								Add calendars
-							</Button>
-						</CardContent>
-					</Card>
-				) : filteredCalendars.length === 0 ? (
-					<Card>
-						<CardContent className="py-10 text-center">
-							<p className="text-muted-foreground">
-								No calendars match your search
-							</p>
-						</CardContent>
-					</Card>
-				) : (
-					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-						{filteredCalendars.map((calendar) => (
-							<Card
-								key={calendar.id}
-								className="group relative cursor-pointer overflow-hidden transition-all duration-200 hover:border-primary/30 hover:shadow-lg"
-								onClick={() => navigate({ to: `/calendars/${calendar.id}` })}
-							>
-								{/* Color accent */}
-								<div
-									className="absolute inset-y-0 left-0 w-1 transition-all duration-200 group-hover:w-1.5"
-									style={{ backgroundColor: calendar.color || "#D4A017" }}
-								/>
-
-								<CardHeader className="pb-2 pl-6">
-									<CardTitle className="line-clamp-1 text-card-title">
-										{calendar.name}
-									</CardTitle>
-									<CardDescription>
-										{calendar.eventCount} event
-										{calendar.eventCount !== 1 ? "s" : ""}
-									</CardDescription>
-								</CardHeader>
-							</Card>
-						))}
-					</div>
+				{renderCalendarsGrid(
+					calendarsArray,
+					filteredCalendars,
+					(id) => navigate({ to: `/calendars/${id}` }),
+					handleEdit,
 				)}
 
 				{/* Edit dialog */}
@@ -387,7 +457,7 @@ function GroupDetailComponent() {
 				{/* Share dialog */}
 				{group && (
 					<ShareCalendarsDialog
-						calendarIds={group.calendars.map((c) => c.id)}
+						calendarIds={calendarsArray.map((c) => c.id)}
 						groupId={groupId}
 						open={shareDialogOpen}
 						onOpenChange={setShareDialogOpen}
@@ -411,7 +481,7 @@ function GroupDetailComponent() {
 									deleteMutation.mutate({ id: groupId });
 									setDeleteDialogOpen(false);
 								}}
-								variant="destructive"
+								className={cn(buttonVariants({ variant: "destructive" }))}
 							>
 								Delete
 							</AlertDialogAction>

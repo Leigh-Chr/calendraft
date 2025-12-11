@@ -1,23 +1,69 @@
 /**
- * Simple in-memory rate limiting middleware
- * Limits requests per IP address
+ * Redis-based rate limiting middleware
+ * Supports distributed rate limiting across multiple instances
  */
 
 import type { Context } from "hono";
-import { logSecurityEvent } from "../lib/logger";
+import Redis from "ioredis";
+import { getLogContext, logger, logSecurityEvent } from "../lib/logger";
+import { env as rateLimitEnv } from "./env";
 
+// Redis client singleton
+let redisClient: Redis | null = null;
+
+/**
+ * Initialize Redis client
+ * Falls back to in-memory if Redis is not available
+ */
+function getRedisClient(): Redis | null {
+	if (redisClient) {
+		return redisClient;
+	}
+
+	const redisUrl = rateLimitEnv.REDIS_URL;
+	if (!redisUrl) {
+		return null;
+	}
+
+	try {
+		redisClient = new Redis(redisUrl, {
+			maxRetriesPerRequest: 3,
+			retryStrategy: (times: number) => {
+				const delay = Math.min(times * 50, 2000);
+				return delay;
+			},
+			enableReadyCheck: true,
+			lazyConnect: true,
+		});
+
+		redisClient.on("error", (err: Error) => {
+			logger.error("[Redis] Connection error", err);
+		});
+
+		redisClient.on("connect", () => {
+			logger.info("[Redis] Connected successfully");
+		});
+
+		return redisClient;
+	} catch (error) {
+		logger.error("[Redis] Failed to initialize", error);
+		return null;
+	}
+}
+
+// Fallback in-memory store (only used if Redis is unavailable)
 type RateLimitStore = Map<string, { count: number; resetAt: number }>;
+const fallbackStore: RateLimitStore = new Map();
 
-// Store for rate limiting (in-memory, lost on restart)
-const rateLimitStore: RateLimitStore = new Map();
-
-// Cleanup old entries every 5 minutes
+// Cleanup old entries every 5 minutes (fallback only)
 setInterval(
 	() => {
+		if (redisClient) return; // Only cleanup if using fallback
+
 		const now = Date.now();
-		for (const [key, value] of rateLimitStore.entries()) {
+		for (const [key, value] of fallbackStore.entries()) {
 			if (value.resetAt < now) {
-				rateLimitStore.delete(key);
+				fallbackStore.delete(key);
 			}
 		}
 	},
@@ -47,25 +93,69 @@ function getClientIP(request: Request): string {
 }
 
 /**
- * Check rate limit for an IP
- * @param ip - Client IP address
- * @param maxRequests - Maximum requests allowed
- * @param windowMs - Time window in milliseconds
- * @returns true if within limit, false if exceeded
+ * Check rate limit using Redis
  */
-function checkRateLimit(
-	ip: string,
+async function checkRateLimitRedis(
+	key: string,
+	maxRequests: number,
+	windowMs: number,
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+	const client = getRedisClient();
+	if (!client) {
+		throw new Error("Redis client not available");
+	}
+
+	const now = Date.now();
+	const windowKey = `ratelimit:${key}`;
+
+	try {
+		// Use Redis INCR with expiration
+		const count = await client.incr(windowKey);
+
+		// Set expiration on first request
+		if (count === 1) {
+			await client.pexpire(windowKey, windowMs);
+		}
+
+		// Get TTL to calculate actual reset time
+		const ttl = await client.pttl(windowKey);
+		const actualResetAt = now + (ttl > 0 ? ttl : windowMs);
+
+		if (count > maxRequests) {
+			return {
+				allowed: false,
+				remaining: 0,
+				resetAt: actualResetAt,
+			};
+		}
+
+		return {
+			allowed: true,
+			remaining: Math.max(0, maxRequests - count),
+			resetAt: actualResetAt,
+		};
+	} catch (error) {
+		logger.error("[Redis] Rate limit check failed", error);
+		// Fall through to fallback
+		throw error;
+	}
+}
+
+/**
+ * Check rate limit using fallback in-memory store
+ */
+function checkRateLimitFallback(
+	key: string,
 	maxRequests: number,
 	windowMs: number,
 ): { allowed: boolean; remaining: number; resetAt: number } {
 	const now = Date.now();
-	const key = ip;
-	const record = rateLimitStore.get(key);
+	const record = fallbackStore.get(key);
 
 	if (!record || record.resetAt < now) {
 		// New window or expired, reset
 		const resetAt = now + windowMs;
-		rateLimitStore.set(key, { count: 1, resetAt });
+		fallbackStore.set(key, { count: 1, resetAt });
 		return { allowed: true, remaining: maxRequests - 1, resetAt };
 	}
 
@@ -88,6 +178,82 @@ function checkRateLimit(
 }
 
 /**
+ * Check rate limit (Redis with fallback to in-memory)
+ */
+async function checkRateLimit(
+	key: string,
+	maxRequests: number,
+	windowMs: number,
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+	const client = getRedisClient();
+
+	if (client) {
+		try {
+			// Ensure connection is ready
+			if (client.status !== "ready") {
+				await client.connect();
+			}
+			return await checkRateLimitRedis(key, maxRequests, windowMs);
+		} catch (error) {
+			// Fallback to in-memory if Redis fails
+			logger.warn("[Rate Limit] Redis unavailable, using fallback", error);
+			return checkRateLimitFallback(key, maxRequests, windowMs);
+		}
+	}
+
+	// No Redis configured, use fallback
+	return checkRateLimitFallback(key, maxRequests, windowMs);
+}
+
+/**
+ * Build rate limit error response
+ */
+function buildRateLimitErrorResponse(
+	c: Context,
+	result: { resetAt: number },
+	maxRequests: number,
+	keyPrefix: string,
+	ip: string,
+) {
+	const retryAfter = Math.ceil((result.resetAt - Date.now()) / 1000);
+	const correlationId = c.req.header("x-correlation-id");
+
+	// Log security event with correlation ID
+	logSecurityEvent("rate_limit_exceeded", {
+		ip,
+		path: c.req.path,
+		...(correlationId ? { correlationId } : {}),
+		reason: keyPrefix
+			? `${keyPrefix} rate limit exceeded`
+			: "General rate limit exceeded",
+	});
+
+	return c.json(
+		{
+			error: "Too Many Requests",
+			message: `Rate limit exceeded. Please try again in ${retryAfter} seconds.`,
+			retryAfter,
+		},
+		429,
+		{
+			"Retry-After": String(retryAfter),
+			"X-RateLimit-Limit": String(maxRequests),
+			"X-RateLimit-Remaining": "0",
+			"X-RateLimit-Reset": String(result.resetAt),
+		},
+	);
+}
+
+/**
+ * Handle rate limit errors
+ */
+function handleRateLimitError(c: Context, error: unknown): void {
+	const correlationId = c.req.header("x-correlation-id");
+	const context = correlationId ? getLogContext(correlationId) : undefined;
+	logger.error("[Rate Limit] Error", error, context);
+}
+
+/**
  * Rate limit middleware for Hono
  * @param maxRequests - Maximum requests allowed per window
  * @param windowMs - Time window in milliseconds (default: 60000 = 1 minute)
@@ -107,42 +273,31 @@ export function rateLimit(
 		}
 
 		const key = keyPrefix ? `${keyPrefix}:${ip}` : ip;
-		const result = checkRateLimit(key, maxRequests, windowMs);
 
-		if (!result.allowed) {
-			const retryAfter = Math.ceil((result.resetAt - Date.now()) / 1000);
+		try {
+			const result = await checkRateLimit(key, maxRequests, windowMs);
 
-			// Log security event
-			logSecurityEvent("rate_limit_exceeded", {
-				ip,
-				path: c.req.path,
-				reason: keyPrefix
-					? `${keyPrefix} rate limit exceeded`
-					: "General rate limit exceeded",
-			});
+			if (!result.allowed) {
+				return buildRateLimitErrorResponse(
+					c,
+					result,
+					maxRequests,
+					keyPrefix,
+					ip,
+				);
+			}
 
-			return c.json(
-				{
-					error: "Too Many Requests",
-					message: `Rate limit exceeded. Please try again in ${retryAfter} seconds.`,
-					retryAfter,
-				},
-				429,
-				{
-					"Retry-After": String(retryAfter),
-					"X-RateLimit-Limit": String(maxRequests),
-					"X-RateLimit-Remaining": "0",
-					"X-RateLimit-Reset": String(result.resetAt),
-				},
-			);
+			// Add rate limit headers
+			c.header("X-RateLimit-Limit", String(maxRequests));
+			c.header("X-RateLimit-Remaining", String(result.remaining));
+			c.header("X-RateLimit-Reset", String(result.resetAt));
+
+			return next();
+		} catch (error) {
+			// If rate limiting fails, allow the request but log the error
+			handleRateLimitError(c, error);
+			return next();
 		}
-
-		// Add rate limit headers
-		c.header("X-RateLimit-Limit", String(maxRequests));
-		c.header("X-RateLimit-Remaining", String(result.remaining));
-		c.header("X-RateLimit-Reset", String(result.resetAt));
-
-		return next();
 	};
 }
 
@@ -160,4 +315,14 @@ export function authRateLimit() {
  */
 export function signupRateLimit() {
 	return rateLimit(5, 60000, "signup");
+}
+
+/**
+ * Close Redis connection (for graceful shutdown)
+ */
+export async function closeRedisConnection(): Promise<void> {
+	if (redisClient) {
+		await redisClient.quit();
+		redisClient = null;
+	}
 }

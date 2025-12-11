@@ -50,10 +50,10 @@ export function AccountPrompt({
 		usage &&
 		(usage.calendarCount >= usage.maxCalendars * 0.8 ||
 			Object.values(usage.eventCounts).some(
-				(count) => count >= usage.maxEventsPerCalendar * 0.8,
+				(count: number) => count >= usage.maxEventsPerCalendar * 0.8,
 			));
 
-	const handleSignup = () => {
+	const handleSignup = (): void => {
 		navigate({
 			to: "/login",
 			search: { mode: "signup", redirect: location.pathname },

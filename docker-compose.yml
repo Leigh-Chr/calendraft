@@ -33,6 +33,27 @@ services:
       - calendraft-network
 
   # -----------------------------------
+  # Redis (Rate Limiting)
+  # -----------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: calendraft-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - calendraft-network
+
+  # -----------------------------------
   # Backend API (Hono + tRPC)
   # -----------------------------------
   server:
@@ -44,6 +65,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -52,6 +75,7 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-change-me-in-production-min-32-chars}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
       SENTRY_DSN: ${SENTRY_DSN:-}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
     ports:
       - "${SERVER_PORT:-3000}:3000"
     healthcheck:
@@ -95,6 +119,8 @@ services:
 # -----------------------------------
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local
 
 # -----------------------------------

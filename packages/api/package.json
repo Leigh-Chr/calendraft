@@ -14,11 +14,15 @@
 	"scripts": {
 		"build": "tsdown",
 		"typecheck": "tsc --noEmit",
-		"clean": "rm -rf dist *.tsbuildinfo"
+		"clean": "rm -rf dist *.tsbuildinfo",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"devDependencies": {
 		"tsdown": "catalog:",
-		"@calendraft/config": "workspace:*"
+		"@calendraft/config": "workspace:*",
+		"vitest": "^4.0.15",
+		"@vitest/coverage-v8": "^4.0.15"
 	},
 	"peerDependencies": {
 		"typescript": "^5"

@@ -9,8 +9,8 @@ import z from "zod";
 import { authOrAnonProcedure, router } from "../../index";
 import {
 	buildOwnershipFilter,
-	checkAnonymousCalendarLimit,
-	getAnonymousUsage,
+	checkCalendarLimit,
+	getUserUsage,
 } from "../../middleware";
 
 export const calendarCoreRouter = router({
@@ -19,15 +19,30 @@ export const calendarCoreRouter = router({
 			z
 				.object({
 					filterGroups: z.array(z.string()).optional(),
+					limit: z.number().int().min(1).max(100).optional().default(50),
+					cursor: z.string().optional(),
 				})
 				.optional(),
 		)
 		.query(async ({ ctx, input }) => {
-			// Fetch calendars
+			const limit = input?.limit ?? 50;
+			const cursor = input?.cursor;
+
+			// Build where clause with cursor support
+			const where: {
+				OR: Array<{ userId: string }>;
+				id?: { gt: string };
+			} = {
+				...buildOwnershipFilter(ctx),
+			};
+
+			if (cursor) {
+				where.id = { gt: cursor };
+			}
+
+			// Fetch one extra to determine if there's a next page
 			const calendarsRaw = await prisma.calendar.findMany({
-				where: {
-					...buildOwnershipFilter(ctx),
-				},
+				where,
 				include: {
 					_count: {
 						select: { events: true },
@@ -36,6 +51,7 @@ export const calendarCoreRouter = router({
 				orderBy: {
 					updatedAt: "desc",
 				},
+				take: limit + 1,
 			});
 
 			// Filter by groups if specified
@@ -57,6 +73,13 @@ export const calendarCoreRouter = router({
 				calendars = calendars.filter((cal) => calendarIdsInGroups.has(cal.id));
 			}
 
+			// Determine next cursor
+			let nextCursor: string | undefined;
+			if (calendars.length > limit) {
+				const nextItem = calendars.pop();
+				nextCursor = nextItem?.id;
+			}
+
 			// Update updatedAt for all calendars on list access (for anonymous users only)
 			// This prevents cleanup of calendars that are still being accessed
 			// Only do this for anonymous users to avoid unnecessary DB writes for authenticated users
@@ -71,40 +94,28 @@ export const calendarCoreRouter = router({
 				});
 			}
 
-			return calendars.map((cal) => ({
-				id: cal.id,
-				name: cal.name,
-				color: cal.color,
-				eventCount: cal._count.events,
-				sourceUrl: cal.sourceUrl,
-				lastSyncedAt: cal.lastSyncedAt,
-				createdAt: cal.createdAt,
-				updatedAt: cal.updatedAt,
-			}));
+			return {
+				calendars: calendars.map((cal) => ({
+					id: cal.id,
+					name: cal.name,
+					color: cal.color,
+					eventCount: cal._count.events,
+					sourceUrl: cal.sourceUrl,
+					lastSyncedAt: cal.lastSyncedAt,
+					createdAt: cal.createdAt,
+					updatedAt: cal.updatedAt,
+				})),
+				nextCursor,
+			};
 		}),
 
 	getById: authOrAnonProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
-			// First check if calendar exists (without ownership filter)
-			const calendarExists = await prisma.calendar.findUnique({
+			// Single query to check existence, ownership, and fetch data
+			// Use findUnique first to check existence, then verify ownership
+			const calendar = await prisma.calendar.findUnique({
 				where: { id: input.id },
-				select: { id: true, userId: true },
-			});
-
-			if (!calendarExists) {
-				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Calendar not found",
-				});
-			}
-
-			// Check if user has access to this calendar
-			const calendar = await prisma.calendar.findFirst({
-				where: {
-					id: input.id,
-					...buildOwnershipFilter(ctx),
-				},
 				include: {
 					events: {
 						orderBy: {
@@ -115,7 +126,23 @@ export const calendarCoreRouter = router({
 			});
 
 			if (!calendar) {
-				// Calendar exists but user doesn't have access
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Calendar not found",
+				});
+			}
+
+			// Verify ownership in a single check
+			const ownershipFilter = buildOwnershipFilter(ctx);
+			const hasAccess =
+				(ownershipFilter.OR?.some(
+					(condition) =>
+						"userId" in condition && condition.userId === calendar.userId,
+				) ??
+					false) ||
+				calendar.userId === null;
+
+			if (!hasAccess) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
 					message: "Access denied to this calendar",
@@ -124,10 +151,16 @@ export const calendarCoreRouter = router({
 
 			// Update updatedAt on access to prevent cleanup of actively used calendars
 			// This ensures that calendars that are viewed (even if not modified) are not considered orphaned
-			await prisma.calendar.update({
-				where: { id: input.id },
-				data: { updatedAt: new Date() },
-			});
+			// Use updateMany to avoid another query if not needed
+			if (ctx.anonymousId) {
+				await prisma.calendar.updateMany({
+					where: {
+						id: input.id,
+						userId: ctx.anonymousId,
+					},
+					data: { updatedAt: new Date() },
+				});
+			}
 
 			return calendar;
 		}),
@@ -149,7 +182,7 @@ export const calendarCoreRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			await checkAnonymousCalendarLimit(ctx);
+			await checkCalendarLimit(ctx);
 
 			const calendar = await prisma.calendar.create({
 				data: {
@@ -181,29 +214,30 @@ export const calendarCoreRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			// First check if calendar exists (without ownership filter)
-			const calendarExists = await prisma.calendar.findUnique({
+			// Single query to check existence and ownership
+			const calendar = await prisma.calendar.findUnique({
 				where: { id: input.id },
 				select: { id: true, userId: true },
 			});
 
-			if (!calendarExists) {
+			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
 					message: "Calendar not found",
 				});
 			}
 
-			// Check if user has access to this calendar
-			const calendar = await prisma.calendar.findFirst({
-				where: {
-					id: input.id,
-					...buildOwnershipFilter(ctx),
-				},
-			});
+			// Verify ownership
+			const ownershipFilter = buildOwnershipFilter(ctx);
+			const hasAccess =
+				(ownershipFilter.OR?.some(
+					(condition) =>
+						"userId" in condition && condition.userId === calendar.userId,
+				) ??
+					false) ||
+				calendar.userId === null;
 
-			if (!calendar) {
-				// Calendar exists but user doesn't have access
+			if (!hasAccess) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
 					message: "Access denied to this calendar",
@@ -227,29 +261,30 @@ export const calendarCoreRouter = router({
 	delete: authOrAnonProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			// First check if calendar exists (without ownership filter)
-			const calendarExists = await prisma.calendar.findUnique({
+			// Single query to check existence and ownership
+			const calendar = await prisma.calendar.findUnique({
 				where: { id: input.id },
 				select: { id: true, userId: true },
 			});
 
-			if (!calendarExists) {
+			if (!calendar) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
 					message: "Calendar not found",
 				});
 			}
 
-			// Check if user has access to this calendar
-			const calendar = await prisma.calendar.findFirst({
-				where: {
-					id: input.id,
-					...buildOwnershipFilter(ctx),
-				},
-			});
+			// Verify ownership
+			const ownershipFilter = buildOwnershipFilter(ctx);
+			const hasAccess =
+				(ownershipFilter.OR?.some(
+					(condition) =>
+						"userId" in condition && condition.userId === calendar.userId,
+				) ??
+					false) ||
+				calendar.userId === null;
 
-			if (!calendar) {
-				// Calendar exists but user doesn't have access
+			if (!hasAccess) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
 					message: "Access denied to this calendar",
@@ -307,7 +342,7 @@ export const calendarCoreRouter = router({
 	 * Returns limits and current usage (useful for anonymous users)
 	 */
 	getUsage: authOrAnonProcedure.query(async ({ ctx }) => {
-		const usage = await getAnonymousUsage(ctx);
+		const usage = await getUserUsage(ctx);
 		return usage;
 	}),
 });

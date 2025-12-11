@@ -8,7 +8,7 @@ import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { authOrAnonProcedure, router } from "../../index";
 import { parseIcsFile } from "../../lib/ics-parser";
-import { buildOwnershipFilter } from "../../middleware";
+import { verifyCalendarAccess } from "../../middleware";
 import { createEventFromParsed, validateFileSize } from "./helpers";
 
 export const calendarImportExportRouter = router({
@@ -97,44 +97,42 @@ export const calendarImportExportRouter = router({
 				};
 			}
 
-			// First check if calendar exists (without ownership filter)
-			const calendarExists = await prisma.calendar.findUnique({
+			// Verify calendar access (optimized single query)
+			await verifyCalendarAccess(input.id, ctx);
+
+			// Fetch calendar with events (access already verified)
+			const calendar = await prisma.calendar.findUnique({
 				where: { id: input.id },
-				select: { id: true, userId: true },
-			});
-
-			if (!calendarExists) {
-				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Calendar not found",
-				});
-			}
-
-			// Check if user has access to this calendar
-			const calendar = await prisma.calendar.findFirst({
-				where: {
-					id: input.id,
-					...buildOwnershipFilter(ctx),
-				},
 				include: {
-					events: {
-						where: Object.keys(eventWhere).length > 0 ? eventWhere : undefined,
-						include: {
-							attendees: true,
-							alarms: true,
-							categories: true,
-							resources: true,
-							recurrenceDates: true,
-						},
-					},
+					events:
+						Object.keys(eventWhere).length > 0
+							? {
+									where: eventWhere,
+									include: {
+										attendees: true,
+										alarms: true,
+										categories: true,
+										resources: true,
+										recurrenceDates: true,
+									},
+								}
+							: {
+									include: {
+										attendees: true,
+										alarms: true,
+										categories: true,
+										resources: true,
+										recurrenceDates: true,
+									},
+								},
 				},
 			});
 
 			if (!calendar) {
-				// Calendar exists but user doesn't have access
+				// Should not happen after verifyCalendarAccess, but TypeScript safety
 				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Access denied to this calendar",
+					code: "NOT_FOUND",
+					message: "Calendar not found",
 				});
 			}
 
@@ -146,29 +144,33 @@ export const calendarImportExportRouter = router({
 				// Convert normalized categories to comma-separated string
 				const categoriesStr =
 					event.categories.length > 0
-						? event.categories.map((c) => c.category).join(",")
+						? event.categories
+								.map((c: { category: string }) => c.category)
+								.join(",")
 						: null;
 
 				// Convert normalized resources to comma-separated string
 				const resourcesStr =
 					event.resources.length > 0
-						? event.resources.map((r) => r.resource).join(",")
+						? event.resources
+								.map((r: { resource: string }) => r.resource)
+								.join(",")
 						: null;
 
 				// Convert normalized recurrence dates to JSON arrays
 				const rdates = event.recurrenceDates
-					.filter((rd) => rd.type === "RDATE")
-					.map((rd) => rd.date);
+					.filter((rd: { type: string }) => rd.type === "RDATE")
+					.map((rd: { date: Date }) => rd.date);
 				const exdates = event.recurrenceDates
-					.filter((rd) => rd.type === "EXDATE")
-					.map((rd) => rd.date);
+					.filter((rd: { type: string }) => rd.type === "EXDATE")
+					.map((rd: { date: Date }) => rd.date);
 				const rdateJson =
 					rdates.length > 0
-						? JSON.stringify(rdates.map((d) => d.toISOString()))
+						? JSON.stringify(rdates.map((d: Date) => d.toISOString()))
 						: null;
 				const exdateJson =
 					exdates.length > 0
-						? JSON.stringify(exdates.map((d) => d.toISOString()))
+						? JSON.stringify(exdates.map((d: Date) => d.toISOString()))
 						: null;
 
 				return {
@@ -202,21 +204,38 @@ export const calendarImportExportRouter = router({
 					recurrenceId: event.recurrenceId,
 					relatedTo: event.relatedTo,
 					color: event.color,
-					attendees: event.attendees?.map((a) => ({
-						name: a.name,
-						email: a.email,
-						role: a.role,
-						status: a.status,
-						rsvp: a.rsvp,
-					})),
-					alarms: event.alarms?.map((a) => ({
-						trigger: a.trigger,
-						action: a.action,
-						summary: a.summary,
-						description: a.description,
-						duration: a.duration,
-						repeat: a.repeat,
-					})),
+					attendees: event.attendees?.map(
+						(a: {
+							name: string | null;
+							email: string;
+							role: string | null;
+							status: string | null;
+							rsvp: boolean;
+						}) => ({
+							name: a.name,
+							email: a.email,
+							role: a.role,
+							status: a.status,
+							rsvp: a.rsvp,
+						}),
+					),
+					alarms: event.alarms?.map(
+						(a: {
+							trigger: string;
+							action: string;
+							summary: string | null;
+							description: string | null;
+							duration: string | null;
+							repeat: number | null;
+						}) => ({
+							trigger: a.trigger,
+							action: a.action,
+							summary: a.summary,
+							description: a.description,
+							duration: a.duration,
+							repeat: a.repeat,
+						}),
+					),
 					createdAt: event.createdAt,
 					updatedAt: event.updatedAt,
 				};

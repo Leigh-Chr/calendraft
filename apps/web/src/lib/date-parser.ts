@@ -3,6 +3,8 @@
  * Used for RDATE and EXDATE in ICS (RFC 5545) format
  */
 
+import { logger } from "./logger";
+
 /**
  * Parse a JSON string containing an array of date strings into Date objects
  * @param jsonString - JSON string containing an array of ISO date strings
@@ -25,15 +27,13 @@ export function parseDateArray(
 		const dates = parsed.map((d: string) => new Date(d));
 		const validDates = dates.filter((d: Date) => !Number.isNaN(d.getTime()));
 
-		if (validDates.length !== dates.length && import.meta.env.DEV) {
-			console.warn(`Some dates in ${fieldName} were invalid`);
+		if (validDates.length !== dates.length) {
+			logger.warn(`Some dates in ${fieldName} were invalid`);
 		}
 
 		return validDates;
 	} catch (error) {
-		if (import.meta.env.DEV) {
-			console.error(`Failed to parse ${fieldName}:`, error);
-		}
+		logger.error(`Failed to parse ${fieldName}`, error);
 		return [];
 	}
 }

@@ -96,7 +96,8 @@ function processNonStringFields(
 	setValue(data, "geoLongitude", input.geoLongitude);
 
 	if (input.sequence !== undefined) {
-		data.sequence = input.sequence ?? 0;
+		// biome-ignore lint/complexity/useLiteralKeys: Dynamic key access for Prisma data object
+		data["sequence"] = input.sequence ?? 0;
 	}
 }
 
@@ -128,8 +129,8 @@ type AlarmAction = "DISPLAY" | "EMAIL" | "AUDIO";
 type AttendeeCreateData = {
 	name: string | null;
 	email: string;
-	role: AttendeeRole | null;
-	status: AttendeeStatus | null;
+	role: AttendeeRole | null | undefined;
+	status: AttendeeStatus | null | undefined;
 	rsvp: boolean;
 };
 

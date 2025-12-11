@@ -10,7 +10,7 @@ import {
 	Plus,
 	Trash2,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/utils/trpc";
 import {
@@ -24,7 +24,7 @@ import {
 	AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -78,12 +78,13 @@ export function ShareCalendarsDialog({
 	const [bundleIdToDelete, setBundleIdToDelete] = useState<string | null>(null);
 
 	// Get calendars info for display
-	const { data: calendars } = useQuery({
+	const { data: calendarsData } = useQuery({
 		...trpc.calendar.list.queryOptions(),
 		enabled: open,
 	});
 
-	const selectedCalendars = calendars?.filter((cal) =>
+	const calendars = calendarsData?.calendars || [];
+	const selectedCalendars = calendars.filter((cal) =>
 		calendarIds.includes(cal.id),
 	);
 
@@ -147,29 +148,27 @@ export function ShareCalendarsDialog({
 	);
 
 	// Build share URL
-	const getShareUrl = useCallback((token: string) => {
+	// React Compiler will automatically memoize these callbacks
+	const getShareUrl = (token: string): string => {
 		const baseUrl = window.location.origin;
 		return `${baseUrl}/share/${token}`;
-	}, []);
+	};
 
 	// Copy to clipboard
-	const handleCopy = useCallback(
-		async (token: string, bundleId: string) => {
-			const url = getShareUrl(token);
-			try {
-				await navigator.clipboard.writeText(url);
-				setCopiedId(bundleId);
-				setTimeout(() => setCopiedId(null), 2000);
-				toast.success("Link copied!");
-			} catch {
-				toast.error("Unable to copy link");
-			}
-		},
-		[getShareUrl],
-	);
+	const handleCopy = async (token: string, bundleId: string): Promise<void> => {
+		const url = getShareUrl(token);
+		try {
+			await navigator.clipboard.writeText(url);
+			setCopiedId(bundleId);
+			setTimeout(() => setCopiedId(null), 2000);
+			toast.success("Link copied!");
+		} catch {
+			toast.error("Unable to copy link");
+		}
+	};
 
 	// Create new bundle
-	const handleCreate = useCallback(() => {
+	const handleCreate = (): void => {
 		if (calendarIds.length === 0 && !groupId) {
 			toast.error("Please select at least one calendar");
 			return;
@@ -180,29 +179,26 @@ export function ShareCalendarsDialog({
 			name: newBundleName.trim() || undefined,
 			removeDuplicates,
 		});
-	}, [calendarIds, createMutation, newBundleName, removeDuplicates, groupId]);
+	};
 
 	// Toggle bundle active state
-	const handleToggleActive = useCallback(
-		(bundleId: string, isActive: boolean) => {
-			updateMutation.mutate({ id: bundleId, isActive });
-		},
-		[updateMutation],
-	);
+	const handleToggleActive = (bundleId: string, isActive: boolean): void => {
+		updateMutation.mutate({ id: bundleId, isActive });
+	};
 
 	// Delete bundle
-	const handleDelete = useCallback((bundleId: string) => {
+	const handleDelete = (bundleId: string): void => {
 		setBundleIdToDelete(bundleId);
 		setDeleteDialogOpen(true);
-	}, []);
+	};
 
-	const confirmDelete = useCallback(() => {
+	const confirmDelete = (): void => {
 		if (bundleIdToDelete) {
 			deleteMutation.mutate({ id: bundleIdToDelete });
 			setDeleteDialogOpen(false);
 			setBundleIdToDelete(null);
 		}
-	}, [bundleIdToDelete, deleteMutation]);
+	};
 
 	// Generate default name
 	const defaultName = `${calendarIds.length} calendars - ${format(new Date(), "MMM d, yyyy", { locale: enUS })}`;
@@ -343,7 +339,7 @@ export function ShareCalendarsDialog({
 						<AlertDialogCancel>Cancel</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={confirmDelete}
-							variant="destructive"
+							className={buttonVariants({ variant: "destructive" })}
 							disabled={deleteMutation.isPending}
 						>
 							{deleteMutation.isPending ? "Deleting..." : "Delete"}

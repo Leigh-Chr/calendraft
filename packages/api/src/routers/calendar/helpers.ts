@@ -20,10 +20,13 @@ import type { ParsedEvent } from "../../lib/ics-parser";
 
 /**
  * Validate ICS file size
+ * Uses Buffer.byteLength for accurate byte counting (more reliable than Blob in server environments)
  */
 export function validateFileSize(fileContent: string) {
 	const maxSizeBytes = 5 * 1024 * 1024; // 5MB
-	const fileSizeBytes = new Blob([fileContent]).size;
+	// Use Buffer.byteLength for accurate UTF-8 byte counting
+	// This is more reliable than Blob.size in server environments
+	const fileSizeBytes = Buffer.byteLength(fileContent, "utf8");
 	if (fileSizeBytes > maxSizeBytes) {
 		throw new TRPCError({
 			code: "BAD_REQUEST",

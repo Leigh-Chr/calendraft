@@ -5,7 +5,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckSquare, Loader2, Square, Trash2, X } from "lucide-react";
 import { motion } from "motion/react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
 	AlertDialog,
@@ -17,7 +17,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { QUERY_KEYS } from "@/lib/query-keys";
 import { trpc } from "@/utils/trpc";
 import { MoveEventDialog } from "./move-event-dialog";
@@ -60,10 +60,11 @@ export function BulkActionsBar({
 		}),
 	);
 
-	const handleDelete = useCallback(() => {
+	// React Compiler will automatically memoize this callback
+	const handleDelete = () => {
 		bulkDeleteMutation.mutate({ eventIds: Array.from(selectedIds) });
 		setDeleteDialogOpen(false);
-	}, [bulkDeleteMutation, selectedIds]);
+	};
 
 	const isAllSelected = selectedCount === totalCount;
 	const isPending = bulkDeleteMutation.isPending;
@@ -164,7 +165,10 @@ export function BulkActionsBar({
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction onClick={handleDelete} variant="destructive">
+						<AlertDialogAction
+							onClick={handleDelete}
+							className={buttonVariants({ variant: "destructive" })}
+						>
 							Delete
 						</AlertDialogAction>
 					</AlertDialogFooter>

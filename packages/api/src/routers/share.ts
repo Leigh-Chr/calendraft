@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { authOrAnonProcedure, publicProcedure, router } from "../index";
 import { deduplicateEvents } from "../lib/duplicate-detection";
+import { logger } from "../lib/logger";
 import { buildOwnershipFilter } from "../middleware";
 
 /**
@@ -12,6 +13,96 @@ import { buildOwnershipFilter } from "../middleware";
  */
 function generateShareToken(): string {
 	return randomBytes(32).toString("base64url");
+}
+
+/**
+ * Get calendar IDs for bundle creation
+ */
+async function getCalendarIdsForBundle(
+	groupId: string | undefined,
+	calendarIds: string[] | undefined,
+	ctx: Parameters<typeof buildOwnershipFilter>[0],
+): Promise<string[]> {
+	if (groupId) {
+		const group = await prisma.calendarGroup.findFirst({
+			where: {
+				id: groupId,
+				...buildOwnershipFilter(ctx),
+			},
+			include: {
+				calendars: {
+					orderBy: {
+						order: "asc",
+					},
+				},
+			},
+		});
+
+		if (!group) {
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Group not found",
+			});
+		}
+
+		const ids = group.calendars.map((c) => c.calendarId);
+
+		if (ids.length === 0) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "Group is empty. Add calendars to the group first.",
+			});
+		}
+
+		if (ids.length > 15) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message:
+					"Group contains too many calendars. Maximum 15 calendars per bundle.",
+			});
+		}
+
+		return ids;
+	}
+
+	if (!calendarIds || calendarIds.length === 0) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Either groupId or calendarIds must be provided",
+		});
+	}
+
+	return calendarIds;
+}
+
+/**
+ * Check bundle limit for user
+ */
+async function checkBundleLimit(
+	ctx: Parameters<typeof buildOwnershipFilter>[0],
+): Promise<void> {
+	const MAX_BUNDLES_PER_USER = 20;
+	const userCalendarIds = await prisma.calendar.findMany({
+		where: buildOwnershipFilter(ctx),
+		select: { id: true },
+	});
+
+	const actualBundleCount = await prisma.calendarShareBundle.count({
+		where: {
+			calendars: {
+				some: {
+					calendarId: { in: userCalendarIds.map((c) => c.id) },
+				},
+			},
+		},
+	});
+
+	if (actualBundleCount >= MAX_BUNDLES_PER_USER) {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: `Limit reached: you can only create ${MAX_BUNDLES_PER_USER} share bundles. Delete an existing bundle to create a new one.`,
+		});
+	}
 }
 
 export const shareRouter = router({
@@ -355,7 +446,10 @@ export const shareRouter = router({
 						lastAccessedAt: new Date(),
 					},
 				})
-				.catch(console.error);
+				.catch((error) => {
+					// Log error but don't fail the request (non-critical operation)
+					logger.error("[Share Link] Failed to update access stats", error);
+				});
 
 			// Import the generator
 			const { generateIcs } = await import("../lib/ics-generator");
@@ -634,57 +728,12 @@ export const shareRouter = router({
 					),
 			)
 			.mutation(async ({ ctx, input }) => {
-				let calendarIds: string[];
-
-				// If groupId is provided, get calendars from the group
-				if (input.groupId) {
-					const group = await prisma.calendarGroup.findFirst({
-						where: {
-							id: input.groupId,
-							...buildOwnershipFilter(ctx),
-						},
-						include: {
-							calendars: {
-								orderBy: {
-									order: "asc",
-								},
-							},
-						},
-					});
-
-					if (!group) {
-						throw new TRPCError({
-							code: "NOT_FOUND",
-							message: "Group not found",
-						});
-					}
-
-					calendarIds = group.calendars.map((c) => c.calendarId);
-
-					if (calendarIds.length === 0) {
-						throw new TRPCError({
-							code: "BAD_REQUEST",
-							message: "Group is empty. Add calendars to the group first.",
-						});
-					}
-
-					if (calendarIds.length > 15) {
-						throw new TRPCError({
-							code: "FORBIDDEN",
-							message:
-								"Group contains too many calendars. Maximum 15 calendars per bundle.",
-						});
-					}
-				} else {
-					// Use provided calendarIds
-					if (!input.calendarIds || input.calendarIds.length === 0) {
-						throw new TRPCError({
-							code: "BAD_REQUEST",
-							message: "Either groupId or calendarIds must be provided",
-						});
-					}
-					calendarIds = input.calendarIds;
-				}
+				// Get calendar IDs from group or input
+				const calendarIds = await getCalendarIdsForBundle(
+					input.groupId,
+					input.calendarIds,
+					ctx,
+				);
 
 				// Verify the user owns all calendars
 				const calendars = await prisma.calendar.findMany({
@@ -701,33 +750,8 @@ export const shareRouter = router({
 					});
 				}
 
-				// Check bundle limit per user (20 bundles)
-				const MAX_BUNDLES_PER_USER = 20;
-				// Note: bundleCount check removed as it was using wrong variable
-				// We'll use actualBundleCount below which is more accurate
-
-				// More accurate check: count bundles owned by user's calendars
-				const userCalendarIds = await prisma.calendar.findMany({
-					where: buildOwnershipFilter(ctx),
-					select: { id: true },
-				});
-
-				const actualBundleCount = await prisma.calendarShareBundle.count({
-					where: {
-						calendars: {
-							some: {
-								calendarId: { in: userCalendarIds.map((c) => c.id) },
-							},
-						},
-					},
-				});
-
-				if (actualBundleCount >= MAX_BUNDLES_PER_USER) {
-					throw new TRPCError({
-						code: "FORBIDDEN",
-						message: `Limit reached: you can only create ${MAX_BUNDLES_PER_USER} share bundles. Delete an existing bundle to create a new one.`,
-					});
-				}
+				// Check bundle limit per user
+				await checkBundleLimit(ctx);
 
 				// Generate unique token
 				const token = generateShareToken();
@@ -1039,7 +1063,10 @@ export const shareRouter = router({
 							lastAccessedAt: new Date(),
 						},
 					})
-					.catch(console.error);
+					.catch((error) => {
+						// Log error but don't fail the request (non-critical operation)
+						logger.error("[Share Bundle] Failed to update access stats", error);
+					});
 
 				// Import the generator
 				const { generateIcs } = await import("../lib/ics-generator");
@@ -1143,9 +1170,9 @@ export const shareRouter = router({
 				// Validate file size (estimate: ~1.5KB per event)
 				const estimatedSize = allEvents.length * 1.5 * 1024;
 				if (estimatedSize > 4 * 1024 * 1024) {
-					// Warn but continue
-					console.warn(
-						`Large bundle detected: ${allEvents.length} events, estimated ${(estimatedSize / 1024 / 1024).toFixed(2)}MB`,
+					// Warn but continue - log for monitoring large bundle requests
+					logger.warn(
+						`[Share Bundle] Large bundle detected: ${allEvents.length} events, estimated ${(estimatedSize / 1024 / 1024).toFixed(2)}MB`,
 					);
 				}
 

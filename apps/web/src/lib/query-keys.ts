@@ -37,6 +37,20 @@ export const QUERY_KEYS = {
 		session: [["auth", "session"]] as const,
 		privateData: [["privateData"]] as const,
 	},
+
+	// Calendar group queries
+	calendarGroup: {
+		all: [["calendar", "group"]] as const,
+		byId: (id: string) => [["calendar", "group", "getById"], { id }] as const,
+		byCalendarId: (calendarId: string) =>
+			[["calendar", "group", "getByCalendarId"], { calendarId }] as const,
+	},
+
+	// Share bundle queries
+	shareBundle: {
+		all: [["share", "bundle", "list"]] as const,
+		byId: (id: string) => [["share", "bundle", "getById"], { id }] as const,
+	},
 } as const;
 
 /**

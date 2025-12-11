@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 export function PWAUpdatePrompt() {
 	const [registration, setRegistration] =
@@ -51,18 +52,18 @@ export function PWAUpdatePrompt() {
 						});
 					},
 					onRegisterError(error) {
-						console.error("SW registration error:", error);
+						logger.error("SW registration error", error);
 					},
 				});
 			} catch (error) {
-				console.error("Failed to register service worker:", error);
+				logger.error("Failed to register service worker", error);
 			}
 		};
 
 		registerSW();
 
 		// Listen for controllerchange to reload when new SW takes over
-		const handleControllerChange = () => {
+		const handleControllerChange = (): void => {
 			window.location.reload();
 		};
 
@@ -87,7 +88,7 @@ export function PWAUpdatePrompt() {
 	// Listen for waiting service worker
 	useEffect(() => {
 		if (registration) {
-			const handleStateChange = () => {
+			const handleStateChange = (): void => {
 				if (registration.waiting) {
 					setWaitingWorker(registration.waiting);
 				}

@@ -294,7 +294,7 @@ export function useCommandPalette() {
 	const [open, setOpen] = useState(false);
 
 	useEffect(() => {
-		const down = (e: KeyboardEvent) => {
+		const down = (e: KeyboardEvent): void => {
 			// Cmd+K or Ctrl+K
 			if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
 				e.preventDefault();

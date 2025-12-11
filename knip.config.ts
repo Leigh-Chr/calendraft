@@ -14,6 +14,10 @@ const config: KnipConfig = {
 			entry: ["src/index.ts"],
 			project: ["src/**/*.{ts,tsx}", "!**/*.test.{ts,tsx}"],
 		},
+		"packages/config": {
+			entry: [],
+			project: [],
+		},
 	},
 	ignore: [
 		"**/routeTree.gen.ts",
@@ -43,14 +47,14 @@ const config: KnipConfig = {
 		"@calendraft/config",
 		"postcss",
 		// CSS-imported dependencies (not detected by knip)
-		"@fontsource-variable/geist",
-		"@fontsource-variable/geist-mono",
 		"tw-animate-css",
 		"tailwindcss",
 		// Command palette planned feature
 		"cmdk",
 		// Peer dependencies also in devDependencies for testing
 		"@tanstack/react-query",
+		// Used in seed files (not detected by knip)
+		"@noble/hashes",
 	],
 };
 

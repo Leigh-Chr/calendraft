@@ -57,6 +57,7 @@ model Calendar {
   events    Event[]
 
   @@index([userId]) // Fast lookups for calendars by user
+  @@index([userId, updatedAt]) // Composite index for list queries with sorting
   @@map("calendar")
 }
 
@@ -115,8 +116,10 @@ model Event {
   // Indexes for performance and constraints
   @@unique([calendarId, uid]) // RFC 5545: UID must be unique within a calendar
   @@index([calendarId]) // Fast lookups for events in a calendar
+  @@index([calendarId, startDate]) // Composite index for list queries with date filtering
   @@index([startDate]) // Fast sorting/filtering by date
   @@index([endDate]) // Fast range queries
+  @@index([calendarId, endDate, startDate]) // Composite index for duration sorting
   @@index([uid]) // Fast lookups by UID for validation
   @@index([status]) // Fast filtering by status
   @@map("event")

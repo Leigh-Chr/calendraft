@@ -11,7 +11,7 @@ import {
 	deduplicateEvents,
 	getDuplicateIds,
 } from "../../lib/duplicate-detection";
-import { buildOwnershipFilter } from "../../middleware";
+import { buildOwnershipFilter, verifyCalendarAccess } from "../../middleware";
 
 export const calendarMergeDuplicatesRouter = router({
 	merge: authOrAnonProcedure
@@ -87,25 +87,12 @@ export const calendarMergeDuplicatesRouter = router({
 	cleanDuplicates: authOrAnonProcedure
 		.input(z.object({ calendarId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			// First check if calendar exists (without ownership filter)
-			const calendarExists = await prisma.calendar.findUnique({
+			// Verify calendar access (optimized single query)
+			await verifyCalendarAccess(input.calendarId, ctx);
+
+			// Fetch calendar with events (access already verified)
+			const calendar = await prisma.calendar.findUnique({
 				where: { id: input.calendarId },
-				select: { id: true, userId: true },
-			});
-
-			if (!calendarExists) {
-				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Calendar not found",
-				});
-			}
-
-			// Verify calendar ownership
-			const calendar = await prisma.calendar.findFirst({
-				where: {
-					id: input.calendarId,
-					...buildOwnershipFilter(ctx),
-				},
 				include: {
 					events: true,
 				},

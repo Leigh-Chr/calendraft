@@ -1,5 +1,5 @@
 import { AlertCircle, HelpCircle } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { DateTimePicker } from "@/components/date-time-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,7 +65,8 @@ export function ExpertModeSection({
 
 	// Parse RECURRENCE-ID from ICS format (UTC) to display in DateTimePicker (local)
 	const recurrenceIdDate = parseDateFromICS(formData.recurrenceId);
-	const getDateTimeString = useCallback((date: Date | null): string => {
+	// Helper function to format date
+	const getDateTimeString = (date: Date | null): string => {
 		if (!date) return "";
 		// Convert UTC date to local for display
 		const localDate = new Date(
@@ -81,17 +82,18 @@ export function ExpertModeSection({
 		const hours = String(localDate.getHours()).padStart(2, "0");
 		const minutes = String(localDate.getMinutes()).padStart(2, "0");
 		return `${year}-${month}-${day}T${hours}:${minutes}`;
-	}, []);
+	};
 
 	const [recurrenceIdDateTime, setRecurrenceIdDateTime] = useState<string>(
 		getDateTimeString(recurrenceIdDate),
 	);
 
 	// Update when formData.recurrenceId changes externally
+	// biome-ignore lint/correctness/useExhaustiveDependencies: getDateTimeString is a pure helper function
 	useEffect(() => {
 		const parsed = parseDateFromICS(formData.recurrenceId);
 		setRecurrenceIdDateTime(getDateTimeString(parsed));
-	}, [formData.recurrenceId, getDateTimeString]);
+	}, [formData.recurrenceId]);
 
 	const handleRecurrenceIdDateTimeChange = (value: string) => {
 		setRecurrenceIdDateTime(value);

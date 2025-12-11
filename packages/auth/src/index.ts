@@ -4,12 +4,14 @@ import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { emailHarmony } from "better-auth-harmony";
 import { sendResetPasswordEmail, sendVerificationEmail } from "./lib/email";
+import { env } from "./lib/env";
+import { logger } from "./lib/logger";
 
-const isProduction = process.env["NODE_ENV"] === "production";
+const isProduction = env.NODE_ENV === "production";
 
 // URL du frontend pour les redirections après vérification
 // Better-Auth redirige vers le callbackURL côté client
-const frontendURL = process.env["CORS_ORIGIN"] || "http://localhost:3001";
+const frontendURL = env.CORS_ORIGIN || "http://localhost:3001";
 
 export const auth = betterAuth<BetterAuthOptions>({
 	database: prismaAdapter(prisma, {
@@ -40,7 +42,7 @@ export const auth = betterAuth<BetterAuthOptions>({
 		// Better-Auth invalide automatiquement toutes les sessions existantes
 		onPasswordReset: async ({ user }) => {
 			// Log pour audit (optionnel)
-			console.log(`Password reset successful for user: ${user.email}`);
+			logger.info("Password reset successful", { email: user.email });
 		},
 	},
 	// Configuration de la vérification d'email

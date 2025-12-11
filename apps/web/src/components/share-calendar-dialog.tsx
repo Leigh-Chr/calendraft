@@ -10,7 +10,7 @@ import {
 	Plus,
 	Trash2,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/utils/trpc";
 import {
@@ -24,7 +24,7 @@ import {
 	AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -108,56 +108,51 @@ export function ShareCalendarDialog({
 	);
 
 	// Build share URL
-	const getShareUrl = useCallback((token: string) => {
+	// React Compiler will automatically memoize these callbacks
+	const getShareUrl = (token: string) => {
 		const baseUrl = window.location.origin;
 		return `${baseUrl}/share/${token}`;
-	}, []);
+	};
 
 	// Copy to clipboard
-	const handleCopy = useCallback(
-		async (token: string, linkId: string) => {
-			const url = getShareUrl(token);
-			try {
-				await navigator.clipboard.writeText(url);
-				setCopiedId(linkId);
-				setTimeout(() => setCopiedId(null), 2000);
-				toast.success("Link copied!");
-			} catch {
-				toast.error("Unable to copy link");
-			}
-		},
-		[getShareUrl],
-	);
+	const handleCopy = async (token: string, linkId: string) => {
+		const url = getShareUrl(token);
+		try {
+			await navigator.clipboard.writeText(url);
+			setCopiedId(linkId);
+			setTimeout(() => setCopiedId(null), 2000);
+			toast.success("Link copied!");
+		} catch {
+			toast.error("Unable to copy link");
+		}
+	};
 
 	// Create new link
-	const handleCreate = useCallback(() => {
+	const handleCreate = () => {
 		createMutation.mutate({
 			calendarId,
 			name: newLinkName.trim() || undefined,
 		});
-	}, [calendarId, createMutation, newLinkName]);
+	};
 
 	// Toggle link active state
-	const handleToggleActive = useCallback(
-		(linkId: string, isActive: boolean) => {
-			updateMutation.mutate({ id: linkId, isActive });
-		},
-		[updateMutation],
-	);
+	const handleToggleActive = (linkId: string, isActive: boolean) => {
+		updateMutation.mutate({ id: linkId, isActive });
+	};
 
 	// Delete link
-	const handleDelete = useCallback((linkId: string) => {
+	const handleDelete = (linkId: string) => {
 		setLinkIdToDelete(linkId);
 		setDeleteDialogOpen(true);
-	}, []);
+	};
 
-	const confirmDelete = useCallback(() => {
+	const confirmDelete = () => {
 		if (linkIdToDelete) {
 			deleteMutation.mutate({ id: linkIdToDelete });
 			setDeleteDialogOpen(false);
 			setLinkIdToDelete(null);
 		}
-	}, [linkIdToDelete, deleteMutation]);
+	};
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -333,7 +328,7 @@ export function ShareCalendarDialog({
 						<AlertDialogCancel>Cancel</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={confirmDelete}
-							variant="destructive"
+							className={buttonVariants({ variant: "destructive" })}
 							disabled={deleteMutation.isPending}
 						>
 							{deleteMutation.isPending ? "Deleting..." : "Delete"}

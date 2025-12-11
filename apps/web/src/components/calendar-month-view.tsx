@@ -9,7 +9,7 @@ import {
 	startOfWeek,
 } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	Calendar,
 	dateFnsLocalizer,
@@ -89,15 +89,13 @@ function EventWithHover({
 }: EventProps<RBCEvent> & { calendarId: string }) {
 	const navigate = useNavigate();
 
-	const handleClick = useCallback(
-		(e: React.MouseEvent) => {
-			e.stopPropagation();
-			navigate({
-				to: `/calendars/${calendarId}/events/${event.resource.id}`,
-			});
-		},
-		[calendarId, event.resource.id, navigate],
-	);
+	// React Compiler will automatically memoize this callback
+	const handleClick = (e: React.MouseEvent): void => {
+		e.stopPropagation();
+		navigate({
+			to: `/calendars/${calendarId}/events/${event.resource.id}`,
+		});
+	};
 
 	return (
 		<HoverCard openDelay={300} closeDelay={100}>
@@ -156,6 +154,7 @@ function EventWithHover({
 /**
  * CalendarView - Calendar visualization component with month, week, and day views
  * Supports drag & drop, event resizing, and quick create
+ * React Compiler will automatically memoize this component
  */
 export function CalendarView({
 	calendarId,
@@ -171,7 +170,8 @@ export function CalendarView({
 	const quickCreate = useQuickCreate();
 
 	// Parse initial date from URL or default to today
-	const defaultDate = useMemo(() => {
+	// React Compiler will automatically memoize this computation
+	const defaultDate = ((): Date => {
 		if (initialDate) {
 			try {
 				return parseISO(initialDate);
@@ -180,7 +180,7 @@ export function CalendarView({
 			}
 		}
 		return new Date();
-	}, [initialDate]);
+	})();
 
 	const [currentDate, setCurrentDate] = useState<Date>(defaultDate);
 	const [currentView, setCurrentView] = useState<View>(initialView);
@@ -212,126 +212,109 @@ export function CalendarView({
 		}),
 	);
 
-	const calendarEvents = useMemo(
-		() =>
-			events.map((event) => {
-				// Use event color if set, otherwise use calendar color
-				const effectiveColor = event.color || calendarColor;
-				return {
-					id: event.id,
-					title: event.title,
-					start: new Date(event.startDate),
-					end: new Date(event.endDate),
-					resource: event,
-					...(effectiveColor && {
-						style: {
-							backgroundColor: effectiveColor,
-							borderColor: effectiveColor,
-						},
-					}),
-				};
+	// React Compiler will automatically memoize this computation
+	const calendarEvents = events.map((event) => {
+		// Use event color if set, otherwise use calendar color
+		const effectiveColor = event.color || calendarColor;
+		return {
+			id: event.id,
+			title: event.title,
+			start: new Date(event.startDate),
+			end: new Date(event.endDate),
+			resource: event,
+			...(effectiveColor && {
+				style: {
+					backgroundColor: effectiveColor,
+					borderColor: effectiveColor,
+				},
 			}),
-		[events, calendarColor],
-	);
+		};
+	});
 
-	const handleSelectEvent = useCallback(
-		(event: RBCEvent) => {
-			navigate({
-				to: `/calendars/${calendarId}/events/${event.id}`,
-			});
-		},
-		[calendarId, navigate],
-	);
+	// React Compiler will automatically memoize these callbacks
+	const handleSelectEvent = (event: RBCEvent): void => {
+		navigate({
+			to: `/calendars/${calendarId}/events/${event.id}`,
+		});
+	};
 
-	const handleSelectSlot = useCallback(
-		(slotInfo: { start: Date; end: Date; action: string }) => {
-			// For single click, open quick create
-			// For double click or drag selection, still open quick create but with full range
-			quickCreate.open(slotInfo.start, slotInfo.end);
-		},
-		[quickCreate],
-	);
+	const handleSelectSlot = (slotInfo: {
+		start: Date;
+		end: Date;
+		action: string;
+	}): void => {
+		// For single click, open quick create
+		// For double click or drag selection, still open quick create but with full range
+		quickCreate.open(slotInfo.start, slotInfo.end);
+	};
 
-	const handleNavigate = useCallback(
-		(newDate: Date) => {
-			setCurrentDate(newDate);
-			// Update URL with the new date (use first of month for cleaner URLs)
-			const dateStr = format(startOfMonth(newDate), "yyyy-MM-dd");
-			onDateChange?.(dateStr);
-		},
-		[onDateChange],
-	);
+	const handleNavigate = (newDate: Date): void => {
+		setCurrentDate(newDate);
+		// Update URL with the new date (use first of month for cleaner URLs)
+		const dateStr = format(startOfMonth(newDate), "yyyy-MM-dd");
+		onDateChange?.(dateStr);
+	};
 
-	const handleViewChange = useCallback(
-		(view: View) => {
-			setCurrentView(view);
-			onViewChange?.(view);
-		},
-		[onViewChange],
-	);
+	const handleViewChange = (view: View): void => {
+		setCurrentView(view);
+		onViewChange?.(view);
+	};
 
 	// Handle event drop (drag & drop move)
-	const handleEventDrop = useCallback(
-		({
-			event,
-			start,
-			end,
-		}: {
-			event: RBCEvent;
-			start: Date | string;
-			end: Date | string;
-		}) => {
-			updateEventMutation.mutate({
-				id: event.id,
-				startDate: new Date(start).toISOString(),
-				endDate: new Date(end).toISOString(),
-			});
-		},
-		[updateEventMutation],
-	);
+	const handleEventDrop = ({
+		event,
+		start,
+		end,
+	}: {
+		event: RBCEvent;
+		start: Date | string;
+		end: Date | string;
+	}) => {
+		updateEventMutation.mutate({
+			id: event.id,
+			startDate: new Date(start).toISOString(),
+			endDate: new Date(end).toISOString(),
+		});
+	};
 
 	// Handle event resize
-	const handleEventResize = useCallback(
-		({
-			event,
-			start,
-			end,
-		}: {
-			event: RBCEvent;
-			start: Date | string;
-			end: Date | string;
-		}) => {
-			updateEventMutation.mutate({
-				id: event.id,
-				startDate: new Date(start).toISOString(),
-				endDate: new Date(end).toISOString(),
-			});
-		},
-		[updateEventMutation],
-	);
+	const handleEventResize = ({
+		event,
+		start,
+		end,
+	}: {
+		event: RBCEvent;
+		start: Date | string;
+		end: Date | string;
+	}) => {
+		updateEventMutation.mutate({
+			id: event.id,
+			startDate: new Date(start).toISOString(),
+			endDate: new Date(end).toISOString(),
+		});
+	};
 
 	// Navigate to full form with data from quick create
-	const handleOpenFullForm = useCallback(
-		(data: { title: string; start: Date; end: Date }) => {
-			const start = format(data.start, "yyyy-MM-dd'T'HH:mm");
-			const end = format(data.end, "yyyy-MM-dd'T'HH:mm");
-			navigate({
-				to: `/calendars/${calendarId}/events/new`,
-				search: { start, end },
-			});
-		},
-		[calendarId, navigate],
-	);
+	const handleOpenFullForm = (data: {
+		title: string;
+		start: Date;
+		end: Date;
+	}) => {
+		const start = format(data.start, "yyyy-MM-dd'T'HH:mm");
+		const end = format(data.end, "yyyy-MM-dd'T'HH:mm");
+		navigate({
+			to: `/calendars/${calendarId}/events/new`,
+			search: { start, end },
+		});
+	};
 
 	// Custom event wrapper to add hover card
-	const components = useMemo(
-		() => ({
-			event: (props: EventProps<RBCEvent>) => (
-				<EventWithHover {...props} calendarId={calendarId} />
-			),
-		}),
-		[calendarId],
-	);
+	// React Compiler will automatically memoize this computation
+	const components = {
+		event: (props: EventProps<RBCEvent>) => (
+			<EventWithHover {...props} calendarId={calendarId} />
+		),
+	};
 
 	return (
 		<div
@@ -396,9 +379,3 @@ export function CalendarView({
 		</div>
 	);
 }
-
-/**
- * @deprecated Use CalendarView instead
- * Backwards-compatible alias for CalendarView
- */
-export const CalendarMonthView = CalendarView;

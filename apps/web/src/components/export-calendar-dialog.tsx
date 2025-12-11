@@ -7,7 +7,7 @@ import {
 	Filter,
 	Loader2,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { trpcClient } from "@/utils/trpc";
@@ -62,32 +62,31 @@ export function ExportCalendarDialog({
 	});
 
 	// Extract unique categories
-	const normalizeCategory = useCallback((c: string | { category: string }) => {
+	// React Compiler will automatically memoize these callbacks
+	const normalizeCategory = (c: string | { category: string }) => {
 		return typeof c === "string" ? c : c.category;
-	}, []);
+	};
 
-	const extractCategories = useCallback(
-		(events: Array<{ categories?: unknown }>) => {
-			if (!events) return [];
-			const categories = new Set<string>();
-			for (const event of events) {
-				if (!event.categories || !Array.isArray(event.categories)) continue;
-				for (const cat of event.categories.map(normalizeCategory)) {
-					if (cat) categories.add(cat);
-				}
+	const extractCategories = (events: Array<{ categories?: unknown }>) => {
+		if (!events) return [];
+		const categories = new Set<string>();
+		for (const event of events) {
+			if (!event.categories || !Array.isArray(event.categories)) continue;
+			for (const cat of event.categories.map(normalizeCategory)) {
+				if (cat) categories.add(cat);
 			}
-			return Array.from(categories).sort();
-		},
-		[normalizeCategory],
-	);
+		}
+		return Array.from(categories).sort();
+	};
 
-	const availableCategories = useMemo(() => {
+	// React Compiler will automatically memoize this computation
+	const availableCategories = (() => {
 		if (!calendarData?.events) return [];
 		return extractCategories(calendarData.events);
-	}, [calendarData?.events, extractCategories]);
+	})();
 
 	// Toggle category selection
-	const toggleCategory = useCallback((category: string) => {
+	const toggleCategory = (category: string) => {
 		setSelectedCategories((prev) => {
 			const next = new Set(prev);
 			if (next.has(category)) {
@@ -97,10 +96,10 @@ export function ExportCalendarDialog({
 			}
 			return next;
 		});
-	}, []);
+	};
 
 	// Export handler
-	const handleExport = useCallback(async () => {
+	const handleExport = async () => {
 		setIsExporting(true);
 		try {
 			const data = await trpcClient.calendar.exportIcs.query({
@@ -144,10 +143,10 @@ export function ExportCalendarDialog({
 		} finally {
 			setIsExporting(false);
 		}
-	}, [calendarId, dateRange, selectedCategories, futureOnly, onOpenChange]);
+	};
 
 	// Quick export (no filters)
-	const handleQuickExport = useCallback(async () => {
+	const handleQuickExport = async () => {
 		setIsExporting(true);
 		try {
 			const data = await trpcClient.calendar.exportIcs.query({
@@ -173,14 +172,14 @@ export function ExportCalendarDialog({
 		} finally {
 			setIsExporting(false);
 		}
-	}, [calendarId, onOpenChange]);
+	};
 
 	// Clear all filters
-	const clearFilters = useCallback(() => {
+	const clearFilters = () => {
 		setDateRange({});
 		setSelectedCategories(new Set());
 		setFutureOnly(false);
-	}, []);
+	};
 
 	const hasFilters =
 		dateRange.from || dateRange.to || selectedCategories.size > 0 || futureOnly;

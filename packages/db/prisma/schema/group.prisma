@@ -29,6 +29,7 @@ model CalendarGroupMember {
   @@unique([groupId, calendarId]) // Prevent duplicate calendars in same group
   @@index([groupId]) // Fast lookups for calendars in a group
   @@index([calendarId]) // Fast lookups for groups containing a calendar
+  @@index([groupId, calendarId]) // Composite index for filtering calendars by multiple groups
   @@map("calendar_group_member")
 }
 

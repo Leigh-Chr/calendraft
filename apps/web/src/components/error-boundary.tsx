@@ -13,6 +13,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { logger } from "@/lib/logger";
 
 interface Props {
 	children: ReactNode;
@@ -35,10 +36,8 @@ export class ErrorBoundary extends Component<Props, State> {
 	}
 
 	componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-		// Log error for debugging (only in development)
-		if (import.meta.env.DEV) {
-			console.error("Error Boundary caught an error:", error, errorInfo);
-		}
+		// Log error for debugging
+		logger.error("Error Boundary caught an error", error, { errorInfo });
 	}
 
 	handleReset = () => {

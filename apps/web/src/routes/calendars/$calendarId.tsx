@@ -22,7 +22,7 @@ import {
 	Sparkles,
 	Upload,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { AccountPrompt } from "@/components/account-prompt";
 import { CalendarView } from "@/components/calendar-month-view";
@@ -79,15 +79,13 @@ function CalendarViewComponent() {
 	const viewMode = search.view;
 
 	// Helper for updating search params on current route
-	const updateSearch = useCallback(
-		(updates: Partial<typeof search>) => {
-			navigate({
-				to: ".",
-				search: { ...search, ...updates },
-			});
-		},
-		[navigate, search],
-	);
+	// React Compiler will automatically memoize this callback
+	const updateSearch = (updates: Partial<typeof search>) => {
+		navigate({
+			to: ".",
+			search: { ...search, ...updates },
+		});
+	};
 
 	const { calendar, isLoading } = useCalendar(calendarId);
 	const eventsQuery = useQuery({
@@ -95,15 +93,15 @@ function CalendarViewComponent() {
 		enabled: !!calendarId,
 	});
 
-	// Memoize event transformation to avoid recalculating on every render
-	const normalizedEvents = useMemo(() => {
+	// React Compiler will automatically memoize this computation
+	const normalizedEvents = (() => {
 		const rawEvents = eventsQuery.data?.events || calendar?.events || [];
 		return rawEvents.map((e) => ({
 			...e,
 			startDate: normalizeDate(e.startDate),
 			endDate: normalizeDate(e.endDate),
 		}));
-	}, [eventsQuery.data?.events, calendar?.events]);
+	})();
 
 	const eventCount = normalizedEvents.length;
 
@@ -153,17 +151,18 @@ function CalendarViewComponent() {
 		}),
 	);
 
-	const handleCleanDuplicates = useCallback(() => {
+	// React Compiler will automatically memoize these callbacks
+	const handleCleanDuplicates = () => {
 		cleanDuplicatesMutation.mutate({ calendarId });
-	}, [cleanDuplicatesMutation, calendarId]);
+	};
 
-	const handleRefreshFromUrl = useCallback(() => {
+	const handleRefreshFromUrl = () => {
 		refreshFromUrlMutation.mutate({
 			calendarId,
 			replaceAll: false,
 			skipDuplicates: true,
 		});
-	}, [refreshFromUrlMutation, calendarId]);
+	};
 
 	// Check if we're on a child route (like /events/new or /import)
 	// If so, render the child route via Outlet

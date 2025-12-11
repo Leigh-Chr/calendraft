@@ -10,5 +10,6 @@ export interface EventListItem {
 	description?: string | null;
 	location?: string | null;
 	uid?: string | null;
-	[key: string]: unknown;
+	// Restrict index signature to allowed types only
+	[key: string]: string | Date | null | undefined;
 }

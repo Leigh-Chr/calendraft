@@ -14,7 +14,7 @@ import {
 	MapPin,
 	X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,62 +88,54 @@ export function QuickCreateEvent({
 		}),
 	);
 
-	const handleSubmit = useCallback(
-		(e?: React.FormEvent) => {
-			e?.preventDefault();
-			if (!title.trim()) {
-				toast.error("Title is required");
-				return;
-			}
+	// React Compiler will automatically memoize these callbacks
+	const handleSubmit = (e?: React.FormEvent) => {
+		e?.preventDefault();
+		if (!title.trim()) {
+			toast.error("Title is required");
+			return;
+		}
 
-			createMutation.mutate({
-				calendarId,
-				title: title.trim(),
-				startDate: startDate.toISOString(),
-				endDate: currentEndDate.toISOString(),
-				location: location.trim() || undefined,
-			});
-		},
-		[title, location, calendarId, startDate, currentEndDate, createMutation],
-	);
+		createMutation.mutate({
+			calendarId,
+			title: title.trim(),
+			startDate: startDate.toISOString(),
+			endDate: currentEndDate.toISOString(),
+			location: location.trim() || undefined,
+		});
+	};
 
-	const handleDurationChange = useCallback(
-		(preset: (typeof DURATION_PRESETS)[number]) => {
-			if (preset.allDay) {
-				// Set to full day
-				const newStart = new Date(startDate);
-				newStart.setHours(0, 0, 0, 0);
-				const newEnd = new Date(startDate);
-				newEnd.setHours(23, 59, 59, 999);
-				setCurrentEndDate(newEnd);
-			} else if (preset.minutes) {
-				const newEnd = new Date(startDate.getTime() + preset.minutes * 60000);
-				setCurrentEndDate(newEnd);
-			}
-		},
-		[startDate],
-	);
+	const handleDurationChange = (preset: (typeof DURATION_PRESETS)[number]) => {
+		if (preset.allDay) {
+			// Set to full day
+			const newStart = new Date(startDate);
+			newStart.setHours(0, 0, 0, 0);
+			const newEnd = new Date(startDate);
+			newEnd.setHours(23, 59, 59, 999);
+			setCurrentEndDate(newEnd);
+		} else if (preset.minutes) {
+			const newEnd = new Date(startDate.getTime() + preset.minutes * 60000);
+			setCurrentEndDate(newEnd);
+		}
+	};
 
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
-			if (e.key === "Enter" && !e.shiftKey) {
-				e.preventDefault();
-				handleSubmit();
-			} else if (e.key === "Escape") {
-				onClose();
-			}
-		},
-		[handleSubmit, onClose],
-	);
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (e.key === "Enter" && !e.shiftKey) {
+			e.preventDefault();
+			handleSubmit();
+		} else if (e.key === "Escape") {
+			onClose();
+		}
+	};
 
-	const handleMoreOptions = useCallback(() => {
+	const handleMoreOptions = () => {
 		onOpenFullForm({
 			title: title.trim(),
 			start: startDate,
 			end: currentEndDate,
 		});
 		onClose();
-	}, [title, startDate, currentEndDate, onOpenFullForm, onClose]);
+	};
 
 	// Format date display
 	const formatDateRange = () => {
@@ -293,13 +285,14 @@ export function useQuickCreate() {
 		endDate: new Date(),
 	});
 
-	const open = useCallback((startDate: Date, endDate: Date) => {
+	// React Compiler will automatically memoize these callbacks
+	const open = (startDate: Date, endDate: Date) => {
 		setState({ isOpen: true, startDate, endDate });
-	}, []);
+	};
 
-	const close = useCallback(() => {
+	const close = () => {
 		setState((prev) => ({ ...prev, isOpen: false }));
-	}, []);
+	};
 
 	return { ...state, open, close };
 }

@@ -2,6 +2,7 @@
  * Error handling helper functions
  */
 
+import { logger } from "../logger";
 import type { AppError, ErrorContext, ErrorSeverity } from "./types";
 
 /**
@@ -72,15 +73,20 @@ export function getErrorCode(error: unknown): string | undefined {
 	if (error && typeof error === "object") {
 		const errorRecord = error as Record<string, unknown>;
 		if ("code" in errorRecord) {
+			// biome-ignore lint/complexity/useLiteralKeys: Dynamic key access from Record
 			return String(errorRecord["code"]);
 		}
 		if (
 			"data" in errorRecord &&
+			// biome-ignore lint/complexity/useLiteralKeys: Dynamic key access from Record
 			errorRecord["data"] &&
+			// biome-ignore lint/complexity/useLiteralKeys: Dynamic key access from Record
 			typeof errorRecord["data"] === "object"
 		) {
+			// biome-ignore lint/complexity/useLiteralKeys: Dynamic key access from Record
 			const data = errorRecord["data"] as Record<string, unknown>;
 			if ("code" in data) {
+				// biome-ignore lint/complexity/useLiteralKeys: Dynamic key access from Record
 				return String(data["code"]);
 			}
 		}
@@ -136,6 +142,7 @@ export function logErrorInDev(error: unknown, context?: ErrorContext): void {
 	try {
 		// Check Vite's import.meta.env
 		if (typeof import.meta !== "undefined" && import.meta.env) {
+			// biome-ignore lint/complexity/useLiteralKeys: Environment variable access (project rule)
 			isDev = Boolean(import.meta.env["DEV"]);
 		}
 	} catch {
@@ -152,6 +159,7 @@ export function logErrorInDev(error: unknown, context?: ErrorContext): void {
 	}
 
 	if (isDev) {
-		console.error(formatErrorForLog(error, context), error);
+		// Use logger for consistent error logging
+		logger.error(formatErrorForLog(error, context), error);
 	}
 }

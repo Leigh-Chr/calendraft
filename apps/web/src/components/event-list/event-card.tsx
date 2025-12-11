@@ -6,7 +6,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Copy, Edit, MoreHorizontal, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
-import React, { useCallback } from "react";
+// React Compiler will automatically memoize this component and its callbacks
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,7 +36,7 @@ interface EventCardProps {
 	onToggleSelect?: (id: string) => void;
 }
 
-export const EventCard = React.memo(function EventCard({
+export function EventCard({
 	event,
 	calendarId,
 	onDelete,
@@ -50,32 +50,30 @@ export const EventCard = React.memo(function EventCard({
 }: EventCardProps) {
 	const navigate = useNavigate();
 
-	const handleNavigate = useCallback(() => {
+	// React Compiler will automatically memoize these callbacks
+	const handleNavigate = () => {
 		if (selectionMode) {
 			onToggleSelect?.(event.id);
 		} else {
 			navigate({ to: `/calendars/${calendarId}/events/${event.id}` });
 		}
-	}, [navigate, calendarId, event.id, selectionMode, onToggleSelect]);
+	};
 
-	const handleDelete = useCallback(() => {
+	const handleDelete = () => {
 		onDelete(event.id);
-	}, [onDelete, event.id]);
+	};
 
-	const handleDuplicate = useCallback(() => {
+	const handleDuplicate = () => {
 		onDuplicate?.(event.id);
-	}, [onDuplicate, event.id]);
+	};
 
-	const handleMove = useCallback(() => {
+	const handleMove = () => {
 		onMove?.(event.id);
-	}, [onMove, event.id]);
+	};
 
-	const handleCheckboxChange = useCallback(
-		(_checked: boolean) => {
-			onToggleSelect?.(event.id);
-		},
-		[onToggleSelect, event.id],
-	);
+	const handleCheckboxChange = (_checked: boolean) => {
+		onToggleSelect?.(event.id);
+	};
 
 	return (
 		<motion.div
@@ -172,4 +170,4 @@ export const EventCard = React.memo(function EventCard({
 			</Card>
 		</motion.div>
 	);
-});
+}

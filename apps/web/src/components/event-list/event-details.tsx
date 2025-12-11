@@ -4,7 +4,7 @@
  * Updated with improved visual hierarchy
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
 	AlarmsRow,
 	AttendeesRow,
@@ -127,12 +127,10 @@ function buildRowConfigs(event: EventItem): RowConfig[] {
 
 // ----- Component -----
 
-export const EventDetails = React.memo(function EventDetails({
-	event,
-}: {
-	event: EventItem;
-}) {
-	const { secondaryRows, descriptionRow } = useMemo(() => {
+// React Compiler will automatically memoize this component
+export function EventDetails({ event }: { event: EventItem }) {
+	// React Compiler will automatically memoize this computation
+	const { secondaryRows, descriptionRow } = (() => {
 		const allRows = buildRowConfigs(event).filter((row) => Boolean(row.value));
 
 		// Separate description from other rows
@@ -147,7 +145,7 @@ export const EventDetails = React.memo(function EventDetails({
 				<React.Fragment key={descRow.key}>{descRow.render()}</React.Fragment>
 			) : null,
 		};
-	}, [event]);
+	})();
 
 	return (
 		<div className="space-y-3 text-sm">
@@ -169,4 +167,4 @@ export const EventDetails = React.memo(function EventDetails({
 			{descriptionRow && <div className="pt-3">{descriptionRow}</div>}
 		</div>
 	);
-});
+}

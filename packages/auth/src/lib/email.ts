@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 import { Resend } from "resend";
-
 // Initialiser Resend seulement si la clé API est fournie
-const resend = process.env["RESEND_API_KEY"]
-	? new Resend(process.env["RESEND_API_KEY"])
-	: null;
+import { env } from "./env";
+import { logger } from "./logger";
+
+const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
 
 /**
  * Send verification email to user
@@ -27,7 +27,7 @@ export async function sendVerificationEmail({
 }) {
 	// Vérifier que Resend est configuré
 	if (!resend) {
-		console.error(
+		logger.error(
 			"RESEND_API_KEY is not configured. Email verification cannot be sent.",
 		);
 		return;
@@ -36,7 +36,7 @@ export async function sendVerificationEmail({
 	// Ne pas await pour éviter les timing attacks
 	// L'URL contient déjà le token et le callbackURL configuré par Better-Auth
 	void resend.emails.send({
-		from: process.env["EMAIL_FROM"] || "Calendraft <noreply@calendraft.com>",
+		from: env.EMAIL_FROM || "Calendraft <noreply@calendraft.com>",
 		to,
 		subject: "Verify your email address - Calendraft",
 		html: `
@@ -92,7 +92,7 @@ export async function sendResetPasswordEmail({
 }) {
 	// Vérifier que Resend est configuré
 	if (!resend) {
-		console.error(
+		logger.error(
 			"RESEND_API_KEY is not configured. Password reset email cannot be sent.",
 		);
 		return;
@@ -101,7 +101,7 @@ export async function sendResetPasswordEmail({
 	// Ne pas await pour éviter les timing attacks
 	// L'URL contient déjà le token et le callbackURL configuré par Better-Auth
 	void resend.emails.send({
-		from: process.env["EMAIL_FROM"] || "Calendraft <noreply@calendraft.com>",
+		from: env.EMAIL_FROM || "Calendraft <noreply@calendraft.com>",
 		to,
 		subject: "Reset your password - Calendraft",
 		html: `

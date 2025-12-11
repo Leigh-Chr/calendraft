@@ -13,7 +13,7 @@ import {
 	Loader2,
 	X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -319,111 +319,94 @@ export function FileDropZone({
 	const dragCountRef = useRef(0);
 
 	// Process file
-	const processFile = useCallback(
-		async (selectedFile: File) => {
-			setError(null);
+	// React Compiler will automatically memoize these callbacks
+	const processFile = async (selectedFile: File) => {
+		setError(null);
 
-			// Validate file
-			const validation = validateFile(selectedFile, maxSizeMB);
-			if (!validation.valid) {
-				setError(validation.error || "Invalid file");
-				setState("error");
-				return;
-			}
+		// Validate file
+		const validation = validateFile(selectedFile, maxSizeMB);
+		if (!validation.valid) {
+			setError(validation.error || "Invalid file");
+			setState("error");
+			return;
+		}
 
-			setState("processing");
-			setFile(selectedFile);
+		setState("processing");
+		setFile(selectedFile);
 
-			try {
-				const content = await selectedFile.text();
-				const events = parseIcsContent(content);
-				setPreviewEvents(events);
-				onPreviewParsed?.(events);
-				onFileSelect(selectedFile);
-				setState("success");
-			} catch {
-				setError("Error reading file");
-				setState("error");
-			}
-		},
-		[maxSizeMB, onFileSelect, onPreviewParsed],
-	);
+		try {
+			const content = await selectedFile.text();
+			const events = parseIcsContent(content);
+			setPreviewEvents(events);
+			onPreviewParsed?.(events);
+			onFileSelect(selectedFile);
+			setState("success");
+		} catch {
+			setError("Error reading file");
+			setState("error");
+		}
+	};
 
 	// Drag handlers
-	const handleDragEnter = useCallback(
-		(e: React.DragEvent<HTMLButtonElement>) => {
-			e.preventDefault();
-			e.stopPropagation();
-			if (disabled) return;
+	const handleDragEnter = (e: React.DragEvent<HTMLButtonElement>) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (disabled) return;
 
-			dragCountRef.current++;
-			if (e.dataTransfer.types.includes("Files")) {
-				setState("drag-over");
-			}
-		},
-		[disabled],
-	);
+		dragCountRef.current++;
+		if (e.dataTransfer.types.includes("Files")) {
+			setState("drag-over");
+		}
+	};
 
-	const handleDragLeave = useCallback(
-		(e: React.DragEvent<HTMLButtonElement>) => {
-			e.preventDefault();
-			e.stopPropagation();
-			if (disabled) return;
+	const handleDragLeave = (e: React.DragEvent<HTMLButtonElement>) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (disabled) return;
 
-			dragCountRef.current--;
-			if (dragCountRef.current === 0) {
-				setState((prev) => (prev === "drag-over" ? "idle" : prev));
-			}
-		},
-		[disabled],
-	);
+		dragCountRef.current--;
+		if (dragCountRef.current === 0) {
+			setState((prev) => (prev === "drag-over" ? "idle" : prev));
+		}
+	};
 
-	const handleDragOver = useCallback(
-		(e: React.DragEvent<HTMLButtonElement>) => {
-			e.preventDefault();
-			e.stopPropagation();
-			if (disabled) return;
-		},
-		[disabled],
-	);
+	const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (disabled) return;
+	};
 
-	const handleDrop = useCallback(
-		(e: React.DragEvent<HTMLButtonElement>) => {
-			e.preventDefault();
-			e.stopPropagation();
-			dragCountRef.current = 0;
+	const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
+		e.preventDefault();
+		e.stopPropagation();
+		dragCountRef.current = 0;
 
-			if (disabled) return;
+		if (disabled) return;
 
-			const droppedFile = e.dataTransfer.files[0];
-			if (droppedFile) {
-				processFile(droppedFile);
-			} else {
-				setState("idle");
-			}
-		},
-		[disabled, processFile],
-	);
+		const droppedFile = e.dataTransfer.files[0];
+		if (droppedFile) {
+			processFile(droppedFile);
+		} else {
+			setState("idle");
+		}
+	};
 
 	// Click to select
-	const handleClick = useCallback(() => {
+	const handleClick = () => {
 		if (!disabled) {
 			inputRef.current?.click();
 		}
-	}, [disabled]);
+	};
 
-	const handleInputChange = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const selectedFile = e.target.files?.[0];
-			if (selectedFile) {
-				processFile(selectedFile);
-			}
-		},
-		[processFile],
-	);
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const selectedFile = e.target.files?.[0];
+		if (selectedFile) {
+			processFile(selectedFile);
+		}
+	};
 
 	// Reset
-	const handleReset = useCallback(() => {
+	const handleReset = () => {
 		setFile(null);
 		setPreviewEvents([]);
 		setError(null);
@@ -431,7 +414,7 @@ export function FileDropZone({
 		if (inputRef.current) {
 			inputRef.current.value = "";
 		}
-	}, []);
+	};
 
 	// Reset drag counter on unmount
 	useEffect(() => {

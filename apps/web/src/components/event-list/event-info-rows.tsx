@@ -17,7 +17,7 @@ import {
 	User,
 	Users,
 } from "lucide-react";
-import React from "react";
+// React Compiler will automatically memoize these components
 import {
 	formatDuration,
 	formatEventDateTime,
@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
  * Enhanced DateTime display with contextual formatting
  * Shows "Today" / "Tomorrow" etc. with time range
  */
-export const DateTimeRow = React.memo(function DateTimeRow({
+export function DateTimeRow({
 	startDate,
 	endDate,
 	compact = false,
@@ -79,12 +79,12 @@ export const DateTimeRow = React.memo(function DateTimeRow({
 			)}
 		</div>
 	);
-});
+}
 
 /**
  * Time status badge component
  */
-const TimeStatusBadge = React.memo(function TimeStatusBadge({
+function TimeStatusBadge({
 	status,
 	label,
 }: {
@@ -113,35 +113,27 @@ const TimeStatusBadge = React.memo(function TimeStatusBadge({
 			{label}
 		</span>
 	);
-});
+}
 
-export const LocationRow = React.memo(function LocationRow({
-	location,
-}: {
-	location: string;
-}) {
+export function LocationRow({ location }: { location: string }) {
 	return (
 		<div className="flex items-center gap-2">
 			<MapPin className="h-4 w-4" />
 			<span>{location}</span>
 		</div>
 	);
-});
+}
 
-export const CategoriesRow = React.memo(function CategoriesRow({
-	categories,
-}: {
-	categories: string;
-}) {
+export function CategoriesRow({ categories }: { categories: string }) {
 	return (
 		<div className="flex items-center gap-2">
 			<Tag className="h-4 w-4" />
 			<span>{categories}</span>
 		</div>
 	);
-});
+}
 
-export const UrlRow = React.memo(function UrlRow({ url }: { url: string }) {
+export function UrlRow({ url }: { url: string }) {
 	return (
 		<div className="flex items-center gap-2">
 			<LinkIcon className="h-4 w-4" />
@@ -155,13 +147,9 @@ export const UrlRow = React.memo(function UrlRow({ url }: { url: string }) {
 			</a>
 		</div>
 	);
-});
+}
 
-export const AttendeesRow = React.memo(function AttendeesRow({
-	count,
-}: {
-	count: number;
-}) {
+export function AttendeesRow({ count }: { count: number }) {
 	return (
 		<div className="flex items-center gap-2">
 			<Users className="h-4 w-4" />
@@ -170,13 +158,9 @@ export const AttendeesRow = React.memo(function AttendeesRow({
 			</span>
 		</div>
 	);
-});
+}
 
-export const AlarmsRow = React.memo(function AlarmsRow({
-	count,
-}: {
-	count: number;
-}) {
+export function AlarmsRow({ count }: { count: number }) {
 	return (
 		<div className="flex items-center gap-2">
 			<Bell className="h-4 w-4" />
@@ -185,13 +169,13 @@ export const AlarmsRow = React.memo(function AlarmsRow({
 			</span>
 		</div>
 	);
-});
+}
 
 /**
  * Duration display - only shown when relevant (long events, multi-day)
  * Now more subtle and integrated
  */
-export const DurationRow = React.memo(function DurationRow({
+export function DurationRow({
 	startDate,
 	endDate,
 	showIcon = false,
@@ -208,17 +192,13 @@ export const DurationRow = React.memo(function DurationRow({
 			<span>{duration}</span>
 		</div>
 	);
-});
+}
 
-export const DescriptionRow = React.memo(function DescriptionRow({
-	description,
-}: {
-	description: string;
-}) {
+export function DescriptionRow({ description }: { description: string }) {
 	return <p className="mt-2 line-clamp-2">{description}</p>;
-});
+}
 
-export const OrganizerRow = React.memo(function OrganizerRow({
+export function OrganizerRow({
 	organizerName,
 	organizerEmail,
 }: {
@@ -251,13 +231,9 @@ export const OrganizerRow = React.memo(function OrganizerRow({
 			</span>
 		</div>
 	);
-});
+}
 
-export const ContactRow = React.memo(function ContactRow({
-	contact,
-}: {
-	contact: string;
-}) {
+export function ContactRow({ contact }: { contact: string }) {
 	return (
 		<div className="flex items-center gap-2">
 			<Phone className="h-4 w-4" />
@@ -267,13 +243,9 @@ export const ContactRow = React.memo(function ContactRow({
 			</span>
 		</div>
 	);
-});
+}
 
-export const ResourcesRow = React.memo(function ResourcesRow({
-	resources,
-}: {
-	resources: string;
-}) {
+export function ResourcesRow({ resources }: { resources: string }) {
 	return (
 		<div className="flex items-center gap-2">
 			<Package className="h-4 w-4" />
@@ -283,13 +255,9 @@ export const ResourcesRow = React.memo(function ResourcesRow({
 			</span>
 		</div>
 	);
-});
+}
 
-export const TransparencyRow = React.memo(function TransparencyRow({
-	transp,
-}: {
-	transp: string;
-}) {
+export function TransparencyRow({ transp }: { transp: string }) {
 	const isTransparent = transp === "TRANSPARENT";
 	return (
 		<div className="flex items-center gap-2">
@@ -299,17 +267,13 @@ export const TransparencyRow = React.memo(function TransparencyRow({
 			</span>
 		</div>
 	);
-});
+}
 
-export const CommentRow = React.memo(function CommentRow({
-	comment,
-}: {
-	comment: string;
-}) {
+export function CommentRow({ comment }: { comment: string }) {
 	return (
 		<div className="flex items-start gap-2">
 			<MessageSquare className="mt-0.5 h-4 w-4" />
 			<span className="text-muted-foreground italic">{comment}</span>
 		</div>
 	);
-});
+}

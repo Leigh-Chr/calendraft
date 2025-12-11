@@ -214,7 +214,46 @@ export const calendarGroupCrudRouter = router({
 				});
 			}
 
-			return group;
+			// Get calendar details for each member
+			const calendarIds = group.calendars.map((c) => c.calendarId);
+			const calendars = await prisma.calendar.findMany({
+				where: {
+					id: { in: calendarIds },
+					...buildOwnershipFilter(ctx),
+				},
+				include: {
+					_count: {
+						select: { events: true },
+					},
+				},
+			});
+
+			// Map calendars by ID for quick lookup
+			const calendarsMap = new Map(calendars.map((c) => [c.id, c]));
+
+			// Transform group.calendars to include calendar details
+			const calendarsWithDetails = group.calendars
+				.map((member) => {
+					const calendar = calendarsMap.get(member.calendarId);
+					if (!calendar) return null;
+					return {
+						id: calendar.id,
+						name: calendar.name,
+						color: calendar.color,
+						eventCount: calendar._count.events,
+						sourceUrl: calendar.sourceUrl,
+						lastSyncedAt: calendar.lastSyncedAt,
+						createdAt: calendar.createdAt,
+						updatedAt: calendar.updatedAt,
+						order: member.order,
+					};
+				})
+				.filter((c): c is NonNullable<typeof c> => c !== null);
+
+			return {
+				...group,
+				calendars: calendarsWithDetails,
+			};
 		}),
 
 	/**

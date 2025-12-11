@@ -162,7 +162,42 @@ export async function getUserUsage(ctx: Context): Promise<{
 	};
 }
 
-// Legacy aliases for backward compatibility during migration
-export const checkAnonymousCalendarLimit = checkCalendarLimit;
-export const checkAnonymousEventLimit = checkEventLimit;
-export const getAnonymousUsage = getUserUsage;
+/**
+ * Verify calendar access with optimized single query
+ * Returns the calendar if access is granted, throws TRPCError otherwise
+ */
+export async function verifyCalendarAccess(
+	calendarId: string,
+	ctx: Context,
+): Promise<{ id: string; userId: string | null }> {
+	const calendar = await prisma.calendar.findUnique({
+		where: { id: calendarId },
+		select: { id: true, userId: true },
+	});
+
+	if (!calendar) {
+		throw new TRPCError({
+			code: "NOT_FOUND",
+			message: "Calendar not found",
+		});
+	}
+
+	// Verify ownership in memory
+	const ownershipFilter = buildOwnershipFilter(ctx);
+	const hasAccess =
+		(ownershipFilter.OR?.some(
+			(condition) =>
+				"userId" in condition && condition.userId === calendar.userId,
+		) ??
+			false) ||
+		calendar.userId === null;
+
+	if (!hasAccess) {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: "Access denied to this calendar",
+		});
+	}
+
+	return calendar;
+}

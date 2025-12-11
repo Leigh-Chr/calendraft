@@ -8,11 +8,9 @@ dotenv.config({
 	path: path.join(__dirname, "../../../apps/server/.env"),
 });
 
-const connectionString = process.env["DATABASE_URL"];
+import { env } from "./env";
 
-if (!connectionString) {
-	throw new Error("DATABASE_URL environment variable is required");
-}
+const connectionString = env.DATABASE_URL;
 
 const adapter = new PrismaPg({ connectionString });
 
@@ -21,6 +19,8 @@ const prisma = new PrismaClient({ adapter });
 export default prisma;
 
 export type { PrismaClient } from "../prisma/generated/client";
+// Re-export Prisma namespace for SQL queries
+export { Prisma } from "../prisma/generated/client";
 // Re-export Prisma generated types and enums
 export * from "../prisma/generated/enums";
 export * from "../prisma/generated/models";

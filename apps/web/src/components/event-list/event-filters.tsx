@@ -3,7 +3,7 @@
  */
 
 import { ArrowDown, ArrowUp, Search, X } from "lucide-react";
-import React from "react";
+// React Compiler will automatically memoize these components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,7 +29,7 @@ const DATE_FILTER_LABELS = {
 	month: "This month",
 } as const;
 
-export const DateFilterButtons = React.memo(function DateFilterButtons({
+export function DateFilterButtons({
 	currentFilter,
 	onFilterChange,
 }: DateFilterButtonsProps) {
@@ -49,7 +49,7 @@ export const DateFilterButtons = React.memo(function DateFilterButtons({
 			)}
 		</div>
 	);
-});
+}
 
 // ----- Search and Sort Bar -----
 
@@ -62,7 +62,7 @@ interface SearchSortBarProps {
 	onSortDirectionChange: (sortDirection: FilterState["sortDirection"]) => void;
 }
 
-export const SearchSortBar = React.memo(function SearchSortBar({
+export function SearchSortBar({
 	keyword,
 	sortBy,
 	sortDirection,
@@ -133,4 +133,4 @@ export const SearchSortBar = React.memo(function SearchSortBar({
 			)}
 		</div>
 	);
-});
+}

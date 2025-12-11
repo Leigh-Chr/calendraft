@@ -5,7 +5,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Folder, Loader2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -53,10 +53,12 @@ export function CreateGroupDialog({
 	);
 
 	// Get all calendars
-	const { data: calendars } = useQuery({
+	const { data: calendarsData } = useQuery({
 		...trpc.calendar.list.queryOptions(),
 		enabled: open,
 	});
+
+	const calendars = calendarsData?.calendars || [];
 
 	// Get group details if editing
 	const { data: groupDetails } = useQuery({
@@ -71,9 +73,10 @@ export function CreateGroupDialog({
 				setName(groupDetails.name);
 				setDescription(groupDetails.description || "");
 				setColor(groupDetails.color || null);
-				setSelectedCalendarIds(
-					new Set(groupDetails.calendars.map((c) => c.id)),
-				);
+				const calendarsArray = Array.isArray(groupDetails.calendars)
+					? groupDetails.calendars
+					: [];
+				setSelectedCalendarIds(new Set(calendarsArray.map((c) => c.id)));
 			} else {
 				setName("");
 				setDescription("");
@@ -145,7 +148,8 @@ export function CreateGroupDialog({
 		}),
 	);
 
-	const handleToggleCalendar = useCallback((calendarId: string) => {
+	// React Compiler will automatically memoize these callbacks
+	const handleToggleCalendar = (calendarId: string): void => {
 		setSelectedCalendarIds((prev) => {
 			const newSet = new Set(prev);
 			if (newSet.has(calendarId)) {
@@ -155,47 +159,42 @@ export function CreateGroupDialog({
 			}
 			return newSet;
 		});
-	}, []);
+	};
 
 	// Helper function to update calendars in edit mode
-	const updateGroupCalendars = useCallback(
-		(groupId: string) => {
-			if (!groupDetails) return;
+	const updateGroupCalendars = (groupId: string): void => {
+		if (!groupDetails) return;
 
-			const currentIds = new Set(groupDetails.calendars.map((c) => c.id));
-			const newIds = selectedCalendarIds;
+		const calendarsArray = Array.isArray(groupDetails.calendars)
+			? groupDetails.calendars
+			: [];
+		const currentIds = new Set(calendarsArray.map((c) => c.id));
+		const newIds = selectedCalendarIds;
 
-			// Find calendars to add
-			const toAdd = Array.from(newIds).filter((id) => !currentIds.has(id));
-			// Find calendars to remove
-			const toRemove = Array.from(currentIds).filter((id) => !newIds.has(id));
+		// Find calendars to add
+		const toAdd = Array.from(newIds).filter((id) => !currentIds.has(id));
+		// Find calendars to remove
+		const toRemove = Array.from(currentIds).filter((id) => !newIds.has(id));
 
-			// Add new calendars
-			if (toAdd.length > 0) {
-				addCalendarsMutation.mutate({
-					id: groupId,
-					calendarIds: toAdd,
-				});
-			}
+		// Add new calendars
+		if (toAdd.length > 0) {
+			addCalendarsMutation.mutate({
+				id: groupId,
+				calendarIds: toAdd,
+			});
+		}
 
-			// Remove calendars
-			if (toRemove.length > 0) {
-				removeCalendarsMutation.mutate({
-					id: groupId,
-					calendarIds: toRemove,
-				});
-			}
-		},
-		[
-			groupDetails,
-			selectedCalendarIds,
-			addCalendarsMutation,
-			removeCalendarsMutation,
-		],
-	);
+		// Remove calendars
+		if (toRemove.length > 0) {
+			removeCalendarsMutation.mutate({
+				id: groupId,
+				calendarIds: toRemove,
+			});
+		}
+	};
 
 	// Helper function to handle edit mode submission
-	const handleEditSubmit = useCallback(() => {
+	const handleEditSubmit = (): void => {
 		if (!groupToEdit) return;
 
 		// Update group metadata
@@ -208,17 +207,10 @@ export function CreateGroupDialog({
 
 		// Update calendars if changed
 		updateGroupCalendars(groupToEdit.id);
-	}, [
-		groupToEdit,
-		name,
-		description,
-		color,
-		updateMutation,
-		updateGroupCalendars,
-	]);
+	};
 
 	// Helper function to handle create mode submission
-	const handleCreateSubmit = useCallback(() => {
+	const handleCreateSubmit = (): void => {
 		if (selectedCalendarIds.size === 0) {
 			toast.error("Please select at least one calendar");
 			return;
@@ -229,9 +221,9 @@ export function CreateGroupDialog({
 			color: color || undefined,
 			calendarIds: Array.from(selectedCalendarIds),
 		});
-	}, [name, description, color, selectedCalendarIds, createMutation]);
+	};
 
-	const handleSubmit = useCallback(() => {
+	const handleSubmit = (): void => {
 		if (!name.trim()) {
 			toast.error("Please enter a group name");
 			return;
@@ -242,7 +234,7 @@ export function CreateGroupDialog({
 		} else {
 			handleCreateSubmit();
 		}
-	}, [name, isEditMode, groupToEdit, handleEditSubmit, handleCreateSubmit]);
+	};
 
 	const isPending =
 		createMutation.isPending ||
@@ -310,7 +302,7 @@ export function CreateGroupDialog({
 							</Label>
 							<div className="max-h-[300px] flex-1 overflow-y-auto rounded-md border">
 								<div className="space-y-2 p-4">
-									{calendars?.map((calendar) => {
+									{calendars.map((calendar) => {
 										const isSelected = selectedCalendarIds.has(calendar.id);
 										return (
 											<div

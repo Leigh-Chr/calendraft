@@ -4,7 +4,7 @@
  */
 
 import { ArrowDown, ArrowUp, Search, X } from "lucide-react";
-import React from "react";
+// React Compiler will automatically memoize these components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,7 +26,7 @@ interface SearchBarProps {
 	ariaLabel?: string;
 }
 
-export const SearchBar = React.memo(function SearchBar({
+export function SearchBar({
 	keyword,
 	onKeywordChange,
 	placeholder = "Search calendars...",
@@ -57,7 +57,7 @@ export const SearchBar = React.memo(function SearchBar({
 			</div>
 		</div>
 	);
-});
+}
 
 // ============================================================================
 // Search and Sort Bar (for pages with both search and sort)
@@ -86,7 +86,7 @@ const DEFAULT_SORT_OPTIONS: Array<{ value: CalendarSortBy; label: string }> = [
 	{ value: "eventCount", label: "Event count" },
 ];
 
-export const CalendarSearchSortBar = React.memo(function CalendarSearchSortBar({
+export function CalendarSearchSortBar({
 	keyword,
 	sortBy,
 	sortDirection = "desc",
@@ -95,7 +95,6 @@ export const CalendarSearchSortBar = React.memo(function CalendarSearchSortBar({
 	onSortDirectionChange,
 	showDirectionToggle = false,
 	sortOptions = DEFAULT_SORT_OPTIONS,
-	id,
 }: SearchSortBarProps) {
 	const handleDirectionToggle = () => {
 		if (onSortDirectionChange) {
@@ -104,7 +103,7 @@ export const CalendarSearchSortBar = React.memo(function CalendarSearchSortBar({
 	};
 
 	return (
-		<div id={id} className="flex gap-2">
+		<div className="flex gap-2">
 			<div className="flex-1">
 				<div className="relative">
 					<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
@@ -161,4 +160,4 @@ export const CalendarSearchSortBar = React.memo(function CalendarSearchSortBar({
 			)}
 		</div>
 	);
-});
+}

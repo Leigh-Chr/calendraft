@@ -54,7 +54,7 @@ Sentry.init({
 	// Filter sensitive data before sending to Sentry
 	beforeSend(event) {
 		// Remove any sensitive headers
-		if (event.request?.headers) {
+		if (event.request?.headers && typeof event.request.headers === "object") {
 			const headers = event.request.headers as Record<
 				string,
 				string | undefined

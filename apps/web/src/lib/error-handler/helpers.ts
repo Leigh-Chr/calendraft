@@ -5,6 +5,7 @@
 import type { AppRouter } from "@calendraft/api/routers/index";
 import type { TRPCClientError, TRPCClientErrorLike } from "@trpc/client";
 import { toast } from "sonner";
+import { logger } from "../logger";
 import { ERROR_MESSAGES, NETWORK_ERROR_PATTERNS } from "./constants";
 import type { ErrorResult } from "./types";
 
@@ -63,8 +64,7 @@ export function getTRPCErrorCode(error: unknown): string {
 export function logErrorDetails(
 	error: TRPCClientErrorLike<AppRouter> | TRPCClientError<AppRouter>,
 ): void {
-	if (!import.meta.env.DEV) return;
-	console.error("tRPC Error:", {
+	logger.error("tRPC Error", error, {
 		message: error.message,
 		data: error.data,
 		shape: error.shape,

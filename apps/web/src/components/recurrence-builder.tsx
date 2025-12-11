@@ -1,7 +1,7 @@
 import { addDays, addMonths, addWeeks, addYears, format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { AlertCircle, CalendarIcon, Sparkles } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -713,7 +713,7 @@ function OccurrencesPreview({
 }: {
 	occurrences: Date[];
 	showInfiniteHint: boolean;
-}) {
+}): JSX.Element | null {
 	if (occurrences.length === 0) return null;
 
 	return (
@@ -761,13 +761,12 @@ export function RecurrenceBuilder({
 	});
 
 	// Use provided start date or default to now
-	const startDate = useMemo(() => startDateProp || new Date(), [startDateProp]);
+	// React Compiler will automatically memoize this computation
+	const startDate = startDateProp || new Date();
 
 	// Calculate next occurrences for preview
-	const nextOccurrences = useMemo(
-		() => getNextOccurrences(config, startDate, 5),
-		[config, startDate],
-	);
+	// React Compiler will automatically memoize this computation
+	const nextOccurrences = getNextOccurrences(config, startDate, 5);
 
 	// Store the latest onChange callback in a ref to avoid dependency issues
 	const onChangeRef = useRef(onChange);
