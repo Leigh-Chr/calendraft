@@ -13,6 +13,160 @@ import { assertValidExternalUrl } from "../../lib/url-validator";
 import { checkCalendarLimit, verifyCalendarAccess } from "../../middleware";
 import { createEventFromParsed, validateFileSize } from "./helpers";
 
+/**
+ * Validate calendar exists and has source URL
+ */
+async function validateCalendarForRefresh(calendarId: string) {
+	const calendar = await prisma.calendar.findUnique({
+		where: { id: calendarId },
+		include: { events: true },
+	});
+
+	if (!calendar) {
+		throw new TRPCError({
+			code: "NOT_FOUND",
+			message: "Calendar not found",
+		});
+	}
+
+	if (!calendar.sourceUrl) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "This calendar has no source URL. It cannot be refreshed.",
+		});
+	}
+
+	return calendar;
+}
+
+/**
+ * Get HTTP error code and message from response status
+ */
+function getHttpError(
+	status: number,
+	url: string,
+): { code: string; message: string } {
+	if (status === 404) {
+		return {
+			code: "NOT_FOUND",
+			message: `Calendar URL not found (404). The calendar at ${url} is no longer available.`,
+		};
+	}
+
+	if (status >= 500) {
+		return {
+			code: "INTERNAL_SERVER_ERROR",
+			message: `Unable to retrieve calendar: ${status}`,
+		};
+	}
+
+	return {
+		code: "BAD_REQUEST",
+		message: `Unable to retrieve calendar: ${status}`,
+	};
+}
+
+/**
+ * Fetch ICS content from URL with error handling
+ */
+async function fetchIcsContent(url: string, timeout = 60000): Promise<string> {
+	try {
+		const response = await fetch(url, {
+			headers: {
+				Accept: "text/calendar, application/calendar+xml, */*",
+				"User-Agent": "Calendraft/1.0",
+			},
+			signal: AbortSignal.timeout(timeout),
+		});
+
+		if (!response.ok) {
+			const { code, message } = getHttpError(response.status, url);
+			throw new TRPCError({
+				code: code as "NOT_FOUND" | "INTERNAL_SERVER_ERROR" | "BAD_REQUEST",
+				message: message,
+			});
+		}
+
+		return await response.text();
+	} catch (error) {
+		if (error instanceof TRPCError) throw error;
+
+		if (error instanceof Error && error.name === "AbortError") {
+			throw new TRPCError({
+				code: "TIMEOUT",
+				message:
+					"Request timed out while fetching calendar. The server may be slow or unreachable.",
+			});
+		}
+
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: `Error retrieving calendar: ${error instanceof Error ? error.message : "Unknown error"}`,
+		});
+	}
+}
+
+/**
+ * Filter duplicate events from parsed events
+ */
+function filterDuplicateEvents(
+	parsedEvents: Array<{
+		uid?: string | null;
+		title: string;
+		startDate: Date;
+		endDate: Date;
+		location?: string | null;
+	}>,
+	existingEvents: Array<{
+		id: string;
+		uid?: string | null;
+		title: string;
+		startDate: Date;
+		endDate: Date;
+		location?: string | null;
+	}>,
+): { eventsToImport: typeof parsedEvents; skippedDuplicates: number } {
+	const newEventsForCheck = parsedEvents.map((e, idx) => ({
+		id: `new-${idx}`,
+		uid: e.uid ?? null,
+		title: e.title,
+		startDate: e.startDate,
+		endDate: e.endDate,
+		location: e.location ?? null,
+	}));
+
+	const existingEventsForCheck = existingEvents.map((e) => ({
+		id: e.id,
+		uid: e.uid ?? null,
+		title: e.title,
+		startDate: e.startDate,
+		endDate: e.endDate,
+		location: e.location ?? null,
+	}));
+
+	const { unique, duplicates } = findDuplicatesAgainstExisting(
+		newEventsForCheck,
+		existingEventsForCheck,
+		{
+			useUid: true,
+			useTitle: true,
+			dateTolerance: 60000, // 1 minute tolerance
+		},
+	);
+
+	const uniqueIndices = new Set(
+		unique.map((e) => Number.parseInt(e.id.replace("new-", ""), 10)),
+	);
+	const eventsToImport = parsedEvents.filter((_, idx) =>
+		uniqueIndices.has(idx),
+	);
+
+	return {
+		eventsToImport,
+		skippedDuplicates: duplicates.length,
+	};
+}
+
 export const calendarImportUrlRouter = router({
 	importIcsIntoCalendar: authOrAnonProcedure
 		.input(
@@ -209,28 +363,11 @@ export const calendarImportUrlRouter = router({
 			// Verify calendar access
 			await verifyCalendarAccess(input.calendarId, ctx);
 
-			// Fetch calendar to check sourceUrl
-			const calendar = await prisma.calendar.findUnique({
-				where: { id: input.calendarId },
-				include: { events: true },
-			});
-
-			if (!calendar) {
-				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Calendar not found",
-				});
-			}
-
-			if (!calendar.sourceUrl) {
-				throw new TRPCError({
-					code: "BAD_REQUEST",
-					message: "This calendar has no source URL. It cannot be refreshed.",
-				});
-			}
+			// Validate calendar exists and has source URL
+			const calendar = await validateCalendarForRefresh(input.calendarId);
 
 			// Validate URL against SSRF attacks
-			assertValidExternalUrl(calendar.sourceUrl);
+			assertValidExternalUrl(calendar.sourceUrl!);
 
 			// If replaceAll, delete all events first
 			let deletedCount = 0;
@@ -241,54 +378,8 @@ export const calendarImportUrlRouter = router({
 				deletedCount = deleteResult.count;
 			}
 
-			// Fetch the ICS content from the URL
-			let icsContent: string;
-			try {
-				const response = await fetch(calendar.sourceUrl, {
-					headers: {
-						Accept: "text/calendar, application/calendar+xml, */*",
-						"User-Agent": "Calendraft/1.0",
-					},
-					signal: AbortSignal.timeout(60000), // 60 second timeout
-				});
-
-				if (!response.ok) {
-					// Use appropriate error code based on HTTP status
-					const errorCode =
-						response.status === 404
-							? "NOT_FOUND"
-							: response.status >= 500
-								? "INTERNAL_SERVER_ERROR"
-								: "BAD_REQUEST";
-
-					const errorMessage =
-						response.status === 404
-							? `Calendar URL not found (404). The calendar at ${calendar.sourceUrl} is no longer available.`
-							: `Unable to retrieve calendar: ${response.status} ${response.statusText}`;
-
-					throw new TRPCError({
-						code: errorCode,
-						message: errorMessage,
-					});
-				}
-
-				icsContent = await response.text();
-			} catch (error) {
-				if (error instanceof TRPCError) throw error;
-				// Handle network errors, timeouts, etc.
-				if (error instanceof Error && error.name === "AbortError") {
-					throw new TRPCError({
-						code: "TIMEOUT",
-						message:
-							"Request timed out while fetching calendar. The server may be slow or unreachable.",
-					});
-				}
-				throw new TRPCError({
-					code: "BAD_REQUEST",
-					message: `Error retrieving calendar: ${error instanceof Error ? error.message : "Unknown error"}`,
-				});
-			}
-
+			// Fetch and parse ICS content
+			const icsContent = await fetchIcsContent(calendar.sourceUrl!);
 			validateFileSize(icsContent);
 			const parseResult = parseIcsFile(icsContent);
 
@@ -304,43 +395,12 @@ export const calendarImportUrlRouter = router({
 			let skippedDuplicates = 0;
 
 			if (input.skipDuplicates && !input.replaceAll) {
-				// Adapt parsed events to the duplicate check interface
-				const newEventsForCheck = parseResult.events.map((e, idx) => ({
-					id: `new-${idx}`,
-					uid: e.uid ?? null,
-					title: e.title,
-					startDate: e.startDate,
-					endDate: e.endDate,
-					location: e.location ?? null,
-				}));
-
-				const existingEventsForCheck = calendar.events.map((e) => ({
-					id: e.id,
-					uid: e.uid ?? null,
-					title: e.title,
-					startDate: e.startDate,
-					endDate: e.endDate,
-					location: e.location ?? null,
-				}));
-
-				const { unique, duplicates } = findDuplicatesAgainstExisting(
-					newEventsForCheck,
-					existingEventsForCheck,
-					{
-						useUid: true,
-						useTitle: true,
-						dateTolerance: 60000, // 1 minute tolerance
-					},
+				const result = filterDuplicateEvents(
+					parseResult.events,
+					calendar.events,
 				);
-
-				// Map back to original events
-				const uniqueIndices = new Set(
-					unique.map((e) => Number.parseInt(e.id.replace("new-", ""), 10)),
-				);
-				eventsToImport = parseResult.events.filter((_, idx) =>
-					uniqueIndices.has(idx),
-				);
-				skippedDuplicates = duplicates.length;
+				eventsToImport = result.eventsToImport;
+				skippedDuplicates = result.skippedDuplicates;
 			}
 
 			// Create events

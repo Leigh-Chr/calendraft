@@ -50,6 +50,7 @@ global.fetch = vi.fn();
 
 import prisma from "@calendraft/db";
 import type { Context } from "../../context";
+import { findDuplicatesAgainstExisting } from "../../lib/duplicate-detection";
 import { parseIcsFile } from "../../lib/ics-parser";
 import { verifyCalendarAccess } from "../../middleware";
 import { createEventFromParsed } from "../calendar/helpers";
@@ -113,6 +114,22 @@ describe("calendarImportUrlRouter", () => {
 			(createEventFromParsed as ReturnType<typeof vi.fn>).mockResolvedValue(
 				undefined,
 			);
+
+			// Mock findDuplicatesAgainstExisting to return all events as unique
+			// since calendar.events is empty, all new events should be unique
+			(
+				findDuplicatesAgainstExisting as ReturnType<typeof vi.fn>
+			).mockReturnValue({
+				unique: mockParsedEvents.map((e, idx) => ({
+					id: `new-${idx}`,
+					uid: e.uid ?? null,
+					title: e.title,
+					startDate: e.startDate,
+					endDate: e.endDate,
+					location: null,
+				})),
+				duplicates: [],
+			});
 
 			const caller = calendarImportUrlRouter.createCaller(mockContext);
 			const result = await caller.refreshFromUrl({

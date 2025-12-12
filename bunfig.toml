@@ -1,2 +1,7 @@
 [install]
 linker = "isolated"
+
+# Security Scanner API: Scanne automatiquement les packages avant installation
+# Bloque les packages vulnérables avant leur installation
+[install.security]
+scanner = "bun-osv-scanner"

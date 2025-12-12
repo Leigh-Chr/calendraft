@@ -93,6 +93,8 @@ const config: KnipConfig = {
 		"@tanstack/react-query",
 		// Used in seed files (not detected by knip)
 		"@noble/hashes",
+		// Core package used for types and utilities (may be used dynamically)
+		"@calendraft/core",
 	],
 };
 

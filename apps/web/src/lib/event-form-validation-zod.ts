@@ -85,6 +85,88 @@ function handleTopLevelError(
 }
 
 /**
+ * Check if dates are valid
+ */
+function areDatesValid(formData: EventFormData): boolean {
+	const startDateValid =
+		formData.startDate && !Number.isNaN(new Date(formData.startDate).getTime());
+	const endDateValid =
+		formData.endDate && !Number.isNaN(new Date(formData.endDate).getTime());
+	return startDateValid && endDateValid;
+}
+
+/**
+ * Check if an issue is a date format error
+ */
+function isDateFormatIssue(issue: {
+	path: (string | number)[];
+	message: string;
+	code: string;
+}): boolean {
+	const path = issue.path.join(".");
+	if (path !== "startDate" && path !== "endDate") {
+		return false;
+	}
+	return (
+		issue.message.includes("Invalid date format") ||
+		issue.message.includes("Date is required") ||
+		(issue.code === "custom" &&
+			issue.message.includes("Invalid date format")) ||
+		issue.code === "invalid_type"
+	);
+}
+
+/**
+ * Separate issues into date format errors and other errors
+ */
+function separateIssues(
+	issues: Array<{ path: (string | number)[]; message: string; code: string }>,
+): {
+	dateFormatIssues: typeof issues;
+	otherIssues: typeof issues;
+} {
+	const dateFormatIssues: typeof issues = [];
+	const otherIssues: typeof issues = [];
+
+	for (const issue of issues) {
+		if (isDateFormatIssue(issue)) {
+			dateFormatIssues.push(issue);
+		} else {
+			otherIssues.push(issue);
+		}
+	}
+
+	return { dateFormatIssues, otherIssues };
+}
+
+/**
+ * Process a single validation issue
+ */
+function processIssue(
+	errors: ValidationErrors,
+	issue: { path: (string | number)[]; message: string },
+): void {
+	const path = issue.path.join(".");
+
+	if (path.startsWith("attendees.")) {
+		handleAttendeeError(errors, path, issue.message);
+		return;
+	}
+
+	if (path.startsWith("alarms.")) {
+		handleAlarmError(errors, path, issue.message);
+		return;
+	}
+
+	if (path === "endDate" && issue.message.includes("after") && !errors.dates) {
+		errors.dates = "End date must be after start date";
+		return;
+	}
+
+	handleTopLevelError(errors, path, issue.message);
+}
+
+/**
  * Validate event form data using Zod schema
  * @param formData - Form data to validate
  * @returns Object containing validation errors, empty if valid
@@ -99,36 +181,13 @@ export function validateEventForm(formData: EventFormData): ValidationErrors {
 	const errors: ValidationErrors = {};
 
 	// Check if dates are invalid before processing Zod errors
-	// This handles cases where Zod doesn't return format errors but dates are still invalid
-	const startDateValid =
-		formData.startDate && !Number.isNaN(new Date(formData.startDate).getTime());
-	const endDateValid =
-		formData.endDate && !Number.isNaN(new Date(formData.endDate).getTime());
-
-	if (!startDateValid || !endDateValid) {
+	if (!areDatesValid(formData)) {
 		errors.dates = "Start and end dates must be valid";
-		return errors; // Return early if dates are invalid
+		return errors;
 	}
 
 	// Separate issues into date format errors and other errors
-	const dateFormatIssues: typeof result.error.issues = [];
-	const otherIssues: typeof result.error.issues = [];
-
-	for (const issue of result.error.issues) {
-		const path = issue.path.join(".");
-		if (
-			(path === "startDate" || path === "endDate") &&
-			(issue.message.includes("Invalid date format") ||
-				issue.message.includes("Date is required") ||
-				(issue.code === "custom" &&
-					issue.message.includes("Invalid date format")) ||
-				issue.code === "invalid_type")
-		) {
-			dateFormatIssues.push(issue);
-		} else {
-			otherIssues.push(issue);
-		}
-	}
+	const { dateFormatIssues, otherIssues } = separateIssues(result.error.issues);
 
 	// First pass: handle date format errors (highest priority)
 	if (dateFormatIssues.length > 0) {
@@ -137,22 +196,7 @@ export function validateEventForm(formData: EventFormData): ValidationErrors {
 
 	// Second pass: handle all other errors
 	for (const issue of otherIssues) {
-		const path = issue.path.join(".");
-
-		if (path.startsWith("attendees.")) {
-			handleAttendeeError(errors, path, issue.message);
-		} else if (path.startsWith("alarms.")) {
-			handleAlarmError(errors, path, issue.message);
-		} else if (
-			path === "endDate" &&
-			issue.message.includes("after") &&
-			!errors.dates
-		) {
-			// Map endDate errors about "after" to errors.dates, but only if dates not already set
-			errors.dates = "End date must be after start date";
-		} else {
-			handleTopLevelError(errors, path, issue.message);
-		}
+		processIssue(errors, issue);
 	}
 
 	return errors;
