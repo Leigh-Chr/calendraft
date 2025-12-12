@@ -193,7 +193,7 @@ export const calendarImportUrlRouter = router({
 
 	/**
 	 * Refresh a calendar from its source URL
-	 * Re-imports all events, optionally removing old events first
+	 * Simple manual refresh: fetch, parse, and import events
 	 */
 	refreshFromUrl: authOrAnonProcedure
 		.input(
@@ -206,18 +206,16 @@ export const calendarImportUrlRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			// First check if calendar exists (without ownership filter)
-			// Verify calendar access (optimized single query)
+			// Verify calendar access
 			await verifyCalendarAccess(input.calendarId, ctx);
 
-			// Fetch calendar with events (access already verified)
+			// Fetch calendar to check sourceUrl
 			const calendar = await prisma.calendar.findUnique({
 				where: { id: input.calendarId },
 				include: { events: true },
 			});
 
 			if (!calendar) {
-				// Should not happen after verifyCalendarAccess, but TypeScript safety
 				throw new TRPCError({
 					code: "NOT_FOUND",
 					message: "Calendar not found",
@@ -231,10 +229,19 @@ export const calendarImportUrlRouter = router({
 				});
 			}
 
-			// Validate URL against SSRF attacks (re-validate even from DB)
+			// Validate URL against SSRF attacks
 			assertValidExternalUrl(calendar.sourceUrl);
 
-			// Fetch the ICS content
+			// If replaceAll, delete all events first
+			let deletedCount = 0;
+			if (input.replaceAll) {
+				const deleteResult = await prisma.event.deleteMany({
+					where: { calendarId: input.calendarId },
+				});
+				deletedCount = deleteResult.count;
+			}
+
+			// Fetch the ICS content from the URL
 			let icsContent: string;
 			try {
 				const response = await fetch(calendar.sourceUrl, {
@@ -242,19 +249,40 @@ export const calendarImportUrlRouter = router({
 						Accept: "text/calendar, application/calendar+xml, */*",
 						"User-Agent": "Calendraft/1.0",
 					},
-					signal: AbortSignal.timeout(30000),
+					signal: AbortSignal.timeout(60000), // 60 second timeout
 				});
 
 				if (!response.ok) {
+					// Use appropriate error code based on HTTP status
+					const errorCode =
+						response.status === 404
+							? "NOT_FOUND"
+							: response.status >= 500
+								? "INTERNAL_SERVER_ERROR"
+								: "BAD_REQUEST";
+
+					const errorMessage =
+						response.status === 404
+							? `Calendar URL not found (404). The calendar at ${calendar.sourceUrl} is no longer available.`
+							: `Unable to retrieve calendar: ${response.status} ${response.statusText}`;
+
 					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: `Unable to retrieve calendar: ${response.status} ${response.statusText}`,
+						code: errorCode,
+						message: errorMessage,
 					});
 				}
 
 				icsContent = await response.text();
 			} catch (error) {
 				if (error instanceof TRPCError) throw error;
+				// Handle network errors, timeouts, etc.
+				if (error instanceof Error && error.name === "AbortError") {
+					throw new TRPCError({
+						code: "TIMEOUT",
+						message:
+							"Request timed out while fetching calendar. The server may be slow or unreachable.",
+					});
+				}
 				throw new TRPCError({
 					code: "BAD_REQUEST",
 					message: `Error retrieving calendar: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -271,21 +299,12 @@ export const calendarImportUrlRouter = router({
 				});
 			}
 
-			let deletedCount = 0;
-			let importedCount = 0;
-			let skippedCount = 0;
-
-			// Delete all existing events if replaceAll
-			if (input.replaceAll) {
-				const deleteResult = await prisma.event.deleteMany({
-					where: { calendarId: input.calendarId },
-				});
-				deletedCount = deleteResult.count;
-			}
-
-			// Filter duplicates if not replacing all
+			// Filter duplicates if requested
 			let eventsToImport = parseResult.events;
-			if (!input.replaceAll && input.skipDuplicates) {
+			let skippedDuplicates = 0;
+
+			if (input.skipDuplicates && !input.replaceAll) {
+				// Adapt parsed events to the duplicate check interface
 				const newEventsForCheck = parseResult.events.map((e, idx) => ({
 					id: `new-${idx}`,
 					uid: e.uid ?? null,
@@ -307,34 +326,42 @@ export const calendarImportUrlRouter = router({
 				const { unique, duplicates } = findDuplicatesAgainstExisting(
 					newEventsForCheck,
 					existingEventsForCheck,
-					{ useUid: true, useTitle: true, dateTolerance: 60000 },
+					{
+						useUid: true,
+						useTitle: true,
+						dateTolerance: 60000, // 1 minute tolerance
+					},
 				);
 
+				// Map back to original events
 				const uniqueIndices = new Set(
 					unique.map((e) => Number.parseInt(e.id.replace("new-", ""), 10)),
 				);
 				eventsToImport = parseResult.events.filter((_, idx) =>
 					uniqueIndices.has(idx),
 				);
-				skippedCount = duplicates.length;
+				skippedDuplicates = duplicates.length;
 			}
 
 			// Create events
-			for (const parsedEvent of eventsToImport) {
-				await createEventFromParsed(input.calendarId, parsedEvent);
-				importedCount++;
+			if (eventsToImport.length > 0) {
+				for (const parsedEvent of eventsToImport) {
+					await createEventFromParsed(input.calendarId, parsedEvent);
+				}
 			}
 
 			// Update lastSyncedAt
 			await prisma.calendar.update({
 				where: { id: input.calendarId },
-				data: { lastSyncedAt: new Date() },
+				data: {
+					lastSyncedAt: new Date(),
+				},
 			});
 
 			return {
-				importedEvents: importedCount,
+				importedEvents: eventsToImport.length,
 				deletedEvents: deletedCount,
-				skippedDuplicates: skippedCount,
+				skippedDuplicates,
 				warnings: parseResult.errors,
 			};
 		}),

@@ -7,6 +7,7 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
+import { formatDistanceToNow } from "date-fns";
 import {
 	ArrowLeft,
 	CalendarDays,
@@ -139,13 +140,14 @@ function CalendarViewComponent() {
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
+
 				toast.success(
-					`Calendar updated! ${data.importedEvents} new event(s), ${data.skippedDuplicates} duplicate(s) skipped.`,
+					`Calendar refreshed! ${data.importedEvents} event(s) imported, ${data.skippedDuplicates} duplicate(s) skipped.`,
 				);
 			},
 			onError: (error: unknown) => {
 				const message =
-					error instanceof Error ? error.message : "Error during update";
+					error instanceof Error ? error.message : "Error during refresh";
 				toast.error(message);
 			},
 		}),
@@ -254,7 +256,11 @@ function CalendarViewComponent() {
 								size="sm"
 								onClick={handleRefreshFromUrl}
 								disabled={refreshFromUrlMutation.isPending}
-								title={`Refresh from ${calendar.sourceUrl}`}
+								title={
+									calendar.lastSyncedAt
+										? `Last synced ${formatDistanceToNow(new Date(calendar.lastSyncedAt), { addSuffix: true })}. Click to refresh.`
+										: `Refresh from ${calendar.sourceUrl}`
+								}
 							>
 								{refreshFromUrlMutation.isPending ? (
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" />

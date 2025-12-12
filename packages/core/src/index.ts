@@ -16,8 +16,10 @@ export type {
 	RecurrenceFrequency,
 	Weekday,
 } from "./types";
-
-export { buildRRule, parseRRule } from "./types";
+export {
+	buildRRule,
+	parseRRule,
+} from "./types";
 
 // ----- Utils -----
 

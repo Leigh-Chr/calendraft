@@ -42,7 +42,9 @@ export default defineConfig(({ mode }) => {
 		},
 		plugins: [
 			tailwindcss(),
-			tanstackRouter({}),
+			tanstackRouter({
+				exclude: ["**/__tests__/**", "**/*.test.tsx", "**/*.test.ts"],
+			}),
 			react({
 				babel: {
 					plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],

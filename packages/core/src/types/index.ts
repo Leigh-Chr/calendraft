@@ -2,7 +2,10 @@
  * Core types exports
  */
 
-export type { CalendarEntity, CalendarSummary } from "./calendar";
+export type {
+	CalendarEntity,
+	CalendarSummary,
+} from "./calendar";
 export type {
 	AlarmData,
 	AttendeeData,

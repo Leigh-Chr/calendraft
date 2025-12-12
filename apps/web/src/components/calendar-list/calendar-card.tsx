@@ -3,7 +3,7 @@
  * Displays a single calendar with actions and upcoming events preview
  */
 
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import {
 	Edit,
@@ -146,7 +146,7 @@ export function CalendarCard({
 							{calendar.name}
 						</CardTitle>
 						<CalendarGroupBadges calendarId={calendar.id} />
-						<CardDescription className="mt-0.5 flex items-center gap-2">
+						<CardDescription className="mt-0.5 flex flex-wrap items-center gap-2">
 							<span>
 								{calendar.eventCount} event
 								{calendar.eventCount !== 1 ? "s" : ""}
@@ -154,7 +154,11 @@ export function CalendarCard({
 							{calendar.sourceUrl && (
 								<span
 									className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-1.5 py-0.5 font-medium text-blue-600 text-xs dark:text-blue-400"
-									title={`Subscribed to ${calendar.sourceUrl}`}
+									title={
+										calendar.lastSyncedAt
+											? `Subscribed to ${calendar.sourceUrl}. Last synced ${formatDistanceToNow(new Date(calendar.lastSyncedAt), { addSuffix: true })}`
+											: `Subscribed to ${calendar.sourceUrl}`
+									}
 								>
 									<Globe className="h-3 w-3" />
 									Subscribed

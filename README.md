@@ -13,6 +13,8 @@ The goal is to offer a modern and intuitive experience that allows users to work
 
 ### Calendar Management
 - **Import .ics files** - Import your calendars from any source
+- **Import from URL** - Import calendars from remote URLs (Google Calendar, iCloud, Outlook, etc.)
+- **Manual refresh** - Refresh imported calendars on demand with the "Refresh" button
 - **Import into existing calendar** - Add events from a .ics file to an existing calendar
 - **Create empty calendars** - Create new calendars to organize your events
 - **Merge calendars** - Combine multiple calendars into one with automatic duplicate detection
@@ -277,23 +279,14 @@ calendraft/
 ### Typical Workflow
 
 1. **Import a calendar**: Click on "Import a .ics file" from the home page
-2. **Create an empty calendar**: Click on "Create a calendar" to start from scratch
-3. **Add events**: In the calendar view, click on "Add an event" or click directly on a time slot in the month view
-4. **Edit/Delete**: Use the edit and delete buttons in the list view
-5. **Merge**: Select multiple calendars and merge them into one
-6. **Clean up**: Remove duplicates from a calendar with the "Clean up" button
-7. **Export**: Download your modified calendar in .ics format
-
-## Available Scripts
-
-- `bun run dev` - Start all applications in development mode
-- `bun run build` - Compile all applications for production
-- `bun run dev:web` - Start only the web application
-- `bun run dev:server` - Start only the backend server
-- `bun run check-types` - Check TypeScript types in all applications
-- `bun run db:push` - Push schema changes to the database
-- `bun run db:studio` - Open Prisma Studio to visualize the database
-- `bun run db:generate` - Generate Prisma client
+2. **Import from URL**: Import calendars from remote URLs (Google Calendar, iCloud, Outlook, etc.)
+3. **Create an empty calendar**: Click on "Create a calendar" to start from scratch
+4. **Add events**: In the calendar view, click on "Add an event" or click directly on a time slot in the month view
+5. **Edit/Delete**: Use the edit and delete buttons in the list view
+6. **Refresh**: Use the "Refresh" button to update calendars imported from URLs
+7. **Merge**: Select multiple calendars and merge them into one
+8. **Clean up**: Remove duplicates from a calendar with the "Clean up" button
+9. **Export**: Download your modified calendar in .ics format
 - `bun run db:migrate` - Apply database migrations
 - `bun run db:seed` - Seed database with test data (development only)
 - `bun run check` - Run formatting and linting with Biome

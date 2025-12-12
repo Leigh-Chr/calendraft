@@ -135,14 +135,20 @@ trpc.calendar.importFromUrl.mutate({
 });
 // Returns: { calendar: Calendar, importedEvents: number, warnings: string[] }
 
-// Refresh calendar from its source URL
+// Refresh calendar from its source URL (manual refresh)
 trpc.calendar.refreshFromUrl.mutate({
   calendarId: 'calendar-id',
   replaceAll: false,        // optional: if true, removes all existing events first
   skipDuplicates: true      // optional: if true, skips events that already exist
 });
-// Returns: { importedEvents: number, deletedEvents: number, skippedDuplicates: number, warnings: string[] }
+// Returns: { 
+//   importedEvents: number, 
+//   deletedEvents: number, 
+//   skippedDuplicates: number, 
+//   warnings: string[]
+// }
 // Note: Calendar must have a sourceUrl (created via importFromUrl)
+// Simple fetch, parse, and import - no automatic synchronization
 
 // Merge multiple calendars
 trpc.calendar.merge.mutate({
@@ -401,6 +407,23 @@ export {
 - `@calendraft/db` - Database
 - `@calendraft/schemas` - Zod validation
 - `@calendraft/ics-utils` - ICS parsing/generation
+
+## Calendar Refresh
+
+Calendraft supports manual refresh of calendars imported from remote URLs (WebCal/iCal format).
+
+### How it works
+
+1. **Import from URL**: When you import a calendar from a URL, the `sourceUrl` is stored
+2. **Manual refresh**: Use the `refreshFromUrl` endpoint to fetch and update the calendar on demand
+3. **Simple process**: Fetch the ICS file, parse it, and import events (with optional duplicate detection)
+4. **Last sync time**: The `lastSyncedAt` field tracks when the calendar was last refreshed
+
+### Usage
+
+- **Refresh button**: Available in the calendar view for calendars with a `sourceUrl`
+- **Replace all**: Option to remove all existing events before importing
+- **Skip duplicates**: Option to skip events that already exist (based on UID or title+dates)
 
 ## See also
 

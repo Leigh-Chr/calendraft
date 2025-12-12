@@ -12,6 +12,8 @@ export interface CalendarEntity {
 	description?: string | null;
 	userId?: string | null;
 	anonymousId?: string | null;
+	sourceUrl?: string | null;
+	lastSyncedAt?: Date | null;
 	createdAt: Date;
 	updatedAt: Date;
 	events?: EventEntity[];
