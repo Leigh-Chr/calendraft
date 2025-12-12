@@ -240,6 +240,48 @@ app.get("/health", async (c) => {
 	}
 });
 
+// Dynamic sitemap.xml generation
+app.get("/sitemap.xml", (c) => {
+	const baseUrl = "https://calendraft.app";
+	const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+
+	const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Landing page - Main entry point -->
+  <url>
+    <loc>${baseUrl}/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <!-- Public pages for creating/importing calendars -->
+  <url>
+    <loc>${baseUrl}/calendars/new</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/calendars/import</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <!-- Authentication page -->
+  <url>
+    <loc>${baseUrl}/login</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <!-- Note: /calendars is excluded (private user content, noindex) -->
+</urlset>`;
+
+	return c.text(sitemap, 200, {
+		"Content-Type": "application/xml; charset=utf-8",
+	});
+});
+
 // Global error handler for uncaught exceptions
 app.onError((err, c) => {
 	Sentry.captureException(err);

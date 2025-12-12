@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { Footer } from "@/components/footer";
 import { GlobalFeatures } from "@/components/global-features";
 import Header from "@/components/header";
 import { PWAUpdatePrompt } from "@/components/pwa-update-prompt";
@@ -136,6 +137,7 @@ function RootComponent() {
 						<main id="main-content" className="flex-1" tabIndex={-1}>
 							<Outlet />
 						</main>
+						<Footer />
 					</div>
 				</ErrorBoundary>
 				<Toaster richColors />

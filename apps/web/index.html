@@ -4,16 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     
-    <!-- Primary Meta Tags -->
-    <title>Calendraft - Manage your .ics calendars simply</title>
-    <meta name="title" content="Calendraft - Manage your .ics calendars simply" />
-    <meta name="description" content="Import, create, edit, and merge your ICS calendars in a few clicks. Compatible with Google Calendar, Apple Calendar, Outlook. Free and open-source." />
-    <meta name="keywords" content="calendar, ics, ical, google calendar, apple calendar, outlook, merge, import, export, pwa, free" />
-    <meta name="author" content="Calendraft" />
-    <meta name="robots" content="index, follow" />
-    <meta name="language" content="English" />
-    <meta name="revisit-after" content="7 days" />
-    
     <!-- Content Security Policy -->
     <!-- Note: frame-ancestors is not supported in meta tags, it must be set via HTTP headers -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:* wss://localhost:* https://*.sentry.io wss://*.sentry.io; base-uri 'self'; form-action 'self';" />
@@ -24,29 +14,6 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="msapplication-TileColor" content="#2a2218" />
     
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://calendraft.app/" />
-    <meta property="og:title" content="Calendraft - Manage your .ics calendars simply" />
-    <meta property="og:description" content="Import, create, edit, and merge your ICS calendars in a few clicks. Free and open-source PWA application." />
-    <meta property="og:image" content="https://calendraft.app/og-image.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Calendraft - ICS Calendar Manager" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:site_name" content="Calendraft" />
-    
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://calendraft.app/" />
-    <meta name="twitter:title" content="Calendraft - Manage your .ics calendars simply" />
-    <meta name="twitter:description" content="Import, create, edit, and merge your ICS calendars in a few clicks. Free and open-source PWA application." />
-    <meta name="twitter:image" content="https://calendraft.app/og-image.png" />
-    <meta name="twitter:image:alt" content="Calendraft - ICS Calendar Manager" />
-    
-    <!-- Canonical -->
-    <link rel="canonical" href="https://calendraft.app/" />
-    
     <!-- PWA Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -54,6 +21,11 @@
     <meta name="apple-mobile-web-app-title" content="Calendraft" />
     <meta name="application-name" content="Calendraft" />
     <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Performance: Preload critical resources -->
+    <link rel="preload" as="image" href="/og-image.png" fetchpriority="high" />
+    <link rel="preconnect" href="https://o4506871232004096.ingest.sentry.io" />
+    <link rel="dns-prefetch" href="https://o4506871232004096.ingest.sentry.io" />
     
     <!-- Favicon & Icons -->
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
@@ -66,30 +38,55 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Calendraft",
-      "description": "Import, create, edit, and merge your ICS calendars in a few clicks. Compatible with Google Calendar, Apple Calendar, Outlook.",
-      "url": "https://calendraft.app",
-      "applicationCategory": "ProductivityApplication",
-      "operatingSystem": "Any",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "EUR"
-      },
-      "featureList": [
-        "Import ICS files",
-        "Export to Google Calendar, Apple Calendar, Outlook",
-        "Merge calendars",
-        "Offline mode (PWA)",
-        "Cloud sync"
-      ],
-      "browserRequirements": "Requires JavaScript. Requires HTML5.",
-      "softwareVersion": "1.0.0",
-      "author": {
-        "@type": "Organization",
-        "name": "Calendraft"
-      }
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://calendraft.app/#webapp",
+          "name": "Calendraft",
+          "description": "Import, create, edit, and merge your ICS calendars in a few clicks. Compatible with Google Calendar, Apple Calendar, Outlook.",
+          "url": "https://calendraft.app",
+          "applicationCategory": "ProductivityApplication",
+          "applicationSubCategory": "Calendar Management",
+          "operatingSystem": ["Web Browser", "PWA"],
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          },
+          "featureList": [
+            "Import ICS files",
+            "Export to Google Calendar, Apple Calendar, Outlook",
+            "Merge calendars",
+            "Offline mode (PWA)",
+            "Cloud sync"
+          ],
+          "browserRequirements": "Requires JavaScript. Requires HTML5.",
+          "softwareVersion": "1.0.0",
+          "author": {
+            "@id": "https://calendraft.app/#organization"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://calendraft.app/#organization",
+          "name": "Calendraft",
+          "url": "https://calendraft.app",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://calendraft.app/pwa-512x512.png",
+            "width": 512,
+            "height": 512
+          },
+          "sameAs": [
+            "https://github.com/Leigh-Chr/calendraft"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "Support",
+            "url": "https://calendraft.app"
+          }
+        }
+      ]
     }
     </script>
   </head>

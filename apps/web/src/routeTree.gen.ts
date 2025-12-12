@@ -16,6 +16,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CheckEmailRouteImport } from './routes/check-email'
 import { Route as CalendarsRouteImport } from './routes/calendars'
+import { Route as R404RouteImport } from './routes/404'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareTokenRouteImport } from './routes/share/$token'
 import { Route as CalendarsNewRouteImport } from './routes/calendars/new'
@@ -60,6 +61,11 @@ const CheckEmailRoute = CheckEmailRouteImport.update({
 const CalendarsRoute = CalendarsRouteImport.update({
   id: '/calendars',
   path: '/calendars',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R404Route = R404RouteImport.update({
+  id: '/404',
+  path: '/404',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -118,6 +124,7 @@ const CalendarsCalendarIdEventsEventIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/calendars': typeof CalendarsRouteWithChildren
   '/check-email': typeof CheckEmailRoute
   '/dashboard': typeof DashboardRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/calendars': typeof CalendarsRouteWithChildren
   '/check-email': typeof CheckEmailRoute
   '/dashboard': typeof DashboardRoute
@@ -157,6 +165,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/calendars': typeof CalendarsRouteWithChildren
   '/check-email': typeof CheckEmailRoute
   '/dashboard': typeof DashboardRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/404'
     | '/calendars'
     | '/check-email'
     | '/dashboard'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/404'
     | '/calendars'
     | '/check-email'
     | '/dashboard'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/404'
     | '/calendars'
     | '/check-email'
     | '/dashboard'
@@ -236,6 +248,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  R404Route: typeof R404Route
   CalendarsRoute: typeof CalendarsRouteWithChildren
   CheckEmailRoute: typeof CheckEmailRoute
   DashboardRoute: typeof DashboardRoute
@@ -295,6 +308,13 @@ declare module '@tanstack/react-router' {
       path: '/calendars'
       fullPath: '/calendars'
       preLoaderRoute: typeof CalendarsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/404': {
+      id: '/404'
+      path: '/404'
+      fullPath: '/404'
+      preLoaderRoute: typeof R404RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -407,6 +427,7 @@ const CalendarsRouteWithChildren = CalendarsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  R404Route: R404Route,
   CalendarsRoute: CalendarsRouteWithChildren,
   CheckEmailRoute: CheckEmailRoute,
   DashboardRoute: DashboardRoute,
