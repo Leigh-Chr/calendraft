@@ -28,12 +28,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 	head: () => ({
 		meta: [
 			{
-				title: "Calendraft - Manage your .ics calendars simply",
+				title: "Calendraft - Calendar management simplified",
 			},
 			{
 				name: "description",
 				content:
-					"Import, create, edit, and merge your ICS calendars in a few clicks. Compatible with Google Calendar, Apple Calendar, Outlook. Free and open-source.",
+					"Free, open-source calendar manager. Import, edit, merge your calendar files in seconds. No account required, works offline.",
 			},
 			// Open Graph
 			{

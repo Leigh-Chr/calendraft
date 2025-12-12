@@ -17,9 +17,9 @@ import {
 import { Button } from "@/components/ui/button";
 
 const BASE_URL = "https://calendraft.app";
-const TITLE = "Calendraft - Manage your .ics calendars simply";
+const TITLE = "Calendraft - Calendar management simplified";
 const DESCRIPTION =
-	"Import, create, edit, and merge your ICS calendars in a few clicks. Compatible with Google Calendar, Apple Calendar, Outlook. Free and open-source.";
+	"Free, open-source calendar manager. Import, edit, merge your calendar files in seconds. No account required, works offline.";
 
 export const Route = createFileRoute("/")({
 	component: LandingPage,
@@ -76,7 +76,7 @@ function LandingPage() {
 						<div className="fade-in slide-in-from-bottom-3 mb-8 inline-flex animate-in items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-small duration-500">
 							<Sparkles className="size-4 text-primary" aria-hidden="true" />
 							<span className="text-foreground/80">
-								PWA Application • Works offline
+								Free & Open Source • No Account Required • Works Offline
 							</span>
 						</div>
 
@@ -85,8 +85,7 @@ function LandingPage() {
 							id="hero-heading"
 							className="fade-in slide-in-from-bottom-4 mb-6 animate-in text-hero duration-700"
 						>
-							Your <span className="font-mono text-primary">.ics</span>{" "}
-							calendars
+							Calendar management,
 							<br />
 							<span className="bg-gradient-to-r from-primary via-primary/90 to-primary bg-clip-text text-transparent">
 								simplified
@@ -96,7 +95,7 @@ function LandingPage() {
 						{/* Subtitle */}
 						<p className="fade-in slide-in-from-bottom-5 mx-auto mb-10 max-w-2xl animate-in text-body-large text-muted-foreground duration-1000">
 							Import, create, edit, and merge your calendars in just a few
-							clicks. Compatible with{" "}
+							clicks. Works with{" "}
 							<span className="font-medium text-foreground">
 								Google Calendar
 							</span>
@@ -122,7 +121,7 @@ function LandingPage() {
 							<Button size="lg" variant="outline" className="h-12" asChild>
 								<Link to="/calendars/import">
 									<FileUp className="mr-2 size-4" aria-hidden="true" />
-									Import a .ics
+									Import calendar
 								</Link>
 							</Button>
 						</div>
@@ -162,7 +161,7 @@ function LandingPage() {
 				<div className="container mx-auto px-4 py-20 sm:py-24">
 					<div className="mx-auto mb-16 max-w-2xl text-center">
 						<h2 id="features-heading" className="mb-8 text-display">
-							Everything you need
+							Simple, powerful features
 						</h2>
 						<p className="text-muted-foreground">
 							Powerful tools to manage your calendars, without complexity.
@@ -174,7 +173,7 @@ function LandingPage() {
 						<BentoCard
 							icon={FileUp}
 							title="Import flexible"
-							description="Import your .ics files from any source. Drag and drop or select."
+							description="Import calendar files from any source. Drag and drop or select."
 							delay={0}
 						/>
 						<BentoCard
@@ -204,7 +203,7 @@ function LandingPage() {
 						<BentoCard
 							icon={Zap}
 							title="Offline Mode"
-							description="PWA application that works even without connection."
+							description="Works offline—access your calendars anywhere, anytime."
 							delay={250}
 						/>
 					</div>
@@ -235,7 +234,7 @@ function LandingPage() {
 						<StepCard
 							number="01"
 							title="Import or create"
-							description="Import an existing .ics file or create a new empty calendar."
+							description="Import an existing calendar file or create a new empty calendar."
 							delay={0}
 						/>
 						<StepCard
@@ -247,7 +246,7 @@ function LandingPage() {
 						<StepCard
 							number="03"
 							title="Export anywhere"
-							description="Download in .ics format, compatible with all applications."
+							description="Download in .ics format, works with all applications."
 							delay={200}
 						/>
 					</div>
@@ -418,8 +417,7 @@ function LandingPage() {
 								<span>Calendraft</span>
 							</Link>
 							<p className="text-body text-muted-foreground">
-								Manage your <span className="font-mono text-primary">.ics</span>{" "}
-								calendars simply.
+								Manage your calendars simply.
 							</p>
 						</div>
 
@@ -453,7 +451,7 @@ function LandingPage() {
 										to="/calendars/import"
 										className="rounded-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 									>
-										Import a .ics
+										Import calendar
 									</Link>
 								</li>
 							</ul>

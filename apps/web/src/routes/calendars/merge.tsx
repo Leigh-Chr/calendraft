@@ -86,7 +86,7 @@ function MergeCalendarsComponent() {
 			onSuccess: (data) => {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
 				toast.success(
-					`Calendars merged! ${data.mergedEvents} event(s), ${data.removedDuplicates} duplicate(s) removed.`,
+					`Calendars merged! ${data.mergedEvents} event(s), ${data.removedDuplicates} duplicate(s) cleaned up.`,
 				);
 				navigate({ to: `/calendars/${data.calendar.id}` });
 			},

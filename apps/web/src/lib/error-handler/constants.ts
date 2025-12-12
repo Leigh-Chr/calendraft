@@ -7,7 +7,7 @@ import type { ErrorInfo } from "./types";
 export const ERROR_MESSAGES: Record<string, ErrorInfo> = {
 	UNAUTHORIZED: {
 		title: "Authentication Required",
-		description: "You must be logged in to perform this action.",
+		description: "Please sign in to continue.",
 	},
 	FORBIDDEN: {
 		title: "Access Denied",
@@ -15,7 +15,7 @@ export const ERROR_MESSAGES: Record<string, ErrorInfo> = {
 	},
 	NOT_FOUND: {
 		title: "Resource Not Found",
-		description: "The requested resource does not exist or has been deleted.",
+		description: "This calendar or event doesn't exist or has been deleted.",
 	},
 	BAD_REQUEST: {
 		title: "Invalid Request",

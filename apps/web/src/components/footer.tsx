@@ -12,8 +12,8 @@ export function Footer() {
 					<div className="space-y-3">
 						<h3 className="font-semibold text-base">Calendraft</h3>
 						<p className="text-muted-foreground text-sm">
-							Manage your .ics calendars simply. Import, create, edit, and merge
-							calendars in a few clicks.
+							Free, open-source calendar management. Import, create, edit, and
+							merge your calendars—no complexity, no vendor lock-in.
 						</p>
 					</div>
 

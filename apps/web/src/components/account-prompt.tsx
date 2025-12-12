@@ -134,10 +134,10 @@ export function AccountPrompt({
 				<div className="flex items-start justify-between">
 					<div>
 						<CardTitle className="text-heading-3">
-							Save your calendars
+							Keep your calendars safe
 						</CardTitle>
 						<CardDescription>
-							Create a free account to never lose your data
+							Back up your calendars in the cloud
 						</CardDescription>
 					</div>
 					{dismissible && (

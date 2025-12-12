@@ -18,7 +18,8 @@ export const Route = createFileRoute("/404")({
 			{ title: "Page Not Found - Calendraft" },
 			{
 				name: "description",
-				content: "The page you're looking for doesn't exist.",
+				content:
+					"The page you're looking for doesn't exist. Try going back to your calendars or start from the home page.",
 			},
 			{ name: "robots", content: "noindex, follow" },
 		],

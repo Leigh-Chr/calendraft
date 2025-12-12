@@ -23,7 +23,7 @@ export const Route = createFileRoute("/calendars/import")({
 	component: ImportCalendarComponent,
 	head: () => ({
 		meta: [
-			{ title: "Import a .ics calendar - Calendraft" },
+			{ title: "Import a calendar - Calendraft" },
 			{
 				name: "description",
 				content:
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/calendars/import")({
 			},
 			{
 				property: "og:title",
-				content: "Import a .ics calendar - Calendraft",
+				content: "Import a calendar - Calendraft",
 			},
 			{
 				property: "og:description",
@@ -59,7 +59,7 @@ function ImportCalendarComponent() {
 		trpc.calendar.importIcs.mutationOptions({
 			onSuccess: (data) => {
 				toast.success(
-					`Calendar imported successfully! ${data.importedEvents} event(s) imported.`,
+					`Calendar imported! ${data.importedEvents} events ready to use.`,
 				);
 				navigate({ to: `/calendars/${data.calendar.id}` });
 			},
@@ -75,7 +75,7 @@ function ImportCalendarComponent() {
 		trpc.calendar.importFromUrl.mutationOptions({
 			onSuccess: (data) => {
 				toast.success(
-					`Calendar imported successfully! ${data.importedEvents} event(s) imported.`,
+					`Calendar imported! ${data.importedEvents} events ready to use.`,
 				);
 				navigate({ to: `/calendars/${data.calendar.id}` });
 			},
@@ -142,11 +142,11 @@ function ImportCalendarComponent() {
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Upload className="h-5 w-5" />
-							Import a .ics calendar
+							Import a calendar
 						</CardTitle>
 						<CardDescription>
-							Import a calendar file from your device or from a URL. Compatible
-							with Google Calendar, Apple Calendar, Outlook, and all iCalendar
+							Import a calendar file from your device or from a URL. Works with
+							Google Calendar, Apple Calendar, Outlook, and all iCalendar
 							formats.
 						</CardDescription>
 					</CardHeader>

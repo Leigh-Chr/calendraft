@@ -81,16 +81,16 @@ export const Route = createFileRoute("/share/$token")({
 		// Default meta tags
 		let title = "Shared calendar - Calendraft";
 		let description =
-			"Download this shared calendar in .ics format compatible with all calendar applications.";
+			"Download this shared calendar in .ics format. Works with all calendar applications.";
 
 		// Use loader data if available
 		if (loaderData) {
 			if (loaderData.type === "single") {
 				title = `${loaderData.calendarName} - Shared Calendar - Calendraft`;
-				description = `Calendar "${loaderData.calendarName}" with ${loaderData.eventCount} event${loaderData.eventCount !== 1 ? "s" : ""}. Download in .ics format compatible with all calendar applications.`;
+				description = `Calendar "${loaderData.calendarName}" with ${loaderData.eventCount} event${loaderData.eventCount !== 1 ? "s" : ""}. Ready to download—works with Google Calendar, Apple Calendar, Outlook, and more.`;
 			} else if (loaderData.type === "bundle") {
 				title = `${loaderData.bundleName || "Calendars Bundle"} - Shared Bundle - Calendraft`;
-				description = `Bundle "${loaderData.bundleName || "Calendars"}" with ${loaderData.calendarCount} calendar${loaderData.calendarCount !== 1 ? "s" : ""} and ${loaderData.totalEvents} total events. Download in .ics format.`;
+				description = `Bundle "${loaderData.bundleName || "Calendars"}" with ${loaderData.calendarCount} calendar${loaderData.calendarCount !== 1 ? "s" : ""} and ${loaderData.totalEvents} total events. Ready to download—works with Google Calendar, Apple Calendar, Outlook, and more.`;
 			}
 		}
 
@@ -122,13 +122,13 @@ export const Route = createFileRoute("/share/$token")({
 function getErrorMessageForReason(reason: string): string {
 	switch (reason) {
 		case "not_found":
-			return "This sharing link is not valid or has expired.";
+			return "This link is no longer available. It may have expired or been removed.";
 		case "disabled":
-			return "This sharing link has been disabled.";
+			return "This link is no longer available. It may have been disabled.";
 		case "expired":
-			return "This sharing link has expired.";
+			return "This link is no longer available. It may have expired.";
 		default:
-			return "This sharing link is not valid.";
+			return "This link is no longer available.";
 	}
 }
 
@@ -665,7 +665,8 @@ function SharePage() {
 	// Error state
 	if (error && !isLoading) {
 		const errorMessage =
-			error.message || "This sharing link is not valid or has expired.";
+			error.message ||
+			"This link is no longer available. It may have expired or been removed.";
 		return <ShareErrorView errorMessage={errorMessage} />;
 	}
 

@@ -27,12 +27,12 @@ export const Route = createFileRoute("/calendars/new")({
 			{
 				name: "description",
 				content:
-					"Create a new blank ICS calendar in seconds. Then add your events and export them to Google Calendar, Apple Calendar, or Outlook.",
+					"Create a new calendar in seconds. Then add your events and export to any calendar app—Google Calendar, Apple Calendar, Outlook, and more.",
 			},
 			{ property: "og:title", content: "Create a calendar - Calendraft" },
 			{
 				property: "og:description",
-				content: "Create a new blank ICS calendar in seconds.",
+				content: "Create a new calendar in seconds.",
 			},
 			{ property: "og:url", content: `${BASE_URL}/calendars/new` },
 		],
@@ -69,7 +69,7 @@ function NewCalendarComponent() {
 	const handleCreate = () => {
 		// Validation
 		if (!name.trim()) {
-			toast.error("Calendar name cannot be empty");
+			toast.error("Please enter a calendar name");
 			return;
 		}
 
@@ -88,7 +88,7 @@ function NewCalendarComponent() {
 			{ name: name.trim(), color },
 			{
 				onSuccess: (calendar) => {
-					toast.success("Calendar created successfully!");
+					toast.success("Calendar created! Start adding events.");
 					navigate({ to: `/calendars/${calendar.id}` });
 				},
 				onError: (error) => {

@@ -107,7 +107,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 			},
 			{
 				id: "import",
-				label: "Import a .ics",
+				label: "Import calendar",
 				icon: <FileUp className="h-4 w-4" />,
 				shortcut: "I",
 				action: () => closeAndNavigate("/calendars/import"),

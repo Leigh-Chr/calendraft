@@ -115,7 +115,7 @@ function CalendarViewComponent() {
 				});
 				if (data.removedCount > 0) {
 					toast.success(
-						`${data.removedCount} duplicate(s) removed. ${data.remainingEvents} event(s) remaining.`,
+						`${data.removedCount} duplicate(s) cleaned up. ${data.remainingEvents} event(s) remaining.`,
 					);
 				} else {
 					toast.info("No duplicates found in this calendar.");
