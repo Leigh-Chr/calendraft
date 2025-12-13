@@ -115,6 +115,10 @@ export const trpcClient = createTRPCClient<AppRouter>({
 	links: [
 		httpBatchLink({
 			url: `${serverUrl}/trpc`,
+			// Optimize batching: batch up to 10 requests, wait max 10ms
+			// This reduces network overhead while maintaining low latency
+			maxBatchSize: 10,
+			batchDelay: 10,
 			fetch(url, options) {
 				// Add anonymous ID header if user is not authenticated
 				const headers = new Headers(options?.headers);

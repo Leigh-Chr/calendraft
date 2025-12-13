@@ -14,7 +14,21 @@ const connectionString = env.DATABASE_URL;
 
 const adapter = new PrismaPg({ connectionString });
 
-const prisma = new PrismaClient({ adapter });
+// Singleton pattern for long-running processes (recommended by Prisma)
+// This prevents multiple PrismaClient instances and connection pool exhaustion
+// See: https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/databases-connections#long-running-processes
+const globalForPrisma = globalThis as unknown as {
+	prisma?: PrismaClient;
+};
+
+const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
+
+// In development, store in global to prevent multiple instances during hot-reload
+// In production, module caching should already prevent multiple instances,
+// but this pattern is an explicit best practice recommended by Prisma
+if (process.env.NODE_ENV !== "production") {
+	globalForPrisma.prisma = prisma;
+}
 
 export default prisma;
 

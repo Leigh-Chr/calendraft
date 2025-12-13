@@ -5,6 +5,7 @@
 # ===================================
 
 # Stage 1: Build
+# Using specific version tag instead of :latest for reproducibility
 FROM oven/bun:1.3.1-alpine AS builder
 
 WORKDIR /app
@@ -45,6 +46,7 @@ RUN ./node_modules/.bin/turbo build --filter=server...
 
 # -----------------------------------
 # Stage 2: Production runtime
+# Using specific version tag instead of :latest for reproducibility
 FROM oven/bun:1.3.1-alpine AS runner
 
 WORKDIR /app
@@ -97,15 +99,23 @@ RUN mkdir -p node_modules/@calendraft && \
 # Set ownership
 RUN chown -R bunjs:nodejs /app
 
+# Create a non-writable directory for runtime data if needed
+# (Currently not needed, but good practice for future use)
+
 ENV NODE_ENV=production
 ENV PORT=3000
 
+# Switch to non-root user for security
 USER bunjs
 WORKDIR /app/apps/server
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+# Healthcheck with proper error handling
+# curl is available in bun:alpine image
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
 
+# Start the server using the start script from package.json
+# This executes: bun run dist/index.mjs
 CMD ["bun", "run", "start"]

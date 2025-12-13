@@ -5,6 +5,7 @@
 # ===================================
 
 # Stage 1: Build application
+# Using specific version tag instead of :latest for reproducibility
 FROM oven/bun:1.3.1-alpine AS builder
 
 WORKDIR /app
@@ -54,20 +55,33 @@ RUN cd apps/web && NODE_ENV=production ./node_modules/.bin/vite build
 
 # -----------------------------------
 # Stage 2: Production with Nginx (minimal ~25MB image)
-FROM nginx:1.27-alpine AS runner
+# Using nginx-unprivileged for security best practices (non-root user)
+FROM nginxinc/nginx-unprivileged:1.27-alpine AS runner
 
 # Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf
+RUN rm -f /etc/nginx/conf.d/default.conf
 
 # Copy custom nginx configuration
 COPY apps/web/nginx.conf /etc/nginx/conf.d/calendraft.conf
 
 # Copy only the built static assets (no node_modules, no source)
-COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
+COPY --from=builder --chown=101:101 /app/apps/web/dist /usr/share/nginx/html
 
-EXPOSE 80
+# Create necessary directories with correct permissions
+RUN mkdir -p /var/cache/nginx/client_temp \
+    /var/cache/nginx/proxy_temp \
+    /var/cache/nginx/fastcgi_temp \
+    /var/cache/nginx/uwsgi_temp \
+    /var/cache/nginx/scgi_temp \
+    /var/run && \
+    chown -R 101:101 /var/cache/nginx /var/run /usr/share/nginx/html
+
+# nginx-unprivileged runs as user 101 (nginx)
+# No need to set USER as it's already non-root
+
+EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]

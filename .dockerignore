@@ -1,104 +1,74 @@
 # ===================================
 # Calendraft - Docker Ignore
-# Optimized for fast builds
+# Exclude unnecessary files from Docker builds
 # ===================================
 
-# Git (large, not needed)
-.git
-.gitignore
-.gitattributes
-
-# Dependencies (installed in container)
+# Dependencies
 node_modules
-**/node_modules
+.pnp
+.pnp.js
 
-# Build outputs (built in container)
-**/dist
-**/.turbo
-**/.next
-**/.nuxt
-**/.svelte-kit
+# Testing
+coverage
+.nyc_output
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__
+**/__tests__
+
+# Build outputs (will be rebuilt in Docker)
+dist
+build
+*.tsbuildinfo
 
 # Development files
-.env
-.env.*
-!.env.example
-*.local
-
-# IDE and editor files
+.env.local
+.env.development
+.env.test
 .vscode
 .idea
 *.swp
 *.swo
-.cursor
-.zed
+*~
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-bun-debug.log*
+# Git
+.git
+.gitignore
+.gitattributes
 
-# Testing (not needed in production)
-coverage
-.nyc_output
-**/*.test.ts
-**/*.spec.ts
-**/__tests__
-**/*.test.tsx
-**/*.spec.tsx
-vitest.config.*
-
-# Documentation
+# Documentation (not needed in image)
 *.md
 !README.md
 docs
 
-# Local database files
-*.db
-*.sqlite
-*.sqlite3
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
 
-# OS files
+# Misc
 .DS_Store
 Thumbs.db
-*~
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Docker meta files (not needed in context)
+# Docker files themselves
+Dockerfile
 docker-compose*.yml
 .dockerignore
 
-# Config files not needed in build
-.husky
-*.tsbuildinfo
-.ruler
-bts.jsonc
-knip.config.ts
-biome.json
-.prettierrc*
-.eslintrc*
-tsconfig.tsbuildinfo
-
-# PWA dev files
-dev-dist
+# Database files (should use volumes)
+*.db
+*.sqlite
+*.sqlite3
 
 # Temporary files
 tmp
 temp
 *.tmp
-*.temp
-
-# Native app (not needed for web/server)
-apps/native
-
-# Wrangler/Cloudflare (not used in Docker)
-**/.wrangler
-**/.alchemy
-**/wrangler.jsonc
-
-# Source maps in development
-**/*.map
-
-# Expo
-**/.expo
