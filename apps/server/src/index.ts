@@ -176,9 +176,14 @@ app.use(async (c, next) => {
 // CSRF protection for state-changing requests
 // Uses Origin and Sec-Fetch-Site header validation
 // Exclude auth endpoints as Better-Auth handles CSRF internally
+// Exclude Sentry tunnel as it's a proxy endpoint (no state changes)
 app.use(async (c, next) => {
 	// Skip CSRF for auth endpoints (Better-Auth handles it)
 	if (c.req.path.startsWith("/api/auth/")) {
+		return next();
+	}
+	// Skip CSRF for Sentry tunnel (proxy endpoint, no state changes)
+	if (c.req.path === "/api/sentry-tunnel") {
 		return next();
 	}
 	// Apply CSRF to all other routes
@@ -210,6 +215,101 @@ app.use(
 		},
 	}),
 );
+
+// Sentry tunnel endpoint - proxies events from frontend to Sentry
+// This bypasses CSP restrictions by sending events through the backend
+// Based on official Sentry documentation: https://docs.sentry.io/platforms/javascript/troubleshooting/#using-the-tunnel-option
+app.post("/api/sentry-tunnel", async (c) => {
+	try {
+		// Get the raw envelope from Sentry SDK
+		const envelope = await c.req.text();
+
+		if (!envelope || envelope.trim().length === 0) {
+			logger.warn("Sentry tunnel: Empty envelope received");
+			return c.json({ error: "Empty envelope" }, 400);
+		}
+
+		// Parse the envelope to extract DSN from the header
+		// Envelope format: "{header}\n{payload}\n..."
+		// Header contains: {"dsn": "https://...", ...}
+		const pieces = envelope.split("\n");
+		if (pieces.length === 0) {
+			logger.error("Sentry tunnel: Invalid envelope format (no newlines)");
+			return c.json({ error: "Invalid envelope format" }, 400);
+		}
+
+		// Parse the header (first line) to get the DSN
+		let header: { dsn?: string } | undefined;
+		try {
+			header = JSON.parse(pieces[0]) as { dsn?: string };
+		} catch (error) {
+			logger.error("Sentry tunnel: Failed to parse envelope header", {
+				error,
+				headerPreview: pieces[0].substring(0, 100),
+			});
+			return c.json({ error: "Invalid envelope header" }, 400);
+		}
+
+		// Extract DSN from header
+		const dsn = header.dsn;
+		if (!dsn) {
+			logger.error("Sentry tunnel: DSN not found in envelope header");
+			return c.json({ error: "DSN not found in envelope" }, 400);
+		}
+
+		// Parse DSN URL to extract project ID
+		// Format: https://PUBLIC_KEY@HOST/PROJECT_ID
+		let projectId: string;
+		try {
+			const dsnUrl = new URL(dsn);
+			projectId = dsnUrl.pathname.replace("/", "");
+
+			if (!projectId) {
+				logger.error("Sentry tunnel: Project ID not found in DSN", {
+					dsn: `${dsn.substring(0, 30)}...`,
+				});
+				return c.json({ error: "Invalid DSN format" }, 400);
+			}
+		} catch (error) {
+			logger.error("Sentry tunnel: Failed to parse DSN URL", {
+				error,
+				dsn: `${dsn.substring(0, 30)}...`,
+			});
+			return c.json({ error: "Invalid DSN format" }, 400);
+		}
+
+		// Construct Sentry ingest URL
+		// Format: https://HOST/api/PROJECT_ID/envelope/
+		const dsnUrl = new URL(dsn);
+		const sentryUrl = `https://${dsnUrl.host}/api/${projectId}/envelope/`;
+
+		// Forward the complete envelope to Sentry
+		// The envelope already contains all authentication information
+		const response = await fetch(sentryUrl, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-sentry-envelope",
+			},
+			body: envelope,
+		});
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			logger.error("Sentry tunnel error", {
+				status: response.status,
+				statusText: response.statusText,
+				error: errorText.substring(0, 200),
+			});
+			return c.text("Failed to forward to Sentry", response.status);
+		}
+
+		// Return empty response with same status code as Sentry (usually 200)
+		return c.text("", response.status);
+	} catch (error) {
+		logger.error("Sentry tunnel exception", { error });
+		return c.json({ error: "Internal server error" }, 500);
+	}
+});
 
 app.get("/", (c) => {
 	return c.text("OK");

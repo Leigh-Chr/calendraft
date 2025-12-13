@@ -27,35 +27,85 @@ const router = createRouter({
 });
 
 // Initialize Sentry for error tracking and performance monitoring
+// biome-ignore lint/complexity/useLiteralKeys: import.meta.env uses index signature
+const sentryDsn = import.meta.env["VITE_SENTRY_DSN"];
+const isSentryEnabled = !!sentryDsn;
+// biome-ignore lint/complexity/useLiteralKeys: import.meta.env uses index signature
+const viteServerUrl = import.meta.env["VITE_SERVER_URL"];
+
+// Use tunnel to bypass CSP restrictions - events are sent through the backend
+const tunnelUrl = viteServerUrl
+	? `${viteServerUrl}/api/sentry-tunnel`
+	: undefined;
+
 Sentry.init({
-	dsn: import.meta.env.VITE_SENTRY_DSN,
+	dsn: sentryDsn,
 	environment: import.meta.env.MODE,
-	enabled: !!import.meta.env.VITE_SENTRY_DSN,
+	enabled: isSentryEnabled,
+
+	// Use tunnel to bypass CSP restrictions
+	...(tunnelUrl && { tunnel: tunnelUrl }),
 
 	integrations: [
-		// TanStack Router integration for route-based performance tracing
 		Sentry.tanstackRouterBrowserTracingIntegration(router),
-		// Session replay for debugging user sessions with errors
 		Sentry.replayIntegration({
 			maskAllText: false,
 			blockAllMedia: false,
 		}),
 	],
 
-	// Performance monitoring - adjust in production
+	// Performance monitoring
 	tracesSampleRate: import.meta.env.MODE === "production" ? 0.1 : 1.0,
 
 	// Session Replay sampling
-	replaysSessionSampleRate: 0.1, // 10% of sessions
-	replaysOnErrorSampleRate: 1.0, // 100% of sessions with errors
+	replaysSessionSampleRate: 0.1,
+	replaysOnErrorSampleRate: 1.0,
 
 	// Trace propagation for distributed tracing with backend
 	tracePropagationTargets: [
 		"localhost",
 		/^https:\/\/.*\.calendraft\./,
-		import.meta.env.VITE_API_URL,
+		// biome-ignore lint/complexity/useLiteralKeys: import.meta.env uses index signature
+		import.meta.env["VITE_API_URL"],
+		viteServerUrl,
 	].filter(Boolean),
 });
+
+// Expose Sentry test functions in console (for debugging)
+if (typeof window !== "undefined") {
+	(
+		window as Window & {
+			testSentry?: () => Promise<void>;
+			checkSentry?: () => void;
+		}
+	).testSentry = async () => {
+		if (!isSentryEnabled) {
+			console.error("❌ Sentry is not enabled");
+			return;
+		}
+		const eventId = Sentry.captureException(
+			new Error("Test error from Sentry"),
+			{ tags: { test: true } },
+		);
+		console.log("📤 Event captured:", eventId);
+		const flushed = await Sentry.flush(5000);
+		console.log(flushed ? "✅ Sent successfully" : "❌ Failed to send");
+	};
+
+	(
+		window as Window & {
+			testSentry?: () => Promise<void>;
+			checkSentry?: () => void;
+		}
+	).checkSentry = () => {
+		const client = Sentry.getClient();
+		const options = client?.getOptions();
+		console.log("Sentry:", {
+			enabled: isSentryEnabled,
+			tunnel: options?.tunnel || "not set",
+		});
+	};
+}
 
 declare module "@tanstack/react-router" {
 	interface Register {
@@ -69,8 +119,6 @@ if (!rootElement) {
 	throw new Error("Root element not found");
 }
 
-// Check if root is empty by checking child nodes instead of innerHTML
-// This is safer and avoids XSS concerns
 if (rootElement.childNodes.length === 0) {
 	const root = ReactDOM.createRoot(rootElement);
 	root.render(<RouterProvider router={router} />);
