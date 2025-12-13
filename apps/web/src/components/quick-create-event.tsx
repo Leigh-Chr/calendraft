@@ -3,6 +3,7 @@
  * Displays on calendar slot click for simplified creation
  */
 
+import { useIsMobile } from "@calendraft/react-utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -57,6 +58,7 @@ export function QuickCreateEvent({
 	const [currentEndDate, setCurrentEndDate] = useState(endDate);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const queryClient = useQueryClient();
+	const isMobile = useIsMobile();
 
 	// Reset state when opening
 	useEffect(() => {
@@ -152,10 +154,10 @@ export function QuickCreateEvent({
 				<span />
 			</PopoverTrigger>
 			<PopoverContent
-				className="w-96 p-0 shadow-xl"
-				side="right"
-				align="start"
-				sideOffset={8}
+				className="w-full max-w-sm p-0 shadow-xl sm:w-96"
+				side={isMobile ? "bottom" : "right"}
+				align={isMobile ? "center" : "start"}
+				sideOffset={isMobile ? 8 : 8}
 			>
 				<form onSubmit={handleSubmit}>
 					{/* Header */}
@@ -168,7 +170,7 @@ export function QuickCreateEvent({
 							type="button"
 							variant="ghost"
 							size="icon"
-							className="h-6 w-6"
+							className="h-10 min-h-[44px] w-10 sm:h-6 sm:min-h-0 sm:w-6"
 							onClick={onClose}
 						>
 							<X className="h-4 w-4" />
@@ -202,7 +204,7 @@ export function QuickCreateEvent({
 									type="button"
 									variant="outline"
 									size="sm"
-									className="h-7 text-xs"
+									className="h-10 min-h-[44px] text-xs sm:h-7 sm:min-h-0"
 									onClick={() => handleDurationChange(preset)}
 									disabled={createMutation.isPending}
 								>
@@ -225,15 +227,17 @@ export function QuickCreateEvent({
 								/>
 							</div>
 						) : (
-							<button
+							<Button
 								type="button"
+								variant="ghost"
+								size="sm"
 								onClick={() => setShowLocation(true)}
-								className="flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground"
 								disabled={createMutation.isPending}
+								className="min-h-[44px] justify-start text-muted-foreground sm:min-h-0"
 							>
 								<MapPin className="h-4 w-4" />
 								<span>Add a location</span>
-							</button>
+							</Button>
 						)}
 					</div>
 

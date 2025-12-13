@@ -164,7 +164,7 @@ export function AccountPrompt({
 				)}
 
 				{/* Benefits - compact grid */}
-				<div className="grid grid-cols-3 gap-3">
+				<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 					<BenefitItem icon={Cloud} label="Cloud backup" />
 					<BenefitItem icon={Smartphone} label="Multi-device" />
 					<BenefitItem icon={Calendar} label="100 calendars" />

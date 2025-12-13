@@ -47,9 +47,9 @@ export function DateTimePicker({
 
 		// Keep existing time or use current time
 		const [hours, minutes] = timeValue
-			? timeValue.split(":").map(Number)
+			? timeValue.split(":").map((v) => Number(v) || 0)
 			: [new Date().getHours(), 0];
-		selectedDate.setHours(hours, minutes, 0, 0);
+		selectedDate.setHours(hours ?? 0, minutes ?? 0, 0, 0);
 
 		// Format as datetime-local string
 		const year = selectedDate.getFullYear();
@@ -111,7 +111,10 @@ export function DateTimePicker({
 					)}
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-auto p-0" align="start">
+			<PopoverContent
+				className="w-[calc(100vw-2rem)] max-w-sm p-0 sm:w-auto"
+				align="start"
+			>
 				<div className="space-y-4 p-4">
 					<Calendar
 						mode="single"

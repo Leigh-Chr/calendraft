@@ -127,7 +127,7 @@ export function EventCard({
 									<Button
 										variant="ghost"
 										size="icon"
-										className="h-8 w-8 shrink-0"
+										className="h-10 min-h-[44px] w-10 shrink-0 sm:h-8 sm:min-h-0 sm:w-8"
 									>
 										<MoreHorizontal className="h-4 w-4" />
 										<span className="sr-only">More options</span>

@@ -9,19 +9,23 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
+			"default": "./src/index.ts"
 		},
 		"./hooks": {
 			"types": "./dist/hooks/index.d.ts",
-			"import": "./dist/hooks/index.js"
+			"default": "./src/hooks/index.ts"
 		},
 		"./query": {
 			"types": "./dist/query/index.d.ts",
-			"import": "./dist/query/index.js"
+			"default": "./src/query/index.ts"
 		},
 		"./error": {
 			"types": "./dist/error/index.d.ts",
-			"import": "./dist/error/index.js"
+			"default": "./src/error/index.ts"
+		},
+		"./*": {
+			"types": "./dist/*.d.ts",
+			"default": "./src/*.ts"
 		}
 	},
 	"files": [

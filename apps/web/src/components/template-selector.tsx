@@ -34,7 +34,7 @@ export function TemplateSelector({
 				<Sparkles className="h-4 w-4" />
 				<span>Create from a template</span>
 			</div>
-			<div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+			<div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
 				{EVENT_TEMPLATES.map((template, index) => (
 					<motion.div
 						key={template.id}

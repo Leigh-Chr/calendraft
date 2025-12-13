@@ -441,7 +441,7 @@ function CalendarsListComponent() {
 				<div className="cross-grid absolute inset-0 opacity-20 [mask-image:linear-gradient(to_bottom,#000_0%,transparent_50%)]" />
 			</div>
 
-			<div className="container mx-auto max-w-5xl px-4 py-10">
+			<div className="container mx-auto max-w-5xl px-4 py-6 sm:py-10">
 				{/* Tour dialog */}
 				<TourAlertDialog isOpen={tourOpen} setIsOpen={setTourOpen} />
 

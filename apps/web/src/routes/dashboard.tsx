@@ -157,7 +157,7 @@ function RouteComponent() {
 				<div className="gradient-mesh absolute inset-0 opacity-40" />
 			</div>
 
-			<div className="container mx-auto max-w-6xl px-4 py-10">
+			<div className="container mx-auto max-w-6xl px-4 py-6 sm:py-10">
 				<div className="mb-8">
 					<h1 className="mb-2 text-heading-1">My account</h1>
 					<p className="text-muted-foreground">

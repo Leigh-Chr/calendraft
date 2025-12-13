@@ -3,6 +3,7 @@
  * Displays a single calendar with actions and upcoming events preview
  */
 
+import { useIsMobile } from "@calendraft/react-utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import {
@@ -88,6 +89,7 @@ export function CalendarCard({
 	isSelected = false,
 	onToggleSelect,
 }: CalendarCardProps) {
+	const isMobile = useIsMobile();
 	// React Compiler will automatically memoize these callbacks
 	const handleNavigate = () => {
 		if (selectionMode) {
@@ -180,7 +182,13 @@ export function CalendarCard({
 								<Button
 									variant="ghost"
 									size="icon"
-									className="absolute top-2 right-2 h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+									className={cn(
+										"absolute top-2 right-2 h-10 min-h-[44px] w-10 sm:h-8 sm:min-h-0 sm:w-8",
+										isMobile
+											? "opacity-100"
+											: "opacity-0 transition-opacity group-hover:opacity-100",
+									)}
+									aria-label="Calendar actions"
 								>
 									<MoreHorizontal className="h-4 w-4" />
 								</Button>

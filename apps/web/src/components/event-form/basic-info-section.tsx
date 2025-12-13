@@ -123,6 +123,7 @@ export function BasicInfoSection({
 					onChange={(e) => handleTitleChange(e.target.value)}
 					required
 					disabled={isSubmitting}
+					enterKeyHint="next"
 					aria-required="true"
 					aria-invalid={validationErrors?.title ? "true" : "false"}
 					aria-describedby={validationErrors?.title ? "title-error" : undefined}
@@ -190,6 +191,8 @@ export function BasicInfoSection({
 						}
 					}}
 					disabled={isSubmitting}
+					autoComplete="street-address"
+					enterKeyHint="next"
 					maxLength={FIELD_LIMITS.LOCATION}
 					placeholder="Ex: Conference Room A, 123 Example Street..."
 				/>
@@ -216,6 +219,7 @@ export function BasicInfoSection({
 					value={formData.description || ""}
 					onChange={(e) => onChange({ description: e.target.value })}
 					disabled={isSubmitting}
+					enterKeyHint="done"
 					rows={4}
 					maxLength={FIELD_LIMITS.DESCRIPTION}
 					placeholder="Describe your event, its purpose, the agenda..."

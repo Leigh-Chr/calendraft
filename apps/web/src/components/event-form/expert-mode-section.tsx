@@ -283,6 +283,7 @@ export function ExpertModeSection({
 					<Input
 						id="sequence"
 						type="number"
+						inputMode="numeric"
 						min="0"
 						value={formData.sequence ?? 0}
 						onChange={(e) => onChange({ sequence: Number(e.target.value) })}

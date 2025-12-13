@@ -164,6 +164,7 @@ export default function SignInForm({
 											name={field.name}
 											type="email"
 											autoComplete="email"
+											enterKeyHint="next"
 											value={field.state.value}
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
@@ -200,6 +201,7 @@ export default function SignInForm({
 												name={field.name}
 												type={showPassword ? "text" : "password"}
 												autoComplete="current-password"
+												enterKeyHint="done"
 												value={field.state.value}
 												onBlur={field.handleBlur}
 												onChange={(e) => field.handleChange(e.target.value)}
@@ -215,7 +217,7 @@ export default function SignInForm({
 											<button
 												type="button"
 												onClick={() => setShowPassword(!showPassword)}
-												className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground transition-colors hover:text-foreground"
+												className="-translate-y-1/2 absolute top-1/2 right-3 flex min-h-[44px] min-w-[44px] items-center justify-center text-muted-foreground transition-colors hover:text-foreground sm:min-h-0 sm:min-w-0"
 												aria-label={
 													showPassword ? "Hide password" : "Show password"
 												}

@@ -34,7 +34,7 @@ function NotFoundPage() {
 				<div className="gradient-mesh absolute inset-0 opacity-20" />
 			</div>
 
-			<div className="container mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-10">
+			<div className="container mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-6 sm:py-10">
 				<Card className="w-full">
 					<CardHeader className="text-center">
 						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">

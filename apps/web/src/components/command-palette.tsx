@@ -260,8 +260,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
 			{/* Footer with help */}
 			<div className="border-t px-3 py-2">
-				<div className="flex items-center justify-between text-muted-foreground text-xs">
-					<div className="flex items-center gap-3">
+				<div className="flex flex-col items-start justify-between gap-2 text-muted-foreground text-xs sm:flex-row sm:items-center sm:gap-0">
+					<div className="flex flex-wrap items-center gap-2 sm:gap-3">
 						<span>
 							<kbd className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">
 								↑↓

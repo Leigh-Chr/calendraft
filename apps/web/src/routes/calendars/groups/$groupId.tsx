@@ -1,3 +1,4 @@
+import { useIsMobile } from "@calendraft/react-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
@@ -7,10 +8,11 @@ import {
 	GitMerge,
 	Link2,
 	Loader2,
+	MoreHorizontal,
 	Plus,
 	Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { AccountPrompt } from "@/components/account-prompt";
 import {
@@ -37,6 +39,13 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { trpc, trpcClient } from "@/utils/trpc";
@@ -202,38 +211,24 @@ function renderCalendarsGrid(
 	);
 }
 
-function GroupDetailComponent() {
-	const { groupId } = Route.useParams();
-	const navigate = useNavigate();
-	const queryClient = useQueryClient();
+// Helper to filter and sort calendars
+function useFilteredCalendars(
+	calendars: unknown[],
+	searchKeyword: string,
+	sortBy: CalendarSortBy,
+) {
+	if (!calendars.length) return [];
+	const filtered = filterGroupCalendarsByKeyword(calendars, searchKeyword);
+	return sortGroupCalendars(filtered, sortBy);
+}
 
-	const [editDialogOpen, setEditDialogOpen] = useState(false);
-	const [shareDialogOpen, setShareDialogOpen] = useState(false);
-	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-	const [_exportDialogOpen, _setExportDialogOpen] = useState(false);
-	const [searchKeyword, setSearchKeyword] = useState("");
-	const [sortBy, setSortBy] = useState<CalendarSortBy>("name");
-
-	// Fetch group details
-	const { data: group, isLoading } = useQuery({
-		...trpc.calendar.group.getById.queryOptions({ id: groupId }),
-	});
-
-	// Ensure calendars is always an array
-	const calendarsArray = Array.isArray(group?.calendars) ? group.calendars : [];
-
-	// Filter and sort calendars in the group
-	// React Compiler will automatically memoize this computation
-	const filteredCalendars = (() => {
-		if (!calendarsArray.length) return [];
-		const filtered = filterGroupCalendarsByKeyword(
-			calendarsArray,
-			searchKeyword,
-		);
-		return sortGroupCalendars(filtered, sortBy);
-	})();
-
-	// Delete mutation
+// Hook for group actions and mutations
+function useGroupActions(
+	groupId: string,
+	group: { name: string; calendars: Array<{ id: string }> } | undefined,
+	queryClient: ReturnType<typeof useQueryClient>,
+	navigate: ReturnType<typeof useNavigate>,
+) {
 	const deleteMutation = useMutation(
 		trpc.calendar.group.delete.mutationOptions({
 			onSuccess: () => {
@@ -249,78 +244,294 @@ function GroupDetailComponent() {
 		}),
 	);
 
-	// React Compiler will automatically memoize these callbacks
-	const handleEdit = () => {
-		if (group) {
-			setEditDialogOpen(true);
-		}
-	};
-
-	const handleDelete = () => {
-		setDeleteDialogOpen(true);
-	};
-
-	const handleShare = () => {
-		setShareDialogOpen(true);
-	};
-
-	const handleMerge = () => {
-		if (group && calendarsArray.length > 0) {
-			const calendarIds = calendarsArray.map((c) => c.id).join(",");
+	const handleMerge = useCallback(() => {
+		if (group && group.calendars.length > 0) {
+			const calendarIds = group.calendars.map((c) => c.id).join(",");
 			navigate({
 				to: "/calendars/merge",
 				search: { selected: calendarIds },
 			});
 		}
-	};
+	}, [group, navigate]);
 
-	const handleExport = async () => {
-		if (!group || calendarsArray.length === 0) {
+	const handleExport = useCallback(async () => {
+		if (!group || group.calendars.length === 0) {
 			toast.error("No calendars to export");
 			return;
 		}
-
 		try {
 			await exportGroupAsICS(groupId, group.name);
 			toast.success("Group exported successfully");
 		} catch (_error) {
 			toast.error("Error exporting group");
 		}
-	};
+	}, [group, groupId]);
 
-	if (isLoading) {
-		return (
-			<div className="relative min-h-[calc(100vh-4rem)]">
-				<div className="-z-10 pointer-events-none absolute inset-0">
-					<div className="gradient-mesh absolute inset-0 opacity-30" />
-				</div>
-				<div className="container mx-auto max-w-6xl px-4 py-10">
-					<Skeleton className="mb-4 h-8 w-64" />
-					<Skeleton className="mb-8 h-32 w-full" />
-					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-						{[1, 2, 3].map((i) => (
-							<Skeleton key={i} className="h-32" />
-						))}
-					</div>
+	return { deleteMutation, handleMerge, handleExport };
+}
+
+// Loading state component
+function GroupDetailLoading() {
+	return (
+		<div className="relative min-h-[calc(100vh-4rem)]">
+			<div className="-z-10 pointer-events-none absolute inset-0">
+				<div className="gradient-mesh absolute inset-0 opacity-30" />
+			</div>
+			<div className="container mx-auto max-w-6xl px-4 py-6 sm:py-10">
+				<Skeleton className="mb-4 h-8 w-64" />
+				<Skeleton className="mb-8 h-32 w-full" />
+				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+					{[1, 2, 3].map((i) => (
+						<Skeleton key={i} className="h-32" />
+					))}
 				</div>
 			</div>
-		);
-	}
+		</div>
+	);
+}
 
-	if (!group) {
-		return (
-			<div className="relative min-h-[calc(100vh-4rem)]">
-				<div className="-z-10 pointer-events-none absolute inset-0">
-					<div className="gradient-mesh absolute inset-0 opacity-30" />
-				</div>
-				<div className="container mx-auto max-w-6xl px-4 py-10">
-					<div className="text-center text-muted-foreground">
-						Group not found
-					</div>
-				</div>
+// Not found state component
+function GroupDetailNotFound() {
+	return (
+		<div className="relative min-h-[calc(100vh-4rem)]">
+			<div className="-z-10 pointer-events-none absolute inset-0">
+				<div className="gradient-mesh absolute inset-0 opacity-30" />
 			</div>
-		);
-	}
+			<div className="container mx-auto max-w-6xl px-4 py-6 sm:py-10">
+				<div className="text-center text-muted-foreground">Group not found</div>
+			</div>
+		</div>
+	);
+}
+
+// Header component to reduce complexity
+interface GroupDetailHeaderProps {
+	group: { name: string; color?: string | null; description?: string | null };
+	calendarsArray: Array<{ eventCount: number }>;
+	totalEvents: number;
+	isMobile: boolean;
+	navigate: ReturnType<typeof useNavigate>;
+	onEdit: () => void;
+	onDelete: () => void;
+	onShare: () => void;
+	onMerge: () => void;
+	onExport: () => void;
+	deleteMutation: ReturnType<typeof useMutation>;
+}
+
+function GroupDetailHeader({
+	group,
+	calendarsArray,
+	totalEvents,
+	isMobile,
+	navigate,
+	onEdit,
+	onDelete,
+	onShare,
+	onMerge,
+	onExport,
+	deleteMutation,
+}: GroupDetailHeaderProps) {
+	return (
+		<div className="mb-6 flex flex-wrap items-center gap-4">
+			<Button
+				variant="ghost"
+				size="icon"
+				className="min-h-[44px] sm:min-h-0"
+				onClick={() => navigate({ to: "/calendars" })}
+				aria-label="Back to calendars"
+			>
+				<ArrowLeft className="h-4 w-4" />
+				<span className="sr-only">Back to calendars</span>
+			</Button>
+			<div className="min-w-0 flex-1">
+				<div className="flex items-center gap-3">
+					<div
+						className="h-4 w-4 shrink-0 rounded-full"
+						style={{ backgroundColor: group.color || "#8b5cf6" }}
+					/>
+					<h1 className="text-heading-1">{group.name}</h1>
+				</div>
+				{group.description && (
+					<p className="mt-1 text-muted-foreground">{group.description}</p>
+				)}
+				<p className="mt-1 text-muted-foreground text-sm">
+					{calendarsArray.length} calendar
+					{calendarsArray.length !== 1 ? "s" : ""} • {totalEvents} event
+					{totalEvents !== 1 ? "s" : ""}
+				</p>
+			</div>
+			<div className="flex flex-wrap items-center gap-3 sm:gap-2">
+				{isMobile ? (
+					<>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={onEdit}
+							className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
+						>
+							<Edit className="mr-2 h-4 w-4" />
+							Edit
+						</Button>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="outline"
+									size="sm"
+									className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
+								>
+									<MoreHorizontal className="h-4 w-4" />
+									<span className="sr-only">More actions</span>
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end" mobileAlign="start">
+								<DropdownMenuItem
+									onClick={onShare}
+									disabled={calendarsArray.length === 0}
+								>
+									<Link2 className="mr-2 h-4 w-4" />
+									Share
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={onExport}
+									disabled={calendarsArray.length === 0}
+								>
+									<Download className="mr-2 h-4 w-4" />
+									Export
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={onMerge}
+									disabled={calendarsArray.length < 2}
+								>
+									<GitMerge className="mr-2 h-4 w-4" />
+									Merge
+								</DropdownMenuItem>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem
+									onClick={onDelete}
+									disabled={deleteMutation.isPending}
+									className="text-destructive focus:text-destructive"
+								>
+									{deleteMutation.isPending ? (
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									) : (
+										<Trash2 className="mr-2 h-4 w-4" />
+									)}
+									Delete
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</>
+				) : (
+					<>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={onEdit}
+							className="h-8"
+						>
+							<Edit className="mr-2 h-4 w-4" />
+							Edit
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={onShare}
+							disabled={calendarsArray.length === 0}
+							className="h-8"
+						>
+							<Link2 className="mr-2 h-4 w-4" />
+							Share
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={onExport}
+							disabled={calendarsArray.length === 0}
+							className="h-8"
+						>
+							<Download className="mr-2 h-4 w-4" />
+							Export
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={onMerge}
+							disabled={calendarsArray.length < 2}
+							className="h-8"
+						>
+							<GitMerge className="mr-2 h-4 w-4" />
+							Merge
+						</Button>
+						<Button
+							variant="destructive"
+							size="sm"
+							onClick={onDelete}
+							disabled={deleteMutation.isPending}
+							className="h-8"
+						>
+							{deleteMutation.isPending ? (
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							) : (
+								<Trash2 className="mr-2 h-4 w-4" />
+							)}
+							Delete
+						</Button>
+					</>
+				)}
+			</div>
+		</div>
+	);
+}
+
+function GroupDetailComponent() {
+	const { groupId } = Route.useParams();
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
+	const isMobile = useIsMobile();
+
+	const [editDialogOpen, setEditDialogOpen] = useState(false);
+	const [shareDialogOpen, setShareDialogOpen] = useState(false);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [_exportDialogOpen, _setExportDialogOpen] = useState(false);
+	const [searchKeyword, setSearchKeyword] = useState("");
+	const [sortBy, setSortBy] = useState<CalendarSortBy>("name");
+
+	// Fetch group details
+	const { data: group, isLoading } = useQuery({
+		...trpc.calendar.group.getById.queryOptions({ id: groupId }),
+	});
+
+	// Ensure calendars is always an array
+	const calendarsArray = Array.isArray(group?.calendars) ? group.calendars : [];
+	const filteredCalendars = useFilteredCalendars(
+		calendarsArray,
+		searchKeyword,
+		sortBy,
+	);
+
+	const { deleteMutation, handleMerge, handleExport } = useGroupActions(
+		groupId,
+		group,
+		queryClient,
+		navigate,
+	);
+
+	// Handlers
+	const handleEdit = useCallback(() => {
+		if (group) setEditDialogOpen(true);
+	}, [group]);
+
+	const handleDelete = useCallback(() => {
+		setDeleteDialogOpen(true);
+	}, []);
+
+	const handleShare = useCallback(() => {
+		setShareDialogOpen(true);
+	}, []);
+
+	if (isLoading) return <GroupDetailLoading />;
+	if (!group) return <GroupDetailNotFound />;
 
 	const totalEvents = calendarsArray.reduce(
 		(sum, cal) => sum + cal.eventCount,
@@ -333,85 +544,21 @@ function GroupDetailComponent() {
 				<div className="gradient-mesh absolute inset-0 opacity-30" />
 			</div>
 
-			<div className="container mx-auto max-w-6xl px-4 py-10">
+			<div className="container mx-auto max-w-6xl px-4 py-6 sm:py-10">
 				<AccountPrompt variant="banner" />
-
-				{/* Header */}
-				<div className="mb-6 flex flex-wrap items-center gap-4">
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={() => navigate({ to: "/calendars" })}
-					>
-						<ArrowLeft className="h-4 w-4" />
-					</Button>
-					<div className="min-w-0 flex-1">
-						<div className="flex items-center gap-3">
-							<div
-								className="h-4 w-4 shrink-0 rounded-full"
-								style={{ backgroundColor: group.color || "#8b5cf6" }}
-							/>
-							<h1 className="text-heading-1">{group.name}</h1>
-						</div>
-						{group.description && (
-							<p className="mt-1 text-muted-foreground">{group.description}</p>
-						)}
-						<p className="mt-1 text-muted-foreground text-sm">
-							{calendarsArray.length} calendar
-							{calendarsArray.length !== 1 ? "s" : ""} • {totalEvents} event
-							{totalEvents !== 1 ? "s" : ""}
-						</p>
-					</div>
-					<div className="flex flex-wrap items-center gap-2">
-						{/* Primary action */}
-						<Button variant="outline" size="sm" onClick={handleEdit}>
-							<Edit className="mr-2 h-4 w-4" />
-							Edit
-						</Button>
-						{/* Secondary actions */}
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={handleShare}
-							disabled={calendarsArray.length === 0}
-						>
-							<Link2 className="mr-2 h-4 w-4" />
-							Share
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={handleExport}
-							disabled={calendarsArray.length === 0}
-						>
-							<Download className="mr-2 h-4 w-4" />
-							Export
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={handleMerge}
-							disabled={calendarsArray.length < 2}
-						>
-							<GitMerge className="mr-2 h-4 w-4" />
-							Merge
-						</Button>
-						{/* Destructive action */}
-						<Button
-							variant="destructive"
-							size="sm"
-							onClick={handleDelete}
-							disabled={deleteMutation.isPending}
-						>
-							{deleteMutation.isPending ? (
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-							) : (
-								<Trash2 className="mr-2 h-4 w-4" />
-							)}
-							Delete
-						</Button>
-					</div>
-				</div>
+				<GroupDetailHeader
+					group={group}
+					calendarsArray={calendarsArray}
+					totalEvents={totalEvents}
+					isMobile={isMobile}
+					navigate={navigate}
+					onEdit={handleEdit}
+					onDelete={handleDelete}
+					onShare={handleShare}
+					onMerge={handleMerge}
+					onExport={handleExport}
+					deleteMutation={deleteMutation}
+				/>
 
 				{/* Search and sort */}
 				{calendarsArray.length > 0 && (

@@ -182,6 +182,7 @@ export function ShareCalendarDialog({
 							onClick={handleCreate}
 							disabled={createMutation.isPending}
 							size="sm"
+							className="min-h-[44px] sm:min-h-0"
 						>
 							{createMutation.isPending ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
@@ -220,25 +221,25 @@ export function ShareCalendarDialog({
 												)}
 											</div>
 											<div className="mt-1 flex items-center gap-2">
-												<code className="max-w-[200px] truncate rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+												<code className="max-w-full truncate rounded bg-muted px-1.5 py-0.5 font-mono text-xs sm:max-w-[200px]">
 													{getShareUrl(link.token)}
 												</code>
 												<Button
 													variant="ghost"
 													size="icon"
-													className="h-6 w-6"
+													className="h-10 min-h-[44px] w-10 sm:h-6 sm:min-h-0 sm:w-6"
 													onClick={() => handleCopy(link.token, link.id)}
 												>
 													{copiedId === link.id ? (
-														<Check className="h-3 w-3 text-green-500" />
+														<Check className="h-4 w-4 text-green-500 sm:h-3 sm:w-3" />
 													) : (
-														<Copy className="h-3 w-3" />
+														<Copy className="h-4 w-4 sm:h-3 sm:w-3" />
 													)}
 												</Button>
 												<Button
 													variant="ghost"
 													size="icon"
-													className="h-6 w-6"
+													className="h-10 min-h-[44px] w-10 sm:h-6 sm:min-h-0 sm:w-6"
 													asChild
 												>
 													<a
@@ -246,7 +247,7 @@ export function ShareCalendarDialog({
 														target="_blank"
 														rel="noopener noreferrer"
 													>
-														<ExternalLink className="h-3 w-3" />
+														<ExternalLink className="h-4 w-4 sm:h-3 sm:w-3" />
 													</a>
 												</Button>
 											</div>
@@ -293,7 +294,7 @@ export function ShareCalendarDialog({
 											<Button
 												variant="ghost"
 												size="icon"
-												className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+												className="h-10 min-h-[44px] w-10 text-destructive hover:bg-destructive/10 hover:text-destructive sm:h-8 sm:min-h-0 sm:w-8"
 												onClick={() => handleDelete(link.id)}
 												disabled={deleteMutation.isPending}
 											>

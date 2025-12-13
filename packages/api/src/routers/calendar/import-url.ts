@@ -8,7 +8,7 @@ import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { authOrAnonProcedure, router } from "../../index";
 import { findDuplicatesAgainstExisting } from "../../lib/duplicate-detection";
-import { parseIcsFile } from "../../lib/ics-parser";
+import { type ParsedEvent, parseIcsFile } from "../../lib/ics-parser";
 import { assertValidExternalUrl } from "../../lib/url-validator";
 import { checkCalendarLimit, verifyCalendarAccess } from "../../middleware";
 import { createEventFromParsed, validateFileSize } from "./helpers";
@@ -110,13 +110,7 @@ async function fetchIcsContent(url: string, timeout = 60000): Promise<string> {
  * Filter duplicate events from parsed events
  */
 function filterDuplicateEvents(
-	parsedEvents: Array<{
-		uid?: string | null;
-		title: string;
-		startDate: Date;
-		endDate: Date;
-		location?: string | null;
-	}>,
+	parsedEvents: ParsedEvent[],
 	existingEvents: Array<{
 		id: string;
 		uid?: string | null;
@@ -125,7 +119,7 @@ function filterDuplicateEvents(
 		endDate: Date;
 		location?: string | null;
 	}>,
-): { eventsToImport: typeof parsedEvents; skippedDuplicates: number } {
+): { eventsToImport: ParsedEvent[]; skippedDuplicates: number } {
 	const newEventsForCheck = parsedEvents.map((e, idx) => ({
 		id: `new-${idx}`,
 		uid: e.uid ?? null,
@@ -157,9 +151,15 @@ function filterDuplicateEvents(
 	const uniqueIndices = new Set(
 		unique.map((e) => Number.parseInt(e.id.replace("new-", ""), 10)),
 	);
-	const eventsToImport = parsedEvents.filter((_, idx) =>
-		uniqueIndices.has(idx),
-	);
+
+	// Filter and map events to ensure null values are converted to undefined for ParsedEvent compatibility
+	const eventsToImport: ParsedEvent[] = parsedEvents
+		.filter((_, idx) => uniqueIndices.has(idx))
+		.map((event) => ({
+			...event,
+			location: event.location ?? undefined,
+			uid: event.uid ?? undefined,
+		}));
 
 	return {
 		eventsToImport,
@@ -366,8 +366,16 @@ export const calendarImportUrlRouter = router({
 			// Validate calendar exists and has source URL
 			const calendar = await validateCalendarForRefresh(input.calendarId);
 
+			// TypeScript: validateCalendarForRefresh ensures sourceUrl exists
+			if (!calendar.sourceUrl) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "This calendar has no source URL. It cannot be refreshed.",
+				});
+			}
+
 			// Validate URL against SSRF attacks
-			assertValidExternalUrl(calendar.sourceUrl!);
+			assertValidExternalUrl(calendar.sourceUrl);
 
 			// If replaceAll, delete all events first
 			let deletedCount = 0;
@@ -379,7 +387,7 @@ export const calendarImportUrlRouter = router({
 			}
 
 			// Fetch and parse ICS content
-			const icsContent = await fetchIcsContent(calendar.sourceUrl!);
+			const icsContent = await fetchIcsContent(calendar.sourceUrl);
 			validateFileSize(icsContent);
 			const parseResult = parseIcsFile(icsContent);
 

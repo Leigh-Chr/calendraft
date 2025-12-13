@@ -78,10 +78,10 @@ export function DateListPicker({
 								type="button"
 								onClick={() => handleRemoveDate(index)}
 								disabled={disabled}
-								className="ml-1 rounded-full p-0.5 hover:bg-destructive/20"
+								className="ml-1 min-h-[44px] rounded-full p-1.5 transition-colors hover:bg-destructive/20 sm:min-h-0 sm:p-0.5"
 								aria-label={`Remove date ${format(date, "dd MMM yyyy, HH:mm", { locale: enUS })}`}
 							>
-								<X className="h-3 w-3" />
+								<X className="h-4 w-4 sm:h-3 sm:w-3" />
 							</button>
 						</Badge>
 					))}
@@ -92,13 +92,15 @@ export function DateListPicker({
 								variant="outline"
 								size="sm"
 								disabled={disabled}
-								className="h-8"
 							>
 								<CalendarIcon className="mr-2 h-4 w-4" />
 								{placeholder}
 							</Button>
 						</PopoverTrigger>
-						<PopoverContent className="w-auto p-0" align="start">
+						<PopoverContent
+							className="w-[calc(100vw-2rem)] max-w-sm p-0 sm:w-auto"
+							align="start"
+						>
 							<div className="space-y-4 p-4">
 								<Calendar
 									mode="single"

@@ -132,6 +132,7 @@ export function LocationSection({
 					<Input
 						id="geoLatitude"
 						type="number"
+						inputMode="decimal"
 						step="0.000001"
 						min="-90"
 						max="90"
@@ -209,6 +210,7 @@ export function LocationSection({
 					<Input
 						id="geoLongitude"
 						type="number"
+						inputMode="decimal"
 						step="0.000001"
 						min="-180"
 						max="180"

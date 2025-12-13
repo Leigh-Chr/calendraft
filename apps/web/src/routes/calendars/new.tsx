@@ -43,7 +43,7 @@ export const Route = createFileRoute("/calendars/new")({
 			console.error("Route error:", error);
 		}
 		return (
-			<div className="container mx-auto max-w-2xl px-4 py-10">
+			<div className="container mx-auto max-w-2xl px-4 py-6 sm:py-10">
 				<Card className="border-destructive/50 bg-destructive/5">
 					<CardHeader>
 						<CardTitle className="text-destructive">Loading error</CardTitle>
@@ -109,7 +109,7 @@ function NewCalendarComponent() {
 				<div className="gradient-mesh absolute inset-0 opacity-30" />
 			</div>
 
-			<div className="container mx-auto max-w-2xl px-4 py-10">
+			<div className="container mx-auto max-w-2xl px-4 py-6 sm:py-10">
 				<Card className="card-glow">
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">

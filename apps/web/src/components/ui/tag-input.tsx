@@ -133,10 +133,10 @@ export function TagInput({
 								type="button"
 								onClick={() => handleRemoveTag(tag)}
 								disabled={disabled}
-								className="ml-1 rounded-full p-0.5 transition-colors hover:bg-destructive/20"
+								className="ml-1 min-h-[44px] rounded-full p-1.5 transition-colors hover:bg-destructive/20 sm:min-h-0 sm:p-0.5"
 								aria-label={`Remove ${tag}`}
 							>
-								<X className="h-3 w-3" />
+								<X className="h-4 w-4 sm:h-3 sm:w-3" />
 							</button>
 						</Badge>
 					))}
@@ -147,7 +147,7 @@ export function TagInput({
 						onKeyDown={handleKeyDown}
 						disabled={disabled}
 						placeholder={placeholder}
-						className="min-w-[200px] flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+						className="min-w-[120px] flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 sm:min-w-[200px]"
 					/>
 				</div>
 				{helpText && (

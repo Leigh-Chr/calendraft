@@ -1,11 +1,15 @@
+import { useIsMobile } from "@calendraft/react-utils";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Calendar, Menu } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 import { ModeToggle } from "./mode-toggle";
 import { Button } from "./ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
@@ -14,6 +18,8 @@ import UserMenu from "./user-menu";
 export default function Header() {
 	const location = useLocation();
 	const isLandingPage = location.pathname === "/";
+	const isMobile = useIsMobile();
+	const { data: session } = authClient.useSession();
 
 	const appLinks = [{ to: "/calendars", label: "My calendars" }] as const;
 
@@ -66,45 +72,117 @@ export default function Header() {
 						<div className="flex items-center gap-2 sm:hidden">
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<Button variant="ghost" size="icon" aria-label="Menu">
+									<Button
+										variant="ghost"
+										size="icon"
+										className="min-h-[44px] sm:min-h-0"
+										aria-label="Menu"
+									>
 										<Menu className="size-5" />
 									</Button>
 								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end" className="w-48">
+								<DropdownMenuContent
+									align="end"
+									mobileAlign="start"
+									className="w-48"
+								>
 									<DropdownMenuItem asChild>
 										<Link to="/calendars">My calendars</Link>
 									</DropdownMenuItem>
 									<DropdownMenuItem asChild>
 										<Link to="/calendars/import">Import a .ics</Link>
 									</DropdownMenuItem>
-									<DropdownMenuSeparator />
-									<DropdownMenuItem asChild>
-										<Link to="/login" search={{ mode: "signin" }}>
-											Sign in
-										</Link>
-									</DropdownMenuItem>
-									<DropdownMenuItem asChild>
-										<Link to="/login" search={{ mode: "signup" }}>
-											Create an account
-										</Link>
-									</DropdownMenuItem>
+									{session && (
+										<>
+											<DropdownMenuSeparator />
+											<DropdownMenuLabel>Account</DropdownMenuLabel>
+											<DropdownMenuItem disabled>
+												{session.user.email}
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={() => {
+													authClient.signOut({
+														fetchOptions: {
+															onSuccess: () => {
+																window.location.href = "/";
+															},
+														},
+													});
+												}}
+												className="text-destructive focus:text-destructive"
+											>
+												Sign out
+											</DropdownMenuItem>
+										</>
+									)}
+									{!session && (
+										<>
+											<DropdownMenuSeparator />
+											<DropdownMenuItem asChild>
+												<Link to="/login" search={{ mode: "signin" }}>
+													Sign in
+												</Link>
+											</DropdownMenuItem>
+											<DropdownMenuItem asChild>
+												<Link to="/login" search={{ mode: "signup" }}>
+													Create an account
+												</Link>
+											</DropdownMenuItem>
+										</>
+									)}
 								</DropdownMenuContent>
 							</DropdownMenu>
 						</div>
 					</>
 				) : (
-					// App navigation
-					<nav className="flex items-center gap-6" aria-label="Navigation">
-						{appLinks.map(({ to, label }) => (
-							<Link
-								key={to}
-								to={to}
-								className="rounded-sm font-medium text-muted-foreground text-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-							>
-								{label}
-							</Link>
-						))}
-					</nav>
+					<>
+						{/* Desktop navigation */}
+						<nav
+							className={cn("flex items-center gap-6", isMobile && "hidden")}
+							aria-label="Navigation"
+						>
+							{appLinks.map(({ to, label }) => (
+								<Link
+									key={to}
+									to={to}
+									className="rounded-sm font-medium text-muted-foreground text-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+								>
+									{label}
+								</Link>
+							))}
+						</nav>
+
+						{/* Mobile menu for app */}
+						{isMobile && (
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="min-h-[44px] sm:min-h-0"
+										aria-label="Menu"
+									>
+										<Menu className="size-5" />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent
+									align="end"
+									mobileAlign="start"
+									className="w-48"
+								>
+									<DropdownMenuItem asChild>
+										<Link to="/calendars">My calendars</Link>
+									</DropdownMenuItem>
+									<DropdownMenuItem asChild>
+										<Link to="/calendars/import">Import a .ics</Link>
+									</DropdownMenuItem>
+									<DropdownMenuItem asChild>
+										<Link to="/calendars/new">New calendar</Link>
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						)}
+					</>
 				)}
 
 				<div className="flex items-center gap-2">

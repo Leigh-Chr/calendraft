@@ -83,7 +83,7 @@ export function BulkActionsBar({
 						variant="ghost"
 						size="sm"
 						onClick={isAllSelected ? onDeselectAll : onSelectAll}
-						className="h-8"
+						className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
 					>
 						{isAllSelected ? (
 							<CheckSquare className="mr-2 h-4 w-4" />
@@ -107,7 +107,7 @@ export function BulkActionsBar({
 						size="sm"
 						onClick={() => setMoveDialogOpen(true)}
 						disabled={isPending || selectedCount === 0}
-						className="h-8"
+						className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
 						aria-label={`Move ${selectedCount} selected event${selectedCount !== 1 ? "s" : ""} to another calendar`}
 					>
 						Move
@@ -119,14 +119,15 @@ export function BulkActionsBar({
 						size="sm"
 						onClick={() => setDeleteDialogOpen(true)}
 						disabled={isPending || selectedCount === 0}
-						className="h-8"
+						className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
 					>
 						{bulkDeleteMutation.isPending ? (
 							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 						) : (
 							<Trash2 className="mr-2 h-4 w-4" />
 						)}
-						Delete
+						<span className="hidden sm:inline">Delete</span>
+						<span className="sm:hidden">Del</span>
 					</Button>
 
 					{/* Exit selection mode */}
@@ -134,8 +135,9 @@ export function BulkActionsBar({
 						variant="ghost"
 						size="icon"
 						onClick={onExitSelectionMode}
-						className="h-8 w-8"
+						className="h-10 min-h-[44px] w-10 sm:h-8 sm:min-h-0 sm:w-8"
 						disabled={isPending}
+						aria-label="Exit selection mode"
 					>
 						<X className="h-4 w-4" />
 					</Button>

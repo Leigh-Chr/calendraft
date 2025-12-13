@@ -90,8 +90,9 @@ export function MoveEventDialog({
 	};
 
 	// Filter calendars to exclude current one
+	// Type assertion is safe here because useCalendars returns the same structure as CalendarListItem
 	const moveDestinations = Array.isArray(calendars)
-		? (calendars as CalendarListItem[]).filter(
+		? (calendars as unknown as CalendarListItem[]).filter(
 				(c) => c.id !== currentCalendarId,
 			)
 		: [];

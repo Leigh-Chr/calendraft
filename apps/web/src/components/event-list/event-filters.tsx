@@ -2,8 +2,9 @@
  * Event list filter components
  */
 
-import { ArrowDown, ArrowUp, Search, X } from "lucide-react";
 // React Compiler will automatically memoize these components
+import { useIsMobile } from "@calendraft/react-utils";
+import { ArrowDown, ArrowUp, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -70,6 +71,7 @@ export function SearchSortBar({
 	onSortChange,
 	onSortDirectionChange,
 }: SearchSortBarProps) {
+	const isMobile = useIsMobile();
 	// Only show direction toggle for "date" sort
 	const showDirectionToggle = sortBy === "date";
 
@@ -78,7 +80,7 @@ export function SearchSortBar({
 	};
 
 	return (
-		<div className="flex gap-2">
+		<div className={isMobile ? "flex flex-col gap-2" : "flex gap-2"}>
 			<div className="flex-1">
 				<div className="relative">
 					<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
@@ -93,44 +95,48 @@ export function SearchSortBar({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="-translate-y-1/2 absolute top-1/2 right-1 h-6 w-6"
+							className="-translate-y-1/2 absolute top-1/2 right-1 h-10 min-h-[44px] w-10 sm:h-6 sm:min-h-0 sm:w-6"
 							onClick={() => onKeywordChange("")}
 							aria-label="Clear search"
 						>
-							<X className="h-3 w-3" />
+							<X className="h-4 w-4 sm:h-3 sm:w-3" />
 						</Button>
 					)}
 				</div>
 			</div>
-			<Select
-				value={sortBy}
-				onValueChange={(v) => onSortChange(v as FilterState["sortBy"])}
-			>
-				<SelectTrigger className="w-[180px]">
-					<SelectValue placeholder="Sort by" />
-				</SelectTrigger>
-				<SelectContent>
-					<SelectItem value="date">Date</SelectItem>
-					<SelectItem value="name">Name A-Z</SelectItem>
-					<SelectItem value="duration">Duration</SelectItem>
-				</SelectContent>
-			</Select>
-			{showDirectionToggle && (
-				<Button
-					variant="outline"
-					size="icon"
-					onClick={handleDirectionToggle}
-					className="w-[40px]"
-					aria-label={`Sort ${sortDirection === "asc" ? "ascending" : "descending"}`}
-					title={sortDirection === "asc" ? "Sort ascending" : "Sort descending"}
+			<div className={isMobile ? "flex gap-2" : "flex items-center gap-2"}>
+				<Select
+					value={sortBy}
+					onValueChange={(v) => onSortChange(v as FilterState["sortBy"])}
 				>
-					{sortDirection === "asc" ? (
-						<ArrowUp className="h-4 w-4" />
-					) : (
-						<ArrowDown className="h-4 w-4" />
-					)}
-				</Button>
-			)}
+					<SelectTrigger className={isMobile ? "w-full" : "w-[180px]"}>
+						<SelectValue placeholder="Sort by" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="date">Date</SelectItem>
+						<SelectItem value="name">Name A-Z</SelectItem>
+						<SelectItem value="duration">Duration</SelectItem>
+					</SelectContent>
+				</Select>
+				{showDirectionToggle && (
+					<Button
+						variant="outline"
+						size="icon"
+						onClick={handleDirectionToggle}
+						className={isMobile ? "w-10 flex-shrink-0" : "w-[40px]"}
+						aria-label={`Sort ${sortDirection === "asc" ? "ascending" : "descending"}`}
+						title={
+							sortDirection === "asc" ? "Sort ascending" : "Sort descending"
+						}
+					>
+						{sortDirection === "asc" ? (
+							<ArrowUp className="h-4 w-4" />
+						) : (
+							<ArrowDown className="h-4 w-4" />
+						)}
+					</Button>
+				)}
+			</div>
 		</div>
 	);
 }

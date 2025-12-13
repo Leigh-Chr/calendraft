@@ -174,7 +174,7 @@ function ShareErrorView({ errorMessage }: { errorMessage: string }) {
 				<div className="gradient-mesh absolute inset-0 opacity-20" />
 			</div>
 
-			<div className="container mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-10">
+			<div className="container mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-6 sm:py-10">
 				<Card className="w-full">
 					<CardHeader className="text-center">
 						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
@@ -295,7 +295,7 @@ function ShareLoadingView() {
 				<div className="gradient-mesh absolute inset-0 opacity-20" />
 			</div>
 
-			<div className="container mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-10">
+			<div className="container mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-6 sm:py-10">
 				<Loader2 className="h-10 w-10 animate-spin text-primary" />
 				<p className="mt-4 text-muted-foreground">Loading...</p>
 			</div>
@@ -332,7 +332,7 @@ function BundleShareView({
 				<div className="gradient-mesh absolute inset-0 opacity-20" />
 			</div>
 
-			<div className="container mx-auto max-w-4xl px-4 py-10">
+			<div className="container mx-auto max-w-4xl px-4 py-6 sm:py-10">
 				<Card className="mb-6">
 					<CardHeader className="text-center">
 						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
@@ -490,7 +490,7 @@ function SingleShareView({
 				<div className="gradient-mesh absolute inset-0 opacity-20" />
 			</div>
 
-			<div className="container mx-auto max-w-4xl px-4 py-10">
+			<div className="container mx-auto max-w-4xl px-4 py-6 sm:py-10">
 				<Card className="mb-6">
 					<CardHeader className="text-center">
 						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">

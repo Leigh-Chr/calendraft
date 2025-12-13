@@ -7,7 +7,7 @@ export function Footer() {
 	return (
 		<footer className="border-t bg-muted/30">
 			<div className="container mx-auto px-4 py-8">
-				<div className="grid gap-8 md:grid-cols-3">
+				<div className="grid grid-cols-1 gap-8 md:grid-cols-3">
 					{/* Brand section */}
 					<div className="space-y-3">
 						<h3 className="font-semibold text-base">Calendraft</h3>

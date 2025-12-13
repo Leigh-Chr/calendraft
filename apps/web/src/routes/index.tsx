@@ -70,7 +70,7 @@ function LandingPage() {
 					<div className="noise-overlay absolute inset-0" />
 				</div>
 
-				<div className="container mx-auto px-4 py-24 sm:py-32">
+				<div className="container mx-auto px-4 py-16 sm:py-24 md:py-32">
 					<div className="mx-auto max-w-3xl text-center">
 						{/* Badge */}
 						<div className="fade-in slide-in-from-bottom-3 mb-8 inline-flex animate-in items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-small duration-500">
@@ -397,116 +397,6 @@ function LandingPage() {
 					</div>
 				</div>
 			</section>
-
-			{/* Footer */}
-			<footer className="section-divider relative overflow-hidden bg-muted/30">
-				{/* Subtle background */}
-				<div className="-z-10 pointer-events-none absolute inset-0">
-					<div className="cross-grid absolute inset-0 opacity-20" />
-				</div>
-				<div className="container mx-auto px-4 py-12">
-					<div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-						{/* Brand */}
-						<div className="sm:col-span-2 lg:col-span-1">
-							<Link
-								to="/"
-								className="mb-4 inline-flex items-center gap-2 font-semibold"
-								aria-label="Calendraft - Home"
-							>
-								<Calendar className="size-5 text-primary" aria-hidden="true" />
-								<span>Calendraft</span>
-							</Link>
-							<p className="text-body text-muted-foreground">
-								Manage your calendars simply.
-							</p>
-						</div>
-
-						{/* Product navigation */}
-						<nav aria-label="Product links">
-							<p className="mb-4 font-medium text-small" id="footer-product">
-								Product
-							</p>
-							<ul
-								className="space-y-3 text-muted-foreground text-sm"
-								aria-labelledby="footer-product"
-							>
-								<li>
-									<Link
-										to="/calendars"
-										className="rounded-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-									>
-										My calendars
-									</Link>
-								</li>
-								<li>
-									<Link
-										to="/calendars/new"
-										className="rounded-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-									>
-										Create a calendar
-									</Link>
-								</li>
-								<li>
-									<Link
-										to="/calendars/import"
-										className="rounded-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-									>
-										Import calendar
-									</Link>
-								</li>
-							</ul>
-						</nav>
-
-						{/* Account navigation */}
-						<nav aria-label="Account links">
-							<p className="mb-4 font-medium text-small" id="footer-account">
-								Account
-							</p>
-							<ul
-								className="space-y-3 text-muted-foreground text-sm"
-								aria-labelledby="footer-account"
-							>
-								<li>
-									<Link
-										to="/login"
-										search={{ mode: "signin" }}
-										className="rounded-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-									>
-										Sign in
-									</Link>
-								</li>
-								<li>
-									<Link
-										to="/login"
-										search={{ mode: "signup" }}
-										className="rounded-sm transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-									>
-										Create an account
-									</Link>
-								</li>
-							</ul>
-						</nav>
-
-						{/* Open Source info */}
-						<div>
-							<p className="mb-4 font-medium text-small">Open Source</p>
-							<p className="text-body text-muted-foreground">
-								Calendraft is 100% free and open-source under the MIT license.
-							</p>
-						</div>
-					</div>
-
-					{/* Copyright */}
-					<div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row">
-						<p className="text-muted-foreground text-sm">
-							© {new Date().getFullYear()} Calendraft
-						</p>
-						<p className="text-muted-foreground/60 text-xs">
-							Made with care to simplify your calendars
-						</p>
-					</div>
-				</div>
-			</footer>
 		</div>
 	);
 }

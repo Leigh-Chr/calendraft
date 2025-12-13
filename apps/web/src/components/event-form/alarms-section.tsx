@@ -238,6 +238,7 @@ function AlarmDurationInput({
 				<Input
 					id={`alarm-duration-${index}`}
 					type="number"
+					inputMode="numeric"
 					min="1"
 					value={value}
 					onChange={(e) => handleValueChange(e.target.value)}
@@ -251,7 +252,10 @@ function AlarmDurationInput({
 					onValueChange={handleUnitChange}
 					disabled={disabled}
 				>
-					<SelectTrigger className="w-[140px]" aria-label="Duration unit">
+					<SelectTrigger
+						className="w-full sm:w-[140px]"
+						aria-label="Duration unit"
+					>
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
@@ -363,7 +367,7 @@ function AlarmTriggerSelect({
 			<Label htmlFor={`alarm-trigger-when-${index}`}>
 				When to trigger the alert
 			</Label>
-			<div className="grid grid-cols-3 gap-2">
+			<div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
 				<Select
 					value={trigger.when}
 					onValueChange={(value: "before" | "at" | "after") => {
@@ -410,6 +414,7 @@ function AlarmTriggerSelect({
 						<Input
 							id={`alarm-trigger-value-${index}`}
 							type="number"
+							inputMode="numeric"
 							min="1"
 							value={trigger.value}
 							onChange={(e) =>
@@ -620,6 +625,7 @@ function AlarmRepeatInput({
 			<Input
 				id={`alarm-repeat-${index}`}
 				type="number"
+				inputMode="numeric"
 				min="0"
 				max="1000"
 				value={alarm.repeat ?? ""}

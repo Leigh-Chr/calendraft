@@ -55,15 +55,15 @@ export function CalendarsSection({
 
 			{calendars.length === 0 ? (
 				<Card id={TOUR_STEP_IDS.CALENDAR_GRID}>
-					<CardContent className="py-16 text-center">
-						<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-							<Calendar className="h-8 w-8 text-muted-foreground" />
+					<CardContent className="py-8 text-center sm:py-16">
+						<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted sm:mb-6 sm:h-16 sm:w-16">
+							<Calendar className="h-6 w-6 text-muted-foreground sm:h-8 sm:w-8" />
 						</div>
 						<h3 className="mb-2 text-heading-3">No calendars yet</h3>
-						<p className="mb-6 text-muted-foreground">
+						<p className="mb-4 text-muted-foreground sm:mb-6">
 							Create your first calendar or import an existing .ics file.
 						</p>
-						<div className="flex justify-center gap-3">
+						<div className="flex flex-col justify-center gap-3 sm:flex-row">
 							<Button onClick={() => navigate({ to: "/calendars/new" })}>
 								<Plus className="mr-2 h-4 w-4" />
 								Create a calendar

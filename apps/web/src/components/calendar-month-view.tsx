@@ -1,3 +1,4 @@
+import { useIsMobile } from "@calendraft/react-utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -20,6 +21,15 @@ import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import {
 	HoverCard,
 	HoverCardContent,
@@ -82,20 +92,107 @@ interface CalendarViewProps {
 	onViewChange?: (view: View) => void;
 }
 
-// Custom event component with hover preview
+// Custom event component with hover preview (desktop) or dialog (mobile)
 function EventWithHover({
 	event,
 	calendarId,
 }: EventProps<RBCEvent> & { calendarId: string }) {
 	const navigate = useNavigate();
+	const isMobile = useIsMobile();
+	const [dialogOpen, setDialogOpen] = useState(false);
 
 	// React Compiler will automatically memoize this callback
 	const handleClick = (e: React.MouseEvent): void => {
 		e.stopPropagation();
+		if (isMobile) {
+			setDialogOpen(true);
+		} else {
+			navigate({
+				to: `/calendars/${calendarId}/events/${event.resource.id}`,
+			});
+		}
+	};
+
+	const handleEdit = () => {
+		setDialogOpen(false);
 		navigate({
 			to: `/calendars/${calendarId}/events/${event.resource.id}`,
 		});
 	};
+
+	const eventContent = (
+		<div className="space-y-3">
+			{/* Event title */}
+			<div>
+				<h4 className="text-heading-4">{event.title}</h4>
+				<p className="mt-1 text-muted-foreground text-sm">
+					{format(event.start, "EEEE d MMMM yyyy", { locale: enUS })}
+				</p>
+				<p className="text-muted-foreground text-sm">
+					{format(event.start, "HH:mm")} - {format(event.end, "HH:mm")}
+				</p>
+			</div>
+
+			{/* Location */}
+			{event.resource.location && (
+				<div className="flex items-start gap-2 text-sm">
+					<span className="text-muted-foreground">📍</span>
+					<span>{event.resource.location}</span>
+				</div>
+			)}
+
+			{/* Description preview */}
+			{event.resource.description && (
+				<p className="line-clamp-3 text-muted-foreground text-sm">
+					{event.resource.description}
+				</p>
+			)}
+
+			{/* Quick actions hint */}
+			<p className="text-muted-foreground/60 text-xs">
+				Click to edit • Drag to move
+			</p>
+		</div>
+	);
+
+	if (isMobile) {
+		return (
+			<>
+				<button
+					type="button"
+					className="rbc-event-content w-full cursor-pointer truncate border-none bg-transparent p-0 text-left text-inherit"
+					onClick={handleClick}
+				>
+					{event.title}
+				</button>
+				<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>{event.title}</DialogTitle>
+							<DialogDescription>
+								{format(event.start, "EEEE d MMMM yyyy", { locale: enUS })}
+								{" • "}
+								{format(event.start, "HH:mm")} - {format(event.end, "HH:mm")}
+							</DialogDescription>
+						</DialogHeader>
+						{eventContent}
+						<DialogFooter>
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => setDialogOpen(false)}
+							>
+								Close
+							</Button>
+							<Button type="button" onClick={handleEdit}>
+								Edit
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+			</>
+		);
+	}
 
 	return (
 		<HoverCard openDelay={300} closeDelay={100}>
@@ -109,43 +206,12 @@ function EventWithHover({
 				</button>
 			</HoverCardTrigger>
 			<HoverCardContent
-				className="w-80 p-4"
+				className="w-[calc(100vw-2rem)] max-w-sm p-4 sm:w-80"
 				side="right"
 				align="start"
 				sideOffset={8}
 			>
-				<div className="space-y-3">
-					{/* Event title */}
-					<div>
-						<h4 className="text-heading-4">{event.title}</h4>
-						<p className="mt-1 text-muted-foreground text-sm">
-							{format(event.start, "EEEE d MMMM yyyy", { locale: enUS })}
-						</p>
-						<p className="text-muted-foreground text-sm">
-							{format(event.start, "HH:mm")} - {format(event.end, "HH:mm")}
-						</p>
-					</div>
-
-					{/* Location */}
-					{event.resource.location && (
-						<div className="flex items-start gap-2 text-sm">
-							<span className="text-muted-foreground">📍</span>
-							<span>{event.resource.location}</span>
-						</div>
-					)}
-
-					{/* Description preview */}
-					{event.resource.description && (
-						<p className="line-clamp-3 text-muted-foreground text-sm">
-							{event.resource.description}
-						</p>
-					)}
-
-					{/* Quick actions hint */}
-					<p className="text-muted-foreground/60 text-xs">
-						Click to edit • Drag to move
-					</p>
-				</div>
+				{eventContent}
 			</HoverCardContent>
 		</HoverCard>
 	);
@@ -168,6 +234,7 @@ export function CalendarView({
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const quickCreate = useQuickCreate();
+	const isMobile = useIsMobile();
 
 	// Parse initial date from URL or default to today
 	// React Compiler will automatically memoize this computation
@@ -319,7 +386,8 @@ export function CalendarView({
 	return (
 		<div
 			className={cn(
-				"relative h-[600px]",
+				"relative",
+				isMobile ? "h-[calc(100vh-20rem)] min-h-[25rem]" : "h-[37.5rem]",
 				updateEventMutation.isPending && "opacity-70",
 			)}
 		>

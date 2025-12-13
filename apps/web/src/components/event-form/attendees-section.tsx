@@ -222,6 +222,7 @@ export function AttendeesSection({
 											onAttendeeChange(index, { name: e.target.value })
 										}
 										disabled={isSubmitting}
+										enterKeyHint="next"
 										maxLength={FIELD_LIMITS.NAME}
 										placeholder="Ex: Marie Martin"
 									/>
@@ -237,6 +238,8 @@ export function AttendeesSection({
 									<Input
 										id={`attendee-email-${index}`}
 										type="email"
+										autoComplete="email"
+										enterKeyHint="next"
 										value={attendee.email}
 										onChange={(e) =>
 											handleAttendeeEmailChange(index, e.target.value)

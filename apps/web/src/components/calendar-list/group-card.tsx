@@ -3,6 +3,7 @@
  * Displays a group of calendars with actions (merge, export, share, edit, delete)
  */
 
+import { useIsMobile } from "@calendraft/react-utils";
 import {
 	Download,
 	Edit,
@@ -56,6 +57,7 @@ export function CalendarGroupCard({
 	onShare,
 	isDeleting = false,
 }: CalendarGroupCardProps) {
+	const isMobile = useIsMobile();
 	return (
 		<Card
 			className={cn(
@@ -103,7 +105,12 @@ export function CalendarGroupCard({
 							<Button
 								variant="ghost"
 								size="icon"
-								className="absolute top-2 right-2 h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+								className={cn(
+									"absolute top-2 right-2",
+									isMobile
+										? "opacity-100"
+										: "opacity-0 transition-opacity group-hover:opacity-100",
+								)}
 								onClick={(e) => e.stopPropagation()}
 							>
 								<MoreHorizontal className="h-4 w-4" />

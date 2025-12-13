@@ -273,7 +273,10 @@ export function ExportCalendarDialog({
 													: "Start date"}
 											</Button>
 										</PopoverTrigger>
-										<PopoverContent className="w-auto p-0" align="start">
+										<PopoverContent
+											className="w-[calc(100vw-2rem)] max-w-sm p-0 sm:w-auto"
+											align="start"
+										>
 											<Calendar
 												mode="single"
 												selected={dateRange.from}
@@ -299,7 +302,10 @@ export function ExportCalendarDialog({
 													: "End date"}
 											</Button>
 										</PopoverTrigger>
-										<PopoverContent className="w-auto p-0" align="start">
+										<PopoverContent
+											className="w-[calc(100vw-2rem)] max-w-sm p-0 sm:w-auto"
+											align="start"
+										>
 											<Calendar
 												mode="single"
 												selected={dateRange.to}
@@ -325,7 +331,7 @@ export function ExportCalendarDialog({
 											variant={
 												selectedCategories.has(category) ? "default" : "outline"
 											}
-											className="cursor-pointer"
+											className="min-h-[44px] cursor-pointer px-3 py-2 sm:min-h-0 sm:px-2 sm:py-0.5"
 											onClick={() => toggleCategory(category)}
 										>
 											{category}

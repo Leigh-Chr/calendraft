@@ -384,22 +384,27 @@ function BundleItem({
 						)}
 					</div>
 					<div className="mt-1 flex items-center gap-2">
-						<code className="max-w-[200px] truncate rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+						<code className="max-w-full truncate rounded bg-muted px-1.5 py-0.5 font-mono text-xs sm:max-w-[200px]">
 							{getShareUrl(bundle.token)}
 						</code>
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-6 w-6"
+							className="h-10 min-h-[44px] w-10 sm:h-6 sm:min-h-0 sm:w-6"
 							onClick={() => onCopy(bundle.token, bundle.id)}
 						>
 							{copiedId === bundle.id ? (
-								<Check className="h-3 w-3 text-green-500" />
+								<Check className="h-4 w-4 text-green-500 sm:h-3 sm:w-3" />
 							) : (
-								<Copy className="h-3 w-3" />
+								<Copy className="h-4 w-4 sm:h-3 sm:w-3" />
 							)}
 						</Button>
-						<Button variant="ghost" size="icon" className="h-6 w-6" asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-10 min-h-[44px] w-10 sm:h-6 sm:min-h-0 sm:w-6"
+							asChild
+						>
 							<a
 								href={getShareUrl(bundle.token)}
 								target="_blank"

@@ -474,6 +474,7 @@ function IntervalInput({
 				<Input
 					id="recurrence-interval"
 					type="number"
+					inputMode="numeric"
 					min="1"
 					value={config.interval}
 					onChange={(e) =>
@@ -508,7 +509,7 @@ function WeeklyDaysSelector({
 	return (
 		<div className="space-y-2">
 			<Label>Which days of the week?</Label>
-			<div className="grid grid-cols-2 gap-2">
+			<div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
 				{DAYS_OF_WEEK.map((day) => (
 					<div key={day.value} className="flex items-center space-x-2">
 						<Checkbox
@@ -594,7 +595,7 @@ function YearlyMonthsSelector({
 	return (
 		<div className="space-y-2">
 			<Label>Which months?</Label>
-			<div className="grid grid-cols-3 gap-2">
+			<div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
 				{MONTHS.map((month) => (
 					<div key={month.value} className="flex items-center space-x-2">
 						<Checkbox
@@ -656,6 +657,7 @@ function EndTypeSelector({
 						<>
 							<Input
 								type="number"
+								inputMode="numeric"
 								min="1"
 								value={config.count || ""}
 								onChange={(e) =>
@@ -686,7 +688,10 @@ function EndTypeSelector({
 										: "Select a date"}
 								</Button>
 							</PopoverTrigger>
-							<PopoverContent className="w-auto p-0" align="start">
+							<PopoverContent
+								className="w-[calc(100vw-2rem)] max-w-sm p-0 sm:w-auto"
+								align="start"
+							>
 								<Calendar
 									mode="single"
 									selected={config.until}

@@ -2,6 +2,7 @@
  * Bulk actions toolbar for selected calendars
  */
 
+import { useIsMobile } from "@calendraft/react-utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -11,6 +12,7 @@ import {
 	GitMerge,
 	Link2,
 	Loader2,
+	MoreHorizontal,
 	Square,
 	Trash2,
 	X,
@@ -30,9 +32,176 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { QUERY_KEYS } from "@/lib/query-keys";
 import { trpc } from "@/utils/trpc";
 import { CreateGroupDialog } from "./create-group-dialog";
+
+// Mobile actions component
+function MobileActions({
+	isPending,
+	selectedCount,
+	canMerge,
+	onDelete,
+	onCreateGroup,
+	onShare,
+	onMerge,
+	onExport,
+	onExit,
+}: MobileActionsProps) {
+	return (
+		<>
+			<Button
+				variant="destructive"
+				size="sm"
+				onClick={onDelete}
+				disabled={isPending || selectedCount === 0}
+				className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
+			>
+				{isPending ? (
+					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+				) : (
+					<Trash2 className="mr-2 h-4 w-4" />
+				)}
+				Delete
+			</Button>
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button
+						variant="outline"
+						size="sm"
+						className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
+					>
+						<MoreHorizontal className="h-4 w-4" />
+						<span className="sr-only">More actions</span>
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end" mobileAlign="start">
+					<DropdownMenuItem
+						onClick={onCreateGroup}
+						disabled={isPending || selectedCount === 0}
+					>
+						<Folder className="mr-2 h-4 w-4" />
+						Save as group
+					</DropdownMenuItem>
+					<DropdownMenuItem
+						onClick={onShare}
+						disabled={isPending || selectedCount === 0}
+					>
+						<Link2 className="mr-2 h-4 w-4" />
+						Share
+					</DropdownMenuItem>
+					<DropdownMenuItem onClick={onMerge} disabled={isPending || !canMerge}>
+						<GitMerge className="mr-2 h-4 w-4" />
+						Merge
+					</DropdownMenuItem>
+					<DropdownMenuItem
+						onClick={onExport}
+						disabled={isPending || selectedCount === 0}
+					>
+						<Download className="mr-2 h-4 w-4" />
+						Export
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+			<Button
+				variant="ghost"
+				size="icon"
+				onClick={onExit}
+				className="h-10 min-h-[44px] w-10 sm:h-8 sm:min-h-0 sm:w-8"
+				disabled={isPending}
+			>
+				<X className="h-4 w-4" />
+			</Button>
+		</>
+	);
+}
+
+// Desktop actions component
+function DesktopActions({
+	isPending,
+	selectedCount,
+	canMerge,
+	onDelete,
+	onCreateGroup,
+	onShare,
+	onMerge,
+	onExport,
+	onExit,
+}: DesktopActionsProps) {
+	return (
+		<>
+			<Button
+				variant="outline"
+				size="sm"
+				onClick={onCreateGroup}
+				disabled={isPending || selectedCount === 0}
+				className="h-8"
+			>
+				<Folder className="mr-2 h-4 w-4" />
+				Save as group
+			</Button>
+			<Button
+				variant="outline"
+				size="sm"
+				onClick={onShare}
+				disabled={isPending || selectedCount === 0}
+				className="h-8"
+			>
+				<Link2 className="mr-2 h-4 w-4" />
+				Share
+			</Button>
+			<Button
+				variant="outline"
+				size="sm"
+				onClick={onMerge}
+				disabled={isPending || !canMerge}
+				className="h-8"
+			>
+				<GitMerge className="mr-2 h-4 w-4" />
+				Merge
+			</Button>
+			<Button
+				variant="outline"
+				size="sm"
+				onClick={onExport}
+				disabled={isPending || selectedCount === 0}
+				className="h-8"
+			>
+				<Download className="mr-2 h-4 w-4" />
+				Export
+			</Button>
+			<Button
+				variant="destructive"
+				size="sm"
+				onClick={onDelete}
+				disabled={isPending || selectedCount === 0}
+				className="h-8"
+			>
+				{isPending ? (
+					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+				) : (
+					<Trash2 className="mr-2 h-4 w-4" />
+				)}
+				Delete
+			</Button>
+			<Button
+				variant="ghost"
+				size="icon"
+				onClick={onExit}
+				className="h-8 w-8"
+				disabled={isPending}
+			>
+				<X className="h-4 w-4" />
+			</Button>
+		</>
+	);
+}
 
 interface CalendarBulkActionsBarProps {
 	selectedCount: number;
@@ -41,6 +210,30 @@ interface CalendarBulkActionsBarProps {
 	onDeselectAll: () => void;
 	onExitSelectionMode: () => void;
 	selectedIds: Set<string>;
+}
+
+interface MobileActionsProps {
+	isPending: boolean;
+	selectedCount: number;
+	canMerge: boolean;
+	onDelete: () => void;
+	onCreateGroup: () => void;
+	onShare: () => void;
+	onMerge: () => void;
+	onExport: () => void;
+	onExit: () => void;
+}
+
+interface DesktopActionsProps {
+	isPending: boolean;
+	selectedCount: number;
+	canMerge: boolean;
+	onDelete: () => void;
+	onCreateGroup: () => void;
+	onShare: () => void;
+	onMerge: () => void;
+	onExport: () => void;
+	onExit: () => void;
 }
 
 export function CalendarBulkActionsBar({
@@ -95,6 +288,16 @@ export function CalendarBulkActionsBar({
 	const isAllSelected = selectedCount === totalCount;
 	const isPending = bulkDeleteMutation.isPending;
 	const canMerge = selectedCount >= 2;
+	const isMobile = useIsMobile();
+
+	const actionHandlers = {
+		onDelete: () => setDeleteDialogOpen(true),
+		onCreateGroup: () => setCreateGroupDialogOpen(true),
+		onShare: () => setShareDialogOpen(true),
+		onMerge: handleMerge,
+		onExport: handleExport,
+		onExit: onExitSelectionMode,
+	};
 
 	return (
 		<>
@@ -110,7 +313,7 @@ export function CalendarBulkActionsBar({
 						variant="ghost"
 						size="sm"
 						onClick={isAllSelected ? onDeselectAll : onSelectAll}
-						className="h-8"
+						className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
 					>
 						{isAllSelected ? (
 							<CheckSquare className="mr-2 h-4 w-4" />
@@ -128,80 +331,21 @@ export function CalendarBulkActionsBar({
 
 				{/* Actions */}
 				<div className="flex items-center gap-2">
-					{/* Save as group */}
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => setCreateGroupDialogOpen(true)}
-						disabled={isPending || selectedCount === 0}
-						className="h-8"
-					>
-						<Folder className="mr-2 h-4 w-4" />
-						Save as group
-					</Button>
-
-					{/* Share calendars */}
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => setShareDialogOpen(true)}
-						disabled={isPending || selectedCount === 0}
-						className="h-8"
-					>
-						<Link2 className="mr-2 h-4 w-4" />
-						Share
-					</Button>
-
-					{/* Merge calendars */}
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleMerge}
-						disabled={isPending || !canMerge}
-						className="h-8"
-					>
-						<GitMerge className="mr-2 h-4 w-4" />
-						Merge
-					</Button>
-
-					{/* Export (placeholder for future feature) */}
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleExport}
-						disabled={isPending || selectedCount === 0}
-						className="h-8"
-					>
-						<Download className="mr-2 h-4 w-4" />
-						Export
-					</Button>
-
-					{/* Delete */}
-					<Button
-						variant="destructive"
-						size="sm"
-						onClick={() => setDeleteDialogOpen(true)}
-						disabled={isPending || selectedCount === 0}
-						className="h-8"
-					>
-						{bulkDeleteMutation.isPending ? (
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-						) : (
-							<Trash2 className="mr-2 h-4 w-4" />
-						)}
-						Delete
-					</Button>
-
-					{/* Exit selection mode */}
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={onExitSelectionMode}
-						className="h-8 w-8"
-						disabled={isPending}
-					>
-						<X className="h-4 w-4" />
-					</Button>
+					{isMobile ? (
+						<MobileActions
+							isPending={isPending}
+							selectedCount={selectedCount}
+							canMerge={canMerge}
+							{...actionHandlers}
+						/>
+					) : (
+						<DesktopActions
+							isPending={isPending}
+							selectedCount={selectedCount}
+							canMerge={canMerge}
+							{...actionHandlers}
+						/>
+					)}
 				</div>
 			</motion.div>
 
@@ -219,7 +363,10 @@ export function CalendarBulkActionsBar({
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction onClick={handleDelete} variant="destructive">
+						<AlertDialogAction
+							onClick={handleDelete}
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						>
 							Delete
 						</AlertDialogAction>
 					</AlertDialogFooter>

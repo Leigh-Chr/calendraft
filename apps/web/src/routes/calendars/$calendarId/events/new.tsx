@@ -135,7 +135,7 @@ function NewEventComponent() {
 				<div className="gradient-mesh absolute inset-0 opacity-25" />
 			</div>
 
-			<div className="container mx-auto max-w-4xl space-y-6 px-4 py-10">
+			<div className="container mx-auto max-w-4xl space-y-6 px-4 py-6 sm:py-10">
 				<Breadcrumb
 					items={[
 						{

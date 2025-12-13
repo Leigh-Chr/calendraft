@@ -67,10 +67,10 @@ export function ColorPicker({
 							{value || "Color"}
 						</Button>
 					</PopoverTrigger>
-					<PopoverContent className="w-64">
+					<PopoverContent className="w-[calc(100vw-2rem)] max-w-xs sm:w-64">
 						<div className="space-y-3">
 							<Label className="font-medium text-xs">Predefined colors</Label>
-							<div className="grid grid-cols-5 gap-2">
+							<div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
 								{PREDEFINED_COLORS.map((color) => (
 									<button
 										key={color.value}
@@ -81,7 +81,7 @@ export function ColorPicker({
 										}}
 										disabled={disabled}
 										className={cn(
-											"h-8 w-8 rounded-md border-2 transition-all hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+											"h-10 min-h-[44px] w-10 rounded-md border-2 transition-all hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-8 sm:min-h-0 sm:w-8",
 											value === color.value
 												? "border-foreground ring-2 ring-offset-2"
 												: "border-muted",

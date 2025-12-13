@@ -363,7 +363,7 @@ export function EventListView({
 
 	return (
 		<div className="space-y-4">
-			<div className="flex flex-wrap items-center gap-2">
+			<div className="flex flex-wrap items-center gap-3 sm:gap-2">
 				<DateFilterButtons
 					currentFilter={filters.dateFilter}
 					onFilterChange={handleDateFilterChange}

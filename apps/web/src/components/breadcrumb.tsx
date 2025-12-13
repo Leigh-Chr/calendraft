@@ -34,7 +34,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 				variant="ghost"
 				size="sm"
 				onClick={() => handleClick("/calendars")}
-				className="h-8 px-2"
+				className="h-10 min-h-[44px] px-3 sm:h-8 sm:min-h-0 sm:px-2"
 				aria-label="Home - My calendars"
 			>
 				<Home className="h-4 w-4" aria-hidden="true" />
@@ -53,7 +53,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 							variant="ghost"
 							size="sm"
 							onClick={() => handleClick(item.href)}
-							className="h-8 px-2 text-muted-foreground hover:text-foreground"
+							className="h-10 min-h-[44px] px-3 text-muted-foreground hover:text-foreground sm:h-8 sm:min-h-0 sm:px-2"
 						>
 							{item.label}
 						</Button>

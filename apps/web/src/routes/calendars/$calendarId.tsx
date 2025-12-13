@@ -1,3 +1,4 @@
+import { useIsMobile } from "@calendraft/react-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	createFileRoute,
@@ -18,6 +19,7 @@ import {
 	List,
 	Loader2,
 	Merge,
+	MoreHorizontal,
 	Plus,
 	RefreshCw,
 	Sparkles,
@@ -41,6 +43,12 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useCalendar } from "@/hooks/use-storage";
 import { normalizeDate } from "@/lib/date-utils";
 import { QUERY_KEYS } from "@/lib/query-keys";
@@ -72,6 +80,7 @@ function CalendarViewComponent() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const queryClient = useQueryClient();
+	const isMobile = useIsMobile();
 	const [cleanDialogOpen, setCleanDialogOpen] = useState(false);
 	const [shareDialogOpen, setShareDialogOpen] = useState(false);
 	const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -183,7 +192,7 @@ function CalendarViewComponent() {
 				<div className="-z-10 pointer-events-none absolute inset-0">
 					<div className="gradient-mesh absolute inset-0 opacity-30" />
 				</div>
-				<div className="container mx-auto max-w-6xl px-4 py-10">
+				<div className="container mx-auto max-w-6xl px-4 py-6 sm:py-10">
 					<div className="text-center text-muted-foreground">Loading...</div>
 				</div>
 			</div>
@@ -196,7 +205,7 @@ function CalendarViewComponent() {
 				<div className="-z-10 pointer-events-none absolute inset-0">
 					<div className="gradient-mesh absolute inset-0 opacity-30" />
 				</div>
-				<div className="container mx-auto max-w-6xl px-4 py-10">
+				<div className="container mx-auto max-w-6xl px-4 py-6 sm:py-10">
 					<div className="text-center text-muted-foreground">
 						Calendar not found
 					</div>
@@ -212,23 +221,26 @@ function CalendarViewComponent() {
 				<div className="gradient-mesh absolute inset-0 opacity-25" />
 			</div>
 
-			<div className="container mx-auto max-w-6xl px-4 py-10">
+			<div className="container mx-auto max-w-6xl px-4 py-6 sm:py-10">
 				<AccountPrompt variant="banner" />
 
 				<div className="mb-6 flex flex-wrap items-center gap-4">
 					<Button
 						variant="ghost"
 						size="icon"
+						className="min-h-[44px] sm:min-h-0"
 						onClick={() => navigate({ to: "/calendars" })}
+						aria-label="Back to calendars"
 					>
 						<ArrowLeft className="h-4 w-4" />
+						<span className="sr-only">Back to calendars</span>
 					</Button>
 					<div>
 						<h1 className="text-heading-1">{calendar.name}</h1>
 						<p className="text-muted-foreground">{eventCount} event(s)</p>
 					</div>
-					<div className="ml-auto flex flex-wrap items-center gap-2">
-						{/* Primary action */}
+					<div className="ml-auto flex flex-wrap items-center gap-3 sm:gap-2">
+						{/* Primary action - always visible */}
 						<Button
 							onClick={() =>
 								navigate({ to: `/calendars/${calendarId}/events/new` })
@@ -238,75 +250,135 @@ function CalendarViewComponent() {
 							<Plus className="mr-2 h-4 w-4" />
 							Add an event
 						</Button>
-						{/* Secondary actions */}
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() =>
-								navigate({ to: `/calendars/${calendarId}/import` })
-							}
-						>
-							<Upload className="mr-2 h-4 w-4" />
-							Import
-						</Button>
-						{/* Refresh button - only shown for calendars with a source URL */}
-						{calendar.sourceUrl && (
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={handleRefreshFromUrl}
-								disabled={refreshFromUrlMutation.isPending}
-								title={
-									calendar.lastSyncedAt
-										? `Last synced ${formatDistanceToNow(new Date(calendar.lastSyncedAt), { addSuffix: true })}. Click to refresh.`
-										: `Refresh from ${calendar.sourceUrl}`
-								}
-							>
-								{refreshFromUrlMutation.isPending ? (
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-								) : (
-									<RefreshCw className="mr-2 h-4 w-4" />
+						{/* Mobile: More actions menu */}
+						{isMobile ? (
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button variant="outline" size="sm">
+										<MoreHorizontal className="h-4 w-4" />
+										<span className="sr-only">More actions</span>
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end" mobileAlign="start">
+									<DropdownMenuItem
+										onClick={() =>
+											navigate({ to: `/calendars/${calendarId}/import` })
+										}
+									>
+										<Upload className="mr-2 h-4 w-4" />
+										Import
+									</DropdownMenuItem>
+									{calendar.sourceUrl && (
+										<DropdownMenuItem
+											onClick={handleRefreshFromUrl}
+											disabled={refreshFromUrlMutation.isPending}
+										>
+											{refreshFromUrlMutation.isPending ? (
+												<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+											) : (
+												<RefreshCw className="mr-2 h-4 w-4" />
+											)}
+											Refresh
+										</DropdownMenuItem>
+									)}
+									<DropdownMenuItem onClick={() => setCleanDialogOpen(true)}>
+										<Sparkles className="mr-2 h-4 w-4" />
+										Clean up
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										onClick={() =>
+											navigate({
+												to: "/calendars/merge",
+												search: { selected: calendarId },
+											})
+										}
+									>
+										<Merge className="mr-2 h-4 w-4" />
+										Merge
+									</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setExportDialogOpen(true)}>
+										<Download className="mr-2 h-4 w-4" />
+										Export
+									</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
+										<Link2 className="mr-2 h-4 w-4" />
+										Share
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						) : (
+							<>
+								{/* Desktop: All actions visible */}
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() =>
+										navigate({ to: `/calendars/${calendarId}/import` })
+									}
+								>
+									<Upload className="mr-2 h-4 w-4" />
+									Import
+								</Button>
+								{/* Refresh button - only shown for calendars with a source URL */}
+								{calendar.sourceUrl && (
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={handleRefreshFromUrl}
+										disabled={refreshFromUrlMutation.isPending}
+										title={
+											calendar.lastSyncedAt
+												? `Last synced ${formatDistanceToNow(new Date(calendar.lastSyncedAt), { addSuffix: true })}. Click to refresh.`
+												: `Refresh from ${calendar.sourceUrl}`
+										}
+									>
+										{refreshFromUrlMutation.isPending ? (
+											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										) : (
+											<RefreshCw className="mr-2 h-4 w-4" />
+										)}
+										Refresh
+									</Button>
 								)}
-								Refresh
-							</Button>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => setCleanDialogOpen(true)}
+								>
+									<Sparkles className="mr-2 h-4 w-4" />
+									Clean up
+								</Button>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() =>
+										navigate({
+											to: "/calendars/merge",
+											search: { selected: calendarId },
+										})
+									}
+								>
+									<Merge className="mr-2 h-4 w-4" />
+									Merge
+								</Button>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => setExportDialogOpen(true)}
+								>
+									<Download className="mr-2 h-4 w-4" />
+									Export
+								</Button>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => setShareDialogOpen(true)}
+								>
+									<Link2 className="mr-2 h-4 w-4" />
+									Share
+								</Button>
+							</>
 						)}
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setCleanDialogOpen(true)}
-						>
-							<Sparkles className="mr-2 h-4 w-4" />
-							Clean up
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() =>
-								navigate({
-									to: "/calendars/merge",
-									search: { selected: calendarId },
-								})
-							}
-						>
-							<Merge className="mr-2 h-4 w-4" />
-							Merge
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setExportDialogOpen(true)}
-						>
-							<Download className="mr-2 h-4 w-4" />
-							Export
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setShareDialogOpen(true)}
-						>
-							<Link2 className="mr-2 h-4 w-4" />
-							Share
-						</Button>
 					</div>
 				</div>
 
@@ -316,7 +388,7 @@ function CalendarViewComponent() {
 						<Button
 							variant={viewMode === "list" ? "default" : "ghost"}
 							size="sm"
-							className="h-8"
+							className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
 							onClick={() => updateSearch({ view: "list" })}
 						>
 							<List className="mr-2 h-4 w-4" />
@@ -325,7 +397,7 @@ function CalendarViewComponent() {
 						<Button
 							variant={viewMode === "calendar" ? "default" : "ghost"}
 							size="sm"
-							className="h-8"
+							className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
 							onClick={() => updateSearch({ view: "calendar" })}
 						>
 							<CalendarIcon className="mr-2 h-4 w-4" />
@@ -339,7 +411,7 @@ function CalendarViewComponent() {
 							<Button
 								variant={search.calendarView === "month" ? "default" : "ghost"}
 								size="sm"
-								className="h-8"
+								className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
 								onClick={() => updateSearch({ calendarView: "month" })}
 								title="Month view"
 							>
@@ -349,7 +421,7 @@ function CalendarViewComponent() {
 							<Button
 								variant={search.calendarView === "week" ? "default" : "ghost"}
 								size="sm"
-								className="h-8"
+								className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
 								onClick={() => updateSearch({ calendarView: "week" })}
 								title="Week view"
 							>
@@ -359,7 +431,7 @@ function CalendarViewComponent() {
 							<Button
 								variant={search.calendarView === "day" ? "default" : "ghost"}
 								size="sm"
-								className="h-8"
+								className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
 								onClick={() => updateSearch({ calendarView: "day" })}
 								title="Day view"
 							>

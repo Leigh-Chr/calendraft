@@ -49,7 +49,7 @@ export function EmptyState({
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.4 }}
 			className={cn(
-				"relative flex flex-col items-center justify-center py-16 text-center",
+				"relative flex flex-col items-center justify-center py-8 text-center sm:py-16",
 				className,
 			)}
 		>
@@ -85,7 +85,7 @@ export function EmptyState({
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
 					transition={{ delay: 0.3 }}
-					className="relative mb-6 max-w-md text-muted-foreground"
+					className="relative mb-4 max-w-md text-muted-foreground sm:mb-6"
 				>
 					{description}
 				</motion.p>
@@ -96,7 +96,7 @@ export function EmptyState({
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
 					transition={{ delay: 0.4 }}
-					className="relative flex flex-wrap justify-center gap-3"
+					className="relative flex flex-col justify-center gap-3 sm:flex-row"
 				>
 					{action && (
 						<Button

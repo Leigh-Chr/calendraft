@@ -424,7 +424,7 @@ export function FileDropZone({
 	}, []);
 
 	const buttonClassName = cn(
-		"relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200",
+		"relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all duration-200 sm:p-8",
 		"cursor-pointer hover:border-primary/50 hover:bg-primary/5",
 		"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
 		state === "idle" && "border-muted-foreground/25",

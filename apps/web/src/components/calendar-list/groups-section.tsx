@@ -13,6 +13,7 @@ interface GroupsSectionProps {
 				name: string;
 				description?: string | null;
 				color?: string | null;
+				calendarCount: number;
 		  }>
 		| undefined;
 	groupHandlers: {
