@@ -17,6 +17,19 @@ const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
 // biome-ignore lint/suspicious/noExplicitAny: jsdom types don't match globalThis types
 (globalThis as any).navigator = dom.window.navigator;
 
+// Mock window.matchMedia for media query hooks (useMediaQuery, useIsMobile, etc.)
+// biome-ignore lint/suspicious/noExplicitAny: jsdom types don't match globalThis types
+(globalThis as any).window.matchMedia = (query: string) => ({
+	matches: false,
+	media: query,
+	onchange: null,
+	addListener: () => {},
+	removeListener: () => {},
+	addEventListener: () => {},
+	removeEventListener: () => {},
+	dispatchEvent: () => true,
+});
+
 import { render } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";

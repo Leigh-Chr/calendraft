@@ -37,7 +37,7 @@ const config: KnipConfig = {
 		"**/success-animation.tsx",
 		"**/empty-state.tsx",
 	],
-	ignoreBinaries: ["vitest", "tsc"],
+	ignoreBinaries: ["tsc"],
 	ignoreIssues: {
 		// Logger utilities exported for external API use
 		"apps/server/src/lib/logger.ts": ["exports", "types"],
@@ -95,6 +95,8 @@ const config: KnipConfig = {
 		"@noble/hashes",
 		// Core package used for types and utilities (may be used dynamically)
 		"@calendraft/core",
+		// Used in bunfig.toml for security scanning
+		"bun-osv-scanner",
 	],
 };
 
