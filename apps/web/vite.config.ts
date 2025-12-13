@@ -8,7 +8,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 const ReactCompilerConfig = {
 	// Enable only in production to not slow down dev
-	// Disable this line to test in dev
+	// Re-enabled after fixing chunking issues - the problem was manual chunking, not React Compiler
 };
 
 export default defineConfig(({ mode }) => {
@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => {
 			}),
 			react({
 				babel: {
+					// Re-enabled after fixing chunking issues - the problem was manual chunking, not React Compiler
 					plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
 				},
 			}),
@@ -187,8 +188,9 @@ export default defineConfig(({ mode }) => {
 			dedupe: ["react", "react-dom"],
 		},
 		optimizeDeps: {
-			// CRITICAL: Pre-bundle React to ensure single instance
-			// Prevents multiple React instances from being loaded
+			// SIMPLIFIED: Only pre-bundle React to ensure single instance
+			// Let Vite handle Radix UI dependencies automatically
+			// This avoids complex dependency resolution issues
 			include: ["react", "react-dom"],
 		},
 		build: {
@@ -197,51 +199,9 @@ export default defineConfig(({ mode }) => {
 			cssCodeSplit: true, // Split CSS for better caching
 			chunkSizeWarningLimit: 1000, // Warn if chunk exceeds 1MB
 			target: "esnext", // Modern browsers only
-			rollupOptions: {
-				output: {
-					manualChunks: (id) => {
-						// CRITICAL: Ensure React and ReactDOM are in the same chunk
-						// This prevents "Invalid hook call" and "dispatcher is null" errors
-						// by ensuring a single React instance across the entire bundle
-						if (
-							id.includes("node_modules/react/") ||
-							id.includes("node_modules/react-dom/")
-						) {
-							return "vendor-react";
-						}
-						// Vendor chunk mapping: [patterns, chunkName]
-						const chunks: [string[], string][] = [
-							[["@tanstack/react-router"], "vendor-router"],
-							[["@tanstack/react-query"], "vendor-query"],
-							[
-								["@tanstack/react-form", "@tanstack/zod-adapter"],
-								"vendor-form",
-							],
-							[["@trpc/"], "vendor-trpc"],
-							[["react-big-calendar", "/moment/"], "vendor-calendar"],
-							[["date-fns"], "vendor-date"],
-							[["@radix-ui/"], "vendor-radix"],
-							[["lucide-react"], "vendor-icons"],
-							[["/motion/"], "vendor-motion"],
-							[["@sentry/"], "vendor-sentry"],
-							[["better-auth", "@better-auth/"], "vendor-auth"],
-							[["/zod/", "/zod-to-json-schema/"], "vendor-zod"],
-							[["react-day-picker"], "vendor-datepicker"],
-							[["sonner"], "vendor-toast"],
-							[
-								["class-variance-authority", "clsx", "tailwind-merge"],
-								"vendor-css",
-							],
-						];
-						for (const [patterns, chunk] of chunks) {
-							if (patterns.some((p) => id.includes(p))) {
-								return chunk;
-							}
-						}
-						return undefined;
-					},
-				},
-			},
+			// SIMPLIFIED: Let Vite handle chunking automatically
+			// Manual chunking was causing initialization order issues with Radix UI
+			// Vite's automatic chunking is smart enough to handle dependencies correctly
 		},
 	};
 });
