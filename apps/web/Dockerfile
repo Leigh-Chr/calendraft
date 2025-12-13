@@ -65,16 +65,11 @@ RUN rm -f /etc/nginx/conf.d/default.conf
 COPY apps/web/nginx.conf /etc/nginx/conf.d/calendraft.conf
 
 # Copy only the built static assets (no node_modules, no source)
-COPY --from=builder --chown=101:101 /app/apps/web/dist /usr/share/nginx/html
+# Note: /usr/share/nginx/html is owned by root, nginx user (101) can read it
+COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
 
-# Create necessary directories with correct permissions
-RUN mkdir -p /var/cache/nginx/client_temp \
-    /var/cache/nginx/proxy_temp \
-    /var/cache/nginx/fastcgi_temp \
-    /var/cache/nginx/uwsgi_temp \
-    /var/cache/nginx/scgi_temp \
-    /var/run && \
-    chown -R 101:101 /var/cache/nginx /var/run /usr/share/nginx/html
+# Note: Cache directories (/var/cache/nginx, /var/run) are created via tmpfs
+# in docker-compose.yml, so no need to create them here
 
 # nginx-unprivileged runs as user 101 (nginx)
 # No need to set USER as it's already non-root

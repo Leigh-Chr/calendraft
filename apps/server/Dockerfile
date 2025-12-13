@@ -55,6 +55,9 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 bunjs
 
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
 # Copy package files for production install
 COPY package.json bun.lock ./
 COPY packages/config/package.json ./packages/config/

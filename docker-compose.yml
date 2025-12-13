@@ -232,6 +232,7 @@ services:
     tmpfs:
       - /var/cache/nginx:noexec,nosuid,nodev
       - /var/run:noexec,nosuid,nodev
+      - /tmp:noexec,nosuid,nodev
 
 # -----------------------------------
 # Volumes
