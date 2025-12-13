@@ -3,12 +3,12 @@
 # Exclude unnecessary files from Docker builds
 # ===================================
 
-# Dependencies
+# Dependencies (will be installed in container)
 node_modules
 .pnp
 .pnp.js
 
-# Testing
+# Testing (not needed in production)
 coverage
 .nyc_output
 *.test.ts
@@ -17,23 +17,28 @@ coverage
 *.spec.tsx
 __tests__
 **/__tests__
+vitest.config.*
 
 # Build outputs (will be rebuilt in Docker)
 dist
 build
 *.tsbuildinfo
+dev-dist
 
 # Development files
+.env
 .env.local
 .env.development
 .env.test
+.env.production
 .vscode
 .idea
+.cursor
 *.swp
 *.swo
 *~
 
-# Git
+# Git (not needed in image)
 .git
 .gitignore
 .gitattributes
@@ -43,10 +48,22 @@ build
 !README.md
 docs
 
-# CI/CD
+# CI/CD (not needed in image)
 .github
 .gitlab-ci.yml
 .travis.yml
+
+# Lock files from other package managers (not used with Bun)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+# Note: bun.lock is needed for --frozen-lockfile, so it's NOT ignored
+
+# Configuration files (not needed in image)
+bunfig.toml
+knip.config.ts
+bts.jsonc
+ruler.config.*
 
 # Misc
 .DS_Store
@@ -57,6 +74,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+bun-debug.log*
 
 # Docker files themselves
 Dockerfile
@@ -67,8 +85,15 @@ docker-compose*.yml
 *.db
 *.sqlite
 *.sqlite3
+local.db
+
+# Turbo cache
+.turbo
 
 # Temporary files
 tmp
 temp
 *.tmp
+
+# Better-T-Stack
+.alchemy

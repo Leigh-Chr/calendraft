@@ -11,6 +11,11 @@ build
 # Environment variables
 .env
 .env*.local
+.env.production
+.env.development
+.env.test
+!.env.example
+!docker.env.example
 
 # IDEs and editors
 .vscode/*
@@ -19,10 +24,12 @@ build
 !.vscode/launch.json
 !.vscode/extensions.json
 .idea
+.cursor
 *.swp
 *.swo
 *~
 .DS_Store
+Thumbs.db
 
 # Logs
 logs
@@ -32,19 +39,44 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
+bun-debug.log*
 
 # Turbo
 .turbo
+**/.turbo
 
 # Better-T-Stack
 .alchemy
 
+# Husky (git hooks - generated files)
+.husky/_/
+
+# TanStack Router (generated files - optional, can be committed)
+# .tanstack/
+
+# Codacy (code analysis tool)
+.codacy
+.codacy/
+
 # Testing
 coverage
 .nyc_output
+
+# PWA development files
+dev-dist
+
+# Database files (local development)
+*.db
+*.sqlite
+*.sqlite3
+local.db
+
+# Source maps (optional - uncomment if you don't want to commit source maps)
+# *.map
 
 # Misc
 *.tgz
 .cache
 tmp
 temp
+*.tmp
