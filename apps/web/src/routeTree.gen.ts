@@ -8,435 +8,435 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as R404RouteImport } from "./routes/404";
-import { Route as CalendarsRouteImport } from "./routes/calendars";
-import { Route as CalendarsCalendarIdRouteImport } from "./routes/calendars/$calendarId";
-import { Route as CalendarsCalendarIdEventsEventIdRouteImport } from "./routes/calendars/$calendarId/events/$eventId";
-import { Route as CalendarsCalendarIdEventsNewRouteImport } from "./routes/calendars/$calendarId/events/new";
-import { Route as CalendarsCalendarIdImportRouteImport } from "./routes/calendars/$calendarId/import";
-import { Route as CalendarsGroupsGroupIdRouteImport } from "./routes/calendars/groups/$groupId";
-import { Route as CalendarsImportRouteImport } from "./routes/calendars/import";
-import { Route as CalendarsMergeRouteImport } from "./routes/calendars/merge";
-import { Route as CalendarsNewRouteImport } from "./routes/calendars/new";
-import { Route as CheckEmailRouteImport } from "./routes/check-email";
-import { Route as DashboardRouteImport } from "./routes/dashboard";
-import { Route as ForgotPasswordRouteImport } from "./routes/forgot-password";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as LoginRouteImport } from "./routes/login";
-import { Route as ResetPasswordRouteImport } from "./routes/reset-password";
-import { Route as ShareTokenRouteImport } from "./routes/share/$token";
-import { Route as VerifyEmailRouteImport } from "./routes/verify-email";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CheckEmailRouteImport } from './routes/check-email'
+import { Route as CalendarsRouteImport } from './routes/calendars'
+import { Route as R404RouteImport } from './routes/404'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as ShareTokenRouteImport } from './routes/share/$token'
+import { Route as CalendarsNewRouteImport } from './routes/calendars/new'
+import { Route as CalendarsMergeRouteImport } from './routes/calendars/merge'
+import { Route as CalendarsImportRouteImport } from './routes/calendars/import'
+import { Route as CalendarsCalendarIdRouteImport } from './routes/calendars/$calendarId'
+import { Route as CalendarsGroupsGroupIdRouteImport } from './routes/calendars/groups/$groupId'
+import { Route as CalendarsCalendarIdImportRouteImport } from './routes/calendars/$calendarId/import'
+import { Route as CalendarsCalendarIdEventsNewRouteImport } from './routes/calendars/$calendarId/events/new'
+import { Route as CalendarsCalendarIdEventsEventIdRouteImport } from './routes/calendars/$calendarId/events/$eventId'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
-	id: "/verify-email",
-	path: "/verify-email",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
-	id: "/reset-password",
-	path: "/reset-password",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
-	id: "/login",
-	path: "/login",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-	id: "/forgot-password",
-	path: "/forgot-password",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
-	id: "/dashboard",
-	path: "/dashboard",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CheckEmailRoute = CheckEmailRouteImport.update({
-	id: "/check-email",
-	path: "/check-email",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/check-email',
+  path: '/check-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarsRoute = CalendarsRouteImport.update({
-	id: "/calendars",
-	path: "/calendars",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/calendars',
+  path: '/calendars',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const R404Route = R404RouteImport.update({
-	id: "/404",
-	path: "/404",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/404',
+  path: '/404',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
-	id: "/",
-	path: "/",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShareTokenRoute = ShareTokenRouteImport.update({
-	id: "/share/$token",
-	path: "/share/$token",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/share/$token',
+  path: '/share/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarsNewRoute = CalendarsNewRouteImport.update({
-	id: "/new",
-	path: "/new",
-	getParentRoute: () => CalendarsRoute,
-} as any);
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => CalendarsRoute,
+} as any)
 const CalendarsMergeRoute = CalendarsMergeRouteImport.update({
-	id: "/merge",
-	path: "/merge",
-	getParentRoute: () => CalendarsRoute,
-} as any);
+  id: '/merge',
+  path: '/merge',
+  getParentRoute: () => CalendarsRoute,
+} as any)
 const CalendarsImportRoute = CalendarsImportRouteImport.update({
-	id: "/import",
-	path: "/import",
-	getParentRoute: () => CalendarsRoute,
-} as any);
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => CalendarsRoute,
+} as any)
 const CalendarsCalendarIdRoute = CalendarsCalendarIdRouteImport.update({
-	id: "/$calendarId",
-	path: "/$calendarId",
-	getParentRoute: () => CalendarsRoute,
-} as any);
+  id: '/$calendarId',
+  path: '/$calendarId',
+  getParentRoute: () => CalendarsRoute,
+} as any)
 const CalendarsGroupsGroupIdRoute = CalendarsGroupsGroupIdRouteImport.update({
-	id: "/groups/$groupId",
-	path: "/groups/$groupId",
-	getParentRoute: () => CalendarsRoute,
-} as any);
+  id: '/groups/$groupId',
+  path: '/groups/$groupId',
+  getParentRoute: () => CalendarsRoute,
+} as any)
 const CalendarsCalendarIdImportRoute =
-	CalendarsCalendarIdImportRouteImport.update({
-		id: "/import",
-		path: "/import",
-		getParentRoute: () => CalendarsCalendarIdRoute,
-	} as any);
+  CalendarsCalendarIdImportRouteImport.update({
+    id: '/import',
+    path: '/import',
+    getParentRoute: () => CalendarsCalendarIdRoute,
+  } as any)
 const CalendarsCalendarIdEventsNewRoute =
-	CalendarsCalendarIdEventsNewRouteImport.update({
-		id: "/events/new",
-		path: "/events/new",
-		getParentRoute: () => CalendarsCalendarIdRoute,
-	} as any);
+  CalendarsCalendarIdEventsNewRouteImport.update({
+    id: '/events/new',
+    path: '/events/new',
+    getParentRoute: () => CalendarsCalendarIdRoute,
+  } as any)
 const CalendarsCalendarIdEventsEventIdRoute =
-	CalendarsCalendarIdEventsEventIdRouteImport.update({
-		id: "/events/$eventId",
-		path: "/events/$eventId",
-		getParentRoute: () => CalendarsCalendarIdRoute,
-	} as any);
+  CalendarsCalendarIdEventsEventIdRouteImport.update({
+    id: '/events/$eventId',
+    path: '/events/$eventId',
+    getParentRoute: () => CalendarsCalendarIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-	"/": typeof IndexRoute;
-	"/404": typeof R404Route;
-	"/calendars": typeof CalendarsRouteWithChildren;
-	"/check-email": typeof CheckEmailRoute;
-	"/dashboard": typeof DashboardRoute;
-	"/forgot-password": typeof ForgotPasswordRoute;
-	"/login": typeof LoginRoute;
-	"/reset-password": typeof ResetPasswordRoute;
-	"/verify-email": typeof VerifyEmailRoute;
-	"/calendars/$calendarId": typeof CalendarsCalendarIdRouteWithChildren;
-	"/calendars/import": typeof CalendarsImportRoute;
-	"/calendars/merge": typeof CalendarsMergeRoute;
-	"/calendars/new": typeof CalendarsNewRoute;
-	"/share/$token": typeof ShareTokenRoute;
-	"/calendars/$calendarId/import": typeof CalendarsCalendarIdImportRoute;
-	"/calendars/groups/$groupId": typeof CalendarsGroupsGroupIdRoute;
-	"/calendars/$calendarId/events/$eventId": typeof CalendarsCalendarIdEventsEventIdRoute;
-	"/calendars/$calendarId/events/new": typeof CalendarsCalendarIdEventsNewRoute;
+  '/': typeof IndexRoute
+  '/404': typeof R404Route
+  '/calendars': typeof CalendarsRouteWithChildren
+  '/check-email': typeof CheckEmailRoute
+  '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
+  '/calendars/import': typeof CalendarsImportRoute
+  '/calendars/merge': typeof CalendarsMergeRoute
+  '/calendars/new': typeof CalendarsNewRoute
+  '/share/$token': typeof ShareTokenRoute
+  '/calendars/$calendarId/import': typeof CalendarsCalendarIdImportRoute
+  '/calendars/groups/$groupId': typeof CalendarsGroupsGroupIdRoute
+  '/calendars/$calendarId/events/$eventId': typeof CalendarsCalendarIdEventsEventIdRoute
+  '/calendars/$calendarId/events/new': typeof CalendarsCalendarIdEventsNewRoute
 }
 export interface FileRoutesByTo {
-	"/": typeof IndexRoute;
-	"/404": typeof R404Route;
-	"/calendars": typeof CalendarsRouteWithChildren;
-	"/check-email": typeof CheckEmailRoute;
-	"/dashboard": typeof DashboardRoute;
-	"/forgot-password": typeof ForgotPasswordRoute;
-	"/login": typeof LoginRoute;
-	"/reset-password": typeof ResetPasswordRoute;
-	"/verify-email": typeof VerifyEmailRoute;
-	"/calendars/$calendarId": typeof CalendarsCalendarIdRouteWithChildren;
-	"/calendars/import": typeof CalendarsImportRoute;
-	"/calendars/merge": typeof CalendarsMergeRoute;
-	"/calendars/new": typeof CalendarsNewRoute;
-	"/share/$token": typeof ShareTokenRoute;
-	"/calendars/$calendarId/import": typeof CalendarsCalendarIdImportRoute;
-	"/calendars/groups/$groupId": typeof CalendarsGroupsGroupIdRoute;
-	"/calendars/$calendarId/events/$eventId": typeof CalendarsCalendarIdEventsEventIdRoute;
-	"/calendars/$calendarId/events/new": typeof CalendarsCalendarIdEventsNewRoute;
+  '/': typeof IndexRoute
+  '/404': typeof R404Route
+  '/calendars': typeof CalendarsRouteWithChildren
+  '/check-email': typeof CheckEmailRoute
+  '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
+  '/calendars/import': typeof CalendarsImportRoute
+  '/calendars/merge': typeof CalendarsMergeRoute
+  '/calendars/new': typeof CalendarsNewRoute
+  '/share/$token': typeof ShareTokenRoute
+  '/calendars/$calendarId/import': typeof CalendarsCalendarIdImportRoute
+  '/calendars/groups/$groupId': typeof CalendarsGroupsGroupIdRoute
+  '/calendars/$calendarId/events/$eventId': typeof CalendarsCalendarIdEventsEventIdRoute
+  '/calendars/$calendarId/events/new': typeof CalendarsCalendarIdEventsNewRoute
 }
 export interface FileRoutesById {
-	__root__: typeof rootRouteImport;
-	"/": typeof IndexRoute;
-	"/404": typeof R404Route;
-	"/calendars": typeof CalendarsRouteWithChildren;
-	"/check-email": typeof CheckEmailRoute;
-	"/dashboard": typeof DashboardRoute;
-	"/forgot-password": typeof ForgotPasswordRoute;
-	"/login": typeof LoginRoute;
-	"/reset-password": typeof ResetPasswordRoute;
-	"/verify-email": typeof VerifyEmailRoute;
-	"/calendars/$calendarId": typeof CalendarsCalendarIdRouteWithChildren;
-	"/calendars/import": typeof CalendarsImportRoute;
-	"/calendars/merge": typeof CalendarsMergeRoute;
-	"/calendars/new": typeof CalendarsNewRoute;
-	"/share/$token": typeof ShareTokenRoute;
-	"/calendars/$calendarId/import": typeof CalendarsCalendarIdImportRoute;
-	"/calendars/groups/$groupId": typeof CalendarsGroupsGroupIdRoute;
-	"/calendars/$calendarId/events/$eventId": typeof CalendarsCalendarIdEventsEventIdRoute;
-	"/calendars/$calendarId/events/new": typeof CalendarsCalendarIdEventsNewRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/404': typeof R404Route
+  '/calendars': typeof CalendarsRouteWithChildren
+  '/check-email': typeof CheckEmailRoute
+  '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
+  '/calendars/import': typeof CalendarsImportRoute
+  '/calendars/merge': typeof CalendarsMergeRoute
+  '/calendars/new': typeof CalendarsNewRoute
+  '/share/$token': typeof ShareTokenRoute
+  '/calendars/$calendarId/import': typeof CalendarsCalendarIdImportRoute
+  '/calendars/groups/$groupId': typeof CalendarsGroupsGroupIdRoute
+  '/calendars/$calendarId/events/$eventId': typeof CalendarsCalendarIdEventsEventIdRoute
+  '/calendars/$calendarId/events/new': typeof CalendarsCalendarIdEventsNewRoute
 }
 export interface FileRouteTypes {
-	fileRoutesByFullPath: FileRoutesByFullPath;
-	fullPaths:
-		| "/"
-		| "/404"
-		| "/calendars"
-		| "/check-email"
-		| "/dashboard"
-		| "/forgot-password"
-		| "/login"
-		| "/reset-password"
-		| "/verify-email"
-		| "/calendars/$calendarId"
-		| "/calendars/import"
-		| "/calendars/merge"
-		| "/calendars/new"
-		| "/share/$token"
-		| "/calendars/$calendarId/import"
-		| "/calendars/groups/$groupId"
-		| "/calendars/$calendarId/events/$eventId"
-		| "/calendars/$calendarId/events/new";
-	fileRoutesByTo: FileRoutesByTo;
-	to:
-		| "/"
-		| "/404"
-		| "/calendars"
-		| "/check-email"
-		| "/dashboard"
-		| "/forgot-password"
-		| "/login"
-		| "/reset-password"
-		| "/verify-email"
-		| "/calendars/$calendarId"
-		| "/calendars/import"
-		| "/calendars/merge"
-		| "/calendars/new"
-		| "/share/$token"
-		| "/calendars/$calendarId/import"
-		| "/calendars/groups/$groupId"
-		| "/calendars/$calendarId/events/$eventId"
-		| "/calendars/$calendarId/events/new";
-	id:
-		| "__root__"
-		| "/"
-		| "/404"
-		| "/calendars"
-		| "/check-email"
-		| "/dashboard"
-		| "/forgot-password"
-		| "/login"
-		| "/reset-password"
-		| "/verify-email"
-		| "/calendars/$calendarId"
-		| "/calendars/import"
-		| "/calendars/merge"
-		| "/calendars/new"
-		| "/share/$token"
-		| "/calendars/$calendarId/import"
-		| "/calendars/groups/$groupId"
-		| "/calendars/$calendarId/events/$eventId"
-		| "/calendars/$calendarId/events/new";
-	fileRoutesById: FileRoutesById;
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/'
+    | '/404'
+    | '/calendars'
+    | '/check-email'
+    | '/dashboard'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/verify-email'
+    | '/calendars/$calendarId'
+    | '/calendars/import'
+    | '/calendars/merge'
+    | '/calendars/new'
+    | '/share/$token'
+    | '/calendars/$calendarId/import'
+    | '/calendars/groups/$groupId'
+    | '/calendars/$calendarId/events/$eventId'
+    | '/calendars/$calendarId/events/new'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/404'
+    | '/calendars'
+    | '/check-email'
+    | '/dashboard'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/verify-email'
+    | '/calendars/$calendarId'
+    | '/calendars/import'
+    | '/calendars/merge'
+    | '/calendars/new'
+    | '/share/$token'
+    | '/calendars/$calendarId/import'
+    | '/calendars/groups/$groupId'
+    | '/calendars/$calendarId/events/$eventId'
+    | '/calendars/$calendarId/events/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/404'
+    | '/calendars'
+    | '/check-email'
+    | '/dashboard'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/verify-email'
+    | '/calendars/$calendarId'
+    | '/calendars/import'
+    | '/calendars/merge'
+    | '/calendars/new'
+    | '/share/$token'
+    | '/calendars/$calendarId/import'
+    | '/calendars/groups/$groupId'
+    | '/calendars/$calendarId/events/$eventId'
+    | '/calendars/$calendarId/events/new'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-	IndexRoute: typeof IndexRoute;
-	R404Route: typeof R404Route;
-	CalendarsRoute: typeof CalendarsRouteWithChildren;
-	CheckEmailRoute: typeof CheckEmailRoute;
-	DashboardRoute: typeof DashboardRoute;
-	ForgotPasswordRoute: typeof ForgotPasswordRoute;
-	LoginRoute: typeof LoginRoute;
-	ResetPasswordRoute: typeof ResetPasswordRoute;
-	VerifyEmailRoute: typeof VerifyEmailRoute;
-	ShareTokenRoute: typeof ShareTokenRoute;
+  IndexRoute: typeof IndexRoute
+  R404Route: typeof R404Route
+  CalendarsRoute: typeof CalendarsRouteWithChildren
+  CheckEmailRoute: typeof CheckEmailRoute
+  DashboardRoute: typeof DashboardRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
+  ShareTokenRoute: typeof ShareTokenRoute
 }
 
-declare module "@tanstack/react-router" {
-	interface FileRoutesByPath {
-		"/verify-email": {
-			id: "/verify-email";
-			path: "/verify-email";
-			fullPath: "/verify-email";
-			preLoaderRoute: typeof VerifyEmailRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/reset-password": {
-			id: "/reset-password";
-			path: "/reset-password";
-			fullPath: "/reset-password";
-			preLoaderRoute: typeof ResetPasswordRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/login": {
-			id: "/login";
-			path: "/login";
-			fullPath: "/login";
-			preLoaderRoute: typeof LoginRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/forgot-password": {
-			id: "/forgot-password";
-			path: "/forgot-password";
-			fullPath: "/forgot-password";
-			preLoaderRoute: typeof ForgotPasswordRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/dashboard": {
-			id: "/dashboard";
-			path: "/dashboard";
-			fullPath: "/dashboard";
-			preLoaderRoute: typeof DashboardRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/check-email": {
-			id: "/check-email";
-			path: "/check-email";
-			fullPath: "/check-email";
-			preLoaderRoute: typeof CheckEmailRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/calendars": {
-			id: "/calendars";
-			path: "/calendars";
-			fullPath: "/calendars";
-			preLoaderRoute: typeof CalendarsRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/404": {
-			id: "/404";
-			path: "/404";
-			fullPath: "/404";
-			preLoaderRoute: typeof R404RouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/": {
-			id: "/";
-			path: "/";
-			fullPath: "/";
-			preLoaderRoute: typeof IndexRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/share/$token": {
-			id: "/share/$token";
-			path: "/share/$token";
-			fullPath: "/share/$token";
-			preLoaderRoute: typeof ShareTokenRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/calendars/new": {
-			id: "/calendars/new";
-			path: "/new";
-			fullPath: "/calendars/new";
-			preLoaderRoute: typeof CalendarsNewRouteImport;
-			parentRoute: typeof CalendarsRoute;
-		};
-		"/calendars/merge": {
-			id: "/calendars/merge";
-			path: "/merge";
-			fullPath: "/calendars/merge";
-			preLoaderRoute: typeof CalendarsMergeRouteImport;
-			parentRoute: typeof CalendarsRoute;
-		};
-		"/calendars/import": {
-			id: "/calendars/import";
-			path: "/import";
-			fullPath: "/calendars/import";
-			preLoaderRoute: typeof CalendarsImportRouteImport;
-			parentRoute: typeof CalendarsRoute;
-		};
-		"/calendars/$calendarId": {
-			id: "/calendars/$calendarId";
-			path: "/$calendarId";
-			fullPath: "/calendars/$calendarId";
-			preLoaderRoute: typeof CalendarsCalendarIdRouteImport;
-			parentRoute: typeof CalendarsRoute;
-		};
-		"/calendars/groups/$groupId": {
-			id: "/calendars/groups/$groupId";
-			path: "/groups/$groupId";
-			fullPath: "/calendars/groups/$groupId";
-			preLoaderRoute: typeof CalendarsGroupsGroupIdRouteImport;
-			parentRoute: typeof CalendarsRoute;
-		};
-		"/calendars/$calendarId/import": {
-			id: "/calendars/$calendarId/import";
-			path: "/import";
-			fullPath: "/calendars/$calendarId/import";
-			preLoaderRoute: typeof CalendarsCalendarIdImportRouteImport;
-			parentRoute: typeof CalendarsCalendarIdRoute;
-		};
-		"/calendars/$calendarId/events/new": {
-			id: "/calendars/$calendarId/events/new";
-			path: "/events/new";
-			fullPath: "/calendars/$calendarId/events/new";
-			preLoaderRoute: typeof CalendarsCalendarIdEventsNewRouteImport;
-			parentRoute: typeof CalendarsCalendarIdRoute;
-		};
-		"/calendars/$calendarId/events/$eventId": {
-			id: "/calendars/$calendarId/events/$eventId";
-			path: "/events/$eventId";
-			fullPath: "/calendars/$calendarId/events/$eventId";
-			preLoaderRoute: typeof CalendarsCalendarIdEventsEventIdRouteImport;
-			parentRoute: typeof CalendarsCalendarIdRoute;
-		};
-	}
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check-email': {
+      id: '/check-email'
+      path: '/check-email'
+      fullPath: '/check-email'
+      preLoaderRoute: typeof CheckEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendars': {
+      id: '/calendars'
+      path: '/calendars'
+      fullPath: '/calendars'
+      preLoaderRoute: typeof CalendarsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/404': {
+      id: '/404'
+      path: '/404'
+      fullPath: '/404'
+      preLoaderRoute: typeof R404RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/share/$token': {
+      id: '/share/$token'
+      path: '/share/$token'
+      fullPath: '/share/$token'
+      preLoaderRoute: typeof ShareTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendars/new': {
+      id: '/calendars/new'
+      path: '/new'
+      fullPath: '/calendars/new'
+      preLoaderRoute: typeof CalendarsNewRouteImport
+      parentRoute: typeof CalendarsRoute
+    }
+    '/calendars/merge': {
+      id: '/calendars/merge'
+      path: '/merge'
+      fullPath: '/calendars/merge'
+      preLoaderRoute: typeof CalendarsMergeRouteImport
+      parentRoute: typeof CalendarsRoute
+    }
+    '/calendars/import': {
+      id: '/calendars/import'
+      path: '/import'
+      fullPath: '/calendars/import'
+      preLoaderRoute: typeof CalendarsImportRouteImport
+      parentRoute: typeof CalendarsRoute
+    }
+    '/calendars/$calendarId': {
+      id: '/calendars/$calendarId'
+      path: '/$calendarId'
+      fullPath: '/calendars/$calendarId'
+      preLoaderRoute: typeof CalendarsCalendarIdRouteImport
+      parentRoute: typeof CalendarsRoute
+    }
+    '/calendars/groups/$groupId': {
+      id: '/calendars/groups/$groupId'
+      path: '/groups/$groupId'
+      fullPath: '/calendars/groups/$groupId'
+      preLoaderRoute: typeof CalendarsGroupsGroupIdRouteImport
+      parentRoute: typeof CalendarsRoute
+    }
+    '/calendars/$calendarId/import': {
+      id: '/calendars/$calendarId/import'
+      path: '/import'
+      fullPath: '/calendars/$calendarId/import'
+      preLoaderRoute: typeof CalendarsCalendarIdImportRouteImport
+      parentRoute: typeof CalendarsCalendarIdRoute
+    }
+    '/calendars/$calendarId/events/new': {
+      id: '/calendars/$calendarId/events/new'
+      path: '/events/new'
+      fullPath: '/calendars/$calendarId/events/new'
+      preLoaderRoute: typeof CalendarsCalendarIdEventsNewRouteImport
+      parentRoute: typeof CalendarsCalendarIdRoute
+    }
+    '/calendars/$calendarId/events/$eventId': {
+      id: '/calendars/$calendarId/events/$eventId'
+      path: '/events/$eventId'
+      fullPath: '/calendars/$calendarId/events/$eventId'
+      preLoaderRoute: typeof CalendarsCalendarIdEventsEventIdRouteImport
+      parentRoute: typeof CalendarsCalendarIdRoute
+    }
+  }
 }
 
 interface CalendarsCalendarIdRouteChildren {
-	CalendarsCalendarIdImportRoute: typeof CalendarsCalendarIdImportRoute;
-	CalendarsCalendarIdEventsEventIdRoute: typeof CalendarsCalendarIdEventsEventIdRoute;
-	CalendarsCalendarIdEventsNewRoute: typeof CalendarsCalendarIdEventsNewRoute;
+  CalendarsCalendarIdImportRoute: typeof CalendarsCalendarIdImportRoute
+  CalendarsCalendarIdEventsEventIdRoute: typeof CalendarsCalendarIdEventsEventIdRoute
+  CalendarsCalendarIdEventsNewRoute: typeof CalendarsCalendarIdEventsNewRoute
 }
 
 const CalendarsCalendarIdRouteChildren: CalendarsCalendarIdRouteChildren = {
-	CalendarsCalendarIdImportRoute: CalendarsCalendarIdImportRoute,
-	CalendarsCalendarIdEventsEventIdRoute: CalendarsCalendarIdEventsEventIdRoute,
-	CalendarsCalendarIdEventsNewRoute: CalendarsCalendarIdEventsNewRoute,
-};
+  CalendarsCalendarIdImportRoute: CalendarsCalendarIdImportRoute,
+  CalendarsCalendarIdEventsEventIdRoute: CalendarsCalendarIdEventsEventIdRoute,
+  CalendarsCalendarIdEventsNewRoute: CalendarsCalendarIdEventsNewRoute,
+}
 
 const CalendarsCalendarIdRouteWithChildren =
-	CalendarsCalendarIdRoute._addFileChildren(CalendarsCalendarIdRouteChildren);
+  CalendarsCalendarIdRoute._addFileChildren(CalendarsCalendarIdRouteChildren)
 
 interface CalendarsRouteChildren {
-	CalendarsCalendarIdRoute: typeof CalendarsCalendarIdRouteWithChildren;
-	CalendarsImportRoute: typeof CalendarsImportRoute;
-	CalendarsMergeRoute: typeof CalendarsMergeRoute;
-	CalendarsNewRoute: typeof CalendarsNewRoute;
-	CalendarsGroupsGroupIdRoute: typeof CalendarsGroupsGroupIdRoute;
+  CalendarsCalendarIdRoute: typeof CalendarsCalendarIdRouteWithChildren
+  CalendarsImportRoute: typeof CalendarsImportRoute
+  CalendarsMergeRoute: typeof CalendarsMergeRoute
+  CalendarsNewRoute: typeof CalendarsNewRoute
+  CalendarsGroupsGroupIdRoute: typeof CalendarsGroupsGroupIdRoute
 }
 
 const CalendarsRouteChildren: CalendarsRouteChildren = {
-	CalendarsCalendarIdRoute: CalendarsCalendarIdRouteWithChildren,
-	CalendarsImportRoute: CalendarsImportRoute,
-	CalendarsMergeRoute: CalendarsMergeRoute,
-	CalendarsNewRoute: CalendarsNewRoute,
-	CalendarsGroupsGroupIdRoute: CalendarsGroupsGroupIdRoute,
-};
+  CalendarsCalendarIdRoute: CalendarsCalendarIdRouteWithChildren,
+  CalendarsImportRoute: CalendarsImportRoute,
+  CalendarsMergeRoute: CalendarsMergeRoute,
+  CalendarsNewRoute: CalendarsNewRoute,
+  CalendarsGroupsGroupIdRoute: CalendarsGroupsGroupIdRoute,
+}
 
 const CalendarsRouteWithChildren = CalendarsRoute._addFileChildren(
-	CalendarsRouteChildren,
-);
+  CalendarsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
-	IndexRoute: IndexRoute,
-	R404Route: R404Route,
-	CalendarsRoute: CalendarsRouteWithChildren,
-	CheckEmailRoute: CheckEmailRoute,
-	DashboardRoute: DashboardRoute,
-	ForgotPasswordRoute: ForgotPasswordRoute,
-	LoginRoute: LoginRoute,
-	ResetPasswordRoute: ResetPasswordRoute,
-	VerifyEmailRoute: VerifyEmailRoute,
-	ShareTokenRoute: ShareTokenRoute,
-};
+  IndexRoute: IndexRoute,
+  R404Route: R404Route,
+  CalendarsRoute: CalendarsRouteWithChildren,
+  CheckEmailRoute: CheckEmailRoute,
+  DashboardRoute: DashboardRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
+  ShareTokenRoute: ShareTokenRoute,
+}
 export const routeTree = rootRouteImport
-	._addFileChildren(rootRouteChildren)
-	._addFileTypes<FileRouteTypes>();
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
