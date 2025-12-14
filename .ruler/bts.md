@@ -95,6 +95,15 @@ core → ics-utils (0 internal dependencies)
 - `bun run dev:web` - Start only the web app
 - `bun run dev:server` - Start only the server
 
+### Development Scripts
+Development scripts are located in `scripts/dev/` and provide automated tools for local development:
+- **`dev-setup.sh`** - Initial development environment setup (first time)
+- **`dev.sh`** - Start development environment (Docker + apps) with options (`--no-db`, `--no-apps`)
+- **`dev-db.sh`** - Database management (`push`, `seed`, `studio`, `reset`, `status`)
+- **`dev-clean.sh`** - Clean development environment (`--volumes`, `--cache`, `--all`)
+
+📖 See [`scripts/dev/README.md`](../scripts/dev/README.md) for detailed usage.
+
 ### Build & Type Checking
 - `bun run build` - Build all apps for production (uses Turborepo cache)
 - `bun run typecheck` - Check TypeScript types across all packages (uses project references)

@@ -316,7 +316,7 @@ chmod +x scripts/docker-init-db.sh
 ./scripts/docker-init-db.sh
 ```
 
-**Note** : Le script peut utiliser `docker-compose` (avec tiret) au lieu de `docker compose` (avec espace). Si c'est le cas, modifiez le script ou utilisez la commande manuelle ci-dessus.
+**Note** : Ce script utilise `docker compose` (syntaxe moderne) et est destiné à la production. Pour le développement local, utilisez `./scripts/dev/dev-db.sh push` à la place.
 
 ### 4.4 Démarrer Tous les Services
 

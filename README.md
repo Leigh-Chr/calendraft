@@ -94,6 +94,14 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 
 #### Initialize the database
 
+**Using scripts (recommended):**
+```bash
+./scripts/dev/dev-db.sh push    # Push schema changes
+./scripts/dev/dev-db.sh seed    # Seed with test data
+./scripts/dev/dev-db.sh studio  # Open Prisma Studio
+```
+
+**Or manually:**
 ```bash
 # Generate Prisma client and push schema
 bun run db:push
@@ -134,6 +142,27 @@ VITE_SERVER_URL=http://localhost:3000
 
 ### Starting
 
+#### Option 1: Using Development Scripts (Recommended)
+
+For first-time setup:
+```bash
+./scripts/dev/dev-setup.sh
+```
+
+For daily development:
+```bash
+./scripts/dev/dev.sh
+```
+
+This automatically:
+- Starts PostgreSQL and Redis in Docker
+- Checks database initialization
+- Launches apps in development mode
+
+See [scripts/dev/README.md](scripts/dev/README.md) for all available development scripts.
+
+#### Option 2: Manual Commands
+
 Launch the application in development mode:
 
 ```bash
@@ -162,6 +191,16 @@ The project is fully dockerized to facilitate deployment.
 
 #### Option 1: Development (PostgreSQL Docker + Local Apps)
 
+**Using scripts (recommended):**
+```bash
+# First time setup
+./scripts/dev/dev-setup.sh
+
+# Daily development
+./scripts/dev/dev.sh
+```
+
+**Or manually:**
 ```bash
 # 1. Start PostgreSQL
 docker-compose -f docker-compose.dev.yml up -d
@@ -196,6 +235,17 @@ docker-compose logs -f
 | `web` | 3001 | Frontend (Nginx) |
 
 📖 **Complete guide**: See [DOCKER.md](./DOCKER.md) for all commands and troubleshooting.
+
+## Development Scripts
+
+Development scripts are located in `scripts/dev/` and provide automated tools for local development:
+
+- **Setup**: `dev-setup.sh` - Initial development environment setup (first time)
+- **Launch**: `dev.sh` - Start development environment (Docker + apps)
+- **Database**: `dev-db.sh` - Database management (push, seed, studio, reset, status)
+- **Cleanup**: `dev-clean.sh` - Clean development environment
+
+📖 **Complete guide**: See [`scripts/dev/README.md`](./scripts/dev/README.md) for detailed usage.
 
 ## Production
 
