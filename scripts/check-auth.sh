@@ -40,6 +40,25 @@ if [ -f "apps/web/.env" ]; then
 else
     warn "apps/web/.env manquant - Créez-le avec VITE_SERVER_URL"
 fi
+
+if [ -f "packages/db/.env" ]; then
+    check "packages/db/.env existe"
+    # Vérifier si le fichier contient des valeurs placeholder
+    if grep -q "placeholder" packages/db/.env 2>/dev/null; then
+        warn "packages/db/.env contient des valeurs placeholder - doit être corrigé"
+    else
+        # Vérifier que DATABASE_URL correspond à apps/server/.env
+        if [ -f "apps/server/.env" ]; then
+            SERVER_DB_URL=$(grep "^DATABASE_URL=" apps/server/.env | cut -d'=' -f2- | tr -d '"' || echo "")
+            DB_DB_URL=$(grep "^DATABASE_URL=" packages/db/.env | cut -d'=' -f2- | tr -d '"' || echo "")
+            if [ -n "$SERVER_DB_URL" ] && [ -n "$DB_DB_URL" ] && [ "$SERVER_DB_URL" != "$DB_DB_URL" ]; then
+                warn "packages/db/.env DATABASE_URL ne correspond pas à apps/server/.env"
+            fi
+        fi
+    fi
+else
+    warn "packages/db/.env manquant - Nécessaire pour Prisma (sera créé automatiquement par dev-setup.sh)"
+fi
 echo ""
 
 # 2. Vérifier les variables d'environnement backend

@@ -36,23 +36,61 @@ warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
+# Vérifier/créer packages/db/.env si nécessaire
+ensure_db_env() {
+    if [ ! -f "packages/db/.env" ]; then
+        warning "packages/db/.env non trouvé. Création..."
+        if [ -f "apps/server/.env" ]; then
+            SERVER_DB_URL=$(grep "^DATABASE_URL=" apps/server/.env | cut -d'=' -f2- | tr -d '"' || echo "")
+            if [ -n "$SERVER_DB_URL" ]; then
+                echo "DATABASE_URL=\"$SERVER_DB_URL\"" > packages/db/.env
+                log "✅ packages/db/.env créé avec DATABASE_URL depuis apps/server/.env"
+            else
+                echo 'DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"' > packages/db/.env
+                log "✅ packages/db/.env créé avec valeurs par défaut"
+            fi
+        else
+            echo 'DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"' > packages/db/.env
+            log "✅ packages/db/.env créé avec valeurs par défaut"
+        fi
+    elif grep -q "placeholder" packages/db/.env 2>/dev/null; then
+        warning "packages/db/.env contient des valeurs placeholder. Correction..."
+        if [ -f "apps/server/.env" ]; then
+            SERVER_DB_URL=$(grep "^DATABASE_URL=" apps/server/.env | cut -d'=' -f2- | tr -d '"' || echo "")
+            if [ -n "$SERVER_DB_URL" ]; then
+                echo "DATABASE_URL=\"$SERVER_DB_URL\"" > packages/db/.env
+                log "✅ packages/db/.env corrigé"
+            else
+                echo 'DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"' > packages/db/.env
+                log "✅ packages/db/.env corrigé avec valeurs par défaut"
+            fi
+        else
+            echo 'DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"' > packages/db/.env
+            log "✅ packages/db/.env corrigé avec valeurs par défaut"
+        fi
+    fi
+}
+
 # Parse command
 COMMAND="${1:-help}"
 
 case "$COMMAND" in
     push)
+        ensure_db_env
         log "📦 Application des changements de schéma à la base de données..."
         bun run db:push
         log "✅ Schéma appliqué"
         ;;
     
     seed)
+        ensure_db_env
         log "🌱 Remplissage de la base de données avec des données de test..."
         bun run db:seed
         log "✅ Base de données remplie"
         ;;
     
     studio)
+        ensure_db_env
         log "🎨 Ouverture de Prisma Studio..."
         warning "Prisma Studio va s'ouvrir dans votre navigateur"
         bun run db:studio
@@ -66,6 +104,7 @@ case "$COMMAND" in
             exit 0
         fi
         
+        ensure_db_env
         log "🗑️  Réinitialisation de la base de données..."
         
         # Arrêter les apps si elles tournent (elles pourraient utiliser la DB)

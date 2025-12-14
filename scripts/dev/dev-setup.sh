@@ -113,6 +113,54 @@ else
     log "✅ apps/web/.env existe"
 fi
 
+# DB package .env (nécessaire pour Prisma)
+# Ce fichier doit pointer vers la même DATABASE_URL que apps/server/.env
+if [ ! -f "packages/db/.env" ]; then
+    warning "packages/db/.env non trouvé. Création du template..."
+    # Lire DATABASE_URL depuis apps/server/.env si disponible
+    if [ -f "apps/server/.env" ]; then
+        SERVER_DB_URL=$(grep "^DATABASE_URL=" apps/server/.env | cut -d'=' -f2- | tr -d '"' || echo "")
+        if [ -n "$SERVER_DB_URL" ]; then
+            echo "DATABASE_URL=\"$SERVER_DB_URL\"" > packages/db/.env
+            log "✅ packages/db/.env créé avec DATABASE_URL depuis apps/server/.env"
+        else
+            cat > packages/db/.env << 'EOF'
+DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"
+EOF
+            log "✅ packages/db/.env créé avec valeurs par défaut"
+        fi
+    else
+        cat > packages/db/.env << 'EOF'
+DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"
+EOF
+        log "✅ packages/db/.env créé avec valeurs par défaut"
+    fi
+else
+    # Vérifier si le fichier contient des valeurs placeholder
+    if grep -q "placeholder" packages/db/.env 2>/dev/null; then
+        warning "packages/db/.env contient des valeurs placeholder. Correction..."
+        if [ -f "apps/server/.env" ]; then
+            SERVER_DB_URL=$(grep "^DATABASE_URL=" apps/server/.env | cut -d'=' -f2- | tr -d '"' || echo "")
+            if [ -n "$SERVER_DB_URL" ]; then
+                echo "DATABASE_URL=\"$SERVER_DB_URL\"" > packages/db/.env
+                log "✅ packages/db/.env corrigé avec DATABASE_URL depuis apps/server/.env"
+            else
+                cat > packages/db/.env << 'EOF'
+DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"
+EOF
+                log "✅ packages/db/.env corrigé avec valeurs par défaut"
+            fi
+        else
+            cat > packages/db/.env << 'EOF'
+DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"
+EOF
+            log "✅ packages/db/.env corrigé avec valeurs par défaut"
+        fi
+    else
+        log "✅ packages/db/.env existe et semble correct"
+    fi
+fi
+
 # Générer le client Prisma
 log "🗄️  Génération du client Prisma..."
 bun run db:generate
@@ -145,6 +193,7 @@ echo "Prochaines étapes:"
 echo "  1. Examiner et mettre à jour les fichiers .env si nécessaire:"
 echo "     - apps/server/.env"
 echo "     - apps/web/.env"
+echo "     - packages/db/.env (généré automatiquement depuis apps/server/.env)"
 echo ""
 echo "  2. Démarrer le développement:"
 echo "     ./scripts/dev.sh"

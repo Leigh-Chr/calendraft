@@ -92,9 +92,47 @@ if [ "$START_DB" = true ]; then
     log "✅ Services Docker prêts"
 fi
 
+# Vérifier/créer packages/db/.env si nécessaire
+ensure_db_env() {
+    if [ ! -f "packages/db/.env" ]; then
+        warning "packages/db/.env non trouvé. Création..."
+        if [ -f "apps/server/.env" ]; then
+            SERVER_DB_URL=$(grep "^DATABASE_URL=" apps/server/.env | cut -d'=' -f2- | tr -d '"' || echo "")
+            if [ -n "$SERVER_DB_URL" ]; then
+                echo "DATABASE_URL=\"$SERVER_DB_URL\"" > packages/db/.env
+                log "✅ packages/db/.env créé avec DATABASE_URL depuis apps/server/.env"
+            else
+                echo 'DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"' > packages/db/.env
+                log "✅ packages/db/.env créé avec valeurs par défaut"
+            fi
+        else
+            echo 'DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"' > packages/db/.env
+            log "✅ packages/db/.env créé avec valeurs par défaut"
+        fi
+    elif grep -q "placeholder" packages/db/.env 2>/dev/null; then
+        warning "packages/db/.env contient des valeurs placeholder. Correction..."
+        if [ -f "apps/server/.env" ]; then
+            SERVER_DB_URL=$(grep "^DATABASE_URL=" apps/server/.env | cut -d'=' -f2- | tr -d '"' || echo "")
+            if [ -n "$SERVER_DB_URL" ]; then
+                echo "DATABASE_URL=\"$SERVER_DB_URL\"" > packages/db/.env
+                log "✅ packages/db/.env corrigé"
+            else
+                echo 'DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"' > packages/db/.env
+                log "✅ packages/db/.env corrigé avec valeurs par défaut"
+            fi
+        else
+            echo 'DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"' > packages/db/.env
+            log "✅ packages/db/.env corrigé avec valeurs par défaut"
+        fi
+    fi
+}
+
 # Vérifier l'initialisation de la base de données
 if [ "$START_DB" = true ] && [ "$START_APPS" = true ]; then
     log "🔍 Vérification de l'initialisation de la base de données..."
+    
+    # S'assurer que packages/db/.env existe et est correct
+    ensure_db_env
     
     # Vérifier si le client Prisma est généré
     if [ ! -d "packages/db/node_modules/.prisma" ]; then
