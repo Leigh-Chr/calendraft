@@ -71,14 +71,14 @@ if [ "$CLEAN_VOLUMES" = true ]; then
     read -p "Êtes-vous sûr ? (yes/no): " -r
     if [[ ! $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
         echo "Nettoyage des volumes ignoré"
-        docker compose -f docker-compose.dev.yml down
+        docker-compose -f docker-compose.dev.yml down
     else
         log "🗑️  Arrêt des services et suppression des volumes..."
-        docker compose -f docker-compose.dev.yml down -v
+        docker-compose -f docker-compose.dev.yml down -v
         log "✅ Services arrêtés et volumes supprimés"
     fi
 else
-    docker compose -f docker-compose.dev.yml down
+    docker-compose -f docker-compose.dev.yml down
     log "✅ Services Docker arrêtés"
 fi
 

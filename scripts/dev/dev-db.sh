@@ -73,7 +73,7 @@ case "$COMMAND" in
         sleep 2
         
         # Supprimer et recréer la base de données
-        docker compose -f docker-compose.dev.yml exec -T db psql -U calendraft -d calendraft_dev -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" > /dev/null 2>&1 || true
+        docker-compose -f docker-compose.dev.yml exec -T db psql -U calendraft -d calendraft_dev -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" > /dev/null 2>&1 || true
         
         # Appliquer le schéma
         bun run db:push
@@ -86,12 +86,12 @@ case "$COMMAND" in
         echo ""
         
         # Vérifier si les services Docker sont en cours d'exécution
-        if ! docker compose -f docker-compose.dev.yml ps db | grep -q "Up"; then
-            error "Le conteneur PostgreSQL n'est pas en cours d'exécution. Démarrez-le avec: docker compose -f docker-compose.dev.yml up -d"
+        if ! docker-compose -f docker-compose.dev.yml ps db | grep -q "Up"; then
+            error "Le conteneur PostgreSQL n'est pas en cours d'exécution. Démarrez-le avec: docker-compose -f docker-compose.dev.yml up -d"
         fi
         
         # Vérifier la connexion
-        if docker compose -f docker-compose.dev.yml exec -T db pg_isready -U calendraft > /dev/null 2>&1; then
+        if docker-compose -f docker-compose.dev.yml exec -T db pg_isready -U calendraft > /dev/null 2>&1; then
             log "✅ PostgreSQL est en cours d'exécution et accessible"
         else
             error "PostgreSQL n'est pas prêt"
@@ -100,7 +100,7 @@ case "$COMMAND" in
         # Lister les tables
         echo ""
         echo -e "${BLUE}📋 Tables de la base de données:${NC}"
-        docker compose -f docker-compose.dev.yml exec -T db psql -U calendraft -d calendraft_dev -c "\dt" 2>/dev/null || echo "  Aucune table trouvée ou schéma non initialisé"
+        docker-compose -f docker-compose.dev.yml exec -T db psql -U calendraft -d calendraft_dev -c "\dt" 2>/dev/null || echo "  Aucune table trouvée ou schéma non initialisé"
         ;;
     
     help|*)

@@ -120,14 +120,14 @@ log "✅ Client Prisma généré"
 
 # Démarrer les services Docker
 log "🐳 Démarrage des services Docker..."
-docker compose -f docker-compose.dev.yml up -d
+docker-compose -f docker-compose.dev.yml up -d
 
 log "⏳ Attente de la disponibilité des services..."
-until docker compose -f docker-compose.dev.yml exec -T db pg_isready -U calendraft > /dev/null 2>&1; do
+until docker-compose -f docker-compose.dev.yml exec -T db pg_isready -U calendraft > /dev/null 2>&1; do
     sleep 1
 done
 
-until docker compose -f docker-compose.dev.yml exec -T redis redis-cli ping > /dev/null 2>&1; do
+until docker-compose -f docker-compose.dev.yml exec -T redis redis-cli ping > /dev/null 2>&1; do
     sleep 1
 done
 

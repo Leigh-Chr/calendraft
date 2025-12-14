@@ -75,17 +75,17 @@ fi
 if [ "$START_DB" = true ]; then
     log "📦 Démarrage des services Docker (PostgreSQL + Redis)..."
     
-    if ! docker compose -f docker-compose.dev.yml up -d; then
+    if ! docker-compose -f docker-compose.dev.yml up -d; then
         error "Échec du démarrage des services Docker"
     fi
     
     log "⏳ Attente de la disponibilité de PostgreSQL..."
-    until docker compose -f docker-compose.dev.yml exec -T db pg_isready -U calendraft > /dev/null 2>&1; do
+    until docker-compose -f docker-compose.dev.yml exec -T db pg_isready -U calendraft > /dev/null 2>&1; do
         sleep 1
     done
     
     log "⏳ Attente de la disponibilité de Redis..."
-    until docker compose -f docker-compose.dev.yml exec -T redis redis-cli ping > /dev/null 2>&1; do
+    until docker-compose -f docker-compose.dev.yml exec -T redis redis-cli ping > /dev/null 2>&1; do
         sleep 1
     done
     
@@ -103,7 +103,7 @@ if [ "$START_DB" = true ] && [ "$START_APPS" = true ]; then
     fi
     
     # Vérifier si la base de données a des tables
-    TABLE_COUNT=$(docker compose -f docker-compose.dev.yml exec -T db psql -U calendraft -d calendraft_dev -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | tr -d ' ' || echo "0")
+    TABLE_COUNT=$(docker-compose -f docker-compose.dev.yml exec -T db psql -U calendraft -d calendraft_dev -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | tr -d ' ' || echo "0")
     if [ -z "$TABLE_COUNT" ] || [ "$TABLE_COUNT" = "0" ]; then
         warning "Schéma de base de données non initialisé. Application du schéma..."
         bun run db:push
