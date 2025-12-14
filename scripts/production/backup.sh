@@ -9,9 +9,9 @@ set -euo pipefail  # Arrêter en cas d'erreur, variable non définie, ou erreur 
 if [ -f "docker-compose.yml" ]; then
     PROJECT_DIR="$(pwd)"
 else
-    PROJECT_DIR="${PROJECT_DIR:-~/calendraft}"
+    PROJECT_DIR="${PROJECT_DIR:-$HOME/calendraft}"
 fi
-BACKUP_DIR="${BACKUP_DIR:-~/backups}"
+BACKUP_DIR="${BACKUP_DIR:-$HOME/backups}"
 RETENTION_DAYS="${RETENTION_DAYS:-30}"
 
 # Créer le répertoire de sauvegarde

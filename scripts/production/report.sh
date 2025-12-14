@@ -9,7 +9,7 @@ set -e
 if [ -f "docker-compose.yml" ]; then
     PROJECT_DIR="$(pwd)"
 else
-    PROJECT_DIR="${PROJECT_DIR:-~/calendraft}"
+    PROJECT_DIR="${PROJECT_DIR:-$HOME/calendraft}"
 fi
 
 cd "$PROJECT_DIR" || exit 1
@@ -96,7 +96,7 @@ generate_text_report() {
     get_output ""
     
     get_output "💾 Sauvegardes récentes:"
-    BACKUP_DIR="${BACKUP_DIR:-~/backups}"
+    BACKUP_DIR="${BACKUP_DIR:-$HOME/backups}"
     if [ -d "$BACKUP_DIR" ]; then
         BACKUP_LIST=$(ls -lht "$BACKUP_DIR"/db-backup-*.sql.gz 2>/dev/null | head -5 | awk '{print $9, "(" $5 ")"}')
         if [ -n "$OUTPUT" ]; then
@@ -125,7 +125,7 @@ generate_json_report() {
     DISK_USAGE=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')
     MEM_USAGE=$(free | awk 'NR==2{printf "%.0f", $3*100/$2}')
     
-    BACKUP_DIR="${BACKUP_DIR:-~/backups}"
+    BACKUP_DIR="${BACKUP_DIR:-$HOME/backups}"
     BACKUP_COUNT=0
     if [ -d "$BACKUP_DIR" ]; then
         BACKUP_COUNT=$(find "$BACKUP_DIR" -name "db-backup-*.sql.gz" | wc -l)

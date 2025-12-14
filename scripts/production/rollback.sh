@@ -9,11 +9,11 @@ set -euo pipefail  # Arrêter en cas d'erreur, variable non définie, ou erreur 
 if [ -f "docker-compose.yml" ]; then
     PROJECT_DIR="$(pwd)"
 else
-    PROJECT_DIR="${PROJECT_DIR:-~/calendraft}"
+    PROJECT_DIR="${PROJECT_DIR:-$HOME/calendraft}"
 fi
 
-BACKUP_DIR="${BACKUP_DIR:-~/backups}"
-LOG_FILE="${LOG_FILE:-~/rollback.log}"
+BACKUP_DIR="${BACKUP_DIR:-$HOME/backups}"
+LOG_FILE="${LOG_FILE:-$HOME/rollback.log}"
 
 # Couleurs
 RED='\033[0;31m'

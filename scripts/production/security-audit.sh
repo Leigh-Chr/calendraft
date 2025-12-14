@@ -9,7 +9,7 @@ set -e
 if [ -f "docker-compose.yml" ]; then
     PROJECT_DIR="$(pwd)"
 else
-    PROJECT_DIR="${PROJECT_DIR:-~/calendraft}"
+    PROJECT_DIR="${PROJECT_DIR:-$HOME/calendraft}"
 fi
 
 VERBOSE=false

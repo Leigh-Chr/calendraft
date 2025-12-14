@@ -5,8 +5,8 @@
 set -e
 
 # Configuration
-BACKUP_DIR="${BACKUP_DIR:-~/backups}"
-PROJECT_DIR="${PROJECT_DIR:-~/calendraft}"
+BACKUP_DIR="${BACKUP_DIR:-$HOME/backups}"
+PROJECT_DIR="${PROJECT_DIR:-$HOME/calendraft}"
 
 # Utiliser le répertoire courant si docker-compose.yml est présent
 if [ -f "docker-compose.yml" ]; then

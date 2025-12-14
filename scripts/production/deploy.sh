@@ -15,10 +15,10 @@ NC='\033[0m' # No Color
 if [ -f "docker-compose.yml" ]; then
     PROJECT_DIR="$(pwd)"
 else
-    PROJECT_DIR="${PROJECT_DIR:-~/calendraft}"
+    PROJECT_DIR="${PROJECT_DIR:-$HOME/calendraft}"
 fi
-BACKUP_DIR="${BACKUP_DIR:-~/backups}"
-LOG_FILE="${LOG_FILE:-~/deploy.log}"
+BACKUP_DIR="${BACKUP_DIR:-$HOME/backups}"
+LOG_FILE="${LOG_FILE:-$HOME/deploy.log}"
 
 # Fonctions
 log() {
