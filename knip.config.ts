@@ -87,6 +87,10 @@ const config: KnipConfig = {
 		// CSS-imported dependencies (not detected by knip)
 		"tw-animate-css",
 		"tailwindcss",
+		"@fontsource-variable/jetbrains-mono",
+		"@fontsource-variable/sora",
+		// Babel plugin used in vite.config.ts (not detected by knip)
+		"babel-plugin-react-compiler",
 		// Command palette planned feature
 		"cmdk",
 		// Peer dependencies also in devDependencies for testing

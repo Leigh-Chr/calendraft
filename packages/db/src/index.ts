@@ -26,7 +26,7 @@ const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 // In development, store in global to prevent multiple instances during hot-reload
 // In production, module caching should already prevent multiple instances,
 // but this pattern is an explicit best practice recommended by Prisma
-if (process.env.NODE_ENV !== "production") {
+if (process.env["NODE_ENV"] !== "production") {
 	globalForPrisma.prisma = prisma;
 }
 

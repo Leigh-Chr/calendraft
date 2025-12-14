@@ -49,7 +49,7 @@ function RouteComponent() {
 		});
 	};
 
-	return search.mode === "signin" ? (
+	return search["mode"] === "signin" ? (
 		<SignInForm
 			onSwitchToSignUp={handleSwitchToSignUp}
 			redirectTo={search.redirect}

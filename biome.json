@@ -24,7 +24,9 @@
 			"!**/.alchemy",
 			"!**/.svelte-kit",
 			"!**/wrangler.jsonc",
-			"!**/.source"
+			"!**/.source",
+			"!**/*.html",
+			"!**/*.conf"
 		]
 	},
 	"formatter": {
@@ -60,10 +62,7 @@
 				},
 				"noExcessiveNestedTestSuites": "warn",
 				"noForEach": "off",
-				"useLiteralKeys": {
-					"level": "warn",
-					"fix": "unsafe"
-				}
+				"useLiteralKeys": "off"
 			},
 			"nursery": {
 				"useSortedClasses": {

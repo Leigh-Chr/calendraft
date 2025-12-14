@@ -50,13 +50,13 @@ export function parseDurationFromICS(
 
 	// Parse days
 	const daysMatch = clean.match(/(\d+)D/);
-	if (daysMatch) {
+	if (daysMatch?.[1]) {
 		return { value: Number.parseInt(daysMatch[1], 10), unit: "days" };
 	}
 
 	// Parse time part (T...)
 	const timeMatch = clean.match(/T(.+)/);
-	if (!timeMatch) {
+	if (!timeMatch || !timeMatch[1]) {
 		return null;
 	}
 
@@ -64,19 +64,19 @@ export function parseDurationFromICS(
 
 	// Parse hours
 	const hoursMatch = timePart.match(/(\d+)H/);
-	if (hoursMatch) {
+	if (hoursMatch?.[1]) {
 		return { value: Number.parseInt(hoursMatch[1], 10), unit: "hours" };
 	}
 
 	// Parse minutes
 	const minutesMatch = timePart.match(/(\d+)M/);
-	if (minutesMatch) {
+	if (minutesMatch?.[1]) {
 		return { value: Number.parseInt(minutesMatch[1], 10), unit: "minutes" };
 	}
 
 	// Parse seconds
 	const secondsMatch = timePart.match(/(\d+)S/);
-	if (secondsMatch) {
+	if (secondsMatch?.[1]) {
 		return { value: Number.parseInt(secondsMatch[1], 10), unit: "seconds" };
 	}
 

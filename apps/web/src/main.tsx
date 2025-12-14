@@ -27,10 +27,8 @@ const router = createRouter({
 });
 
 // Initialize Sentry for error tracking and performance monitoring
-// biome-ignore lint/complexity/useLiteralKeys: import.meta.env uses index signature
 const sentryDsn = import.meta.env["VITE_SENTRY_DSN"];
 const isSentryEnabled = !!sentryDsn;
-// biome-ignore lint/complexity/useLiteralKeys: import.meta.env uses index signature
 const viteServerUrl = import.meta.env["VITE_SERVER_URL"];
 
 // Use tunnel to bypass CSP restrictions - events are sent through the backend
@@ -65,7 +63,6 @@ Sentry.init({
 	tracePropagationTargets: [
 		"localhost",
 		/^https:\/\/.*\.calendraft\./,
-		// biome-ignore lint/complexity/useLiteralKeys: import.meta.env uses index signature
 		import.meta.env["VITE_API_URL"],
 		viteServerUrl,
 	].filter(Boolean),

@@ -28,6 +28,7 @@ export default function VerifyEmail() {
 		}
 		// Erreur de vérification (token invalide ou expiré)
 		toast.error("Email verification failed. The link may have expired.");
+		return undefined;
 	}, [error, navigate]);
 
 	// Afficher un loader pendant le traitement

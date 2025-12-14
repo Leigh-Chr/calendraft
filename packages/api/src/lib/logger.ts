@@ -3,7 +3,6 @@
  * Uses console but with structured format
  */
 
-// biome-ignore lint/complexity/useLiteralKeys: Environment variable access (project rule: use bracket notation)
 const isProduction = process.env["NODE_ENV"] === "production";
 
 function formatTimestamp(): string {

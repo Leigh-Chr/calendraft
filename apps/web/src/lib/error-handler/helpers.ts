@@ -87,9 +87,18 @@ export function showErrorToast(
  * Build error result from network error
  */
 export function buildNetworkError(): ErrorResult {
+	const networkError = ERROR_MESSAGES["NETWORK_ERROR"];
+	if (!networkError) {
+		return {
+			title: "Network Error",
+			description:
+				"Unable to contact the server. Please check your connection.",
+			code: "NETWORK_ERROR",
+		};
+	}
 	return {
-		title: ERROR_MESSAGES.NETWORK_ERROR.title,
-		description: ERROR_MESSAGES.NETWORK_ERROR.description,
+		title: networkError.title,
+		description: networkError.description,
 		code: "NETWORK_ERROR",
 	};
 }

@@ -6,7 +6,6 @@ import { randomBytes } from "node:crypto";
 
 type LogLevel = "info" | "warn" | "error" | "security";
 
-// biome-ignore lint/complexity/useLiteralKeys: Environment variable access (project rule: use bracket notation)
 const isProduction = process.env["NODE_ENV"] === "production";
 
 /**

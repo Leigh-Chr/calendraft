@@ -96,7 +96,6 @@ function processNonStringFields(
 	setValue(data, "geoLongitude", input.geoLongitude);
 
 	if (input.sequence !== undefined) {
-		// biome-ignore lint/complexity/useLiteralKeys: Dynamic key access for Prisma data object
 		data["sequence"] = input.sequence ?? 0;
 	}
 }

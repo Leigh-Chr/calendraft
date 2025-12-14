@@ -227,7 +227,10 @@ function useShareData(token: string | undefined) {
 	});
 
 	const shareType = typeDetection?.type ?? null;
-	const detectionError = typeDetection?.reason;
+	const detectionError =
+		typeDetection && "reason" in typeDetection
+			? (typeDetection.reason as string | undefined)
+			: undefined;
 
 	// Get single calendar info (only if type is single)
 	const {
@@ -679,7 +682,18 @@ function SharePage() {
 	if (shareType === "bundle" && bundleInfo) {
 		return (
 			<BundleShareView
-				bundleInfo={bundleInfo}
+				bundleInfo={{
+					bundleName: bundleInfo.bundleName ?? "",
+					calendarCount: bundleInfo.calendarCount,
+					totalEvents: bundleInfo.totalEvents,
+					removedCalendars: bundleInfo.removedCalendars,
+					calendars: bundleInfo.calendars.map((cal) => ({
+						id: cal.id,
+						name: cal.name,
+						color: cal.color ?? null,
+						eventCount: cal.eventCount,
+					})),
+				}}
 				downloadState={downloadState}
 				onDownload={handleDownload}
 			/>
@@ -687,11 +701,15 @@ function SharePage() {
 	}
 
 	// Render single calendar view
-	if (shareType === "single" && info) {
+	if (shareType === "single" && info && "calendarName" in info) {
 		return (
 			<SingleShareView
-				info={info}
-				eventsData={eventsData}
+				info={{
+					calendarName: info.calendarName,
+					shareName: "shareName" in info ? info.shareName : null,
+					eventCount: info.eventCount,
+				}}
+				eventsData={eventsData ?? null}
 				groupedEvents={groupedEvents}
 				downloadState={downloadState}
 				onDownload={handleDownload}

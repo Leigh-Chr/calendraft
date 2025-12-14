@@ -19,10 +19,14 @@ export const logger = {
 			console.warn(`[WARN] ${message}`, data || "");
 		}
 		// Send warnings to Sentry in production
-		if (!isDev) {
+		if (!isDev && data !== undefined) {
 			Sentry.captureMessage(message, {
 				level: "warning",
-				extra: data,
+				extra: data as Record<string, unknown>,
+			});
+		} else if (!isDev) {
+			Sentry.captureMessage(message, {
+				level: "warning",
 			});
 		}
 	},
@@ -33,12 +37,17 @@ export const logger = {
 		// Always send errors to Sentry
 		if (error instanceof Error) {
 			Sentry.captureException(error, {
-				extra: data,
+				extra: data as Record<string, unknown>,
 			});
 		} else {
 			Sentry.captureMessage(message, {
 				level: "error",
-				extra: { error, ...(typeof data === "object" ? data : { data }) },
+				extra: {
+					error,
+					...(typeof data === "object" && data !== null
+						? (data as Record<string, unknown>)
+						: { data }),
+				},
 			});
 		}
 	},

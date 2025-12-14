@@ -8,9 +8,7 @@
 const isProduction = (() => {
 	// Check Vite's import.meta.env first (browser environment)
 	if (typeof import.meta !== "undefined" && import.meta.env) {
-		// biome-ignore lint/complexity/useLiteralKeys: Environment variable access (project rule)
 		const mode = import.meta.env["MODE"];
-		// biome-ignore lint/complexity/useLiteralKeys: Environment variable access (project rule)
 		const prod = import.meta.env["PROD"];
 		return mode === "production" || Boolean(prod);
 	}
@@ -18,7 +16,7 @@ const isProduction = (() => {
 	try {
 		// Use try-catch to safely access process in case it's not defined
 		if (typeof process !== "undefined" && process.env) {
-			return process.env.NODE_ENV === "production";
+			return process.env["NODE_ENV"] === "production";
 		}
 	} catch {
 		// process is not available (browser environment without import.meta.env)

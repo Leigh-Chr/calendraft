@@ -17,10 +17,12 @@ const ReactCompilerConfig = {
 // Pattern observed: fetch("http://127.0.0.1:7242/ingest/55689669-9371-4ed0-be4d-b42defee24b9",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({location:"utils.ts:4",message:"cn function definition",...})}).catch(()=>{})
 // This is a clean solution: removes the code completely using a precise regex
 // Currently disabled - CSP allows 127.0.0.1:7242 to prevent errors
+// @ts-expect-error - Function kept for future use but currently unused
 function _removeDebugCode(): Plugin {
 	return {
 		name: "remove-debug-code",
 		enforce: "post",
+		// @ts-expect-error - Vite 7 renderChunk signature differs from type definition
 		renderChunk(code, chunk) {
 			if (!chunk.fileName.endsWith(".js")) {
 				return null;
@@ -42,7 +44,13 @@ function _removeDebugCode(): Plugin {
 			// Clean up orphaned punctuation
 			result = result.replace(/,\s*,/g, ",").replace(/;\s*;/g, ";");
 
-			return result !== code ? { code: result, map: chunk.map } : null;
+			if (result !== code) {
+				return {
+					code: result,
+					map: "map" in chunk && chunk.map ? chunk.map : null,
+				};
+			}
+			return null;
 		},
 	};
 }
@@ -61,12 +69,12 @@ export default defineConfig(({ mode }) => {
 			},
 			proxy: {
 				"/trpc": {
-					target: env.VITE_SERVER_URL || "http://localhost:3000",
+					target: env["VITE_SERVER_URL"] || "http://localhost:3000",
 					changeOrigin: true,
 					secure: false,
 				},
 				"/api": {
-					target: env.VITE_SERVER_URL || "http://localhost:3000",
+					target: env["VITE_SERVER_URL"] || "http://localhost:3000",
 					changeOrigin: true,
 					secure: false,
 				},
@@ -78,9 +86,7 @@ export default defineConfig(({ mode }) => {
 		},
 		plugins: [
 			tailwindcss(),
-			tanstackRouter({
-				exclude: ["**/__tests__/**", "**/*.test.tsx", "**/*.test.ts"],
-			}),
+			tanstackRouter(),
 			react({
 				babel: {
 					// Re-enabled: React Compiler is NOT the source of debug code
@@ -223,14 +229,14 @@ export default defineConfig(({ mode }) => {
 			}),
 			// Sentry plugin for source maps upload (only in production builds)
 			sentryVitePlugin({
-				org: env.SENTRY_ORG,
-				project: env.SENTRY_PROJECT,
-				authToken: env.SENTRY_AUTH_TOKEN,
+				org: env["SENTRY_ORG"],
+				project: env["SENTRY_PROJECT"],
+				authToken: env["SENTRY_AUTH_TOKEN"],
 				sourcemaps: {
 					filesToDeleteAfterUpload: ["./dist/**/*.map"],
 				},
 				// Disable plugin if no auth token (local development)
-				disable: !env.SENTRY_AUTH_TOKEN,
+				disable: !env["SENTRY_AUTH_TOKEN"],
 			}),
 		],
 		resolve: {

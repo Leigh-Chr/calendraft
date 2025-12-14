@@ -14,7 +14,7 @@ export interface ParsedDuration {
  */
 function parseDays(timePart: string): number {
 	const daysMatch = timePart.match(/(\d+)D/);
-	return daysMatch ? Number.parseInt(daysMatch[1], 10) : 0;
+	return daysMatch?.[1] ? Number.parseInt(daysMatch[1], 10) : 0;
 }
 
 /**
@@ -24,8 +24,8 @@ function parseTime(timeStr: string): { hours: number; minutes: number } {
 	const hoursMatch = timeStr.match(/(\d+)H/);
 	const minutesMatch = timeStr.match(/(\d+)M/);
 	return {
-		hours: hoursMatch ? Number.parseInt(hoursMatch[1], 10) : 0,
-		minutes: minutesMatch ? Number.parseInt(minutesMatch[1], 10) : 0,
+		hours: hoursMatch?.[1] ? Number.parseInt(hoursMatch[1], 10) : 0,
+		minutes: minutesMatch?.[1] ? Number.parseInt(minutesMatch[1], 10) : 0,
 	};
 }
 
@@ -74,7 +74,7 @@ function parseDurationWithTime(
 	days: number,
 ): ParsedDuration | null {
 	const timeMatch = timePart.match(/T(.+)/);
-	if (!timeMatch) {
+	if (!timeMatch || !timeMatch[1]) {
 		return days > 0
 			? { when: isNegative ? "before" : "after", value: days, unit: "days" }
 			: null;

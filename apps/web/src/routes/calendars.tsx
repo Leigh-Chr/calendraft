@@ -346,7 +346,22 @@ function CalendarsListContent({
 
 			{/* Groups section */}
 			{!isLoadingGroups && groups && (
-				<GroupsSection groups={groups} groupHandlers={groupHandlers} />
+				<GroupsSection
+					groups={groups.map((g) => {
+						const count =
+							"calendarCount" in g && typeof g.calendarCount === "number"
+								? g.calendarCount
+								: 0;
+						return {
+							id: g.id,
+							name: g.name,
+							description: g.description,
+							color: g.color,
+							calendarCount: count,
+						};
+					})}
+					groupHandlers={groupHandlers}
+				/>
 			)}
 
 			{/* Calendars section */}
@@ -369,9 +384,9 @@ function CalendarsListComponent() {
 	const search = Route.useSearch();
 
 	// Parse filters from URL
-	const keyword = search.q || "";
-	const sortBy = search.sortBy || "updatedAt";
-	const sortDirection = search.sortDirection || "desc";
+	const keyword = search["q"] || "";
+	const sortBy = search["sortBy"] || "updatedAt";
+	const sortDirection = search["sortDirection"] || "desc";
 
 	// Get calendars
 	const { calendars: allCalendars, isLoading } = useCalendars();

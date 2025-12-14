@@ -35,7 +35,13 @@ export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
 		onError: (error, query) => {
 			// Check if this query should suppress error logging
-			const suppressErrorLog = query.meta?.suppressErrorLog === true;
+			const suppressErrorLog =
+				query.meta &&
+				typeof query.meta === "object" &&
+				"suppressErrorLog" in query.meta
+					? (query.meta as { suppressErrorLog?: boolean }).suppressErrorLog ===
+						true
+					: false;
 
 			// Handle network errors first (even without data property)
 			if (isNetworkErrorType(error)) {
@@ -109,16 +115,12 @@ export const queryClient = new QueryClient({
 	},
 });
 
-const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+const serverUrl = import.meta.env["VITE_SERVER_URL"] || "http://localhost:3000";
 
 export const trpcClient = createTRPCClient<AppRouter>({
 	links: [
 		httpBatchLink({
 			url: `${serverUrl}/trpc`,
-			// Optimize batching: batch up to 10 requests, wait max 10ms
-			// This reduces network overhead while maintaining low latency
-			maxBatchSize: 10,
-			batchDelay: 10,
 			fetch(url, options) {
 				// Add anonymous ID header if user is not authenticated
 				const headers = new Headers(options?.headers);

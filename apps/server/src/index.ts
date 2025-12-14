@@ -59,8 +59,8 @@ Sentry.init({
 				string,
 				string | undefined
 			>;
-			headers.authorization = undefined;
-			headers.cookie = undefined;
+			headers["authorization"] = undefined;
+			headers["cookie"] = undefined;
 			headers["x-anonymous-id"] = undefined;
 		}
 
@@ -239,13 +239,21 @@ app.post("/api/sentry-tunnel", async (c) => {
 		}
 
 		// Parse the header (first line) to get the DSN
+		const firstPiece = pieces[0];
+		if (!firstPiece) {
+			logger.error(
+				"Sentry tunnel: Invalid envelope format (empty first piece)",
+			);
+			return c.json({ error: "Invalid envelope format" }, 400);
+		}
+
 		let header: { dsn?: string } | undefined;
 		try {
-			header = JSON.parse(pieces[0]) as { dsn?: string };
+			header = JSON.parse(firstPiece) as { dsn?: string };
 		} catch (error) {
 			logger.error("Sentry tunnel: Failed to parse envelope header", {
 				error,
-				headerPreview: pieces[0].substring(0, 100),
+				headerPreview: firstPiece.substring(0, 100),
 			});
 			return c.json({ error: "Invalid envelope header" }, 400);
 		}
@@ -300,11 +308,15 @@ app.post("/api/sentry-tunnel", async (c) => {
 				statusText: response.statusText,
 				error: errorText.substring(0, 200),
 			});
-			return c.text("Failed to forward to Sentry", response.status);
+			return new Response("Failed to forward to Sentry", {
+				status: response.status,
+			});
 		}
 
 		// Return empty response with same status code as Sentry (usually 200)
-		return c.text("", response.status);
+		return new Response("", {
+			status: response.status,
+		});
 	} catch (error) {
 		logger.error("Sentry tunnel exception", { error });
 		return c.json({ error: "Internal server error" }, 500);

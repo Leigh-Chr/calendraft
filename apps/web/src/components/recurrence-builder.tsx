@@ -718,7 +718,7 @@ function OccurrencesPreview({
 }: {
 	occurrences: Date[];
 	showInfiniteHint: boolean;
-}): JSX.Element | null {
+}): React.JSX.Element | null {
 	if (occurrences.length === 0) return null;
 
 	return (

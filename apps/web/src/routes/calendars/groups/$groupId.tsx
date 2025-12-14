@@ -218,7 +218,10 @@ function useFilteredCalendars(
 	sortBy: CalendarSortBy,
 ) {
 	if (!calendars.length) return [];
-	const filtered = filterGroupCalendarsByKeyword(calendars, searchKeyword);
+	const filtered = filterGroupCalendarsByKeyword(
+		calendars as CalendarForGroupSort[],
+		searchKeyword,
+	);
 	return sortGroupCalendars(filtered, sortBy);
 }
 
@@ -316,7 +319,9 @@ interface GroupDetailHeaderProps {
 	onShare: () => void;
 	onMerge: () => void;
 	onExport: () => void;
-	deleteMutation: ReturnType<typeof useMutation>;
+	deleteMutation: ReturnType<
+		typeof useMutation<{ success: boolean }, unknown, { id: string }, unknown>
+	>;
 }
 
 function GroupDetailHeader({

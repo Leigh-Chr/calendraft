@@ -88,10 +88,12 @@ function handleTopLevelError(
  * Check if dates are valid
  */
 function areDatesValid(formData: EventFormData): boolean {
-	const startDateValid =
-		formData.startDate && !Number.isNaN(new Date(formData.startDate).getTime());
-	const endDateValid =
-		formData.endDate && !Number.isNaN(new Date(formData.endDate).getTime());
+	const startDateValid = Boolean(
+		formData.startDate && !Number.isNaN(new Date(formData.startDate).getTime()),
+	);
+	const endDateValid = Boolean(
+		formData.endDate && !Number.isNaN(new Date(formData.endDate).getTime()),
+	);
 	return startDateValid && endDateValid;
 }
 
@@ -187,7 +189,13 @@ export function validateEventForm(formData: EventFormData): ValidationErrors {
 	}
 
 	// Separate issues into date format errors and other errors
-	const { dateFormatIssues, otherIssues } = separateIssues(result.error.issues);
+	const { dateFormatIssues, otherIssues } = separateIssues(
+		result.error.issues as Array<{
+			path: (string | number)[];
+			message: string;
+			code: string;
+		}>,
+	);
 
 	// First pass: handle date format errors (highest priority)
 	if (dateFormatIssues.length > 0) {

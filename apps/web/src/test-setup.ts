@@ -3,6 +3,7 @@
  * Ensures document and window are available for React Testing Library
  */
 
+// @ts-expect-error - jsdom types are not available, but the module works at runtime
 import { JSDOM } from "jsdom";
 
 // Setup DOM before tests run

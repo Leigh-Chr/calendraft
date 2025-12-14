@@ -67,7 +67,9 @@ export function ExportCalendarDialog({
 		return typeof c === "string" ? c : c.category;
 	};
 
-	const extractCategories = (events: Array<{ categories?: unknown }>) => {
+	const extractCategories = (
+		events: Array<{ categories?: unknown }>,
+	): string[] => {
 		if (!events) return [];
 		const categories = new Set<string>();
 		for (const event of events) {
@@ -82,7 +84,9 @@ export function ExportCalendarDialog({
 	// React Compiler will automatically memoize this computation
 	const availableCategories = (() => {
 		if (!calendarData?.events) return [];
-		return extractCategories(calendarData.events);
+		return extractCategories(
+			calendarData.events as Array<{ categories?: unknown }>,
+		);
 	})();
 
 	// Toggle category selection

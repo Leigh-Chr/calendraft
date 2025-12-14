@@ -49,6 +49,7 @@ export function SuccessAnimation({
 			const timer = setTimeout(onComplete, duration);
 			return () => clearTimeout(timer);
 		}
+		return undefined;
 	}, [show, onComplete, duration]);
 
 	return (

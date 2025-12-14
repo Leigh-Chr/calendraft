@@ -48,7 +48,7 @@ export function TagInput({
 
 	const handleCommaInput = (newValue: string) => {
 		const parts = newValue.split(",");
-		const tagToAdd = parts[0].trim();
+		const tagToAdd = parts[0]?.trim();
 		if (!tagToAdd) return;
 
 		const updated = addTag(value, tagToAdd);
