@@ -201,6 +201,19 @@ docker-compose logs -f
 
 To deploy in production, consult the complete guide: [DEPLOYMENT.md](./DEPLOYMENT.md)
 
+### Production Management Scripts
+
+For managing the application in production, a comprehensive set of scripts is available in [`scripts/production/`](./scripts/production/):
+
+- **Deployment**: `deploy.sh` - Automated deployment with backup and migrations
+- **Backup & Restore**: `backup.sh` - Database backup and restoration
+- **Rollback**: `rollback.sh` - Revert to a previous version
+- **Monitoring**: `monitor.sh`, `health-check.sh`, `report.sh` - Service health and resource monitoring
+- **Security**: `security-audit.sh` - Security configuration audit
+- **Maintenance**: `cleanup.sh`, `verify-backup.sh` - Cleanup and verification tools
+
+📖 **Complete guide**: See [`PRODUCTION_COMMANDS.md`](./PRODUCTION_COMMANDS.md) for detailed usage and [`scripts/production/README.md`](./scripts/production/README.md) for quick start.
+
 ### Quick Production Checklist
 
 - [ ] Environment variables configured (see `apps/server/.env.example`)
@@ -325,6 +338,8 @@ calendraft/
 | [README.md](README.md) | This file - Overview and quick start |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Package architecture and dependency diagram |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Complete production deployment guide |
+| [PRODUCTION_COMMANDS.md](PRODUCTION_COMMANDS.md) | Production management commands and scripts guide |
+| [VPS_DEPLOYMENT.md](VPS_DEPLOYMENT.md) | VPS initial setup and deployment guide |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Project contribution guide |
 | [SECURITY.md](SECURITY.md) | Security policy and vulnerability reporting |
 

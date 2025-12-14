@@ -10,6 +10,8 @@ This is a Calendraft project - a web platform for managing, editing, and creatin
 - **`README.md`** - Project overview, features, getting started, stack, scripts
 - **`ARCHITECTURE.md`** - Package structure, dependency diagram, package contents
 - **`DEPLOYMENT.md`** - Production deployment guide, environment variables, monitoring
+- **`PRODUCTION_COMMANDS.md`** - Complete production management guide, scripts usage, Docker commands, monitoring, troubleshooting
+- **`VPS_DEPLOYMENT.md`** - VPS initial setup and deployment guide (first-time installation)
 - **`CONTRIBUTING.md`** - Contribution guidelines, code standards, PR process
 - **`SECURITY.md`** - Security policy, vulnerability reporting, security measures
 - **`AUTHENTICATION.md`** - Authentication flow, anonymous users, Better-Auth configuration
@@ -108,6 +110,23 @@ All database operations run from the root:
 - `bun run db:migrate` - Run database migrations
 
 **Important**: Database schema is located in `packages/db/prisma/schema/` (not in apps/server)
+
+### Production Management Scripts
+Production scripts are located in `scripts/production/` and provide automated management tools:
+- **`deploy.sh`** - Automated deployment with backup and migrations (`--backup`, `--migrate`, `--service=SERVICE`)
+- **`backup.sh`** - Database backup and restoration (`--list`, `--restore=FILE`)
+- **`rollback.sh`** - Revert to previous Git commit (`--commit=HASH`, `--no-backup`, `--no-db`)
+- **`monitor.sh`** - Service health and resource monitoring (`--all`, `--health`, `--stats`, `--logs`, `--errors`)
+- **`health-check.sh`** - Comprehensive health verification (`--verbose`)
+- **`security-audit.sh`** - Security configuration audit (`--verbose`)
+- **`verify-backup.sh`** - Backup integrity verification
+- **`report.sh`** - Status report generation (`--format=text|json`, `--output=FILE`)
+- **`cleanup.sh`** - Docker resource cleanup (`--all`, `--images`, `--volumes`, `--logs`, `--system`, `--build-cache`)
+- **`quick-commands.sh`** - Quick Docker command shortcuts
+- **`install.sh`** - Install scripts on remote server
+- **`help.sh`** - Integrated help for all scripts
+
+📖 **Complete guide**: See `PRODUCTION_COMMANDS.md` for detailed usage and `scripts/production/README.md` for quick start.
 
 ## Database Schema
 
@@ -217,6 +236,12 @@ cp docker.env.example .env
 # Edit .env with production values
 docker compose up -d --build
 ```
+
+**For production management**, use the scripts in `scripts/production/`:
+- `./scripts/production/deploy.sh --backup --migrate` - Deploy with backup and migrations
+- `./scripts/production/monitor.sh --all` - Monitor all services
+- `./scripts/production/health-check.sh` - Verify service health
+- See `PRODUCTION_COMMANDS.md` for complete guide
 
 ## Environment Variables
 

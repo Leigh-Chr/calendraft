@@ -1,5 +1,8 @@
 # Guide de Déploiement VPS - Calendraft
 
+> 📌 **Guide de première installation** : Ce document est destiné à la configuration initiale d'un nouveau serveur VPS.  
+> Pour la gestion quotidienne en production, consultez [`PRODUCTION_COMMANDS.md`](./PRODUCTION_COMMANDS.md) et les scripts dans [`scripts/production/`](./scripts/production/).
+
 Guide complet pas à pas pour déployer Calendraft sur un VPS avec Docker Compose.
 
 **Temps estimé** : 2-3 heures (première fois)
@@ -649,281 +652,12 @@ docker compose exec db psql -U calendraft -d calendraft
 
 ---
 
-## Étape 10 : Configuration de la Sauvegarde
-
-### 10.1 Créer un Script de Sauvegarde
-
-```bash
-# Créer le répertoire pour les backups
-mkdir -p ~/backups
-
-# Créer le script
-nano ~/backup-calendraft.sh
-```
-
-Contenu du script :
-
-```bash
-#!/bin/bash
-# Script de sauvegarde pour Calendraft
-
-BACKUP_DIR="$HOME/backups"
-DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="$BACKUP_DIR/calendraft_backup_$DATE.sql"
-
-# Créer le répertoire s'il n'existe pas
-mkdir -p $BACKUP_DIR
-
-# Sauvegarder la base de données
-cd ~/calendraft
-docker compose exec -T db pg_dump -U calendraft calendraft | gzip > "$BACKUP_FILE.gz"
-
-# Garder seulement les 7 derniers backups
-ls -t $BACKUP_DIR/calendraft_backup_*.sql.gz | tail -n +8 | xargs rm -f
-
-echo "✅ Backup créé : $BACKUP_FILE.gz"
-```
-
-### 10.2 Rendre le Script Exécutable
-
-```bash
-chmod +x ~/backup-calendraft.sh
-```
-
-### 10.3 Tester le Script
-
-```bash
-~/backup-calendraft.sh
-```
-
-### 10.4 Automatiser avec Cron
-
-```bash
-# Éditer le crontab
-crontab -e
-
-# Ajouter cette ligne (sauvegarde quotidienne à 2h du matin)
-0 2 * * * /home/calendraft/backup-calendraft.sh >> /home/calendraft/backup.log 2>&1
-```
-
----
-
-## Étape 11 : Monitoring et Maintenance
-
-### 11.1 Surveiller les Logs
-
-```bash
-# Logs en temps réel
-docker compose logs -f
-
-# Logs d'un service spécifique
-docker compose logs -f server
-docker compose logs -f web
-docker compose logs -f db
-```
-
-### 11.2 Surveiller les Ressources
-
-```bash
-# Utilisation des ressources Docker
-docker stats
-
-# Utilisation du disque
-df -h
-
-# Utilisation de la mémoire
-free -h
-```
-
-### 11.3 Surveiller les Processus
-
-```bash
-# Voir les processus en cours
-htop
-
-# Ou
-top
-```
-
----
-
-## Mises à Jour Futures
-
-### Mettre à Jour l'Application
-
-```bash
-# Se connecter au VPS
-ssh user@VOTRE_IP_VPS
-
-# Aller dans le répertoire
-cd ~/calendraft
-
-# Sauvegarder la base de données (recommandé)
-~/backup-calendraft.sh
-
-# Récupérer les dernières modifications
-git pull
-
-# Si le schéma Prisma a changé, créer une migration
-docker compose run --rm server bun run db:push
-
-# Reconstruire et redémarrer
-docker compose down
-DOCKER_BUILDKIT=1 docker compose up -d --build
-
-# Vérifier que tout fonctionne
-docker compose ps
-docker compose logs -f
-```
-
----
-
-## Dépannage
-
-### Les Services ne Démarrent Pas
-
-```bash
-# Vérifier les logs
-docker compose logs
-
-# Vérifier les logs d'un service spécifique
-docker compose logs server | tail -30
-docker compose logs web | tail -30
-
-# Vérifier les variables d'environnement
-docker compose config
-
-# Vérifier les ports
-sudo netstat -tulpn | grep -E '3000|3001|5432|6379'
-```
-
-### Service "Unhealthy"
-
-Si un service affiche "unhealthy" :
-
-```bash
-# Vérifier les logs du service
-docker compose logs server
-
-# Tester le healthcheck manuellement
-docker compose exec server curl -f http://localhost:3000/health
-
-# Si curl n'est pas disponible, vérifier le Dockerfile
-# Le Dockerfile du serveur doit installer curl :
-# RUN apk add --no-cache curl
-```
-
-### Erreurs de Validation des Variables d'Environnement
-
-Si le serveur redémarre en boucle avec des erreurs de validation :
-
-```bash
-# Vérifier les variables dans .env
-cat .env | grep -E 'EMAIL_FROM|RESEND_API_KEY|SMTP'
-
-# IMPORTANT : EMAIL_FROM doit être au format email simple
-# ❌ Mauvais : EMAIL_FROM=Calendraft <noreply@calendraft.com>
-# ✅ Bon : EMAIL_FROM=noreply@calendraft.com
-
-# Si les variables SMTP sont vides, laissez-les vides ou commentez-les
-# Le schéma de validation accepte maintenant les chaînes vides
-```
-
-### Erreur de Connexion à la Base de Données
-
-```bash
-# Vérifier que PostgreSQL est démarré
-docker compose ps db
-
-# Vérifier les logs PostgreSQL
-docker compose logs db
-
-# Vérifier la connexion
-docker compose exec db psql -U calendraft -d calendraft -c "SELECT 1;"
-```
-
-### Le Frontend ne Charge Pas
-
-```bash
-# Vérifier que le conteneur web est démarré
-docker compose ps web
-
-# Vérifier les logs
-docker compose logs web
-
-# Erreur commune : "Read-only file system" pour /tmp
-# Solution : Vérifier que docker-compose.yml a /tmp dans tmpfs :
-# tmpfs:
-#   - /var/cache/nginx:noexec,nosuid,nodev
-#   - /var/run:noexec,nosuid,nodev
-#   - /tmp:noexec,nosuid,nodev
-
-# Vérifier que Nginx proxy correctement
-sudo nginx -t
-sudo systemctl status nginx
-
-# Vérifier les logs Nginx
-sudo tail -f /var/log/nginx/error.log
-```
-
-### Erreur "curl: executable file not found" dans le Healthcheck
-
-Si le healthcheck du serveur échoue avec cette erreur :
-
-```bash
-# Vérifier le Dockerfile du serveur
-# Il doit contenir dans le stage "runner" :
-# RUN apk add --no-cache curl
-
-# Reconstruire le serveur
-docker compose build --no-cache server
-docker compose up -d server
-```
-
-### Erreurs de Build (Dépendances Manquantes)
-
-Si le build échoue avec des erreurs de dépendances manquantes :
-
-```bash
-# Vérifier les package.json sont à jour
-# Dépendances courantes qui peuvent manquer :
-# - babel-plugin-react-compiler
-# - @fontsource-variable/jetbrains-mono
-# - @fontsource-variable/sora
-
-# Mettre à jour les dépendances localement, puis retransférer
-# Sur votre machine locale :
-cd /chemin/vers/calendraft
-bun install
-rsync -avz apps/web/package.json bun.lock root@VPS_IP:~/calendraft/
-
-# Sur le VPS, reconstruire
-docker compose build --no-cache web
-docker compose up -d web
-```
-
-### Erreur SSL
-
-```bash
-# Vérifier les certificats
-sudo certbot certificates
-
-# Renouveler manuellement si nécessaire
-sudo certbot renew
-
-# Vérifier la configuration Nginx
-sudo nginx -t
-```
-
-### Erreur CORS
-
-```bash
-# Vérifier que CORS_ORIGIN est correct dans .env
-cat .env | grep CORS_ORIGIN
-
-# Vérifier que le backend a été redéployé après modification
-docker compose restart server
-```
+> 💡 **Sauvegarde, Monitoring et Maintenance** : Pour configurer les sauvegardes automatisées, le monitoring et la maintenance quotidienne, consultez [`PRODUCTION_COMMANDS.md`](./PRODUCTION_COMMANDS.md) et utilisez les scripts dans [`scripts/production/`](./scripts/production/).
+>
+> - **Sauvegarde** : Utilisez `./scripts/production/backup.sh` (plus robuste que le script manuel)
+> - **Monitoring** : Utilisez `./scripts/production/monitor.sh` et `./scripts/production/health-check.sh`
+> - **Mises à jour** : Utilisez `./scripts/production/deploy.sh --backup --migrate`
+> - **Dépannage** : Consultez la section "Dépannage" dans [`PRODUCTION_COMMANDS.md`](./PRODUCTION_COMMANDS.md)
 
 ---
 
@@ -964,49 +698,13 @@ docker compose restart server
 - [ ] Logs sans erreurs critiques
 - [ ] Authentification testée (création de compte)
 
-### Maintenance
-- [ ] Script de sauvegarde créé et testé
-- [ ] Cron job de sauvegarde configuré
-- [ ] Monitoring configuré (logs, ressources)
+### Prochaines Étapes
+- [ ] Scripts de production installés : `./scripts/production/install.sh`
+- [ ] Documentation de production consultée : [`PRODUCTION_COMMANDS.md`](./PRODUCTION_COMMANDS.md)
 
 ---
 
-## Commandes Utiles
-
-```bash
-# Voir les services
-docker compose ps
-
-# Logs en temps réel
-docker compose logs -f
-
-# Redémarrer un service
-docker compose restart server
-
-# Reconstruire un service
-docker compose up -d --build server
-
-# Arrêter tous les services
-docker compose down
-
-# Arrêter et supprimer les volumes (⚠️ supprime les données)
-docker compose down -v
-
-# Accéder à PostgreSQL
-docker compose exec db psql -U calendraft -d calendraft
-
-# Sauvegarder la base de données
-docker compose exec db pg_dump -U calendraft calendraft > backup.sql
-
-# Restaurer la base de données
-docker compose exec -T db psql -U calendraft calendraft < backup.sql
-
-# Voir l'utilisation des ressources
-docker stats
-
-# Nettoyer les images Docker inutilisées
-docker system prune -a
-```
+> 💡 **Commandes de production** : Pour toutes les commandes de maintenance, monitoring et gestion quotidienne, consultez [`PRODUCTION_COMMANDS.md`](./PRODUCTION_COMMANDS.md) et utilisez les scripts automatisés dans [`scripts/production/`](./scripts/production/).
 
 ---
 
@@ -1035,13 +733,30 @@ Nginx (Port 443 HTTPS)
 
 Votre application est maintenant déployée en production ! 🎉
 
-Les prochaines mises à jour se font simplement avec :
+### Prochaines étapes
+
+1. **Gestion quotidienne** : Utilisez les scripts de production
+   ```bash
+   cd ~/calendraft
+   ./scripts/production/deploy.sh --backup
+   ```
+
+2. **Documentation complète** : Consultez [`PRODUCTION_COMMANDS.md`](./PRODUCTION_COMMANDS.md) pour :
+   - Toutes les commandes de maintenance
+   - Monitoring et dépannage
+   - Sauvegardes automatisées
+   - Scripts de production
+
+3. **Aide rapide** : Utilisez `./scripts/production/help.sh` pour l'aide contextuelle
+
+### Mise à jour simple
+
+Pour les mises à jour futures, utilisez le script de déploiement :
 
 ```bash
 cd ~/calendraft
-git pull
-docker compose up -d --build
+./scripts/production/deploy.sh --backup --migrate
 ```
 
-C'est tout !
+C'est tout ! 🚀
 
