@@ -35,10 +35,11 @@ export async function sendVerificationEmail({
 
 	// Ne pas await pour éviter les timing attacks
 	// L'URL contient déjà le token et le callbackURL configuré par Better-Auth
-	void resend.emails.send({
-		from: env.EMAIL_FROM || "Calendraft <noreply@calendraft.com>",
-		to,
-		subject: "Verify your email address - Calendraft",
+	resend.emails
+		.send({
+			from: env.EMAIL_FROM || "Calendraft <noreply@calendraft.com>",
+			to,
+			subject: "Verify your email address - Calendraft",
 		html: `
       <!DOCTYPE html>
       <html>
@@ -68,7 +69,23 @@ ${url}
 This link will expire in 1 hour.
 
 If you didn't create an account, you can safely ignore this email.`,
-	});
+		})
+		.then((result) => {
+			if (result.error) {
+				logger.error("Failed to send verification email", {
+					to,
+					error: result.error,
+				});
+			} else {
+				logger.info("Verification email sent successfully", {
+					to,
+					emailId: result.data?.id,
+				});
+			}
+		})
+		.catch((error) => {
+			logger.error("Error sending verification email", { to, error });
+		});
 }
 
 /**
@@ -100,10 +117,11 @@ export async function sendResetPasswordEmail({
 
 	// Ne pas await pour éviter les timing attacks
 	// L'URL contient déjà le token et le callbackURL configuré par Better-Auth
-	void resend.emails.send({
-		from: env.EMAIL_FROM || "Calendraft <noreply@calendraft.com>",
-		to,
-		subject: "Reset your password - Calendraft",
+	resend.emails
+		.send({
+			from: env.EMAIL_FROM || "Calendraft <noreply@calendraft.com>",
+			to,
+			subject: "Reset your password - Calendraft",
 		html: `
       <!DOCTYPE html>
       <html>
@@ -133,5 +151,21 @@ ${url}
 This link will expire in 1 hour.
 
 If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.`,
-	});
+		})
+		.then((result) => {
+			if (result.error) {
+				logger.error("Failed to send password reset email", {
+					to,
+					error: result.error,
+				});
+			} else {
+				logger.info("Password reset email sent successfully", {
+					to,
+					emailId: result.data?.id,
+				});
+			}
+		})
+		.catch((error) => {
+			logger.error("Error sending password reset email", { to, error });
+		});
 }
