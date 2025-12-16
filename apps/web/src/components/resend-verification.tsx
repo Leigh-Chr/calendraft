@@ -10,6 +10,48 @@ import { FormMessage } from "./ui/form-message";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
+function handleResendVerificationError(
+	error: unknown,
+	email: string,
+	setSubmittedEmail: (email: string) => void,
+	setIsSubmitted: (submitted: boolean) => void,
+	setCooldownSeconds: (seconds: number) => void,
+	navigate: (options: { to: string }) => void,
+): void {
+	const errorData = error as {
+		error?: { message?: string; status?: number };
+	};
+	const errorMessage = errorData?.error?.message || "";
+	const status = errorData?.error?.status;
+
+	if (status === 429) {
+		setCooldownSeconds(30);
+		toast.error(
+			"Too many requests. Please wait 30 seconds before trying again.",
+		);
+	} else if (
+		errorMessage.includes("not found") ||
+		errorMessage.includes("does not exist")
+	) {
+		// Email n'existe pas (meilleure pratique: ne pas révéler si l'email existe)
+		// On affiche quand même un message de succès pour éviter l'énumération d'emails
+		setSubmittedEmail(email);
+		setIsSubmitted(true);
+		setCooldownSeconds(30);
+		toast.success("If this email exists, a verification link has been sent.");
+	} else if (
+		errorMessage.includes("already verified") ||
+		errorMessage.includes("verified")
+	) {
+		toast.info("This email is already verified. You can sign in.");
+		navigate({ to: "/login" });
+	} else {
+		toast.error(
+			errorMessage || "Failed to send verification email. Please try again.",
+		);
+	}
+}
+
 export default function ResendVerification() {
 	const navigate = useNavigate();
 	const [isSubmitted, setIsSubmitted] = useState(false);
@@ -49,45 +91,14 @@ export default function ResendVerification() {
 				setCooldownSeconds(30); // 30 secondes de cooldown
 				toast.success("Verification email sent! Please check your inbox.");
 			} catch (error: unknown) {
-				const errorData = error as {
-					error?: { message?: string; status?: number };
-				};
-				const errorMessage = errorData?.error?.message || "";
-				const status = errorData?.error?.status;
-
-				// Gestion spécifique des erreurs
-				if (status === 429) {
-					// Rate limit atteint
-					setCooldownSeconds(30);
-					toast.error(
-						"Too many requests. Please wait 30 seconds before trying again.",
-					);
-				} else if (
-					errorMessage.includes("not found") ||
-					errorMessage.includes("does not exist")
-				) {
-					// Email n'existe pas (meilleure pratique: ne pas révéler si l'email existe)
-					// On affiche quand même un message de succès pour éviter l'énumération d'emails
-					setSubmittedEmail(value.email);
-					setIsSubmitted(true);
-					setCooldownSeconds(30);
-					toast.success(
-						"If this email exists, a verification link has been sent.",
-					);
-				} else if (
-					errorMessage.includes("already verified") ||
-					errorMessage.includes("verified")
-				) {
-					// Email déjà vérifié
-					toast.info("This email is already verified. You can sign in.");
-					navigate({ to: "/login" });
-				} else {
-					// Autres erreurs
-					toast.error(
-						errorMessage ||
-							"Failed to send verification email. Please try again.",
-					);
-				}
+				handleResendVerificationError(
+					error,
+					value.email,
+					setSubmittedEmail,
+					setIsSubmitted,
+					setCooldownSeconds,
+					navigate,
+				);
 			}
 		},
 		validators: {

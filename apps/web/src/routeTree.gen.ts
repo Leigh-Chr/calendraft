@@ -14,8 +14,11 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ResendVerificationRouteImport } from './routes/resend-verification'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as EditProfileRouteImport } from './routes/edit-profile'
+import { Route as DeleteAccountRouteImport } from './routes/delete-account'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CheckEmailRouteImport } from './routes/check-email'
+import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as CalendarsRouteImport } from './routes/calendars'
 import { Route as R404RouteImport } from './routes/404'
 import { Route as IndexRouteImport } from './routes/index'
@@ -54,6 +57,16 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EditProfileRoute = EditProfileRouteImport.update({
+  id: '/edit-profile',
+  path: '/edit-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeleteAccountRoute = DeleteAccountRouteImport.update({
+  id: '/delete-account',
+  path: '/delete-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -62,6 +75,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const CheckEmailRoute = CheckEmailRouteImport.update({
   id: '/check-email',
   path: '/check-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangePasswordRoute = ChangePasswordRouteImport.update({
+  id: '/change-password',
+  path: '/change-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalendarsRoute = CalendarsRouteImport.update({
@@ -132,8 +150,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/404': typeof R404Route
   '/calendars': typeof CalendarsRouteWithChildren
+  '/change-password': typeof ChangePasswordRoute
   '/check-email': typeof CheckEmailRoute
   '/dashboard': typeof DashboardRoute
+  '/delete-account': typeof DeleteAccountRoute
+  '/edit-profile': typeof EditProfileRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/resend-verification': typeof ResendVerificationRoute
@@ -153,8 +174,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/404': typeof R404Route
   '/calendars': typeof CalendarsRouteWithChildren
+  '/change-password': typeof ChangePasswordRoute
   '/check-email': typeof CheckEmailRoute
   '/dashboard': typeof DashboardRoute
+  '/delete-account': typeof DeleteAccountRoute
+  '/edit-profile': typeof EditProfileRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/resend-verification': typeof ResendVerificationRoute
@@ -175,8 +199,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/404': typeof R404Route
   '/calendars': typeof CalendarsRouteWithChildren
+  '/change-password': typeof ChangePasswordRoute
   '/check-email': typeof CheckEmailRoute
   '/dashboard': typeof DashboardRoute
+  '/delete-account': typeof DeleteAccountRoute
+  '/edit-profile': typeof EditProfileRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/resend-verification': typeof ResendVerificationRoute
@@ -198,8 +225,11 @@ export interface FileRouteTypes {
     | '/'
     | '/404'
     | '/calendars'
+    | '/change-password'
     | '/check-email'
     | '/dashboard'
+    | '/delete-account'
+    | '/edit-profile'
     | '/forgot-password'
     | '/login'
     | '/resend-verification'
@@ -219,8 +249,11 @@ export interface FileRouteTypes {
     | '/'
     | '/404'
     | '/calendars'
+    | '/change-password'
     | '/check-email'
     | '/dashboard'
+    | '/delete-account'
+    | '/edit-profile'
     | '/forgot-password'
     | '/login'
     | '/resend-verification'
@@ -240,8 +273,11 @@ export interface FileRouteTypes {
     | '/'
     | '/404'
     | '/calendars'
+    | '/change-password'
     | '/check-email'
     | '/dashboard'
+    | '/delete-account'
+    | '/edit-profile'
     | '/forgot-password'
     | '/login'
     | '/resend-verification'
@@ -262,8 +298,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   R404Route: typeof R404Route
   CalendarsRoute: typeof CalendarsRouteWithChildren
+  ChangePasswordRoute: typeof ChangePasswordRoute
   CheckEmailRoute: typeof CheckEmailRoute
   DashboardRoute: typeof DashboardRoute
+  DeleteAccountRoute: typeof DeleteAccountRoute
+  EditProfileRoute: typeof EditProfileRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   ResendVerificationRoute: typeof ResendVerificationRoute
@@ -309,6 +348,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/edit-profile': {
+      id: '/edit-profile'
+      path: '/edit-profile'
+      fullPath: '/edit-profile'
+      preLoaderRoute: typeof EditProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/delete-account': {
+      id: '/delete-account'
+      path: '/delete-account'
+      fullPath: '/delete-account'
+      preLoaderRoute: typeof DeleteAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -321,6 +374,13 @@ declare module '@tanstack/react-router' {
       path: '/check-email'
       fullPath: '/check-email'
       preLoaderRoute: typeof CheckEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/change-password': {
+      id: '/change-password'
+      path: '/change-password'
+      fullPath: '/change-password'
+      preLoaderRoute: typeof ChangePasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calendars': {
@@ -449,8 +509,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R404Route: R404Route,
   CalendarsRoute: CalendarsRouteWithChildren,
+  ChangePasswordRoute: ChangePasswordRoute,
   CheckEmailRoute: CheckEmailRoute,
   DashboardRoute: DashboardRoute,
+  DeleteAccountRoute: DeleteAccountRoute,
+  EditProfileRoute: EditProfileRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   ResendVerificationRoute: ResendVerificationRoute,

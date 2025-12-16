@@ -329,6 +329,42 @@ export function emailVerificationResendRateLimit() {
 }
 
 /**
+ * Rate limit for account deletion
+ * 1 request per hour (very strict - irreversible action)
+ */
+export function deleteAccountRateLimit() {
+	// 1 request per hour (3600000ms)
+	return rateLimit(1, 3600000, "delete-account");
+}
+
+/**
+ * Rate limit for data export (RGPD)
+ * 5 requests per day per user
+ */
+export function exportDataRateLimit() {
+	// 5 requests per day (86400000ms = 24 hours)
+	return rateLimit(5, 86400000, "export-data");
+}
+
+/**
+ * Rate limit for password change
+ * 10 requests per hour (security-sensitive operation)
+ */
+export function changePasswordRateLimit() {
+	// 10 requests per hour (3600000ms)
+	return rateLimit(10, 3600000, "change-password");
+}
+
+/**
+ * Rate limit for profile update
+ * 20 requests per hour (less critical, but still should be limited)
+ */
+export function updateProfileRateLimit() {
+	// 20 requests per hour (3600000ms)
+	return rateLimit(20, 3600000, "update-profile");
+}
+
+/**
  * Close Redis connection (for graceful shutdown)
  */
 export async function closeRedisConnection(): Promise<void> {

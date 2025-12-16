@@ -12,6 +12,7 @@ import {
 	Moon,
 	Plus,
 	Search,
+	Settings,
 	Sun,
 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -27,6 +28,7 @@ import {
 	CommandShortcut,
 } from "@/components/ui/command";
 import { useCalendars } from "@/hooks/use-storage";
+import { authClient } from "@/lib/auth-client";
 
 interface CommandPaletteProps {
 	open: boolean;
@@ -47,6 +49,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 	const navigate = useNavigate();
 	const { calendars } = useCalendars();
 	const { theme, setTheme } = useTheme();
+	const { data: session } = authClient.useSession();
 	const [search, setSearch] = useState("");
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -125,6 +128,27 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 			},
 
 			// Settings
+			...(session
+				? [
+						{
+							id: "dashboard",
+							label: "Account settings",
+							icon: <Settings className="h-4 w-4" />,
+							shortcut: "G A",
+							action: () => closeAndNavigate("/dashboard"),
+							keywords: [
+								"account",
+								"settings",
+								"profile",
+								"dashboard",
+								"user",
+								"password",
+								"delete",
+							],
+							group: "settings" as const,
+						},
+					]
+				: []),
 			{
 				id: "toggle-theme",
 				label: theme === "dark" ? "Light mode" : "Dark mode",
@@ -159,7 +183,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 				group: "calendars" as const,
 			})),
 		],
-		[calendars, theme, closeAndNavigate, closeAndAction, setTheme],
+		[calendars, theme, closeAndNavigate, closeAndAction, setTheme, session],
 	);
 
 	// Group commands

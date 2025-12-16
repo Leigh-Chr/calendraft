@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Settings } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -42,6 +43,13 @@ export default function UserMenu() {
 				<DropdownMenuLabel>My account</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem disabled>{session.user.email}</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem asChild>
+					<Link to="/dashboard" className="flex items-center gap-2">
+						<Settings className="h-4 w-4" />
+						Account settings
+					</Link>
+				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					onClick={() => {

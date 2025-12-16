@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { Badge } from "@/components/ui/badge";
+import { ExportDataButton } from "@/components/export-data-button";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -112,34 +112,38 @@ function ProfileCard({
 					<strong>Email:</strong> {userEmail}
 				</p>
 			</CardContent>
-			<CardFooter>
+			<CardFooter className="flex flex-col gap-2">
 				<Button variant="outline" className="w-full" asChild>
-					<Link to="/calendars">View my calendars</Link>
+					<Link to="/edit-profile">Edit profile</Link>
 				</Button>
+				<Button variant="outline" className="w-full" asChild>
+					<Link to="/change-password">Change password</Link>
+				</Button>
+				<ExportDataButton />
 			</CardFooter>
 		</Card>
 	);
 }
 
-// Sub-component: Plan Card
-function PlanCard() {
+// Sub-component: Danger Zone Card
+function DangerZoneCard() {
 	return (
-		<Card>
+		<Card className="border-destructive/50">
 			<CardHeader>
-				<CardTitle>Your plan</CardTitle>
-				<CardDescription>Free and generous access</CardDescription>
+				<CardTitle className="text-destructive">Danger Zone</CardTitle>
+				<CardDescription>Irreversible and destructive actions</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-4">
-				<div>
-					<Badge variant="default" className="text-base">
-						Free
-					</Badge>
-				</div>
+			<CardContent>
 				<p className="text-muted-foreground text-sm">
-					As an authenticated user, you benefit from very generous limits: 100
-					calendars and 2000 events per calendar.
+					Once you delete your account, there is no going back. Please be
+					certain.
 				</p>
 			</CardContent>
+			<CardFooter>
+				<Button variant="destructive" className="w-full" asChild>
+					<Link to="/delete-account">Delete account</Link>
+				</Button>
+			</CardFooter>
 		</Card>
 	);
 }
@@ -165,13 +169,17 @@ function RouteComponent() {
 					</p>
 				</div>
 
-				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-					<PlanCard />
+				<div className="grid gap-6 md:grid-cols-2">
 					<UsageCard usage={usage} />
 					<ProfileCard
 						userName={session.data?.user.name}
 						userEmail={session.data?.user.email}
 					/>
+				</div>
+
+				{/* Danger Zone */}
+				<div className="mt-8">
+					<DangerZoneCard />
 				</div>
 			</div>
 		</div>

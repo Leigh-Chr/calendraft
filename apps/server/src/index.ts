@@ -14,9 +14,12 @@ import { startCleanupJob } from "./jobs/cleanup";
 import { logger } from "./lib/logger";
 import {
 	authRateLimit,
+	changePasswordRateLimit,
+	deleteAccountRateLimit,
 	emailVerificationResendRateLimit,
 	rateLimit,
 	signupRateLimit,
+	updateProfileRateLimit,
 } from "./middleware/rate-limit";
 
 // Validate environment variables
@@ -206,6 +209,15 @@ app.use(
 	"/api/auth/send-verification-email",
 	emailVerificationResendRateLimit(),
 );
+
+// Rate limiting spécifique pour la suppression de compte (1 par heure - très strict)
+app.use("/api/auth/delete-user", deleteAccountRateLimit());
+
+// Rate limiting spécifique pour le changement de mot de passe (10 par heure)
+app.use("/api/auth/change-password", changePasswordRateLimit());
+
+// Rate limiting spécifique pour la mise à jour du profil (20 par heure)
+app.use("/api/auth/update-user", updateProfileRateLimit());
 
 // Rate limiting général pour les autres endpoints auth (10 par minute)
 app.use("/api/auth/*", authRateLimit());
