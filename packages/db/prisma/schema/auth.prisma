@@ -1,17 +1,19 @@
 model User {
-  id            String    @id @map("_id")
-  name          String    // GDPR: Personal data
-  email         String    // GDPR: Personal data
-  emailVerified Boolean
-  image         String?   // GDPR: Personal data (profile picture URL)
-  createdAt     DateTime
-  updatedAt     DateTime
-  sessions      Session[]
-  accounts      Account[]
+  id              String    @id @map("_id")
+  name            String    // GDPR: Personal data
+  email           String    // GDPR: Personal data
+  normalizedEmail String    // Required by Better-Auth with emailHarmony plugin (normalized version of email)
+  emailVerified   Boolean
+  image           String?   // GDPR: Personal data (profile picture URL)
+  createdAt       DateTime
+  updatedAt       DateTime
+  sessions        Session[]
+  accounts        Account[]
   // Note: Calendar.userId can reference User.id, but we don't use a relation
   // because userId can also be an anonymous ID (anon-xxx format)
 
   @@unique([email])
+  @@unique([normalizedEmail]) // Better-Auth uses normalizedEmail for lookups
   @@map("user")
 }
 

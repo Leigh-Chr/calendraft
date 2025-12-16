@@ -202,11 +202,126 @@ app.use("/api/auth/sign-up/email", signupRateLimit());
 // Rate limiting général pour les autres endpoints auth (10 par minute)
 app.use("/api/auth/*", authRateLimit());
 
+// Helper function to convert Prisma errors to HTTP responses
+// Better-Auth uses Prisma internally, so we need to handle Prisma errors
+function handlePrismaErrorForAuth(error: unknown): {
+	status: number;
+	body: { error: string; code?: string };
+} | null {
+	// Check if error is a Prisma error by checking for the code property
+	if (
+		error &&
+		typeof error === "object" &&
+		"code" in error &&
+		typeof error.code === "string" &&
+		error.code.startsWith("P")
+	) {
+		const prismaError = error as {
+			code: string;
+			meta?: { target?: string | string[] };
+		};
+
+		switch (prismaError.code) {
+			case "P2002": {
+				// Unique constraint violation (e.g., email already exists)
+				const field = prismaError.meta?.target
+					? Array.isArray(prismaError.meta.target)
+						? prismaError.meta.target.join(", ")
+						: String(prismaError.meta.target)
+					: "field";
+
+				return {
+					status: 409,
+					body: {
+						error: `A resource with this ${field} already exists`,
+						code: "CONFLICT",
+					},
+				};
+			}
+
+			case "P2003": {
+				// Foreign key constraint violation
+				return {
+					status: 400,
+					body: {
+						error: "Referenced resource does not exist",
+						code: "BAD_REQUEST",
+					},
+				};
+			}
+
+			case "P2025": {
+				// Record not found
+				return {
+					status: 404,
+					body: {
+						error: "Resource not found",
+						code: "NOT_FOUND",
+					},
+				};
+			}
+
+			default: {
+				// Unknown Prisma error
+				return {
+					status: 500,
+					body: {
+						error: "Database error occurred",
+						code: "INTERNAL_SERVER_ERROR",
+					},
+				};
+			}
+		}
+	}
+
+	return null;
+}
+
 // Better-Auth handler pour les endpoints auth (tous les méthodes)
 // CORS is already handled by the global middleware above
+// Best practice: Wrap in try/catch to handle Prisma errors from Better-Auth
 app.all("/api/auth/*", async (c) => {
-	const response = await auth.handler(c.req.raw);
-	return response;
+	try {
+		const response = await auth.handler(c.req.raw);
+		return response;
+	} catch (error) {
+		// Log error for debugging
+		logger.error("Better-Auth handler error", error);
+
+		// Handle Prisma-specific errors (e.g., unique constraint violations)
+		// Better-Auth uses Prisma internally, so unhandled Prisma errors may bubble up
+		// Note: Better-Auth normally handles errors internally, but this catches unhandled exceptions
+		const prismaErrorResponse = handlePrismaErrorForAuth(error);
+		if (prismaErrorResponse) {
+			// Return error in format compatible with Better-Auth client expectations
+			// Better-Auth client expects: error.error.message and error.error.status
+			return c.json(
+				{
+					error: {
+						message: prismaErrorResponse.body.error,
+						status: prismaErrorResponse.status,
+						statusText: prismaErrorResponse.body.code || "Error",
+					},
+				},
+				prismaErrorResponse.status as 400 | 404 | 409 | 500,
+			);
+		}
+
+		// If not a Prisma error, this is an unexpected error
+		// Log to Sentry and return generic error response compatible with Better-Auth format
+		Sentry.captureException(error);
+		return c.json(
+			{
+				error: {
+					message: "An error occurred during authentication",
+					status: 500,
+					statusText: "Internal Server Error",
+				},
+				timestamp: new Date().toISOString(),
+			},
+			500,
+		);
+	}
 });
 
 app.use(
