@@ -30,7 +30,7 @@
 				"vitest.config.ts",
 				"package.json"
 			],
-			"outputs": ["coverage/**"],
+			"outputs": ["coverage/**", "test-results/**"],
 			"cache": true
 		},
 		"lint": {
@@ -52,7 +52,7 @@
 				"tsconfig.json",
 				"package.json"
 			],
-			"outputs": ["*.tsbuildinfo"],
+			"outputs": ["*.tsbuildinfo", "tsconfig.tsbuildinfo"],
 			"cache": true
 		},
 		"typecheck": {

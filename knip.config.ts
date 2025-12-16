@@ -36,6 +36,8 @@ const config: KnipConfig = {
 		"**/page-transition.tsx",
 		"**/success-animation.tsx",
 		"**/empty-state.tsx",
+		// Error boundary component kept for production error handling
+		"**/recoverable-error-boundary.tsx",
 	],
 	ignoreBinaries: ["tsc"],
 	ignoreIssues: {
