@@ -40,7 +40,7 @@ export async function sendVerificationEmail({
 			from: env.EMAIL_FROM || "Calendraft <noreply@calendraft.com>",
 			to,
 			subject: "Verify your email address - Calendraft",
-		html: `
+			html: `
       <!DOCTYPE html>
       <html>
         <head>
@@ -60,7 +60,7 @@ export async function sendVerificationEmail({
         </body>
       </html>
     `,
-		text: `Verify your email address
+			text: `Verify your email address
 
 Thank you for signing up for Calendraft! Please click the link below to verify your email address:
 
@@ -122,7 +122,7 @@ export async function sendResetPasswordEmail({
 			from: env.EMAIL_FROM || "Calendraft <noreply@calendraft.com>",
 			to,
 			subject: "Reset your password - Calendraft",
-		html: `
+			html: `
       <!DOCTYPE html>
       <html>
         <head>
@@ -142,7 +142,7 @@ export async function sendResetPasswordEmail({
         </body>
       </html>
     `,
-		text: `Reset your password
+			text: `Reset your password
 
 We received a request to reset your password for your Calendraft account. Click the link below to reset it:
 
