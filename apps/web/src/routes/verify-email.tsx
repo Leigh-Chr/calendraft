@@ -7,6 +7,7 @@ const BASE_URL = "https://calendraft.app";
 
 const verifyEmailSearchSchema = z.object({
 	error: z.string().optional(), // "invalid_token" si le token est invalide
+	redirect: z.string().optional(), // URL de redirection après vérification
 });
 
 export const Route = createFileRoute("/verify-email")({

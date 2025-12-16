@@ -48,9 +48,20 @@ export default function UserMenu() {
 						authClient.signOut({
 							fetchOptions: {
 								onSuccess: () => {
-									navigate({
-										to: "/",
-									});
+									// Rediriger vers /calendars si on est sur une page protégée, sinon rester sur la page actuelle
+									const currentPath = location.pathname;
+									if (
+										currentPath.startsWith("/dashboard") ||
+										currentPath.startsWith("/calendars")
+									) {
+										navigate({ to: "/calendars" });
+									} else if (currentPath === "/") {
+										// Rester sur la page d'accueil
+										navigate({ to: "/" });
+									} else {
+										// Pour les autres pages (login, etc.), aller à l'accueil
+										navigate({ to: "/" });
+									}
 								},
 							},
 						});

@@ -9,12 +9,18 @@ export default function CheckEmail() {
 	const navigate = useNavigate();
 	const search = useSearch({ from: "/check-email" });
 	const email = (search.email as string | undefined) || "";
+	const redirect = (search.redirect as string | undefined) || "";
 	const [isResending, setIsResending] = useState(false);
 
 	const handleResendEmail = async () => {
 		if (!email) {
 			toast.error("Email address not found. Please try signing up again.");
 			return;
+		}
+
+		// Stocker le redirect dans localStorage pour le récupérer après vérification
+		if (redirect) {
+			localStorage.setItem("signup_redirect", redirect);
 		}
 
 		setIsResending(true);

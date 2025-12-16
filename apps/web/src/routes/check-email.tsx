@@ -7,6 +7,7 @@ const BASE_URL = "https://calendraft.app";
 
 const checkEmailSearchSchema = z.object({
 	email: z.string().email().optional(), // Email pour pouvoir renvoyer le lien
+	redirect: z.string().optional(), // URL de redirection après vérification
 });
 
 export const Route = createFileRoute("/check-email")({

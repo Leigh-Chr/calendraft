@@ -1,5 +1,5 @@
 import { useIsMobile } from "@calendraft/react-utils";
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Calendar, Menu } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ import UserMenu from "./user-menu";
 
 export default function Header() {
 	const location = useLocation();
+	const navigate = useNavigate();
 	const isLandingPage = location.pathname === "/";
 	const isMobile = useIsMobile();
 	const { data: session } = authClient.useSession();
@@ -104,7 +105,20 @@ export default function Header() {
 													authClient.signOut({
 														fetchOptions: {
 															onSuccess: () => {
-																window.location.href = "/";
+																// Rediriger vers /calendars si on est sur une page protégée, sinon rester sur la page actuelle
+																const currentPath = location.pathname;
+																if (
+																	currentPath.startsWith("/dashboard") ||
+																	currentPath.startsWith("/calendars")
+																) {
+																	navigate({ to: "/calendars" });
+																} else if (currentPath === "/") {
+																	// Rester sur la page d'accueil
+																	navigate({ to: "/" });
+																} else {
+																	// Pour les autres pages (login, etc.), aller à l'accueil
+																	navigate({ to: "/" });
+																}
 															},
 														},
 													});

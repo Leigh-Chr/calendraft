@@ -176,7 +176,7 @@ function NewCalendarComponent() {
 							</Button>
 							<Button
 								variant="outline"
-								onClick={() => navigate({ to: "/" })}
+								onClick={() => navigate({ to: "/calendars" })}
 								disabled={isCreating}
 							>
 								Cancel

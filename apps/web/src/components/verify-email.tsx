@@ -11,6 +11,7 @@ export default function VerifyEmail() {
 	const navigate = useNavigate();
 	const search = useSearch({ from: "/verify-email" });
 	const error = search.error as string | undefined;
+	const redirect = search.redirect as string | undefined;
 	const [showSuccess, setShowSuccess] = useState(false);
 
 	useEffect(() => {
@@ -20,16 +21,23 @@ export default function VerifyEmail() {
 			setShowSuccess(true);
 			// Rafraîchir la session pour obtenir les données à jour
 			void authClient.getSession();
-			// Rediriger après l'animation
+			// Récupérer le redirect depuis localStorage (stocké lors de l'inscription) ou depuis l'URL
+			const storedRedirect = localStorage.getItem("signup_redirect");
+			const finalRedirect = redirect || storedRedirect || "/calendars";
+			// Nettoyer le localStorage après utilisation
+			if (storedRedirect) {
+				localStorage.removeItem("signup_redirect");
+			}
+			// Rediriger après l'animation vers redirect ou /calendars par défaut
 			const timer = setTimeout(() => {
-				navigate({ to: "/calendars" });
+				navigate({ to: finalRedirect });
 			}, 2000);
 			return () => clearTimeout(timer);
 		}
 		// Erreur de vérification (token invalide ou expiré)
 		toast.error("Email verification failed. The link may have expired.");
 		return undefined;
-	}, [error, navigate]);
+	}, [error, navigate, redirect]);
 
 	// Afficher un loader pendant le traitement
 	if (!error && !showSuccess) {

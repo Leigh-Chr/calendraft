@@ -65,6 +65,10 @@ export default function SignInForm({
 										label: "Resend email",
 										onClick: async () => {
 											try {
+												// Stocker le redirect dans localStorage pour le récupérer après vérification
+												if (redirectTo) {
+													localStorage.setItem("signup_redirect", redirectTo);
+												}
 												await authClient.sendVerificationEmail({
 													email: value.email,
 													callbackURL: "/verify-email",
@@ -74,7 +78,10 @@ export default function SignInForm({
 												);
 												navigate({
 													to: "/check-email",
-													search: { email: value.email },
+													search: {
+														email: value.email,
+														redirect: redirectTo,
+													},
 												});
 											} catch {
 												toast.error(

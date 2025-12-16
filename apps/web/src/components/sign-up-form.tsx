@@ -40,11 +40,19 @@ export default function SignUpForm({
 				},
 				{
 					onSuccess: () => {
-						// Rediriger vers la page "check your email" avec l'email en paramètre
+						// Rediriger vers la page "check your email" avec l'email et redirect en paramètres
+						// Le redirect sera passé à verify-email via l'URL de vérification
 						navigate({
 							to: "/check-email",
-							search: { email: value.email },
+							search: {
+								email: value.email,
+								redirect: _redirectTo,
+							},
 						});
+						// Stocker le redirect dans localStorage pour le récupérer après vérification
+						if (_redirectTo) {
+							localStorage.setItem("signup_redirect", _redirectTo);
+						}
 						toast.success(
 							"Registration successful! Please check your email to verify your account.",
 						);
