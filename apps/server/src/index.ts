@@ -114,6 +114,9 @@ app.use(
 			"Accept",
 			"Accept-Language",
 			"Accept-Encoding",
+			// Sentry distributed tracing headers
+			"baggage",
+			"sentry-trace",
 		],
 		credentials: true,
 		exposeHeaders: ["Set-Cookie"],
