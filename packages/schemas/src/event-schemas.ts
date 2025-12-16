@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
 	emailSchema,
+	nullableEmailSchema,
 	nullableTrimmedStringSchema,
 	urlSchema,
 } from "./common-schemas";
@@ -309,7 +310,7 @@ export const eventCreateSchema = z
 
 		// Organizer
 		organizerName: nullableTrimmedStringSchema(FIELD_LIMITS.NAME),
-		organizerEmail: emailSchema.optional().nullable(),
+		organizerEmail: nullableEmailSchema,
 
 		// Additional properties (RFC 5545)
 		uid: uidSchema,
@@ -433,7 +434,7 @@ export const eventFormDataSchema = z
 
 		// Organizer
 		organizerName: nullableTrimmedStringSchema(FIELD_LIMITS.NAME),
-		organizerEmail: emailSchema.optional().nullable(),
+		organizerEmail: nullableEmailSchema,
 
 		// Additional properties (RFC 5545)
 		uid: uidSchema,

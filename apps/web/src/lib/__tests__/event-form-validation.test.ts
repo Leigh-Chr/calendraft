@@ -126,10 +126,8 @@ describe("validateEventForm", () => {
 		it("should accept empty email", () => {
 			const formData = { ...validFormData, organizerEmail: "" };
 			const errors = validateEventForm(formData);
-			// Empty string is not the same as undefined/null, so it will be validated
-			// The schema requires either a valid email or null/undefined
-			// Since empty string fails email validation, we expect an error
-			expect(errors.organizerEmail).toBe("Invalid email format");
+			// Empty string is transformed to null by nullableEmailSchema and accepted
+			expect(errors.organizerEmail).toBeUndefined();
 		});
 	});
 

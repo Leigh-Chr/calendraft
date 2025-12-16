@@ -19,6 +19,32 @@ export const emailSchema = z
 	);
 
 /**
+ * Nullable email schema - accepts empty strings and validates email format
+ * Use this for optional email fields in forms
+ * Follows the same pattern as urlSchema for consistency
+ */
+export const nullableEmailSchema = z
+	.string()
+	.trim()
+	.max(
+		FIELD_LIMITS.EMAIL,
+		`Email cannot exceed ${FIELD_LIMITS.EMAIL} characters`,
+	)
+	.refine(
+		(val) => {
+			// Accept empty strings (optional field)
+			if (!val || val.trim() === "") return true;
+			// Otherwise validate as email
+			return z.string().email().safeParse(val).success;
+		},
+		{
+			message: "Invalid email format",
+		},
+	)
+	.optional()
+	.nullable();
+
+/**
  * URL schema with protocol validation and automatic trimming
  * Only allows safe protocols: http, https, mailto, tel
  */
