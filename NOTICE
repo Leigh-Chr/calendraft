@@ -1,0 +1,36 @@
+Calendraft
+Copyright (C) 2024 Calendraft
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+---
+
+Usage Policy:
+
+While Calendraft is licensed under AGPL v3, the maintainer requests that:
+
+- Public Instances: Only the official instance operated by the maintainer
+  should be publicly accessible. If you wish to operate a public instance,
+  please contact the maintainer first.
+
+- Commercial Use: Commercial use of this software is discouraged without
+  prior authorization. If you wish to use this software commercially,
+  please contact the maintainer to discuss licensing options.
+
+- Contributions: All contributions are welcome via Pull Requests. The
+  maintainer reserves the right to accept or reject any contribution.
+
+These requests are not legally binding but are community guidelines that
+we ask users to respect.
+

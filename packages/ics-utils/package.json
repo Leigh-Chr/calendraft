@@ -55,7 +55,7 @@
 		"generator"
 	],
 	"author": "",
-	"license": "MIT",
+	"license": "AGPL-3.0",
 	"dependencies": {
 		"ical.js": "catalog:"
 	},

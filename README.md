@@ -1,6 +1,6 @@
 # Calendraft
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.3-black?logo=bun&logoColor=white)](https://bun.sh/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -411,4 +411,28 @@ Contributions are welcome! See the [contribution guide](CONTRIBUTING.md) to get 
 
 ## License
 
-This project is licensed under MIT - see the [LICENSE](LICENSE) file for details.
+This project is licensed under **AGPL v3** (GNU Affero General Public License v3) - see the [LICENSE](LICENSE) file for details.
+
+### What AGPL v3 Means
+
+AGPL v3 is a copyleft license that ensures cooperation with the community. Key points:
+
+- ✅ **Code is freely viewable and modifiable** - You can study, modify, and use the code
+- ✅ **Private instances are allowed** - You can run Calendraft locally or in a private environment
+- ✅ **Contributions are welcome** - Pull Requests are encouraged
+- ⚠️ **Modified versions must share their source code** - If you modify and deploy Calendraft publicly, you must share your modifications
+- ⚠️ **Commercial use requires source code sharing** - Commercial use is allowed, but modifications must be shared
+
+### Usage Policy
+
+While Calendraft is licensed under AGPL v3, the maintainer requests that:
+
+- **Public Instances**: Only the official instance operated by the maintainer should be publicly accessible. If you wish to operate a public instance, please contact the maintainer first to discuss.
+
+- **Commercial Use**: Commercial use of this software is discouraged without prior authorization. If you wish to use this software commercially, please contact the maintainer to discuss licensing options.
+
+- **Contributions**: All contributions are welcome via Pull Requests. The maintainer reserves the right to accept or reject any contribution to maintain project quality and direction.
+
+These requests are not legally binding but are community guidelines that we ask users to respect.
+
+For detailed usage conditions and examples, see [USAGE.md](USAGE.md).

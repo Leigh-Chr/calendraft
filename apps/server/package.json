@@ -31,5 +31,6 @@
 		"@calendraft/config": "workspace:*",
 		"vitest": "^4.0.15",
 		"@vitest/coverage-v8": "^4.0.15"
-	}
+	},
+	"license": "AGPL-3.0"
 }

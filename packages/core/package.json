@@ -49,7 +49,7 @@
 		"validation"
 	],
 	"author": "",
-	"license": "MIT",
+	"license": "AGPL-3.0",
 	"dependencies": {
 		"date-fns": "catalog:",
 		"dequal": "^2.0.3"

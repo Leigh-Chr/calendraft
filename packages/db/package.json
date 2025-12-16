@@ -38,5 +38,6 @@
 		"@prisma/client": "catalog:",
 		"dotenv": "catalog:",
 		"zod": "catalog:"
-	}
+	},
+	"license": "AGPL-3.0"
 }

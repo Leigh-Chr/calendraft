@@ -70,7 +70,7 @@ export function Footer() {
 									rel="noopener noreferrer"
 									className="text-muted-foreground text-sm transition-colors hover:text-foreground"
 								>
-									License (MIT)
+									License
 								</a>
 							</li>
 						</ul>

@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0
+// Copyright (C) 2024 Calendraft
 import { Resend } from "resend";
 // Initialiser Resend seulement si la clé API est fournie
 import { env } from "./env";
