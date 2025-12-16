@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Github } from "lucide-react";
+import { Github, Heart } from "lucide-react";
 
 export function Footer() {
 	const currentYear = new Date().getFullYear();
@@ -14,6 +14,17 @@ export function Footer() {
 						<p className="text-muted-foreground text-sm">
 							Free, open-source calendar management. Import, create, edit, and
 							merge your calendars—no complexity, no vendor lock-in.
+						</p>
+						<p className="mt-3 text-muted-foreground text-xs">
+							Enjoying Calendraft?{" "}
+							<a
+								href="https://ko-fi.com/leigh_chr"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="font-medium text-primary hover:underline"
+							>
+								Support the project
+							</a>
 						</p>
 					</div>
 
@@ -61,6 +72,17 @@ export function Footer() {
 								>
 									<Github className="h-4 w-4" />
 									GitHub
+								</a>
+							</li>
+							<li>
+								<a
+									href="https://ko-fi.com/leigh_chr"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-primary"
+								>
+									<Heart className="h-4 w-4 fill-current text-primary/70" />
+									Support on Ko-fi
 								</a>
 							</li>
 							<li>
