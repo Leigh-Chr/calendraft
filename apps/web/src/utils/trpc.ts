@@ -91,7 +91,7 @@ export const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
 			retry: (failureCount, error: unknown) => {
-				// Retry once for UNAUTHORIZED errors in case anonymous ID wasn't initialized
+				// Extract error code if available
 				const errorData =
 					error &&
 					typeof error === "object" &&
@@ -101,6 +101,8 @@ export const queryClient = new QueryClient({
 					"code" in error.data
 						? (error.data as { code: string })
 						: null;
+
+				// Special handling for UNAUTHORIZED errors in anonymous mode
 				if (errorData?.code === "UNAUTHORIZED" && failureCount < 1) {
 					// Ensure anonymous ID exists before retry
 					if (typeof window !== "undefined") {
@@ -108,9 +110,31 @@ export const queryClient = new QueryClient({
 					}
 					return true;
 				}
-				// Default retry behavior for other errors
+
+				// Don't retry client errors (4xx) - these are user errors, not transient
+				if (errorData?.code) {
+					const clientErrorCodes = [
+						"BAD_REQUEST",
+						"UNAUTHORIZED",
+						"FORBIDDEN",
+						"NOT_FOUND",
+						"CONFLICT",
+					];
+					if (clientErrorCodes.includes(errorData.code)) {
+						return false;
+					}
+				}
+
+				// Retry server errors and network errors (max 3 times)
 				return failureCount < 3;
 			},
+			// Exponential backoff: 1s, 2s, 4s (max 30s)
+			retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+		},
+		mutations: {
+			// Mutations should not be retried automatically
+			// User actions should be explicit and not retried without user consent
+			retry: false,
 		},
 	},
 });

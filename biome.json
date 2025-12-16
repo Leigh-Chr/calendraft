@@ -26,7 +26,8 @@
 			"!**/wrangler.jsonc",
 			"!**/.source",
 			"!**/*.html",
-			"!**/*.conf"
+			"!**/*.conf",
+			"!**/prisma/generated"
 		]
 	},
 	"formatter": {

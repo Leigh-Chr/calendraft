@@ -17,6 +17,7 @@ import {
 	prepareResourcesData,
 } from "../../lib/event-helpers";
 import type { ParsedEvent } from "../../lib/ics-parser";
+import { handlePrismaError } from "../../lib/prisma-error-handler";
 
 /**
  * Validate ICS file size
@@ -181,5 +182,10 @@ export async function createEventFromParsed(
 	parsedEvent: ParsedEvent,
 ) {
 	const eventData = prepareEventDataFromParsed(calendarId, parsedEvent);
-	return await prisma.event.create({ data: eventData });
+	try {
+		return await prisma.event.create({ data: eventData });
+	} catch (error) {
+		handlePrismaError(error);
+		throw error; // Never reached, but TypeScript needs it
+	}
 }

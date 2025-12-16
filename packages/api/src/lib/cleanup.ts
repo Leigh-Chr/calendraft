@@ -4,6 +4,7 @@
  */
 
 import prisma from "@calendraft/db";
+import { logger } from "./logger";
 
 /**
  * Delete anonymous calendars that haven't been accessed in the last N days
@@ -40,13 +41,22 @@ export async function cleanupOrphanedAnonymousCalendars(
 	const calendarIds = orphanedCalendars.map((cal) => cal.id);
 
 	// Delete calendars (events are deleted automatically via CASCADE)
-	const result = await prisma.calendar.deleteMany({
-		where: {
-			id: {
-				in: calendarIds,
+	// Best practice: Add error handling even for cleanup jobs
+	try {
+		const result = await prisma.calendar.deleteMany({
+			where: {
+				id: {
+					in: calendarIds,
+				},
 			},
-		},
-	});
+		});
 
-	return result.count;
+		return result.count;
+	} catch (error) {
+		// Log error but don't throw - cleanup job should be resilient
+		// The error will be logged by the job's try/catch
+		logger.error("Failed to delete orphaned calendars", error);
+		// Return 0 to indicate no calendars were deleted
+		return 0;
+	}
 }

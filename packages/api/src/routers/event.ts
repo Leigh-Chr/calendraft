@@ -11,6 +11,7 @@ import {
 	prepareRecurrenceDatesData,
 	prepareResourcesData,
 } from "../lib/event-helpers";
+import { handlePrismaError } from "../lib/prisma-error-handler";
 import { checkEventLimit } from "../middleware";
 import {
 	verifyCalendarAccess,
@@ -50,6 +51,7 @@ function groupEventRelations<T extends { eventId: string }>(
 
 /**
  * Get events sorted by duration using raw SQL
+ * Best practice: Add error handling for raw SQL queries
  */
 async function getEventsSortedByDuration(
 	calendarId: string,
@@ -58,39 +60,40 @@ async function getEventsSortedByDuration(
 	filterDateTo: Date | undefined,
 	limit: number,
 ) {
-	const eventsRaw = await prisma.$queryRaw<
-		Array<{
-			id: string;
-			calendarId: string;
-			title: string;
-			startDate: Date;
-			endDate: Date;
-			description: string | null;
-			location: string | null;
-			status: string | null;
-			priority: number | null;
-			url: string | null;
-			class: string | null;
-			comment: string | null;
-			contact: string | null;
-			sequence: number;
-			transp: string | null;
-			rrule: string | null;
-			geoLatitude: number | null;
-			geoLongitude: number | null;
-			organizerName: string | null;
-			organizerEmail: string | null;
-			uid: string | null;
-			dtstamp: Date | null;
-			created: Date | null;
-			lastModified: Date | null;
-			recurrenceId: string | null;
-			relatedTo: string | null;
-			color: string | null;
-			createdAt: Date;
-			updatedAt: Date;
-		}>
-	>`
+	try {
+		const eventsRaw = await prisma.$queryRaw<
+			Array<{
+				id: string;
+				calendarId: string;
+				title: string;
+				startDate: Date;
+				endDate: Date;
+				description: string | null;
+				location: string | null;
+				status: string | null;
+				priority: number | null;
+				url: string | null;
+				class: string | null;
+				comment: string | null;
+				contact: string | null;
+				sequence: number;
+				transp: string | null;
+				rrule: string | null;
+				geoLatitude: number | null;
+				geoLongitude: number | null;
+				organizerName: string | null;
+				organizerEmail: string | null;
+				uid: string | null;
+				dtstamp: Date | null;
+				created: Date | null;
+				lastModified: Date | null;
+				recurrenceId: string | null;
+				relatedTo: string | null;
+				color: string | null;
+				createdAt: Date;
+				updatedAt: Date;
+			}>
+		>`
 		SELECT e.*
 		FROM event e
 		WHERE e."calendarId" = ${calendarId}
@@ -101,28 +104,34 @@ async function getEventsSortedByDuration(
 		LIMIT ${limit + 1}
 	`;
 
-	const eventIds = eventsRaw.map((e) => e.id);
-	const [attendees, alarms, categories, resources] = await Promise.all([
-		prisma.eventAttendee.findMany({ where: { eventId: { in: eventIds } } }),
-		prisma.eventAlarm.findMany({ where: { eventId: { in: eventIds } } }),
-		prisma.eventCategory.findMany({ where: { eventId: { in: eventIds } } }),
-		prisma.eventResource.findMany({ where: { eventId: { in: eventIds } } }),
-	]);
+		const eventIds = eventsRaw.map((e) => e.id);
+		const [attendees, alarms, categories, resources] = await Promise.all([
+			prisma.eventAttendee.findMany({ where: { eventId: { in: eventIds } } }),
+			prisma.eventAlarm.findMany({ where: { eventId: { in: eventIds } } }),
+			prisma.eventCategory.findMany({ where: { eventId: { in: eventIds } } }),
+			prisma.eventResource.findMany({ where: { eventId: { in: eventIds } } }),
+		]);
 
-	const attendeesMap = groupEventRelations(attendees);
-	const alarmsMap = groupEventRelations(alarms);
-	const categoriesMap = groupEventRelations(categories);
-	const resourcesMap = groupEventRelations(resources);
+		const attendeesMap = groupEventRelations(attendees);
+		const alarmsMap = groupEventRelations(alarms);
+		const categoriesMap = groupEventRelations(categories);
+		const resourcesMap = groupEventRelations(resources);
 
-	const events = eventsRaw.map((event) => ({
-		...event,
-		attendees: attendeesMap.get(event.id) || [],
-		alarms: alarmsMap.get(event.id) || [],
-		categories: categoriesMap.get(event.id) || [],
-		resources: resourcesMap.get(event.id) || [],
-	}));
+		const events = eventsRaw.map((event) => ({
+			...event,
+			attendees: attendeesMap.get(event.id) || [],
+			alarms: alarmsMap.get(event.id) || [],
+			categories: categoriesMap.get(event.id) || [],
+			resources: resourcesMap.get(event.id) || [],
+		}));
 
-	return events;
+		return events;
+	} catch (error) {
+		// Handle Prisma errors for raw queries
+		// Raw queries can fail due to SQL syntax errors, connection issues, etc.
+		handlePrismaError(error);
+		throw error; // Never reached, but TypeScript needs it
+	}
 }
 
 /**
@@ -287,15 +296,23 @@ export const eventRouter = router({
 			await checkEventLimit(ctx, input.calendarId);
 
 			// Verify calendar belongs to user
-			const calendar = await prisma.calendar.findFirst({
-				where: {
-					id: input.calendarId,
-					OR: [
-						...(ctx.session?.user?.id ? [{ userId: ctx.session.user.id }] : []),
-						...(ctx.anonymousId ? [{ userId: ctx.anonymousId }] : []),
-					],
-				},
-			});
+			let calendar: Awaited<ReturnType<typeof prisma.calendar.findFirst>>;
+			try {
+				calendar = await prisma.calendar.findFirst({
+					where: {
+						id: input.calendarId,
+						OR: [
+							...(ctx.session?.user?.id
+								? [{ userId: ctx.session.user.id }]
+								: []),
+							...(ctx.anonymousId ? [{ userId: ctx.anonymousId }] : []),
+						],
+					},
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			if (!calendar) {
 				throw new TRPCError({
@@ -309,12 +326,18 @@ export const eventRouter = router({
 
 			// Validate UID uniqueness if provided
 			if (input.uid) {
-				const existingEvent = await prisma.event.findFirst({
-					where: {
-						uid: input.uid,
-						calendarId: input.calendarId,
-					},
-				});
+				let existingEvent: Awaited<ReturnType<typeof prisma.event.findFirst>>;
+				try {
+					existingEvent = await prisma.event.findFirst({
+						where: {
+							uid: input.uid,
+							calendarId: input.calendarId,
+						},
+					});
+				} catch (error) {
+					handlePrismaError(error);
+					throw error; // Never reached, but TypeScript needs it
+				}
 				if (existingEvent) {
 					throw new TRPCError({
 						code: "CONFLICT",
@@ -370,35 +393,41 @@ export const eventRouter = router({
 			});
 
 			// Create event with normalized relations
-			const event = await prisma.event.create({
-				data: {
-					// Required fields first
-					title: input.title,
-					startDate: input.startDate,
-					endDate: input.endDate,
-					calendarId: input.calendarId,
-					// RFC 5545: DTSTAMP is required for all VEVENT - set to current time if not provided
-					dtstamp: new Date(),
-					// Other fields from prepareEventData
-					...eventData,
-					// Nested relations
-					attendees: prepareAttendeeData(input.attendees),
-					alarms: prepareAlarmData(input.alarms),
-					categories: prepareCategoriesData(input.categories),
-					resources: prepareResourcesData(input.resources),
-					recurrenceDates: prepareRecurrenceDatesData(
-						input.rdate,
-						input.exdate,
-					),
-				},
-				include: {
-					attendees: true,
-					alarms: true,
-					categories: true,
-					resources: true,
-					recurrenceDates: true,
-				},
-			});
+			let event: Awaited<ReturnType<typeof prisma.event.create>>;
+			try {
+				event = await prisma.event.create({
+					data: {
+						// Required fields first
+						title: input.title,
+						startDate: input.startDate,
+						endDate: input.endDate,
+						calendarId: input.calendarId,
+						// RFC 5545: DTSTAMP is required for all VEVENT - set to current time if not provided
+						dtstamp: new Date(),
+						// Other fields from prepareEventData
+						...eventData,
+						// Nested relations
+						attendees: prepareAttendeeData(input.attendees),
+						alarms: prepareAlarmData(input.alarms),
+						categories: prepareCategoriesData(input.categories),
+						resources: prepareResourcesData(input.resources),
+						recurrenceDates: prepareRecurrenceDatesData(
+							input.rdate,
+							input.exdate,
+						),
+					},
+					include: {
+						attendees: true,
+						alarms: true,
+						categories: true,
+						resources: true,
+						recurrenceDates: true,
+					},
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return event;
 		}),
@@ -481,63 +510,82 @@ export const eventRouter = router({
 			});
 
 			// Update relations and event in a transaction to ensure atomicity
-			return await prisma.$transaction(async (tx) => {
-				// Prepare Prisma update data with relations
-				// Use type annotation to work around Prisma's complex nested types
-				type PrismaEventUpdateData = Parameters<
-					typeof tx.event.update
-				>[0]["data"];
-				const prismaUpdateData: PrismaEventUpdateData = {
-					...updateData,
-					dtstamp: new Date(),
-				};
+			// Best practice: Configure transaction with timeout and isolation level
+			return await prisma
+				.$transaction(
+					async (tx) => {
+						// Prepare Prisma update data with relations
+						// Use type annotation to work around Prisma's complex nested types
+						type PrismaEventUpdateData = Parameters<
+							typeof tx.event.update
+						>[0]["data"];
+						const prismaUpdateData: PrismaEventUpdateData = {
+							...updateData,
+							dtstamp: new Date(),
+						};
 
-				// Update relations first
-				await updateEventAttendees(
-					tx,
-					input.id,
-					input.attendees as EventUpdateInput["attendees"],
-					prismaUpdateData,
-				);
-				await updateEventAlarms(
-					tx,
-					input.id,
-					input.alarms as EventUpdateInput["alarms"],
-					prismaUpdateData,
-				);
-				await updateEventCategories(
-					tx,
-					input.id,
-					input.categories as EventUpdateInput["categories"],
-					prismaUpdateData,
-				);
-				await updateEventResources(
-					tx,
-					input.id,
-					input.resources as EventUpdateInput["resources"],
-					prismaUpdateData,
-				);
-				await updateEventRecurrenceDates(
-					tx,
-					input.id,
-					input.rdate as EventUpdateInput["rdate"],
-					input.exdate as EventUpdateInput["exdate"],
-					prismaUpdateData,
-				);
+						// Update relations first
+						await updateEventAttendees(
+							tx,
+							input.id,
+							input.attendees as EventUpdateInput["attendees"],
+							prismaUpdateData,
+						);
+						await updateEventAlarms(
+							tx,
+							input.id,
+							input.alarms as EventUpdateInput["alarms"],
+							prismaUpdateData,
+						);
+						await updateEventCategories(
+							tx,
+							input.id,
+							input.categories as EventUpdateInput["categories"],
+							prismaUpdateData,
+						);
+						await updateEventResources(
+							tx,
+							input.id,
+							input.resources as EventUpdateInput["resources"],
+							prismaUpdateData,
+						);
+						await updateEventRecurrenceDates(
+							tx,
+							input.id,
+							input.rdate as EventUpdateInput["rdate"],
+							input.exdate as EventUpdateInput["exdate"],
+							prismaUpdateData,
+						);
 
-				// Update event
-				return await tx.event.update({
-					where: { id: input.id },
-					data: prismaUpdateData,
-					include: {
-						attendees: true,
-						alarms: true,
-						categories: true,
-						resources: true,
-						recurrenceDates: true,
+						// Update event
+						return await tx.event.update({
+							where: { id: input.id },
+							data: prismaUpdateData,
+							include: {
+								attendees: true,
+								alarms: true,
+								categories: true,
+								resources: true,
+								recurrenceDates: true,
+							},
+						});
 					},
+					{
+						maxWait: 5000, // Max 5s to wait for transaction to start
+						timeout: 10000, // Max 10s for transaction to complete
+					},
+				)
+				.catch((error) => {
+					// Prisma automatically rolls back on error
+					// Handle Prisma-specific errors (this will throw if it's a Prisma error)
+					handlePrismaError(error);
+					// If not a Prisma error, throw as TRPCError
+					throw new TRPCError({
+						code: "INTERNAL_SERVER_ERROR",
+						message: "Transaction failed. Please try again.",
+						cause: error,
+					});
 				});
-			});
 		}),
 
 	delete: authOrAnonProcedure
@@ -550,9 +598,14 @@ export const eventRouter = router({
 				ctx.anonymousId || undefined,
 			);
 
-			await prisma.event.delete({
-				where: { id: input.id },
-			});
+			try {
+				await prisma.event.delete({
+					where: { id: input.id },
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return { success: true };
 		}),
@@ -611,79 +664,85 @@ export const eventRouter = router({
 			const newEndDate = new Date(sourceEvent.endDate.getTime() + offsetMs);
 
 			// Create duplicated event
-			const duplicatedEvent = await prisma.event.create({
-				data: {
-					calendarId: targetCalendarId,
-					title: sourceEvent.title,
-					startDate: newStartDate,
-					endDate: newEndDate,
-					description: sourceEvent.description,
-					location: sourceEvent.location,
-					status: sourceEvent.status,
-					priority: sourceEvent.priority,
-					url: sourceEvent.url,
-					class: sourceEvent.class,
-					comment: sourceEvent.comment,
-					contact: sourceEvent.contact,
-					sequence: 0,
-					transp: sourceEvent.transp,
-					geoLatitude: sourceEvent.geoLatitude,
-					geoLongitude: sourceEvent.geoLongitude,
-					organizerName: sourceEvent.organizerName,
-					organizerEmail: sourceEvent.organizerEmail,
-					uid: null,
-					dtstamp: new Date(),
-					color: sourceEvent.color,
-					attendees:
-						sourceEvent.attendees.length > 0
-							? {
-									create: sourceEvent.attendees.map((a) => ({
-										name: a.name,
-										email: a.email,
-										role: a.role,
-										status: a.status,
-										rsvp: a.rsvp,
-									})),
-								}
-							: undefined,
-					alarms:
-						sourceEvent.alarms.length > 0
-							? {
-									create: sourceEvent.alarms.map((a) => ({
-										trigger: a.trigger,
-										action: a.action,
-										summary: a.summary,
-										description: a.description,
-										duration: a.duration,
-										repeat: a.repeat,
-									})),
-								}
-							: undefined,
-					categories:
-						sourceEvent.categories.length > 0
-							? {
-									create: sourceEvent.categories.map((c) => ({
-										category: c.category,
-									})),
-								}
-							: undefined,
-					resources:
-						sourceEvent.resources.length > 0
-							? {
-									create: sourceEvent.resources.map((r) => ({
-										resource: r.resource,
-									})),
-								}
-							: undefined,
-				},
-				include: {
-					attendees: true,
-					alarms: true,
-					categories: true,
-					resources: true,
-					recurrenceDates: true,
-				},
-			});
+			let duplicatedEvent: Awaited<ReturnType<typeof prisma.event.create>>;
+			try {
+				duplicatedEvent = await prisma.event.create({
+					data: {
+						calendarId: targetCalendarId,
+						title: sourceEvent.title,
+						startDate: newStartDate,
+						endDate: newEndDate,
+						description: sourceEvent.description,
+						location: sourceEvent.location,
+						status: sourceEvent.status,
+						priority: sourceEvent.priority,
+						url: sourceEvent.url,
+						class: sourceEvent.class,
+						comment: sourceEvent.comment,
+						contact: sourceEvent.contact,
+						sequence: 0,
+						transp: sourceEvent.transp,
+						geoLatitude: sourceEvent.geoLatitude,
+						geoLongitude: sourceEvent.geoLongitude,
+						organizerName: sourceEvent.organizerName,
+						organizerEmail: sourceEvent.organizerEmail,
+						uid: null,
+						dtstamp: new Date(),
+						color: sourceEvent.color,
+						attendees:
+							sourceEvent.attendees.length > 0
+								? {
+										create: sourceEvent.attendees.map((a) => ({
+											name: a.name,
+											email: a.email,
+											role: a.role,
+											status: a.status,
+											rsvp: a.rsvp,
+										})),
+									}
+								: undefined,
+						alarms:
+							sourceEvent.alarms.length > 0
+								? {
+										create: sourceEvent.alarms.map((a) => ({
+											trigger: a.trigger,
+											action: a.action,
+											summary: a.summary,
+											description: a.description,
+											duration: a.duration,
+											repeat: a.repeat,
+										})),
+									}
+								: undefined,
+						categories:
+							sourceEvent.categories.length > 0
+								? {
+										create: sourceEvent.categories.map((c) => ({
+											category: c.category,
+										})),
+									}
+								: undefined,
+						resources:
+							sourceEvent.resources.length > 0
+								? {
+										create: sourceEvent.resources.map((r) => ({
+											resource: r.resource,
+										})),
+									}
+								: undefined,
+					},
+					include: {
+						attendees: true,
+						alarms: true,
+						categories: true,
+						resources: true,
+						recurrenceDates: true,
+					},
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return duplicatedEvent;
 		}),
@@ -742,9 +801,15 @@ export const eventRouter = router({
 			}
 
 			// Delete accessible events
-			const result = await prisma.event.deleteMany({
-				where: { id: { in: accessibleEventIds } },
-			});
+			let result: Awaited<ReturnType<typeof prisma.event.deleteMany>>;
+			try {
+				result = await prisma.event.deleteMany({
+					where: { id: { in: accessibleEventIds } },
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return {
 				deletedCount: result.count,
@@ -825,10 +890,16 @@ export const eventRouter = router({
 			}
 
 			// Move events to target calendar
-			const result = await prisma.event.updateMany({
-				where: { id: { in: accessibleEventIds } },
-				data: { calendarId: input.targetCalendarId },
-			});
+			let result: Awaited<ReturnType<typeof prisma.event.updateMany>>;
+			try {
+				result = await prisma.event.updateMany({
+					where: { id: { in: accessibleEventIds } },
+					data: { calendarId: input.targetCalendarId },
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return {
 				movedCount: result.count,

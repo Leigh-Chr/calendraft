@@ -8,6 +8,8 @@ import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { authOrAnonProcedure, router } from "../../index";
 import { parseIcsFile } from "../../lib/ics-parser";
+import { logger } from "../../lib/logger";
+import { handlePrismaError } from "../../lib/prisma-error-handler";
 import { verifyCalendarAccess } from "../../middleware";
 import { createEventFromParsed, validateFileSize } from "./helpers";
 
@@ -31,27 +33,65 @@ export const calendarImportExportRouter = router({
 				});
 			}
 
-			// Create calendar
-			const calendar = await prisma.calendar.create({
-				data: {
-					name:
-						input.name ||
-						`Imported Calendar - ${new Date().toLocaleDateString()}`,
-					userId: ctx.session?.user?.id || ctx.anonymousId || null,
-				},
-			});
+			// Create calendar with error handling
+			let calendar: Awaited<ReturnType<typeof prisma.calendar.create>>;
+			try {
+				calendar = await prisma.calendar.create({
+					data: {
+						name:
+							input.name ||
+							`Imported Calendar - ${new Date().toLocaleDateString()}`,
+						userId: ctx.session?.user?.id || ctx.anonymousId || null,
+					},
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
-			// Create events
+			// Create events with batch processing and error handling
+			// Best practice: Use Promise.allSettled to handle partial failures
+			let importedEvents = 0;
+			let failedEvents = 0;
+			const importErrors: string[] = [];
+
 			if (parseResult.events.length > 0) {
-				for (const parsedEvent of parseResult.events) {
-					await createEventFromParsed(calendar.id, parsedEvent);
+				const results = await Promise.allSettled(
+					parseResult.events.map((parsedEvent) =>
+						createEventFromParsed(calendar.id, parsedEvent),
+					),
+				);
+
+				// Count successes and failures
+				for (const result of results) {
+					if (result.status === "fulfilled") {
+						importedEvents++;
+					} else {
+						failedEvents++;
+						const error = result.reason;
+						const errorMessage =
+							error instanceof Error ? error.message : String(error);
+						importErrors.push(errorMessage);
+					}
+				}
+
+				// Log failures if any occurred
+				if (failedEvents > 0) {
+					logger.warn(`Failed to import ${failedEvents} events`, {
+						calendarId: calendar.id,
+						totalEvents: parseResult.events.length,
+						errors: importErrors.slice(0, 10), // Limit to first 10 errors
+					});
 				}
 			}
 
 			return {
 				calendar,
-				importedEvents: parseResult.events.length,
+				importedEvents,
+				failedEvents,
 				warnings: parseResult.errors,
+				// Only include errors if there were failures
+				...(failedEvents > 0 && { importErrors: importErrors.slice(0, 10) }),
 			};
 		}),
 

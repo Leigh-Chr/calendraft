@@ -11,6 +11,7 @@ import {
 	deduplicateEvents,
 	getDuplicateIds,
 } from "../../lib/duplicate-detection";
+import { handlePrismaError } from "../../lib/prisma-error-handler";
 import { buildOwnershipFilter, verifyCalendarAccess } from "../../middleware";
 
 export const calendarMergeDuplicatesRouter = router({
@@ -56,25 +57,36 @@ export const calendarMergeDuplicatesRouter = router({
 			}
 
 			// Create merged calendar
-			const mergedCalendar = await prisma.calendar.create({
-				data: {
-					name: input.name,
-					userId: ctx.session?.user?.id || ctx.anonymousId || null,
-				},
-			});
+			let mergedCalendar: Awaited<ReturnType<typeof prisma.calendar.create>>;
+			try {
+				mergedCalendar = await prisma.calendar.create({
+					data: {
+						name: input.name,
+						userId: ctx.session?.user?.id || ctx.anonymousId || null,
+					},
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			// Create all events
 			if (eventsToMerge.length > 0) {
-				await prisma.event.createMany({
-					data: eventsToMerge.map((event) => ({
-						calendarId: mergedCalendar.id,
-						title: event.title,
-						startDate: event.startDate,
-						endDate: event.endDate,
-						description: event.description,
-						location: event.location,
-					})),
-				});
+				try {
+					await prisma.event.createMany({
+						data: eventsToMerge.map((event) => ({
+							calendarId: mergedCalendar.id,
+							title: event.title,
+							startDate: event.startDate,
+							endDate: event.endDate,
+							description: event.description,
+							location: event.location,
+						})),
+					});
+				} catch (error) {
+					handlePrismaError(error);
+					throw error; // Never reached, but TypeScript needs it
+				}
 			}
 
 			return {
@@ -115,11 +127,16 @@ export const calendarMergeDuplicatesRouter = router({
 
 			// Delete duplicates
 			if (duplicateIds.length > 0) {
-				await prisma.event.deleteMany({
-					where: {
-						id: { in: duplicateIds },
-					},
-				});
+				try {
+					await prisma.event.deleteMany({
+						where: {
+							id: { in: duplicateIds },
+						},
+					});
+				} catch (error) {
+					handlePrismaError(error);
+					throw error; // Never reached, but TypeScript needs it
+				}
 			}
 
 			return {

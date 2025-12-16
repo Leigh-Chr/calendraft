@@ -410,6 +410,35 @@ app.onError((err, c) => {
 	);
 });
 
+// Handle unhandled promise rejections
+// Best practice: Always handle unhandledRejection to prevent silent failures
+process.on("unhandledRejection", (reason, promise) => {
+	logger.error("Unhandled Rejection", reason, { promise });
+	Sentry.captureException(
+		reason instanceof Error ? reason : new Error(String(reason)),
+	);
+	// In production, crash to force clean restart (recommended by Node.js)
+	// This ensures the process restarts in a clean state
+	if (isProduction) {
+		logger.error("Crashing due to unhandled rejection in production");
+		process.exit(1);
+	} else {
+		// In development, log but continue for easier debugging
+		logger.warn("Unhandled rejection in development - continuing");
+	}
+});
+
+// Handle uncaught exceptions
+// Best practice: Always crash on uncaughtException (critical errors)
+process.on("uncaughtException", (error) => {
+	logger.error("Uncaught Exception", error);
+	Sentry.captureException(error);
+	// Uncaught exceptions are always critical - must crash
+	// This prevents the process from continuing in an undefined state
+	logger.error("Crashing due to uncaught exception");
+	process.exit(1);
+});
+
 const port = Number(env.PORT) || 3000;
 
 // Start cleanup job for orphaned anonymous calendars

@@ -5,6 +5,7 @@ import z from "zod";
 import { authOrAnonProcedure, publicProcedure, router } from "../index";
 import { deduplicateEvents } from "../lib/duplicate-detection";
 import { logger } from "../lib/logger";
+import { handlePrismaError } from "../lib/prisma-error-handler";
 import { buildOwnershipFilter } from "../middleware";
 
 /**
@@ -206,14 +207,22 @@ export const shareRouter = router({
 			const token = generateShareToken();
 
 			// Create the share link
-			const shareLink = await prisma.calendarShareLink.create({
-				data: {
-					calendarId: input.calendarId,
-					token,
-					name: input.name || null,
-					expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
-				},
-			});
+			let shareLink: Awaited<
+				ReturnType<typeof prisma.calendarShareLink.create>
+			>;
+			try {
+				shareLink = await prisma.calendarShareLink.create({
+					data: {
+						calendarId: input.calendarId,
+						token,
+						name: input.name || null,
+						expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
+					},
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return {
 				id: shareLink.id,
@@ -322,10 +331,16 @@ export const shareRouter = router({
 					: null;
 			}
 
-			const updated = await prisma.calendarShareLink.update({
-				where: { id: input.id },
-				data: updateData,
-			});
+			let updated: Awaited<ReturnType<typeof prisma.calendarShareLink.update>>;
+			try {
+				updated = await prisma.calendarShareLink.update({
+					where: { id: input.id },
+					data: updateData,
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return {
 				id: updated.id,
@@ -372,9 +387,14 @@ export const shareRouter = router({
 				});
 			}
 
-			await prisma.calendarShareLink.delete({
-				where: { id: input.id },
-			});
+			try {
+				await prisma.calendarShareLink.delete({
+					where: { id: input.id },
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return { success: true };
 		}),
@@ -761,28 +781,33 @@ export const shareRouter = router({
 				const bundleName = input.name?.trim() || defaultName;
 
 				// Create the bundle
-				const bundle = await prisma.calendarShareBundle.create({
-					data: {
-						token,
-						name: bundleName,
-						groupId: input.groupId || null,
-						expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
-						removeDuplicates: input.removeDuplicates,
-						calendars: {
-							create: calendarIds.map((calendarId, index) => ({
-								calendarId,
-								order: index,
-							})),
-						},
-					},
-					include: {
-						calendars: {
-							include: {
-								bundle: false,
+				const bundle = await prisma.calendarShareBundle
+					.create({
+						data: {
+							token,
+							name: bundleName,
+							groupId: input.groupId || null,
+							expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
+							removeDuplicates: input.removeDuplicates,
+							calendars: {
+								create: calendarIds.map((calendarId, index) => ({
+									calendarId,
+									order: index,
+								})),
 							},
 						},
-					},
-				});
+						include: {
+							calendars: {
+								include: {
+									bundle: false,
+								},
+							},
+						},
+					})
+					.catch((error) => {
+						handlePrismaError(error);
+						throw error; // Never reached, but TypeScript needs it
+					});
 
 				return {
 					id: bundle.id,
@@ -922,10 +947,18 @@ export const shareRouter = router({
 					updateData.removeDuplicates = input.removeDuplicates;
 				}
 
-				const updated = await prisma.calendarShareBundle.update({
-					where: { id: input.id },
-					data: updateData,
-				});
+				let updated: Awaited<
+					ReturnType<typeof prisma.calendarShareBundle.update>
+				>;
+				try {
+					updated = await prisma.calendarShareBundle.update({
+						where: { id: input.id },
+						data: updateData,
+					});
+				} catch (error) {
+					handlePrismaError(error);
+					throw error; // Never reached, but TypeScript needs it
+				}
 
 				return {
 					id: updated.id,
@@ -979,9 +1012,14 @@ export const shareRouter = router({
 					});
 				}
 
-				await prisma.calendarShareBundle.delete({
-					where: { id: input.id },
-				});
+				try {
+					await prisma.calendarShareBundle.delete({
+						where: { id: input.id },
+					});
+				} catch (error) {
+					handlePrismaError(error);
+					throw error; // Never reached, but TypeScript needs it
+				}
 
 				return { success: true };
 			}),

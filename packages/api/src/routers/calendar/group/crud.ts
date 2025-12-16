@@ -8,6 +8,7 @@ import prisma from "@calendraft/db";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { authOrAnonProcedure, router } from "../../../index";
+import { handlePrismaError } from "../../../lib/prisma-error-handler";
 import { buildOwnershipFilter } from "../../../middleware";
 
 export const calendarGroupCrudRouter = router({
@@ -85,27 +86,33 @@ export const calendarGroupCrudRouter = router({
 			}
 
 			// Create group
-			const group = await prisma.calendarGroup.create({
-				data: {
-					name: input.name,
-					description: input.description || null,
-					color: input.color || null,
-					userId,
-					calendars: {
-						create: input.calendarIds.map((calendarId, index) => ({
-							calendarId,
-							order: index,
-						})),
-					},
-				},
-				include: {
-					calendars: {
-						include: {
-							group: false, // Avoid circular reference
+			let group: Awaited<ReturnType<typeof prisma.calendarGroup.create>>;
+			try {
+				group = await prisma.calendarGroup.create({
+					data: {
+						name: input.name,
+						description: input.description || null,
+						color: input.color || null,
+						userId,
+						calendars: {
+							create: input.calendarIds.map((calendarId, index) => ({
+								calendarId,
+								order: index,
+							})),
 						},
 					},
-				},
-			});
+					include: {
+						calendars: {
+							include: {
+								group: false, // Avoid circular reference
+							},
+						},
+					},
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return group;
 		}),
@@ -308,10 +315,15 @@ export const calendarGroupCrudRouter = router({
 				updateData.color = input.color;
 			}
 
-			return await prisma.calendarGroup.update({
-				where: { id: input.id },
-				data: updateData,
-			});
+			try {
+				return await prisma.calendarGroup.update({
+					where: { id: input.id },
+					data: updateData,
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 		}),
 
 	/**
@@ -336,9 +348,14 @@ export const calendarGroupCrudRouter = router({
 			}
 
 			// Delete group (cascade will delete members)
-			await prisma.calendarGroup.delete({
-				where: { id: input.id },
-			});
+			try {
+				await prisma.calendarGroup.delete({
+					where: { id: input.id },
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return { success: true };
 		}),

@@ -1,21 +1,37 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { Context } from "./context";
+import { logger } from "./lib/logger";
+
+const isProduction = process.env["NODE_ENV"] === "production";
 
 export const t = initTRPC.context<Context>().create({
 	errorFormatter({ shape, error, ctx }) {
-		// Log errors with context
-		if (
-			error.code === "INTERNAL_SERVER_ERROR" ||
-			error.code === "BAD_REQUEST"
-		) {
-			console.error("❌ tRPC Error:", {
-				code: error.code,
-				message: error.message,
-				path: shape.data?.path,
-				userId: ctx?.userId,
-				stack: error.stack,
-			});
+		// Log all errors with context (not just INTERNAL_SERVER_ERROR and BAD_REQUEST)
+		// This helps with debugging and monitoring
+		logger.error("tRPC Error", {
+			code: error.code,
+			message: error.message,
+			path: shape.data?.path,
+			userId: ctx?.userId,
+			// Only include stack trace in development (too verbose in production)
+			...(isProduction ? {} : { stack: error.stack }),
+		});
+
+		// In production, sanitize error responses to avoid exposing sensitive information
+		if (isProduction) {
+			if (error.code === "INTERNAL_SERVER_ERROR") {
+				return {
+					...shape,
+					message: "An internal error occurred",
+					// Remove stack trace from production responses
+					data: {
+						...shape.data,
+						stack: undefined,
+					},
+				};
+			}
 		}
+
 		return shape;
 	},
 });

@@ -7,6 +7,7 @@ import prisma from "@calendraft/db";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { authOrAnonProcedure, router } from "../../index";
+import { handlePrismaError } from "../../lib/prisma-error-handler";
 import {
 	buildOwnershipFilter,
 	checkCalendarLimit,
@@ -85,13 +86,18 @@ export const calendarCoreRouter = router({
 			// Only do this for anonymous users to avoid unnecessary DB writes for authenticated users
 			if (ctx.anonymousId && calendars.length > 0) {
 				const calendarIds = calendars.map((cal) => cal.id);
-				await prisma.calendar.updateMany({
-					where: {
-						id: { in: calendarIds },
-						userId: ctx.anonymousId,
-					},
-					data: { updatedAt: new Date() },
-				});
+				try {
+					await prisma.calendar.updateMany({
+						where: {
+							id: { in: calendarIds },
+							userId: ctx.anonymousId,
+						},
+						data: { updatedAt: new Date() },
+					});
+				} catch (error) {
+					handlePrismaError(error);
+					throw error; // Never reached, but TypeScript needs it
+				}
 			}
 
 			return {
@@ -153,13 +159,18 @@ export const calendarCoreRouter = router({
 			// This ensures that calendars that are viewed (even if not modified) are not considered orphaned
 			// Use updateMany to avoid another query if not needed
 			if (ctx.anonymousId) {
-				await prisma.calendar.updateMany({
-					where: {
-						id: input.id,
-						userId: ctx.anonymousId,
-					},
-					data: { updatedAt: new Date() },
-				});
+				try {
+					await prisma.calendar.updateMany({
+						where: {
+							id: input.id,
+							userId: ctx.anonymousId,
+						},
+						data: { updatedAt: new Date() },
+					});
+				} catch (error) {
+					handlePrismaError(error);
+					throw error; // Never reached, but TypeScript needs it
+				}
 			}
 
 			return calendar;
@@ -184,13 +195,19 @@ export const calendarCoreRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			await checkCalendarLimit(ctx);
 
-			const calendar = await prisma.calendar.create({
-				data: {
-					name: input.name, // Already trimmed by Zod transform
-					color: input.color || null,
-					userId: ctx.session?.user?.id || ctx.anonymousId || null,
-				},
-			});
+			let calendar: Awaited<ReturnType<typeof prisma.calendar.create>>;
+			try {
+				calendar = await prisma.calendar.create({
+					data: {
+						name: input.name, // Already trimmed by Zod transform
+						color: input.color || null,
+						userId: ctx.session?.user?.id || ctx.anonymousId || null,
+					},
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return calendar;
 		}),
@@ -208,7 +225,7 @@ export const calendarCoreRouter = router({
 					.optional(), // Now optional for partial updates
 				color: z
 					.string()
-					.regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color (format: #RRGGBB)")
+					.regex(/^#[0-9A-Fa-f]6$/, "Invalid color (format: #RRGGBB)")
 					.optional()
 					.nullable(),
 			}),
@@ -252,10 +269,18 @@ export const calendarCoreRouter = router({
 				updateData.color = input.color;
 			}
 
-			return await prisma.calendar.update({
-				where: { id: input.id },
-				data: updateData,
-			});
+			let updated: Awaited<ReturnType<typeof prisma.calendar.update>>;
+			try {
+				updated = await prisma.calendar.update({
+					where: { id: input.id },
+					data: updateData,
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
+
+			return updated;
 		}),
 
 	delete: authOrAnonProcedure
@@ -291,9 +316,14 @@ export const calendarCoreRouter = router({
 				});
 			}
 
-			await prisma.calendar.delete({
-				where: { id: input.id },
-			});
+			try {
+				await prisma.calendar.delete({
+					where: { id: input.id },
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return { success: true };
 		}),
@@ -327,9 +357,15 @@ export const calendarCoreRouter = router({
 			const accessibleCalendarIds = calendars.map((c) => c.id);
 
 			// Delete accessible calendars (cascade will delete events)
-			const result = await prisma.calendar.deleteMany({
-				where: { id: { in: accessibleCalendarIds } },
-			});
+			let result: Awaited<ReturnType<typeof prisma.calendar.deleteMany>>;
+			try {
+				result = await prisma.calendar.deleteMany({
+					where: { id: { in: accessibleCalendarIds } },
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return {
 				deletedCount: result.count,

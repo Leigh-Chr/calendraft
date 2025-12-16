@@ -8,6 +8,7 @@ import prisma from "@calendraft/db";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { authOrAnonProcedure, router } from "../../../index";
+import { handlePrismaError } from "../../../lib/prisma-error-handler";
 import { buildOwnershipFilter } from "../../../middleware";
 
 export const calendarGroupCalendarsRouter = router({
@@ -92,13 +93,18 @@ export const calendarGroupCalendarsRouter = router({
 					: -1;
 
 			// Add calendars
-			await prisma.calendarGroupMember.createMany({
-				data: newCalendarIds.map((calendarId, index) => ({
-					groupId: input.id,
-					calendarId,
-					order: maxOrder + 1 + index,
-				})),
-			});
+			try {
+				await prisma.calendarGroupMember.createMany({
+					data: newCalendarIds.map((calendarId, index) => ({
+						groupId: input.id,
+						calendarId,
+						order: maxOrder + 1 + index,
+					})),
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return {
 				addedCount: newCalendarIds.length,
@@ -133,12 +139,20 @@ export const calendarGroupCalendarsRouter = router({
 			}
 
 			// Remove calendars
-			const result = await prisma.calendarGroupMember.deleteMany({
-				where: {
-					groupId: input.id,
-					calendarId: { in: input.calendarIds },
-				},
-			});
+			let result: Awaited<
+				ReturnType<typeof prisma.calendarGroupMember.deleteMany>
+			>;
+			try {
+				result = await prisma.calendarGroupMember.deleteMany({
+					where: {
+						groupId: input.id,
+						calendarId: { in: input.calendarIds },
+					},
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return {
 				removedCount: result.count,

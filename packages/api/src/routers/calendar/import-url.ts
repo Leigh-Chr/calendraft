@@ -9,6 +9,7 @@ import z from "zod";
 import { authOrAnonProcedure, router } from "../../index";
 import { findDuplicatesAgainstExisting } from "../../lib/duplicate-detection";
 import { type ParsedEvent, parseIcsFile } from "../../lib/ics-parser";
+import { handlePrismaError } from "../../lib/prisma-error-handler";
 import { assertValidExternalUrl } from "../../lib/url-validator";
 import { checkCalendarLimit, verifyCalendarAccess } from "../../middleware";
 import { createEventFromParsed, validateFileSize } from "./helpers";
@@ -67,43 +68,48 @@ function getHttpError(
 }
 
 /**
- * Fetch ICS content from URL with error handling
+ * Fetch ICS content from URL with error handling and circuit breaker
+ * Best practice: Use circuit breaker to prevent cascading failures
  */
 async function fetchIcsContent(url: string, timeout = 60000): Promise<string> {
-	try {
-		const response = await fetch(url, {
-			headers: {
-				Accept: "text/calendar, application/calendar+xml, */*",
-				"User-Agent": "Calendraft/1.0",
-			},
-			signal: AbortSignal.timeout(timeout),
-		});
+	const { urlImportCircuitBreaker } = await import("../../lib/circuit-breaker");
 
-		if (!response.ok) {
-			const { code, message } = getHttpError(response.status, url);
+	return urlImportCircuitBreaker.execute(async () => {
+		try {
+			const response = await fetch(url, {
+				headers: {
+					Accept: "text/calendar, application/calendar+xml, */*",
+					"User-Agent": "Calendraft/1.0",
+				},
+				signal: AbortSignal.timeout(timeout),
+			});
+
+			if (!response.ok) {
+				const { code, message } = getHttpError(response.status, url);
+				throw new TRPCError({
+					code: code as "NOT_FOUND" | "INTERNAL_SERVER_ERROR" | "BAD_REQUEST",
+					message: message,
+				});
+			}
+
+			return await response.text();
+		} catch (error) {
+			if (error instanceof TRPCError) throw error;
+
+			if (error instanceof Error && error.name === "AbortError") {
+				throw new TRPCError({
+					code: "TIMEOUT",
+					message:
+						"Request timed out while fetching calendar. The server may be slow or unreachable.",
+				});
+			}
+
 			throw new TRPCError({
-				code: code as "NOT_FOUND" | "INTERNAL_SERVER_ERROR" | "BAD_REQUEST",
-				message: message,
+				code: "BAD_REQUEST",
+				message: `Error retrieving calendar: ${error instanceof Error ? error.message : "Unknown error"}`,
 			});
 		}
-
-		return await response.text();
-	} catch (error) {
-		if (error instanceof TRPCError) throw error;
-
-		if (error instanceof Error && error.name === "AbortError") {
-			throw new TRPCError({
-				code: "TIMEOUT",
-				message:
-					"Request timed out while fetching calendar. The server may be slow or unreachable.",
-			});
-		}
-
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: `Error retrieving calendar: ${error instanceof Error ? error.message : "Unknown error"}`,
-		});
-	}
+	});
 }
 
 /**
@@ -282,32 +288,9 @@ export const calendarImportUrlRouter = router({
 			// Validate URL against SSRF attacks
 			assertValidExternalUrl(input.url);
 
-			// Fetch the ICS content from the URL
-			let icsContent: string;
-			try {
-				const response = await fetch(input.url, {
-					headers: {
-						Accept: "text/calendar, application/calendar+xml, */*",
-						"User-Agent": "Calendraft/1.0",
-					},
-					signal: AbortSignal.timeout(30000), // 30 second timeout
-				});
-
-				if (!response.ok) {
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: `Unable to retrieve calendar: ${response.status} ${response.statusText}`,
-					});
-				}
-
-				icsContent = await response.text();
-			} catch (error) {
-				if (error instanceof TRPCError) throw error;
-				throw new TRPCError({
-					code: "BAD_REQUEST",
-					message: `Error retrieving calendar: ${error instanceof Error ? error.message : "Unknown error"}`,
-				});
-			}
+			// Fetch the ICS content from the URL with circuit breaker
+			// Best practice: Reuse fetchIcsContent function for consistency
+			const icsContent = await fetchIcsContent(input.url, 30000); // 30 second timeout for initial import
 
 			validateFileSize(icsContent);
 			const parseResult = parseIcsFile(icsContent);
@@ -320,16 +303,22 @@ export const calendarImportUrlRouter = router({
 			}
 
 			// Create calendar with sourceUrl
-			const calendar = await prisma.calendar.create({
-				data: {
-					name:
-						input.name ||
-						`Imported Calendar - ${new Date().toLocaleDateString("en-US")}`,
-					userId: ctx.session?.user?.id || ctx.anonymousId || null,
-					sourceUrl: input.url,
-					lastSyncedAt: new Date(),
-				},
-			});
+			let calendar: Awaited<ReturnType<typeof prisma.calendar.create>>;
+			try {
+				calendar = await prisma.calendar.create({
+					data: {
+						name:
+							input.name ||
+							`Imported Calendar - ${new Date().toLocaleDateString("en-US")}`,
+						userId: ctx.session?.user?.id || ctx.anonymousId || null,
+						sourceUrl: input.url,
+						lastSyncedAt: new Date(),
+					},
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			// Create events
 			if (parseResult.events.length > 0) {
@@ -380,10 +369,15 @@ export const calendarImportUrlRouter = router({
 			// If replaceAll, delete all events first
 			let deletedCount = 0;
 			if (input.replaceAll) {
-				const deleteResult = await prisma.event.deleteMany({
-					where: { calendarId: input.calendarId },
-				});
-				deletedCount = deleteResult.count;
+				try {
+					const deleteResult = await prisma.event.deleteMany({
+						where: { calendarId: input.calendarId },
+					});
+					deletedCount = deleteResult.count;
+				} catch (error) {
+					handlePrismaError(error);
+					throw error; // Never reached, but TypeScript needs it
+				}
 			}
 
 			// Fetch and parse ICS content
@@ -419,12 +413,17 @@ export const calendarImportUrlRouter = router({
 			}
 
 			// Update lastSyncedAt
-			await prisma.calendar.update({
-				where: { id: input.calendarId },
-				data: {
-					lastSyncedAt: new Date(),
-				},
-			});
+			try {
+				await prisma.calendar.update({
+					where: { id: input.calendarId },
+					data: {
+						lastSyncedAt: new Date(),
+					},
+				});
+			} catch (error) {
+				handlePrismaError(error);
+				throw error; // Never reached, but TypeScript needs it
+			}
 
 			return {
 				importedEvents: eventsToImport.length,
