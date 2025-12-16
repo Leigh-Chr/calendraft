@@ -30,8 +30,19 @@ export default function CheckEmail() {
 				callbackURL: "/verify-email",
 			});
 			toast.success("Verification email sent! Please check your inbox.");
-		} catch (_error) {
-			toast.error("Failed to send verification email. Please try again.");
+		} catch (error: unknown) {
+			const errorData = error as {
+				error?: { message?: string; status?: number };
+			};
+			const status = errorData?.error?.status;
+
+			if (status === 429) {
+				toast.error(
+					"Too many requests. Please wait a moment before trying again.",
+				);
+			} else {
+				toast.error("Failed to send verification email. Please try again.");
+			}
 		} finally {
 			setIsResending(false);
 		}
@@ -70,6 +81,10 @@ export default function CheckEmail() {
 						<p className="text-muted-foreground text-small">
 							Click the link in the email to verify your account and complete
 							your registration.
+						</p>
+						<p className="text-muted-foreground text-xs">
+							💡 <strong>Tip:</strong> Don't see the email? Check your spam or
+							junk folder.
 						</p>
 						<div className="space-y-2 pt-2">
 							<Button

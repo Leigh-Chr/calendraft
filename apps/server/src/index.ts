@@ -14,6 +14,7 @@ import { startCleanupJob } from "./jobs/cleanup";
 import { logger } from "./lib/logger";
 import {
 	authRateLimit,
+	emailVerificationResendRateLimit,
 	rateLimit,
 	signupRateLimit,
 } from "./middleware/rate-limit";
@@ -198,6 +199,13 @@ app.use(async (c, next) => {
 // Rate limiting spécifique pour les inscriptions (5 par minute)
 // IMPORTANT: Doit être appliqué AVANT le rate limit général et AVANT le handler Better-Auth
 app.use("/api/auth/sign-up/email", signupRateLimit());
+
+// Rate limiting spécifique pour le renvoi d'email de vérification
+// 1 requête toutes les 30 secondes (pour éviter le spam tout en permettant des tentatives raisonnables)
+app.use(
+	"/api/auth/send-verification-email",
+	emailVerificationResendRateLimit(),
+);
 
 // Rate limiting général pour les autres endpoints auth (10 par minute)
 app.use("/api/auth/*", authRateLimit());

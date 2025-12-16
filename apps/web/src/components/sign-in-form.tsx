@@ -272,6 +272,15 @@ export default function SignInForm({
 						>
 							Forgot password?
 						</Button>
+						<Button
+							variant="link"
+							onClick={() => {
+								navigate({ to: "/resend-verification" });
+							}}
+							className="text-sm"
+						>
+							Didn't receive verification email?
+						</Button>
 						<div>
 							<Button variant="link" onClick={onSwitchToSignUp}>
 								Don't have an account? Sign up

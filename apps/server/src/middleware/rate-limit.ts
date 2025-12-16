@@ -318,6 +318,17 @@ export function signupRateLimit() {
 }
 
 /**
+ * Rate limit for email verification resend
+ * 1 request every 30 seconds per IP
+ * This prevents spam while allowing reasonable retry attempts
+ * Note: This is a sliding window, so users can send 1 email every 30 seconds
+ */
+export function emailVerificationResendRateLimit() {
+	// 1 request per 30 seconds (30000ms)
+	return rateLimit(1, 30000, "email-verification-resend");
+}
+
+/**
  * Close Redis connection (for graceful shutdown)
  */
 export async function closeRedisConnection(): Promise<void> {

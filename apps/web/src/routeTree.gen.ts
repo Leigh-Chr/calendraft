@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ResendVerificationRouteImport } from './routes/resend-verification'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -36,6 +37,11 @@ const VerifyEmailRoute = VerifyEmailRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResendVerificationRoute = ResendVerificationRouteImport.update({
+  id: '/resend-verification',
+  path: '/resend-verification',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/resend-verification': typeof ResendVerificationRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/resend-verification': typeof ResendVerificationRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/resend-verification': typeof ResendVerificationRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
   '/calendars/$calendarId': typeof CalendarsCalendarIdRouteWithChildren
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/resend-verification'
     | '/reset-password'
     | '/verify-email'
     | '/calendars/$calendarId'
@@ -213,6 +223,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/resend-verification'
     | '/reset-password'
     | '/verify-email'
     | '/calendars/$calendarId'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/resend-verification'
     | '/reset-password'
     | '/verify-email'
     | '/calendars/$calendarId'
@@ -254,6 +266,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  ResendVerificationRoute: typeof ResendVerificationRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   ShareTokenRoute: typeof ShareTokenRoute
@@ -273,6 +286,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resend-verification': {
+      id: '/resend-verification'
+      path: '/resend-verification'
+      fullPath: '/resend-verification'
+      preLoaderRoute: typeof ResendVerificationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -433,6 +453,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  ResendVerificationRoute: ResendVerificationRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   ShareTokenRoute: ShareTokenRoute,
