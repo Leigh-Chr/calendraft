@@ -20,6 +20,8 @@ export const auth = betterAuth<BetterAuthOptions>({
 	trustedOrigins: [frontendURL],
 	emailAndPassword: {
 		enabled: true,
+		// Exiger la vérification d'email avant de pouvoir se connecter
+		requireEmailVerification: true,
 		// Validation des mots de passe (cohérent avec la validation côté client)
 		minPasswordLength: 8,
 		maxPasswordLength: 128,
