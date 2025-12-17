@@ -270,3 +270,99 @@ If you didn't request a password reset, you can safely ignore this email. Your p
 			logger.error("Error sending password reset email", { to, error });
 		});
 }
+
+/**
+ * Send group invitation email to user
+ * @param to - User email address
+ * @param groupName - Name of the group
+ * @param inviterName - Name of the user who sent the invitation
+ * @param acceptUrl - URL to accept the invitation (frontend route)
+ */
+export async function sendGroupInvitationEmail({
+	to,
+	groupName,
+	inviterName,
+	acceptUrl,
+}: {
+	to: string;
+	groupName: string;
+	inviterName: string;
+	acceptUrl: string;
+}) {
+	// Vérifier que Resend est configuré
+	if (!resend) {
+		logger.error(
+			"RESEND_API_KEY is not configured. Group invitation email cannot be sent.",
+		);
+		return;
+	}
+
+	// Ne pas await pour éviter les timing attacks
+	resend.emails
+		.send({
+			from: env.EMAIL_FROM || "Calendraft <noreply@calendraft.com>",
+			to,
+			subject: `You've been invited to join "${groupName}" - Calendraft`,
+			html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #18181b;">You've been invited to join a calendar group</h1>
+          <p><strong>${inviterName}</strong> has invited you to join the calendar group <strong>"${groupName}"</strong> on Calendraft.</p>
+          <p>By accepting this invitation, you'll be able to:</p>
+          <ul style="color: #666; margin: 20px 0; padding-left: 20px;">
+            <li>View and manage calendars in this group</li>
+            <li>Add your own calendars to the group</li>
+            <li>Collaborate with other members</li>
+          </ul>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${acceptUrl}" style="display: inline-block; background-color: #18181b; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">Accept Invitation</a>
+          </div>
+          <p style="color: #666; font-size: 14px;">Or copy and paste this link into your browser:</p>
+          <p style="color: #666; font-size: 14px; word-break: break-all;">${acceptUrl}</p>
+          <p style="color: #666; font-size: 14px; margin-top: 30px;">If you don't want to join this group, you can safely ignore this email.</p>
+        </body>
+      </html>
+    `,
+			text: `You've been invited to join a calendar group
+
+${inviterName} has invited you to join the calendar group "${groupName}" on Calendraft.
+
+By accepting this invitation, you'll be able to:
+- View and manage calendars in this group
+- Add your own calendars to the group
+- Collaborate with other members
+
+Click the link below to accept the invitation:
+
+${acceptUrl}
+
+If you don't want to join this group, you can safely ignore this email.`,
+		})
+		.then((result) => {
+			if (result.error) {
+				logger.error("Failed to send group invitation email", {
+					to,
+					groupName,
+					error: result.error,
+				});
+			} else {
+				logger.info("Group invitation email sent successfully", {
+					to,
+					groupName,
+					emailId: result.data?.id,
+				});
+			}
+		})
+		.catch((error) => {
+			logger.error("Error sending group invitation email", {
+				to,
+				groupName,
+				error,
+			});
+		});
+}

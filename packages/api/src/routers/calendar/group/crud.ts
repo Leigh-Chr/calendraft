@@ -10,6 +10,10 @@ import z from "zod";
 import { authOrAnonProcedure, router } from "../../../index";
 import { handlePrismaError } from "../../../lib/prisma-error-handler";
 import { buildOwnershipFilter } from "../../../middleware";
+import {
+	isGroupOwner,
+	verifyGroupAccessOrThrow,
+} from "../../../middleware/access";
 
 export const calendarGroupCrudRouter = router({
 	/**
@@ -166,13 +170,105 @@ export const calendarGroupCrudRouter = router({
 
 	/**
 	 * List all groups for the current user
+	 * Includes groups where user is owner or member (for authenticated users)
 	 */
 	list: authOrAnonProcedure.query(async ({ ctx }) => {
+		// For authenticated users, include groups where they are members
+		if (ctx.session?.user?.id) {
+			const userId = ctx.session.user.id;
+
+			// Get groups where user is owner
+			const ownedGroups = await prisma.calendarGroup.findMany({
+				where: { userId },
+				include: {
+					_count: {
+						select: { calendars: true, members: true },
+					},
+				},
+				orderBy: {
+					updatedAt: "desc",
+				},
+			});
+
+			// Get groups where user is a member (with accepted invitation)
+			const memberGroups = await prisma.groupMember.findMany({
+				where: {
+					userId,
+					acceptedAt: { not: null },
+				},
+				include: {
+					group: {
+						include: {
+							_count: {
+								select: { calendars: true, members: true },
+							},
+						},
+					},
+				},
+				orderBy: {
+					group: {
+						updatedAt: "desc",
+					},
+				},
+			});
+
+			// Combine and deduplicate (user might be both owner and member)
+			const groupIds = new Set<string>();
+			const allGroups: Array<{
+				id: string;
+				name: string;
+				description: string | null;
+				color: string | null;
+				calendarCount: number;
+				memberCount: number;
+				isShared: boolean;
+				createdAt: Date;
+				updatedAt: Date;
+			}> = [];
+
+			for (const group of ownedGroups) {
+				if (!groupIds.has(group.id)) {
+					groupIds.add(group.id);
+					allGroups.push({
+						id: group.id,
+						name: group.name,
+						description: group.description,
+						color: group.color,
+						calendarCount: group._count.calendars,
+						memberCount: group._count.members,
+						isShared: group._count.members > 0,
+						createdAt: group.createdAt,
+						updatedAt: group.updatedAt,
+					});
+				}
+			}
+
+			for (const member of memberGroups) {
+				if (!groupIds.has(member.group.id)) {
+					groupIds.add(member.group.id);
+					allGroups.push({
+						id: member.group.id,
+						name: member.group.name,
+						description: member.group.description,
+						color: member.group.color,
+						calendarCount: member.group._count.calendars,
+						memberCount: member.group._count.members,
+						isShared: member.group._count.members > 0,
+						createdAt: member.group.createdAt,
+						updatedAt: member.group.updatedAt,
+					});
+				}
+			}
+
+			return allGroups;
+		}
+
+		// For anonymous users, only show owned groups (no shared groups)
 		const groups = await prisma.calendarGroup.findMany({
 			where: buildOwnershipFilter(ctx),
 			include: {
 				_count: {
-					select: { calendars: true },
+					select: { calendars: true, members: true },
 				},
 			},
 			orderBy: {
@@ -186,6 +282,8 @@ export const calendarGroupCrudRouter = router({
 			description: group.description,
 			color: group.color,
 			calendarCount: group._count.calendars,
+			memberCount: group._count.members,
+			isShared: group._count.members > 0,
 			createdAt: group.createdAt,
 			updatedAt: group.updatedAt,
 		}));
@@ -193,15 +291,20 @@ export const calendarGroupCrudRouter = router({
 
 	/**
 	 * Get a group by ID
+	 * Accessible to owners and members (for authenticated users)
 	 */
 	getById: authOrAnonProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const group = await prisma.calendarGroup.findFirst({
-				where: {
-					id: input.id,
-					...buildOwnershipFilter(ctx),
-				},
+			// For authenticated users, check group access (owner or member)
+			if (ctx.session?.user?.id) {
+				// Verify access (will throw if no access)
+				await verifyGroupAccessOrThrow(input.id, ctx);
+			}
+
+			// Fetch group with all details
+			const group = await prisma.calendarGroup.findUnique({
+				where: { id: input.id },
 				include: {
 					calendars: {
 						orderBy: {
@@ -210,6 +313,13 @@ export const calendarGroupCrudRouter = router({
 						include: {
 							group: false, // Avoid circular reference
 						},
+					},
+					members: {
+						orderBy: [
+							{ role: "asc" }, // OWNER first
+							{ acceptedAt: "asc" }, // Accepted before pending
+							{ invitedAt: "asc" },
+						],
 					},
 				},
 			});
@@ -221,13 +331,48 @@ export const calendarGroupCrudRouter = router({
 				});
 			}
 
+			// For anonymous users, verify ownership
+			if (!ctx.session?.user?.id) {
+				const ownershipFilter = buildOwnershipFilter(ctx);
+				const hasAccess =
+					(ownershipFilter.OR?.some(
+						(condition) =>
+							"userId" in condition && condition.userId === group.userId,
+					) ??
+						false) ||
+					group.userId === null;
+
+				if (!hasAccess) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Access denied to this group",
+					});
+				}
+			}
+
 			// Get calendar details for each member
+			// For shared groups, members can access calendars even if not owner
 			const calendarIds = group.calendars.map((c) => c.calendarId);
+
+			// Build calendar access filter: owned OR in shared group
+			const calendarWhere: {
+				id: { in: string[] };
+				OR?: Array<{ userId: string }>;
+			} = {
+				id: { in: calendarIds },
+			};
+
+			// If authenticated and group has members, allow access to all calendars in group
+			if (ctx.session?.user?.id && group.members.length > 0) {
+				// User has access via group membership, fetch all calendars
+				// No need to filter by ownership
+			} else {
+				// Filter by ownership for personal groups or anonymous users
+				calendarWhere.OR = buildOwnershipFilter(ctx).OR;
+			}
+
 			const calendars = await prisma.calendar.findMany({
-				where: {
-					id: { in: calendarIds },
-					...buildOwnershipFilter(ctx),
-				},
+				where: calendarWhere,
 				include: {
 					_count: {
 						select: { events: true },
@@ -257,14 +402,63 @@ export const calendarGroupCrudRouter = router({
 				})
 				.filter((c): c is NonNullable<typeof c> => c !== null);
 
+			// Fetch user information for members
+			const membersWithUserInfo = await Promise.all(
+				group.members.map(async (member) => {
+					const user = await prisma.user.findUnique({
+						where: { id: member.userId },
+						select: {
+							id: true,
+							email: true,
+							name: true,
+						},
+					});
+
+					const inviter = await prisma.user.findUnique({
+						where: { id: member.invitedBy },
+						select: {
+							id: true,
+							name: true,
+							email: true,
+						},
+					});
+
+					return {
+						id: member.id,
+						userId: member.userId,
+						role: member.role,
+						invitedBy: member.invitedBy,
+						invitedAt: member.invitedAt,
+						acceptedAt: member.acceptedAt,
+						user: user
+							? {
+									id: user.id,
+									email: user.email,
+									name: user.name,
+								}
+							: null,
+						inviter: inviter
+							? {
+									id: inviter.id,
+									name: inviter.name,
+									email: inviter.email,
+								}
+							: null,
+					};
+				}),
+			);
+
 			return {
 				...group,
 				calendars: calendarsWithDetails,
+				members: membersWithUserInfo,
+				isShared: group.members.length > 0,
 			};
 		}),
 
 	/**
 	 * Update a group
+	 * Only owners can update group details
 	 */
 	update: authOrAnonProcedure
 		.input(
@@ -283,11 +477,24 @@ export const calendarGroupCrudRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			// Find the group
+			// For authenticated users, verify owner access
+			if (ctx.session?.user?.id) {
+				const isOwner = await isGroupOwner(input.id, ctx);
+				if (!isOwner) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only the group owner can update group details",
+					});
+				}
+			}
+
+			// Find the group (for anonymous users, use ownership filter)
 			const group = await prisma.calendarGroup.findFirst({
 				where: {
 					id: input.id,
-					...buildOwnershipFilter(ctx),
+					...(ctx.session?.user?.id
+						? { userId: ctx.session.user.id }
+						: buildOwnershipFilter(ctx)),
 				},
 			});
 
@@ -328,15 +535,29 @@ export const calendarGroupCrudRouter = router({
 
 	/**
 	 * Delete a group
+	 * Only owners can delete groups
 	 */
 	delete: authOrAnonProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			// Find the group
+			// For authenticated users, verify owner access
+			if (ctx.session?.user?.id) {
+				const isOwner = await isGroupOwner(input.id, ctx);
+				if (!isOwner) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Only the group owner can delete the group",
+					});
+				}
+			}
+
+			// Find the group (for anonymous users, use ownership filter)
 			const group = await prisma.calendarGroup.findFirst({
 				where: {
 					id: input.id,
-					...buildOwnershipFilter(ctx),
+					...(ctx.session?.user?.id
+						? { userId: ctx.session.user.id }
+						: buildOwnershipFilter(ctx)),
 				},
 			});
 
@@ -347,7 +568,7 @@ export const calendarGroupCrudRouter = router({
 				});
 			}
 
-			// Delete group (cascade will delete members)
+			// Delete group (cascade will delete members and calendar group members)
 			try {
 				await prisma.calendarGroup.delete({
 					where: { id: input.id },

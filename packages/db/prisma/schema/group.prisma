@@ -1,5 +1,11 @@
 // Calendar groups for organizing calendars
 // Allows users to group calendars together for easier management and bulk operations
+// Groups can be personal (no members) or shared (with members for collaboration)
+
+enum GroupRole {
+  OWNER   // Creator of the group, has full control
+  MEMBER  // Member of the group, can modify calendars in the group
+}
 
 model CalendarGroup {
   id          String   @id @default(uuid())
@@ -12,6 +18,7 @@ model CalendarGroup {
   
   calendars   CalendarGroupMember[] // Many-to-many relation with calendars
   bundles     CalendarShareBundle[] // Bundles created from this group
+  members     GroupMember[] // Members of the group (if empty = personal group, if not empty = shared group)
   
   @@index([userId]) // Fast lookups for groups by user
   @@map("calendar_group")
@@ -31,5 +38,25 @@ model CalendarGroupMember {
   @@index([calendarId]) // Fast lookups for groups containing a calendar
   @@index([groupId, calendarId]) // Composite index for filtering calendars by multiple groups
   @@map("calendar_group_member")
+}
+
+// Members of a shared calendar group
+// Only authenticated users can be members (no anonymous users)
+model GroupMember {
+  id          String    @id @default(uuid())
+  groupId     String
+  userId      String    // User ID (authenticated only, references User.id)
+  role        GroupRole // OWNER or MEMBER
+  invitedBy   String    // User ID who sent the invitation
+  invitedAt   DateTime  @default(now())
+  acceptedAt  DateTime? // null = invitation pending, non-null = invitation accepted
+  
+  group       CalendarGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@unique([groupId, userId]) // Prevent duplicate members in same group
+  @@index([groupId]) // Fast lookups for members of a group
+  @@index([userId]) // Fast lookups for groups a user belongs to
+  @@index([groupId, acceptedAt]) // Composite index for filtering accepted members
+  @@map("group_member")
 }
 

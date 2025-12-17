@@ -201,7 +201,17 @@ export const auth = betterAuth<BetterAuthOptions>({
 						await deleteUserShareBundles(userId, calendarIds);
 					}
 
-					// 4. Supprimer les calendar groups de l'utilisateur
+					// 4. Supprimer les GroupMember où l'utilisateur est membre
+					// (Les membres seront supprimés des groupes partagés)
+					const deletedMemberships = await prisma.groupMember.deleteMany({
+						where: { userId },
+					});
+					logger.info("Deleted group memberships", {
+						userId,
+						count: deletedMemberships.count,
+					});
+
+					// 5. Supprimer les calendar groups de l'utilisateur
 					// (Les CalendarGroupMember seront supprimés via CASCADE)
 					const deletedGroups = await prisma.calendarGroup.deleteMany({
 						where: { userId },
@@ -211,7 +221,7 @@ export const auth = betterAuth<BetterAuthOptions>({
 						count: deletedGroups.count,
 					});
 
-					// 5. Supprimer les calendars de l'utilisateur
+					// 6. Supprimer les calendars de l'utilisateur
 					// (Les Events seront supprimés automatiquement via CASCADE)
 					const deletedCalendars = await prisma.calendar.deleteMany({
 						where: { userId },

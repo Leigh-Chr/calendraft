@@ -39,6 +39,12 @@ The goal is to offer a modern and intuitive experience that allows users to work
 - **Authentication** - Account option to save in the cloud (Better-Auth)
 - **Synchronization** - Authenticated users can access their calendars from any device
 
+### Collaboration
+- **Shared calendar groups** - Invite other users to collaborate on calendar groups
+- **Group invitations** - Send email invitations to join your calendar groups
+- **Member management** - Add or remove members, manage roles (owner/member)
+- **Shared access** - Members can view and manage calendars in shared groups
+
 ## Tech Stack
 
 - **TypeScript** - Type safety end-to-end

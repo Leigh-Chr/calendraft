@@ -27,6 +27,7 @@ import { Route as CalendarsNewRouteImport } from './routes/calendars/new'
 import { Route as CalendarsMergeRouteImport } from './routes/calendars/merge'
 import { Route as CalendarsImportRouteImport } from './routes/calendars/import'
 import { Route as CalendarsCalendarIdRouteImport } from './routes/calendars/$calendarId'
+import { Route as GroupsGroupIdAcceptInvitationRouteImport } from './routes/groups/$groupId/accept-invitation'
 import { Route as CalendarsGroupsGroupIdRouteImport } from './routes/calendars/groups/$groupId'
 import { Route as CalendarsCalendarIdImportRouteImport } from './routes/calendars/$calendarId/import'
 import { Route as CalendarsCalendarIdEventsNewRouteImport } from './routes/calendars/$calendarId/events/new'
@@ -122,6 +123,12 @@ const CalendarsCalendarIdRoute = CalendarsCalendarIdRouteImport.update({
   path: '/$calendarId',
   getParentRoute: () => CalendarsRoute,
 } as any)
+const GroupsGroupIdAcceptInvitationRoute =
+  GroupsGroupIdAcceptInvitationRouteImport.update({
+    id: '/groups/$groupId/accept-invitation',
+    path: '/groups/$groupId/accept-invitation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const CalendarsGroupsGroupIdRoute = CalendarsGroupsGroupIdRouteImport.update({
   id: '/groups/$groupId',
   path: '/groups/$groupId',
@@ -167,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/share/$token': typeof ShareTokenRoute
   '/calendars/$calendarId/import': typeof CalendarsCalendarIdImportRoute
   '/calendars/groups/$groupId': typeof CalendarsGroupsGroupIdRoute
+  '/groups/$groupId/accept-invitation': typeof GroupsGroupIdAcceptInvitationRoute
   '/calendars/$calendarId/events/$eventId': typeof CalendarsCalendarIdEventsEventIdRoute
   '/calendars/$calendarId/events/new': typeof CalendarsCalendarIdEventsNewRoute
 }
@@ -191,6 +199,7 @@ export interface FileRoutesByTo {
   '/share/$token': typeof ShareTokenRoute
   '/calendars/$calendarId/import': typeof CalendarsCalendarIdImportRoute
   '/calendars/groups/$groupId': typeof CalendarsGroupsGroupIdRoute
+  '/groups/$groupId/accept-invitation': typeof GroupsGroupIdAcceptInvitationRoute
   '/calendars/$calendarId/events/$eventId': typeof CalendarsCalendarIdEventsEventIdRoute
   '/calendars/$calendarId/events/new': typeof CalendarsCalendarIdEventsNewRoute
 }
@@ -216,6 +225,7 @@ export interface FileRoutesById {
   '/share/$token': typeof ShareTokenRoute
   '/calendars/$calendarId/import': typeof CalendarsCalendarIdImportRoute
   '/calendars/groups/$groupId': typeof CalendarsGroupsGroupIdRoute
+  '/groups/$groupId/accept-invitation': typeof GroupsGroupIdAcceptInvitationRoute
   '/calendars/$calendarId/events/$eventId': typeof CalendarsCalendarIdEventsEventIdRoute
   '/calendars/$calendarId/events/new': typeof CalendarsCalendarIdEventsNewRoute
 }
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/share/$token'
     | '/calendars/$calendarId/import'
     | '/calendars/groups/$groupId'
+    | '/groups/$groupId/accept-invitation'
     | '/calendars/$calendarId/events/$eventId'
     | '/calendars/$calendarId/events/new'
   fileRoutesByTo: FileRoutesByTo
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/share/$token'
     | '/calendars/$calendarId/import'
     | '/calendars/groups/$groupId'
+    | '/groups/$groupId/accept-invitation'
     | '/calendars/$calendarId/events/$eventId'
     | '/calendars/$calendarId/events/new'
   id:
@@ -290,6 +302,7 @@ export interface FileRouteTypes {
     | '/share/$token'
     | '/calendars/$calendarId/import'
     | '/calendars/groups/$groupId'
+    | '/groups/$groupId/accept-invitation'
     | '/calendars/$calendarId/events/$eventId'
     | '/calendars/$calendarId/events/new'
   fileRoutesById: FileRoutesById
@@ -309,6 +322,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   ShareTokenRoute: typeof ShareTokenRoute
+  GroupsGroupIdAcceptInvitationRoute: typeof GroupsGroupIdAcceptInvitationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -439,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalendarsCalendarIdRouteImport
       parentRoute: typeof CalendarsRoute
     }
+    '/groups/$groupId/accept-invitation': {
+      id: '/groups/$groupId/accept-invitation'
+      path: '/groups/$groupId/accept-invitation'
+      fullPath: '/groups/$groupId/accept-invitation'
+      preLoaderRoute: typeof GroupsGroupIdAcceptInvitationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendars/groups/$groupId': {
       id: '/calendars/groups/$groupId'
       path: '/groups/$groupId'
@@ -520,6 +541,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   ShareTokenRoute: ShareTokenRoute,
+  GroupsGroupIdAcceptInvitationRoute: GroupsGroupIdAcceptInvitationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

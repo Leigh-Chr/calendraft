@@ -373,6 +373,56 @@ trpc.calendar.group.removeCalendars.mutate({
 });
 ```
 
+#### Group Sharing and Collaboration
+
+Calendar groups can be shared with other authenticated users for collaboration:
+
+```typescript
+// Invite a user to a group by email (owner only)
+trpc.calendar.group.inviteMember.mutate({
+  groupId: 'group-id',
+  userEmail: 'user@example.com'
+});
+// Sends an email invitation to the user
+
+// Accept a group invitation (authenticated users only)
+trpc.calendar.group.acceptInvitation.mutate({
+  groupId: 'group-id'
+});
+
+// List all members of a group (owner and members)
+trpc.calendar.group.listMembers.query({
+  groupId: 'group-id'
+});
+// Returns: Array of members with user info, role, and invitation status
+
+// Remove a member from a group (owner only)
+trpc.calendar.group.removeMember.mutate({
+  groupId: 'group-id',
+  userId: 'user-id'
+});
+
+// Leave a group (members only, owners cannot leave)
+trpc.calendar.group.leaveGroup.mutate({
+  groupId: 'group-id'
+});
+
+// Update a member's role (owner only)
+trpc.calendar.group.updateMemberRole.mutate({
+  groupId: 'group-id',
+  userId: 'user-id',
+  role: 'OWNER' | 'MEMBER'
+});
+```
+
+**Group Sharing Features:**
+- Groups without members are personal (existing behavior)
+- Groups with members become shared and accessible to all members
+- Members can view and manage calendars in shared groups
+- Only authenticated users can be members (no anonymous sharing)
+- Owners can invite, remove members, and update roles
+- Members can leave groups (but owners cannot)
+
 **Group Limits:**
 - Anonymous users: 50 groups, 15 calendars per group
 - Authenticated users: 100 groups, 20 calendars per group

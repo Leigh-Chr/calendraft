@@ -165,6 +165,10 @@ export async function getUserUsage(ctx: Context): Promise<{
 /**
  * Verify calendar access with optimized single query
  * Returns the calendar if access is granted, throws TRPCError otherwise
+ *
+ * Access is granted if:
+ * 1. User is the owner of the calendar (original owner)
+ * 2. User is a member of a shared group that contains this calendar (authenticated users only)
  */
 export async function verifyCalendarAccess(
 	calendarId: string,
@@ -182,9 +186,9 @@ export async function verifyCalendarAccess(
 		});
 	}
 
-	// Verify ownership in memory
+	// 1. Verify ownership (original behavior)
 	const ownershipFilter = buildOwnershipFilter(ctx);
-	const hasAccess =
+	const isOwner =
 		(ownershipFilter.OR?.some(
 			(condition) =>
 				"userId" in condition && condition.userId === calendar.userId,
@@ -192,12 +196,38 @@ export async function verifyCalendarAccess(
 			false) ||
 		calendar.userId === null;
 
-	if (!hasAccess) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: "Access denied to this calendar",
-		});
+	if (isOwner) {
+		return calendar;
 	}
 
-	return calendar;
+	// 2. Check if calendar is in a shared group where user is a member (authenticated users only)
+	if (ctx.session?.user?.id) {
+		const groupMember = await prisma.calendarGroupMember.findFirst({
+			where: {
+				calendarId,
+				group: {
+					members: {
+						some: {
+							userId: ctx.session.user.id,
+							acceptedAt: { not: null }, // Only accepted invitations
+						},
+					},
+				},
+			},
+			select: {
+				groupId: true,
+			},
+		});
+
+		if (groupMember) {
+			// User has access via group membership
+			return calendar;
+		}
+	}
+
+	// No access
+	throw new TRPCError({
+		code: "FORBIDDEN",
+		message: "Access denied to this calendar",
+	});
 }

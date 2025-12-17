@@ -12,7 +12,9 @@ import {
 	Link2,
 	MoreHorizontal,
 	Trash2,
+	Users,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -37,6 +39,8 @@ interface CalendarGroupCardProps {
 		description?: string | null;
 		color?: string | null;
 		calendarCount: number;
+		memberCount?: number;
+		isShared?: boolean;
 	};
 	onOpen: () => void;
 	onEdit: () => void;
@@ -80,6 +84,12 @@ export function CalendarGroupCard({
 							<CardTitle className="line-clamp-1 text-card-title">
 								{group.name}
 							</CardTitle>
+							{group.isShared && (
+								<Badge variant="secondary" className="gap-1">
+									<Users className="h-3 w-3" />
+									Shared
+								</Badge>
+							)}
 						</div>
 						<CardDescription className="mt-1.5">
 							{group.description ? (
@@ -94,6 +104,12 @@ export function CalendarGroupCard({
 								<span className="ml-2 text-muted-foreground/70">
 									• {group.calendarCount} calendar
 									{group.calendarCount !== 1 ? "s" : ""}
+								</span>
+							)}
+							{group.isShared && group.memberCount !== undefined && (
+								<span className="ml-2 text-muted-foreground/70">
+									• {group.memberCount} member
+									{group.memberCount !== 1 ? "s" : ""}
 								</span>
 							)}
 						</CardDescription>

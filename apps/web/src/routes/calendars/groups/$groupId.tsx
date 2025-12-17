@@ -11,6 +11,7 @@ import {
 	MoreHorizontal,
 	Plus,
 	Trash2,
+	Users,
 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -20,6 +21,8 @@ import {
 	type CalendarSortBy,
 } from "@/components/calendar-list/calendar-filters";
 import { CreateGroupDialog } from "@/components/calendar-list/create-group-dialog";
+import { GroupMembersList } from "@/components/group-members-list";
+import { InviteGroupMemberDialog } from "@/components/invite-group-member-dialog";
 import { ShareCalendarsDialog } from "@/components/share-calendars-dialog";
 import {
 	AlertDialog,
@@ -47,6 +50,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { trpc, trpcClient } from "@/utils/trpc";
 
@@ -499,8 +503,13 @@ function GroupDetailComponent() {
 	const [shareDialogOpen, setShareDialogOpen] = useState(false);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [_exportDialogOpen, _setExportDialogOpen] = useState(false);
+	const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
 	const [searchKeyword, setSearchKeyword] = useState("");
 	const [sortBy, setSortBy] = useState<CalendarSortBy>("name");
+
+	// Get current user session
+	const { data: session } = authClient.useSession();
+	const currentUserId = session?.user?.id;
 
 	// Fetch group details
 	const { data: group, isLoading } = useQuery({
@@ -542,6 +551,19 @@ function GroupDetailComponent() {
 		(sum, cal) => sum + cal.eventCount,
 		0,
 	);
+
+	// Check if current user is owner
+	// For authenticated users, check if they're the owner or a member
+	const isOwner = currentUserId
+		? group.userId === currentUserId ||
+			(group.members?.some(
+				(m: { userId: string; role: string }) =>
+					m.userId === currentUserId && m.role === "OWNER",
+			) ??
+				false)
+		: group.userId === null; // Anonymous users can only own groups with userId = null
+
+	// Note: isShared is available via group.members?.length if needed in the future
 
 	return (
 		<div className="relative min-h-[calc(100vh-4rem)]">
@@ -591,6 +613,40 @@ function GroupDetailComponent() {
 					(id) => navigate({ to: `/calendars/${id}` }),
 					handleEdit,
 				)}
+
+				{/* Members section (only for authenticated users) */}
+				{currentUserId && (
+					<div className="mt-8">
+						<div className="mb-4 flex items-center justify-between">
+							<div className="flex items-center gap-2">
+								<Users className="h-5 w-5" />
+								<h2 className="text-heading-2">Members</h2>
+							</div>
+							{isOwner && (
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => setInviteDialogOpen(true)}
+								>
+									<Plus className="mr-2 h-4 w-4" />
+									Invite member
+								</Button>
+							)}
+						</div>
+						<GroupMembersList
+							groupId={groupId}
+							isOwner={isOwner}
+							currentUserId={currentUserId}
+						/>
+					</div>
+				)}
+
+				{/* Invite member dialog */}
+				<InviteGroupMemberDialog
+					groupId={groupId}
+					open={inviteDialogOpen}
+					onOpenChange={setInviteDialogOpen}
+				/>
 
 				{/* Edit dialog */}
 				{group && (

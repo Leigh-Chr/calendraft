@@ -10,10 +10,13 @@ import z from "zod";
 import { authOrAnonProcedure, router } from "../../../index";
 import { handlePrismaError } from "../../../lib/prisma-error-handler";
 import { buildOwnershipFilter } from "../../../middleware";
+import { verifyGroupAccessOrThrow } from "../../../middleware/access";
 
 export const calendarGroupCalendarsRouter = router({
 	/**
 	 * Add calendars to a group
+	 * Accessible to owners and members (for authenticated users)
+	 * Users can only add calendars they own
 	 */
 	addCalendars: authOrAnonProcedure
 		.input(
@@ -25,11 +28,18 @@ export const calendarGroupCalendarsRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const isAuth = !!ctx.session?.user?.id;
 
+			// For authenticated users, verify group access (owner or member)
+			if (ctx.session?.user?.id) {
+				await verifyGroupAccessOrThrow(input.id, ctx);
+			}
+
 			// Find the group
 			const group = await prisma.calendarGroup.findFirst({
 				where: {
 					id: input.id,
-					...buildOwnershipFilter(ctx),
+					...(ctx.session?.user?.id
+						? {} // Access already verified above
+						: buildOwnershipFilter(ctx)), // For anonymous, use ownership filter
 				},
 				include: {
 					calendars: true,
@@ -41,6 +51,25 @@ export const calendarGroupCalendarsRouter = router({
 					code: "NOT_FOUND",
 					message: "Group not found",
 				});
+			}
+
+			// For anonymous users, verify ownership
+			if (!ctx.session?.user?.id) {
+				const ownershipFilter = buildOwnershipFilter(ctx);
+				const hasAccess =
+					(ownershipFilter.OR?.some(
+						(condition) =>
+							"userId" in condition && condition.userId === group.userId,
+					) ??
+						false) ||
+					group.userId === null;
+
+				if (!hasAccess) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Access denied to this group",
+					});
+				}
 			}
 
 			// Check calendars per group limit
@@ -114,6 +143,8 @@ export const calendarGroupCalendarsRouter = router({
 
 	/**
 	 * Remove calendars from a group
+	 * Accessible to owners and members (for authenticated users)
+	 * Users can only remove calendars they own
 	 */
 	removeCalendars: authOrAnonProcedure
 		.input(
@@ -123,11 +154,18 @@ export const calendarGroupCalendarsRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			// For authenticated users, verify group access (owner or member)
+			if (ctx.session?.user?.id) {
+				await verifyGroupAccessOrThrow(input.id, ctx);
+			}
+
 			// Find the group
 			const group = await prisma.calendarGroup.findFirst({
 				where: {
 					id: input.id,
-					...buildOwnershipFilter(ctx),
+					...(ctx.session?.user?.id
+						? {} // Access already verified above
+						: buildOwnershipFilter(ctx)), // For anonymous, use ownership filter
 				},
 			});
 
@@ -136,6 +174,25 @@ export const calendarGroupCalendarsRouter = router({
 					code: "NOT_FOUND",
 					message: "Group not found",
 				});
+			}
+
+			// For anonymous users, verify ownership
+			if (!ctx.session?.user?.id) {
+				const ownershipFilter = buildOwnershipFilter(ctx);
+				const hasAccess =
+					(ownershipFilter.OR?.some(
+						(condition) =>
+							"userId" in condition && condition.userId === group.userId,
+					) ??
+						false) ||
+					group.userId === null;
+
+				if (!hasAccess) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "Access denied to this group",
+					});
+				}
 			}
 
 			// Remove calendars

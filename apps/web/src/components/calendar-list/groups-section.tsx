@@ -14,6 +14,8 @@ interface GroupsSectionProps {
 				description?: string | null;
 				color?: string | null;
 				calendarCount: number;
+				memberCount?: number;
+				isShared?: boolean;
 		  }>
 		| undefined;
 	groupHandlers: {
