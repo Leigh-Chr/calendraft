@@ -7,6 +7,7 @@ import { z } from "zod";
 const envSchema = z.object({
 	NODE_ENV: z.enum(["development", "production", "test"]).optional(),
 	CORS_ORIGIN: z.string().url().optional(),
+	BETTER_AUTH_URL: z.string().url().optional(), // Backend URL for Better-Auth (where /api/auth/* is served)
 	RESEND_API_KEY: z.string().optional(),
 	EMAIL_FROM: z
 		.string()

@@ -18,6 +18,11 @@ const isProduction = env.NODE_ENV === "production";
 // Better-Auth redirige vers le callbackURL côté client
 const frontendURL = env.CORS_ORIGIN || "http://localhost:3001";
 
+// URL du backend (serveur) où Better-Auth est servi
+// Better-Auth génère les URLs de vérification avec baseURL + basePath
+// Exemple: ${baseURL}/api/auth/verify-email?token=...&callbackURL=${frontendURL}/verify-email
+const backendURL = env.BETTER_AUTH_URL || "http://localhost:3000";
+
 /**
  * Handle share bundles deletion during account deletion
  * Deletes bundles where all calendars belong to the user, or removes user's calendars from shared bundles
@@ -116,8 +121,9 @@ export const auth = betterAuth<BetterAuthOptions>({
 		sendResetPassword: async ({ user, url, token }) => {
 			// L'URL générée par Better-Auth contient déjà:
 			// - Le token de réinitialisation
-			// - Le callbackURL (configuré via baseURL)
-			// Format: ${baseURL}/api/auth/reset-password?token=...&callbackURL=${frontendURL}/reset-password
+			// - Le callbackURL (frontend URL pour la redirection après réinitialisation)
+			// Format: ${backendURL}/api/auth/reset-password?token=...&callbackURL=${frontendURL}/reset-password
+			// Better-Auth traite la réinitialisation côté backend, puis redirige vers le callbackURL (frontend)
 			// Ne pas await pour éviter les timing attacks
 			void sendResetPasswordEmail({
 				to: user.email,
@@ -137,8 +143,9 @@ export const auth = betterAuth<BetterAuthOptions>({
 		sendVerificationEmail: async ({ user, url, token }) => {
 			// L'URL générée par Better-Auth contient déjà:
 			// - Le token de vérification
-			// - Le callbackURL (configuré via baseURL)
-			// Format: ${baseURL}/api/auth/verify-email?token=...&callbackURL=${frontendURL}/verify-email
+			// - Le callbackURL (frontend URL pour la redirection après vérification)
+			// Format: ${backendURL}/api/auth/verify-email?token=...&callbackURL=${frontendURL}/verify-email
+			// Better-Auth vérifie le token côté backend, puis redirige vers le callbackURL (frontend)
 			// Ne pas await pour éviter les timing attacks
 			void sendVerificationEmail({
 				to: user.email,
@@ -150,9 +157,11 @@ export const auth = betterAuth<BetterAuthOptions>({
 		autoSignInAfterVerification: true, // Connecter automatiquement après vérification
 		expiresIn: 3600, // 1 heure (défaut)
 	},
-	// Configuration de l'URL de base pour les callbacks
-	// Doit pointer vers le frontend car Better-Auth redirige côté client
-	baseURL: frontendURL,
+	// Configuration de l'URL de base pour Better-Auth
+	// Doit pointer vers le backend (serveur) où /api/auth/* est servi
+	// Better-Auth génère les URLs comme: ${baseURL}${basePath}/verify-email?token=...&callbackURL=${frontendURL}/verify-email
+	// Le callbackURL pointe vers le frontend pour la redirection après vérification
+	baseURL: backendURL,
 	basePath: "/api/auth",
 	// Configuration de la suppression de compte
 	user: {
@@ -162,8 +171,9 @@ export const auth = betterAuth<BetterAuthOptions>({
 			sendDeleteAccountVerification: async ({ user, url, token }) => {
 				// L'URL générée par Better-Auth contient déjà:
 				// - Le token de suppression
-				// - Le callbackURL (configuré via baseURL)
-				// Format: ${baseURL}/api/auth/delete-user?token=...&callbackURL=${frontendURL}/delete-account
+				// - Le callbackURL (frontend URL pour la redirection après suppression)
+				// Format: ${backendURL}/api/auth/delete-user?token=...&callbackURL=${frontendURL}/delete-account
+				// Better-Auth traite la suppression côté backend, puis redirige vers le callbackURL (frontend)
 				// Ne pas await pour éviter les timing attacks
 				void sendDeleteAccountVerificationEmail({
 					to: user.email,
