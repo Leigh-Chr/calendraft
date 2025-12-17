@@ -4,6 +4,7 @@
  */
 
 import prisma from "@calendraft/db";
+import { cleanupCalendarRelations } from "./cleanup-calendar-relations";
 import { logger } from "./logger";
 
 /**
@@ -40,22 +41,36 @@ export async function cleanupOrphanedAnonymousCalendars(
 
 	const calendarIds = orphanedCalendars.map((cal) => cal.id);
 
-	// Delete calendars (events are deleted automatically via CASCADE)
+	// Use transaction to ensure atomicity of cleanup and deletion
 	// Best practice: Add error handling even for cleanup jobs
 	try {
-		const result = await prisma.calendar.deleteMany({
-			where: {
-				id: {
-					in: calendarIds,
+		const result = await prisma.$transaction(async (tx) => {
+			// Cleanup all relations (CalendarShareLink, ShareBundleCalendar, CalendarGroupMember)
+			await cleanupCalendarRelations(calendarIds, tx);
+			// Delete calendars (Events will be deleted via CASCADE)
+			return await tx.calendar.deleteMany({
+				where: {
+					id: {
+						in: calendarIds,
+					},
 				},
-			},
+			});
+		});
+
+		logger.info("Successfully cleaned up orphaned anonymous calendars", {
+			deletedCount: result.count,
+			calendarIds: calendarIds.length,
 		});
 
 		return result.count;
 	} catch (error) {
-		// Log error but don't throw - cleanup job should be resilient
+		// Log error with details but don't throw - cleanup job should be resilient
 		// The error will be logged by the job's try/catch
-		logger.error("Failed to delete orphaned calendars", error);
+		logger.error("Failed to delete orphaned calendars", {
+			error,
+			calendarIdsCount: calendarIds.length,
+			calendarIds: calendarIds.slice(0, 10), // Log first 10 IDs for debugging
+		});
 		// Return 0 to indicate no calendars were deleted
 		return 0;
 	}

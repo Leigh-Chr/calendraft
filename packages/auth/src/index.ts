@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0
 // Copyright (C) 2024 Calendraft
-import prisma from "@calendraft/db";
+
+// SPDX-License-Identifier: AGPL-3.0
+// Copyright (C) 2024 Calendraft
+import prisma, { cleanupCalendarRelations } from "@calendraft/db";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { emailHarmony } from "better-auth-harmony";
@@ -22,86 +25,6 @@ const frontendURL = env.CORS_ORIGIN || "http://localhost:3001";
 // Better-Auth génère les URLs de vérification avec baseURL + basePath
 // Exemple: ${baseURL}/api/auth/verify-email?token=...&callbackURL=${frontendURL}/verify-email
 const backendURL = env.BETTER_AUTH_URL || "http://localhost:3000";
-
-/**
- * Handle share bundles deletion during account deletion
- * Deletes bundles where all calendars belong to the user, or removes user's calendars from shared bundles
- */
-async function deleteUserShareBundles(
-	userId: string,
-	calendarIds: string[],
-): Promise<void> {
-	if (calendarIds.length === 0) {
-		return;
-	}
-
-	// Find all bundles containing user's calendars
-	const bundleCalendars = await prisma.shareBundleCalendar.findMany({
-		where: { calendarId: { in: calendarIds } },
-		include: {
-			bundle: {
-				include: {
-					calendars: true,
-				},
-			},
-		},
-	});
-
-	// Group by bundle ID
-	const bundlesMap = new Map<
-		string,
-		{
-			bundle: (typeof bundleCalendars)[0]["bundle"];
-			userCalendarIds: string[];
-		}
-	>();
-
-	for (const bc of bundleCalendars) {
-		const bundleId = bc.bundleId;
-		if (!bundlesMap.has(bundleId)) {
-			bundlesMap.set(bundleId, {
-				bundle: bc.bundle,
-				userCalendarIds: [],
-			});
-		}
-		const bundleEntry = bundlesMap.get(bundleId);
-		if (bundleEntry) {
-			bundleEntry.userCalendarIds.push(bc.calendarId);
-		}
-	}
-
-	// For each bundle, check if all calendars belong to the user
-	for (const [bundleId, { bundle, userCalendarIds }] of bundlesMap) {
-		const allCalendarIds = bundle.calendars.map((c) => c.calendarId);
-		const allBelongToUser = allCalendarIds.every((id) =>
-			calendarIds.includes(id),
-		);
-
-		if (allBelongToUser) {
-			// Delete the entire bundle (ShareBundleCalendar will be deleted via CASCADE)
-			await prisma.calendarShareBundle.delete({
-				where: { id: bundleId },
-			});
-			logger.info("Deleted share bundle (all calendars belonged to user)", {
-				userId,
-				bundleId,
-			});
-		} else {
-			// Delete only ShareBundleCalendar linked to user's calendars
-			await prisma.shareBundleCalendar.deleteMany({
-				where: {
-					bundleId,
-					calendarId: { in: userCalendarIds },
-				},
-			});
-			logger.info("Removed user calendars from share bundle (bundle kept)", {
-				userId,
-				bundleId,
-				removedCount: userCalendarIds.length,
-			});
-		}
-	}
-}
 
 export const auth = betterAuth<BetterAuthOptions>({
 	database: prismaAdapter(prisma, {
@@ -190,55 +113,56 @@ export const auth = betterAuth<BetterAuthOptions>({
 				});
 
 				try {
-					// 1. Trouver tous les calendars de l'utilisateur
-					const userCalendars = await prisma.calendar.findMany({
-						where: { userId },
-						select: { id: true },
-					});
-					const calendarIds = userCalendars.map((cal) => cal.id);
-
-					if (calendarIds.length > 0) {
-						// 2. Delete share links linked to user's calendars
-						await prisma.calendarShareLink.deleteMany({
-							where: { calendarId: { in: calendarIds } },
+					// Use transaction to ensure atomicity of all deletion operations
+					await prisma.$transaction(async (tx) => {
+						// 1. Trouver tous les calendars de l'utilisateur
+						const userCalendars = await tx.calendar.findMany({
+							where: { userId },
+							select: { id: true },
 						});
-						logger.info("Deleted share links", {
+						const calendarIds = userCalendars.map((cal) => cal.id);
+
+						if (calendarIds.length > 0) {
+							// 2. Cleanup all calendar relations (CalendarShareLink, ShareBundleCalendar, CalendarGroupMember)
+							// This handles relations that don't have Prisma foreign keys
+							// cleanupCalendarRelations already handles ShareBundleCalendar with the same logic
+							// as deleteUserShareBundles, so we don't need to call it separately
+							await cleanupCalendarRelations(calendarIds, tx, logger);
+							logger.info("Cleaned up calendar relations", {
+								userId,
+								calendarCount: calendarIds.length,
+							});
+						}
+
+						// 4. Supprimer les GroupMember où l'utilisateur est membre
+						// (Les membres seront supprimés des groupes partagés)
+						const deletedMemberships = await tx.groupMember.deleteMany({
+							where: { userId },
+						});
+						logger.info("Deleted group memberships", {
 							userId,
-							count: calendarIds.length,
+							count: deletedMemberships.count,
 						});
 
-						// 3. Handle share bundles
-						await deleteUserShareBundles(userId, calendarIds);
-					}
+						// 5. Supprimer les calendar groups de l'utilisateur
+						// (Les CalendarGroupMember seront supprimés via CASCADE)
+						const deletedGroups = await tx.calendarGroup.deleteMany({
+							where: { userId },
+						});
+						logger.info("Deleted calendar groups", {
+							userId,
+							count: deletedGroups.count,
+						});
 
-					// 4. Supprimer les GroupMember où l'utilisateur est membre
-					// (Les membres seront supprimés des groupes partagés)
-					const deletedMemberships = await prisma.groupMember.deleteMany({
-						where: { userId },
-					});
-					logger.info("Deleted group memberships", {
-						userId,
-						count: deletedMemberships.count,
-					});
-
-					// 5. Supprimer les calendar groups de l'utilisateur
-					// (Les CalendarGroupMember seront supprimés via CASCADE)
-					const deletedGroups = await prisma.calendarGroup.deleteMany({
-						where: { userId },
-					});
-					logger.info("Deleted calendar groups", {
-						userId,
-						count: deletedGroups.count,
-					});
-
-					// 6. Supprimer les calendars de l'utilisateur
-					// (Les Events seront supprimés automatiquement via CASCADE)
-					const deletedCalendars = await prisma.calendar.deleteMany({
-						where: { userId },
-					});
-					logger.info("Deleted calendars", {
-						userId,
-						count: deletedCalendars.count,
+						// 6. Supprimer les calendars de l'utilisateur
+						// (Les Events seront supprimés automatiquement via CASCADE)
+						const deletedCalendars = await tx.calendar.deleteMany({
+							where: { userId },
+						});
+						logger.info("Deleted calendars", {
+							userId,
+							count: deletedCalendars.count,
+						});
 					});
 
 					logger.info("Account deletion cascade completed successfully", {

@@ -7,6 +7,7 @@ import prisma from "@calendraft/db";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { authOrAnonProcedure, router } from "../../index";
+import { cleanupCalendarRelations } from "../../lib/cleanup-calendar-relations";
 import { handlePrismaError } from "../../lib/prisma-error-handler";
 import {
 	buildOwnershipFilter,
@@ -317,8 +318,14 @@ export const calendarCoreRouter = router({
 			}
 
 			try {
-				await prisma.calendar.delete({
-					where: { id: input.id },
+				// Use transaction to ensure atomicity of cleanup and deletion
+				await prisma.$transaction(async (tx) => {
+					// Cleanup all relations (CalendarShareLink, ShareBundleCalendar, CalendarGroupMember)
+					await cleanupCalendarRelations([input.id], tx);
+					// Delete calendar (Events will be deleted via CASCADE)
+					await tx.calendar.delete({
+						where: { id: input.id },
+					});
 				});
 			} catch (error) {
 				handlePrismaError(error);
@@ -356,11 +363,16 @@ export const calendarCoreRouter = router({
 			// Get accessible calendar IDs
 			const accessibleCalendarIds = calendars.map((c) => c.id);
 
-			// Delete accessible calendars (cascade will delete events)
+			// Use transaction to ensure atomicity of cleanup and deletion
 			let result: Awaited<ReturnType<typeof prisma.calendar.deleteMany>>;
 			try {
-				result = await prisma.calendar.deleteMany({
-					where: { id: { in: accessibleCalendarIds } },
+				result = await prisma.$transaction(async (tx) => {
+					// Cleanup all relations (CalendarShareLink, ShareBundleCalendar, CalendarGroupMember)
+					await cleanupCalendarRelations(accessibleCalendarIds, tx);
+					// Delete calendars (Events will be deleted via CASCADE)
+					return await tx.calendar.deleteMany({
+						where: { id: { in: accessibleCalendarIds } },
+					});
 				});
 			} catch (error) {
 				handlePrismaError(error);

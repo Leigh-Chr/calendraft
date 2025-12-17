@@ -38,3 +38,5 @@ export { Prisma } from "../prisma/generated/client";
 // Re-export Prisma generated types and enums
 export * from "../prisma/generated/enums";
 export * from "../prisma/generated/models";
+// Re-export cleanup utilities
+export { cleanupCalendarRelations } from "./cleanup-calendar-relations";
