@@ -32,14 +32,25 @@ export async function cleanupCalendarRelations(
 		return;
 	}
 
-	const cleanup = async (client: PrismaTransactionClient) => {
-		// 1. Delete CalendarShareLink
-		await client.calendarShareLink.deleteMany({
-			where: { calendarId: { in: calendarIds } },
-		});
+	// Type for bundle data with included relations
+	// We'll infer this from the actual query result
+	type BundleData = {
+		bundle: {
+			id: string;
+			token: string;
+			name: string | null;
+			calendars: Array<{ calendarId: string }>;
+		};
+		calendarIds: string[];
+	};
 
-		// 2. Handle ShareBundleCalendar and bundles
-		// First, find all bundles containing the calendars to be deleted
+	/**
+	 * Build a map of bundles grouped by bundleId
+	 */
+	const buildBundlesMap = async (
+		client: PrismaTransactionClient,
+		calendarIds: string[],
+	): Promise<Map<string, BundleData>> => {
 		const bundleCalendars = await client.shareBundleCalendar.findMany({
 			where: { calendarId: { in: calendarIds } },
 			include: {
@@ -51,14 +62,7 @@ export async function cleanupCalendarRelations(
 			},
 		});
 
-		// Group by bundleId to process each bundle once
-		const bundlesMap = new Map<
-			string,
-			{
-				bundle: (typeof bundleCalendars)[0]["bundle"];
-				calendarIds: string[];
-			}
-		>();
+		const bundlesMap = new Map<string, BundleData>();
 
 		for (const bc of bundleCalendars) {
 			if (!bundlesMap.has(bc.bundleId)) {
@@ -67,46 +71,90 @@ export async function cleanupCalendarRelations(
 					calendarIds: [],
 				});
 			}
-			bundlesMap.get(bc.bundleId)!.calendarIds.push(bc.calendarId);
+			const bundleData = bundlesMap.get(bc.bundleId);
+			if (bundleData) {
+				bundleData.calendarIds.push(bc.calendarId);
+			}
 		}
 
-		// Delete bundles or links based on remaining calendars
+		return bundlesMap;
+	};
+
+	/**
+	 * Process a single bundle: delete it entirely or remove calendar links
+	 */
+	const processBundle = async (
+		client: PrismaTransactionClient,
+		bundleId: string,
+		bundle: BundleData["bundle"],
+		bundleCalendarIds: string[],
+		calendarIds: string[],
+	) => {
+		const allCalendarIds = bundle.calendars.map((c) => c.calendarId);
+		const remainingCalendars = allCalendarIds.filter(
+			(id) => !calendarIds.includes(id),
+		);
+
+		if (remainingCalendars.length === 0) {
+			// All calendars in bundle are being deleted → delete entire bundle
+			// ShareBundleCalendar will be deleted via CASCADE
+			await client.calendarShareBundle.delete({
+				where: { id: bundleId },
+			});
+			if (logger) {
+				logger.info("Deleted share bundle (all calendars deleted)", {
+					bundleId,
+				});
+			}
+		} else {
+			// Some calendars remain → delete only the ShareBundleCalendar links
+			await client.shareBundleCalendar.deleteMany({
+				where: {
+					bundleId,
+					calendarId: { in: bundleCalendarIds },
+				},
+			});
+			if (logger) {
+				logger.info("Removed calendars from share bundle (bundle kept)", {
+					bundleId,
+					removedCount: bundleCalendarIds.length,
+				});
+			}
+		}
+	};
+
+	/**
+	 * Handle ShareBundleCalendar cleanup
+	 * Groups bundles and deletes either the entire bundle or just the calendar links
+	 */
+	const cleanupShareBundles = async (
+		client: PrismaTransactionClient,
+		calendarIds: string[],
+	) => {
+		const bundlesMap = await buildBundlesMap(client, calendarIds);
+
 		for (const [
 			bundleId,
 			{ bundle, calendarIds: bundleCalendarIds },
 		] of bundlesMap) {
-			const allCalendarIds = bundle.calendars.map((c) => c.calendarId);
-			const remainingCalendars = allCalendarIds.filter(
-				(id) => !calendarIds.includes(id),
+			await processBundle(
+				client,
+				bundleId,
+				bundle,
+				bundleCalendarIds,
+				calendarIds,
 			);
-
-			if (remainingCalendars.length === 0) {
-				// All calendars in bundle are being deleted → delete entire bundle
-				// ShareBundleCalendar will be deleted via CASCADE
-				await client.calendarShareBundle.delete({
-					where: { id: bundleId },
-				});
-				if (logger) {
-					logger.info("Deleted share bundle (all calendars deleted)", {
-						bundleId,
-					});
-				}
-			} else {
-				// Some calendars remain → delete only the ShareBundleCalendar links
-				await client.shareBundleCalendar.deleteMany({
-					where: {
-						bundleId,
-						calendarId: { in: bundleCalendarIds },
-					},
-				});
-				if (logger) {
-					logger.info("Removed calendars from share bundle (bundle kept)", {
-						bundleId,
-						removedCount: bundleCalendarIds.length,
-					});
-				}
-			}
 		}
+	};
+
+	const cleanup = async (client: PrismaTransactionClient) => {
+		// 1. Delete CalendarShareLink
+		await client.calendarShareLink.deleteMany({
+			where: { calendarId: { in: calendarIds } },
+		});
+
+		// 2. Handle ShareBundleCalendar and bundles
+		await cleanupShareBundles(client, calendarIds);
 
 		// 3. Delete CalendarGroupMember
 		await client.calendarGroupMember.deleteMany({

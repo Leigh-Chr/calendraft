@@ -7,7 +7,6 @@ export { DataHealth } from "./data-health";
 export { EmptyState } from "./empty-states";
 export { EventStatusInsight } from "./event-status-insight";
 export { HeroMetrics } from "./hero-metrics";
-export { InsightCard } from "./insight-card";
 export { PeriodSelector } from "./period-selector";
 export { QuickActions } from "./quick-actions";
 export { RecurrenceInsight } from "./recurrence-insight";
