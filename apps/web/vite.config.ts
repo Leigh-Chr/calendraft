@@ -180,6 +180,8 @@ export default defineConfig(({ mode }) => {
 					cleanupOutdatedCaches: true,
 					clientsClaim: true,
 					skipWaiting: true,
+					// Increase limit to accommodate large JS bundle (current ~2.1MB)
+					maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3MB
 					// Force cache version update - increment when CSP or other server headers change
 					cacheId: "calendraft-v2",
 					runtimeCaching: [

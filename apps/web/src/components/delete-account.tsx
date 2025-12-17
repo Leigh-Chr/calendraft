@@ -45,7 +45,7 @@ function handleDeletionSuccess(
 		toast.success(
 			"Confirmation email sent! Please check your inbox and click the link to confirm account deletion.",
 		);
-		navigate({ to: "/dashboard" });
+		navigate({ to: "/account" });
 	} else {
 		toast.success("Your account has been deleted successfully.");
 		setTimeout(() => {
@@ -242,7 +242,7 @@ export default function DeleteAccount() {
 						<Button
 							variant="link"
 							onClick={() => {
-								navigate({ to: "/dashboard" });
+								navigate({ to: "/account" });
 							}}
 						>
 							Cancel

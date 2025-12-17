@@ -149,6 +149,7 @@ function CalendarViewComponent() {
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 
 				toast.success(
 					`Calendar refreshed! ${data.importedEvents} event(s) imported, ${data.skippedDuplicates} duplicate(s) skipped.`,

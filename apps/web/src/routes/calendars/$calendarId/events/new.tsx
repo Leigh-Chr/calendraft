@@ -66,6 +66,7 @@ function NewEventComponent() {
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Event created successfully");
 				navigate({ to: `/calendars/${calendarId}` });
 			},

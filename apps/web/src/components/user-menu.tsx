@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Settings } from "lucide-react";
+import { LayoutDashboard, Settings } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -46,6 +46,12 @@ export default function UserMenu() {
 				<DropdownMenuSeparator />
 				<DropdownMenuItem asChild>
 					<Link to="/dashboard" className="flex items-center gap-2">
+						<LayoutDashboard className="h-4 w-4" />
+						Dashboard
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem asChild>
+					<Link to="/account" className="flex items-center gap-2">
 						<Settings className="h-4 w-4" />
 						Account settings
 					</Link>
@@ -59,7 +65,7 @@ export default function UserMenu() {
 									// Rediriger vers /calendars si on est sur une page protégée, sinon rester sur la page actuelle
 									const currentPath = location.pathname;
 									if (
-										currentPath.startsWith("/dashboard") ||
+										currentPath.startsWith("/account") ||
 										currentPath.startsWith("/calendars")
 									) {
 										navigate({ to: "/calendars" });

@@ -65,6 +65,7 @@ export function useCreateCalendar() {
 		trpc.calendar.create.mutationOptions({
 			onSuccess: () => {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 			},
 			onError: (error) => {
 				handleTRPCError(error, {
@@ -93,6 +94,7 @@ export function useUpdateCalendar() {
 			onSuccess: () => {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.all });
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Calendar updated");
 			},
 			onError: (error) => {
@@ -121,6 +123,7 @@ export function useDeleteCalendar() {
 		trpc.calendar.delete.mutationOptions({
 			onSuccess: () => {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Calendar deleted");
 			},
 			onError: (error) => {

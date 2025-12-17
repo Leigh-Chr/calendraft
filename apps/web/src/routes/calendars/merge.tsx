@@ -85,6 +85,7 @@ function MergeCalendarsComponent() {
 		trpc.calendar.merge.mutationOptions({
 			onSuccess: (data) => {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success(
 					`Calendars merged! ${data.mergedEvents} event(s), ${data.removedDuplicates} duplicate(s) cleaned up.`,
 				);

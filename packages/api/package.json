@@ -36,6 +36,7 @@
 		"@trpc/client": "catalog:",
 		"@trpc/server": "catalog:",
 		"@types/node": "^24.10.1",
+		"date-fns": "^4.1.0",
 		"dotenv": "catalog:",
 		"hono": "catalog:",
 		"ical.js": "catalog:",

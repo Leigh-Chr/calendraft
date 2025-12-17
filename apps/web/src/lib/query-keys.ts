@@ -12,6 +12,12 @@ export const QUERY_KEYS = {
 		usage: [["calendar", "getUsage"]] as const,
 	},
 
+	// Dashboard queries
+	dashboard: {
+		all: [["dashboard"]] as const,
+		stats: (period: string) => [["dashboard", "getStats"], { period }] as const,
+	},
+
 	// Event queries
 	event: {
 		all: [["event"]] as const,
@@ -76,4 +82,12 @@ export function getEventMutationInvalidationKeys(calendarId?: string) {
 		QUERY_KEYS.calendar.list,
 		...(calendarId ? [QUERY_KEYS.calendar.byId(calendarId)] : []),
 	];
+}
+
+/**
+ * Helper to invalidate all dashboard queries
+ * Use this after any mutation that affects dashboard data (events, calendars, sharing, etc.)
+ */
+export function getDashboardInvalidationKeys() {
+	return [QUERY_KEYS.dashboard.all];
 }

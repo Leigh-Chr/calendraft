@@ -26,9 +26,9 @@ export default function EditProfile() {
 				});
 
 				toast.success("Profile updated successfully!");
-				// Rediriger vers le dashboard après 1 seconde
+				// Rediriger vers le compte après 1 seconde
 				setTimeout(() => {
-					navigate({ to: "/dashboard" });
+					navigate({ to: "/account" });
 				}, 1000);
 			} catch (error: unknown) {
 				const errorData = error as {
@@ -172,7 +172,7 @@ export default function EditProfile() {
 						<Button
 							variant="link"
 							onClick={() => {
-								navigate({ to: "/dashboard" });
+								navigate({ to: "/account" });
 							}}
 						>
 							Cancel

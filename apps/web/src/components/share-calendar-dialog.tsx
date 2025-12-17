@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { QUERY_KEYS } from "@/lib/query-keys";
 import { trpc } from "@/utils/trpc";
 import {
 	AlertDialog,
@@ -69,6 +70,7 @@ export function ShareCalendarDialog({
 				queryClient.invalidateQueries({
 					queryKey: [["share", "list"]],
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				setNewLinkName("");
 				toast.success("Sharing link created");
 			},
@@ -85,6 +87,7 @@ export function ShareCalendarDialog({
 				queryClient.invalidateQueries({
 					queryKey: [["share", "list"]],
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 			},
 			onError: (error) => {
 				toast.error(error.message || "Error during update");
@@ -99,6 +102,7 @@ export function ShareCalendarDialog({
 				queryClient.invalidateQueries({
 					queryKey: [["share", "list"]],
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Sharing link deleted");
 			},
 			onError: (error) => {

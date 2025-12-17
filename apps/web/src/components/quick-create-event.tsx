@@ -79,6 +79,7 @@ export function QuickCreateEvent({
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Event created!");
 				onClose();
 			},

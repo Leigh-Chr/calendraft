@@ -1,5 +1,6 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
 import { calendarRouter } from "./calendar";
+import { dashboardRouter } from "./dashboard";
 import { eventRouter } from "./event";
 import { shareRouter } from "./share";
 import { userRouter } from "./user";
@@ -15,6 +16,7 @@ export const appRouter = router({
 		};
 	}),
 	calendar: calendarRouter,
+	dashboard: dashboardRouter,
 	event: eventRouter,
 	share: shareRouter,
 	user: userRouter,

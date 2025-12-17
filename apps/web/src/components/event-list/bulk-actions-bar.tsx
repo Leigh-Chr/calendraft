@@ -51,6 +51,7 @@ export function BulkActionsBar({
 			onSuccess: (data) => {
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
 				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.all });
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success(`${data.deletedCount} event(s) deleted`);
 				onExitSelectionMode();
 			},

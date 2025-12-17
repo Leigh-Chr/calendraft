@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { QUERY_KEYS } from "@/lib/query-keys";
 import { trpc } from "@/utils/trpc";
 
 interface CreateGroupDialogProps {
@@ -93,6 +94,7 @@ export function CreateGroupDialog({
 				queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Group created successfully");
 				onOpenChange(false);
 			},
@@ -109,6 +111,7 @@ export function CreateGroupDialog({
 				queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Group updated successfully");
 				onOpenChange(false);
 			},
@@ -125,6 +128,7 @@ export function CreateGroupDialog({
 				queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Calendars added to group");
 			},
 			onError: (error) => {
@@ -140,6 +144,7 @@ export function CreateGroupDialog({
 				queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Calendars removed from group");
 			},
 			onError: (error) => {

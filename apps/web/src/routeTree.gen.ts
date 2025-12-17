@@ -20,6 +20,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CheckEmailRouteImport } from './routes/check-email'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as CalendarsRouteImport } from './routes/calendars'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as R404RouteImport } from './routes/404'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareTokenRouteImport } from './routes/share/$token'
@@ -86,6 +87,11 @@ const ChangePasswordRoute = ChangePasswordRouteImport.update({
 const CalendarsRoute = CalendarsRouteImport.update({
   id: '/calendars',
   path: '/calendars',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const R404Route = R404RouteImport.update({
@@ -156,6 +162,7 @@ const CalendarsCalendarIdEventsEventIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/account': typeof AccountRoute
   '/calendars': typeof CalendarsRouteWithChildren
   '/change-password': typeof ChangePasswordRoute
   '/check-email': typeof CheckEmailRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/account': typeof AccountRoute
   '/calendars': typeof CalendarsRouteWithChildren
   '/change-password': typeof ChangePasswordRoute
   '/check-email': typeof CheckEmailRoute
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/account': typeof AccountRoute
   '/calendars': typeof CalendarsRouteWithChildren
   '/change-password': typeof ChangePasswordRoute
   '/check-email': typeof CheckEmailRoute
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/404'
+    | '/account'
     | '/calendars'
     | '/change-password'
     | '/check-email'
@@ -259,6 +269,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/404'
+    | '/account'
     | '/calendars'
     | '/change-password'
     | '/check-email'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/404'
+    | '/account'
     | '/calendars'
     | '/change-password'
     | '/check-email'
@@ -310,6 +322,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   R404Route: typeof R404Route
+  AccountRoute: typeof AccountRoute
   CalendarsRoute: typeof CalendarsRouteWithChildren
   ChangePasswordRoute: typeof ChangePasswordRoute
   CheckEmailRoute: typeof CheckEmailRoute
@@ -402,6 +415,13 @@ declare module '@tanstack/react-router' {
       path: '/calendars'
       fullPath: '/calendars'
       preLoaderRoute: typeof CalendarsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/404': {
@@ -529,6 +549,7 @@ const CalendarsRouteWithChildren = CalendarsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R404Route: R404Route,
+  AccountRoute: AccountRoute,
   CalendarsRoute: CalendarsRouteWithChildren,
   ChangePasswordRoute: ChangePasswordRoute,
   CheckEmailRoute: CheckEmailRoute,

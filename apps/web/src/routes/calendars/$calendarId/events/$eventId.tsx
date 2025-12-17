@@ -378,6 +378,7 @@ function EditEventComponent() {
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Event updated successfully");
 				navigate({ to: `/calendars/${calendarId}` });
 			},

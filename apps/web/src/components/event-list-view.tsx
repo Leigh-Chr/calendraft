@@ -192,6 +192,7 @@ function useDeleteEvent(calendarId: string) {
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Event deleted");
 			},
 			onError: (error: unknown) => {
@@ -222,6 +223,7 @@ function useDuplicateEvent(calendarId: string) {
 				queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Event duplicated");
 			},
 			onError: (error: unknown) => {

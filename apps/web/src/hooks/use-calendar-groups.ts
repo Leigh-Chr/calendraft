@@ -7,6 +7,7 @@ import type { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { exportGroupAsICSFile } from "@/lib/calendar-export";
+import { QUERY_KEYS } from "@/lib/query-keys";
 import { trpc, trpcClient } from "@/utils/trpc";
 
 export function useGroupHandlers(
@@ -32,6 +33,7 @@ export function useGroupHandlers(
 				queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
+				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
 				toast.success("Group deleted");
 			},
 			onError: (error) => {

@@ -22,7 +22,10 @@ export default function Header() {
 	const isMobile = useIsMobile();
 	const { data: session } = authClient.useSession();
 
-	const appLinks = [{ to: "/calendars", label: "My calendars" }] as const;
+	const appLinks = [
+		{ to: "/calendars", label: "My calendars" },
+		{ to: "/dashboard", label: "Dashboard" },
+	] as const;
 
 	return (
 		<header className="header-glow sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
@@ -108,7 +111,7 @@ export default function Header() {
 																// Rediriger vers /calendars si on est sur une page protégée, sinon rester sur la page actuelle
 																const currentPath = location.pathname;
 																if (
-																	currentPath.startsWith("/dashboard") ||
+																	currentPath.startsWith("/account") ||
 																	currentPath.startsWith("/calendars")
 																) {
 																	navigate({ to: "/calendars" });
@@ -186,6 +189,9 @@ export default function Header() {
 								>
 									<DropdownMenuItem asChild>
 										<Link to="/calendars">My calendars</Link>
+									</DropdownMenuItem>
+									<DropdownMenuItem asChild>
+										<Link to="/dashboard">Dashboard</Link>
 									</DropdownMenuItem>
 									<DropdownMenuItem asChild>
 										<Link to="/calendars/import">Import a .ics</Link>
