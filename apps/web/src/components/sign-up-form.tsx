@@ -77,12 +77,25 @@ export default function SignUpForm({
 							toast.error("Too many signup attempts. Please try again later.");
 						}
 						// Erreur email déjà utilisé
+						// Security: Don't reveal if email exists (prevents account enumeration)
+						// Show success message and redirect to check-email page
 						else if (
 							errorMessage.includes("already") ||
 							errorMessage.includes("exists") ||
 							errorMessage.includes("duplicate")
 						) {
-							toast.error("This email address is already registered.");
+							// Redirect to check-email page as if registration succeeded
+							// This prevents attackers from knowing if an account exists
+							navigate({
+								to: "/check-email",
+								search: {
+									email: value.email,
+									redirect: _redirectTo,
+								},
+							});
+							toast.success(
+								"If this email is not already registered, a verification link has been sent.",
+							);
 						}
 						// Autres erreurs
 						else {

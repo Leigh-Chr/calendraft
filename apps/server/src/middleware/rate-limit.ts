@@ -347,6 +347,16 @@ export function exportDataRateLimit() {
 }
 
 /**
+ * Rate limit for password reset request
+ * 3 requests per hour per IP (prevents account enumeration and abuse)
+ * This endpoint sends emails, so we need to be strict to prevent spam
+ */
+export function passwordResetRequestRateLimit() {
+	// 3 requests per hour (3600000ms)
+	return rateLimit(3, 3600000, "password-reset-request");
+}
+
+/**
  * Rate limit for password change
  * 10 requests per hour (security-sensitive operation)
  */

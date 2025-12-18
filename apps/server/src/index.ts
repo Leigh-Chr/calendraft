@@ -13,16 +13,23 @@ import { z } from "zod";
 import { startCleanupJob } from "./jobs/cleanup";
 import { logger } from "./lib/logger";
 import {
+	getRequiredSecret,
+	getSecret,
+	isUsingDockerSecrets,
+} from "./lib/secrets";
+import {
 	authRateLimit,
 	changePasswordRateLimit,
 	deleteAccountRateLimit,
 	emailVerificationResendRateLimit,
+	passwordResetRequestRateLimit,
 	rateLimit,
 	signupRateLimit,
 	updateProfileRateLimit,
 } from "./middleware/rate-limit";
 
 // Validate environment variables
+// Use Docker secrets helper for sensitive values (with fallback to env vars)
 const envSchema = z.object({
 	NODE_ENV: z.enum(["development", "production", "test"]).optional(),
 	CORS_ORIGIN: z.string().min(1).optional(),
@@ -40,7 +47,18 @@ const envSchema = z.object({
 	SMTP_PASSWORD: z.string().optional(),
 });
 
-const env = envSchema.parse(process.env);
+// Read secrets from Docker secrets or environment variables
+// This allows gradual migration to Docker secrets without breaking existing deployments
+const rawEnv = {
+	...process.env,
+	// Override with Docker secrets if available (more secure)
+	BETTER_AUTH_SECRET:
+		getSecret("BETTER_AUTH_SECRET") || process.env["BETTER_AUTH_SECRET"],
+	RESEND_API_KEY: getSecret("RESEND_API_KEY") || process.env["RESEND_API_KEY"],
+	SMTP_PASSWORD: getSecret("SMTP_PASSWORD") || process.env["SMTP_PASSWORD"],
+};
+
+const env = envSchema.parse(rawEnv);
 
 // Initialize Sentry for error tracking and performance monitoring
 // Must be initialized before any other imports to ensure proper auto-instrumentation
@@ -77,6 +95,13 @@ Sentry.init({
 	},
 });
 
+// Log which secret management method is being used
+if (isUsingDockerSecrets()) {
+	logger.info("Using Docker secrets for sensitive configuration");
+} else {
+	logger.info("Using environment variables for configuration");
+}
+
 // Check critical variables in production
 const isProduction = env.NODE_ENV === "production";
 if (isProduction) {
@@ -91,6 +116,19 @@ if (isProduction) {
 		logger.warn(
 			"CORS_ORIGIN contains 'localhost' in production. This may be incorrect.",
 		);
+	}
+	// BETTER_AUTH_SECRET is required in production
+	if (!env.BETTER_AUTH_SECRET) {
+		logger.error(
+			"BETTER_AUTH_SECRET is required in production. Set it via Docker secret or environment variable.",
+		);
+		// Try to get it with getRequiredSecret to show helpful error
+		try {
+			getRequiredSecret("BETTER_AUTH_SECRET");
+		} catch {
+			// Error already logged by getRequiredSecret
+		}
+		process.exit(1);
 	}
 }
 
@@ -129,19 +167,29 @@ app.use(
 
 // Security headers - using Hono's built-in secure headers middleware
 // Exclude auth endpoints from restrictive cross-origin policies
+// Note: HSTS preload requires domain submission to hstspreload.org
 app.use(async (c, next) => {
+	// Extended Permissions-Policy for all endpoints
+	const extendedPermissionsPolicy = {
+		geolocation: [],
+		microphone: [],
+		camera: [],
+		payment: [],
+		usb: [],
+		accelerometer: [],
+		gyroscope: [],
+		magnetometer: [],
+	};
+
 	// For auth endpoints, use less restrictive headers to allow cross-origin requests
 	if (c.req.path.startsWith("/api/auth/")) {
 		return secureHeaders({
 			xFrameOptions: "DENY",
 			xContentTypeOptions: "nosniff",
 			referrerPolicy: "strict-origin-when-cross-origin",
-			strictTransportSecurity: "max-age=31536000; includeSubDomains",
-			permissionsPolicy: {
-				geolocation: [],
-				microphone: [],
-				camera: [],
-			},
+			// HSTS with preload - ensures browsers always use HTTPS
+			strictTransportSecurity: "max-age=31536000; includeSubDomains; preload",
+			permissionsPolicy: extendedPermissionsPolicy,
 			contentSecurityPolicy: {
 				defaultSrc: ["'none'"],
 				frameAncestors: ["'none'"],
@@ -157,12 +205,9 @@ app.use(async (c, next) => {
 		xFrameOptions: "DENY",
 		xContentTypeOptions: "nosniff",
 		referrerPolicy: "strict-origin-when-cross-origin",
-		strictTransportSecurity: "max-age=31536000; includeSubDomains",
-		permissionsPolicy: {
-			geolocation: [],
-			microphone: [],
-			camera: [],
-		},
+		// HSTS with preload - ensures browsers always use HTTPS
+		strictTransportSecurity: "max-age=31536000; includeSubDomains; preload",
+		permissionsPolicy: extendedPermissionsPolicy,
 		contentSecurityPolicy: {
 			defaultSrc: ["'none'"],
 			frameAncestors: ["'none'"],
@@ -212,6 +257,10 @@ app.use(
 
 // Rate limiting spécifique pour la suppression de compte (1 par heure - très strict)
 app.use("/api/auth/delete-user", deleteAccountRateLimit());
+
+// Rate limiting spécifique pour la demande de réinitialisation de mot de passe (3 par heure)
+// Prevents account enumeration and email spam
+app.use("/api/auth/request-password-reset", passwordResetRequestRateLimit());
 
 // Rate limiting spécifique pour le changement de mot de passe (10 par heure)
 app.use("/api/auth/change-password", changePasswordRateLimit());
@@ -458,6 +507,61 @@ app.post("/api/sentry-tunnel", async (c) => {
 	} catch (error) {
 		logger.error("Sentry tunnel exception", { error });
 		return c.json({ error: "Internal server error" }, 500);
+	}
+});
+
+// CSP violation reporting endpoint
+// Receives Content-Security-Policy violation reports from browsers
+// Reports are logged and optionally sent to Sentry for monitoring
+app.post("/api/csp-report", async (c) => {
+	try {
+		const contentType = c.req.header("content-type") || "";
+
+		// CSP reports can be sent as application/csp-report or application/json
+		if (
+			!contentType.includes("application/csp-report") &&
+			!contentType.includes("application/json")
+		) {
+			return c.json({ error: "Invalid content type" }, 400);
+		}
+
+		const report = await c.req.json();
+
+		// Extract the CSP violation details
+		// Format: { "csp-report": { ... } } or { ... } depending on browser
+		const violation = report["csp-report"] || report;
+
+		// Log the violation for security audit
+		logger.warn("CSP violation detected", {
+			documentUri: violation["document-uri"],
+			violatedDirective: violation["violated-directive"],
+			effectiveDirective: violation["effective-directive"],
+			blockedUri: violation["blocked-uri"],
+			sourceFile: violation["source-file"],
+			lineNumber: violation["line-number"],
+			columnNumber: violation["column-number"],
+		});
+
+		// Send to Sentry for centralized monitoring
+		Sentry.captureMessage("CSP Violation", {
+			level: "warning",
+			tags: {
+				type: "csp-violation",
+				directive: violation["violated-directive"] || "unknown",
+			},
+			extra: {
+				documentUri: violation["document-uri"],
+				blockedUri: violation["blocked-uri"],
+				sourceFile: violation["source-file"],
+			},
+		});
+
+		// Return 204 No Content (standard response for report endpoints)
+		return new Response(null, { status: 204 });
+	} catch (error) {
+		// Log but don't expose errors - CSP reports should fail silently
+		logger.error("CSP report processing error", error);
+		return new Response(null, { status: 204 });
 	}
 });
 

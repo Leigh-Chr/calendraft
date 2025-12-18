@@ -46,7 +46,7 @@
 		"@tanstack/zod-adapter": "^1.140.0",
 		"@trpc/client": "catalog:",
 		"@trpc/server": "catalog:",
-		"@trpc/tanstack-react-query": "^11.7.2",
+		"@trpc/tanstack-react-query": "^11.8.0",
 		"@types/react-big-calendar": "^1.16.3",
 		"better-auth": "catalog:",
 		"class-variance-authority": "^0.7.1",
