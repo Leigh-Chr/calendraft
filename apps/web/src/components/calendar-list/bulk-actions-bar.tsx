@@ -254,7 +254,9 @@ export function CalendarBulkActionsBar({
 	const bulkDeleteMutation = useMutation(
 		trpc.calendar.bulkDelete.mutationOptions({
 			onSuccess: (data) => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.calendar.list,
+				});
 				toast.success(`${data.deletedCount} calendar(s) deleted`);
 				onExitSelectionMode();
 			},

@@ -91,10 +91,12 @@ export function CreateGroupDialog({
 	const createMutation = useMutation(
 		trpc.calendar.group.create.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Group created successfully");
 				onOpenChange(false);
 			},
@@ -108,10 +110,12 @@ export function CreateGroupDialog({
 	const updateMutation = useMutation(
 		trpc.calendar.group.update.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Group updated successfully");
 				onOpenChange(false);
 			},
@@ -125,10 +129,12 @@ export function CreateGroupDialog({
 	const addCalendarsMutation = useMutation(
 		trpc.calendar.group.addCalendars.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Calendars added to group");
 			},
 			onError: (error) => {
@@ -141,10 +147,12 @@ export function CreateGroupDialog({
 	const removeCalendarsMutation = useMutation(
 		trpc.calendar.group.removeCalendars.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Calendars removed from group");
 			},
 			onError: (error) => {
@@ -316,9 +324,9 @@ export function CreateGroupDialog({
 											>
 												<Checkbox
 													checked={isSelected}
-													onCheckedChange={() =>
-														handleToggleCalendar(calendar.id)
-													}
+													onCheckedChange={() => {
+														handleToggleCalendar(calendar.id);
+													}}
 													disabled={isPending}
 												/>
 												<div

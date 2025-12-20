@@ -30,10 +30,12 @@ export function useGroupHandlers(
 	const deleteGroupMutation = useMutation(
 		trpc.calendar.group.delete.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Group deleted");
 			},
 			onError: (error) => {

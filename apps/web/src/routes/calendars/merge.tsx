@@ -84,8 +84,12 @@ function MergeCalendarsComponent() {
 	const mergeMutation = useMutation(
 		trpc.calendar.merge.mutationOptions({
 			onSuccess: (data) => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.calendar.list,
+				});
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success(
 					`Calendars merged! ${data.mergedEvents} event(s), ${data.removedDuplicates} duplicate(s) cleaned up.`,
 				);
@@ -214,9 +218,9 @@ function MergeCalendarsComponent() {
 							<Checkbox
 								id="removeDuplicates"
 								checked={removeDuplicates}
-								onCheckedChange={(checked) =>
-									setRemoveDuplicates(checked === true)
-								}
+								onCheckedChange={(checked) => {
+									setRemoveDuplicates(checked === true);
+								}}
 								disabled={mergeMutation.isPending}
 							/>
 							<label

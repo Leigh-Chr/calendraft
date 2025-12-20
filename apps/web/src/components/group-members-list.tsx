@@ -194,10 +194,10 @@ export function GroupMembersList({
 	const removeMemberMutation = useMutation(
 		trpc.calendar.group.removeMember.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["calendar", "group", "listMembers"]],
 				});
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["calendar", "group", "getById"]],
 				});
 				toast.success("Member removed");
@@ -214,7 +214,7 @@ export function GroupMembersList({
 	const leaveGroupMutation = useMutation(
 		trpc.calendar.group.leaveGroup.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
 				toast.success("You left the group");

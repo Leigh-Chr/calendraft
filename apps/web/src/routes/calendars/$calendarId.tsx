@@ -118,8 +118,8 @@ function CalendarViewComponent() {
 	const cleanDuplicatesMutation = useMutation(
 		trpc.calendar.cleanDuplicates.mutationOptions({
 			onSuccess: (data) => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
 				if (data.removedCount > 0) {
@@ -144,12 +144,16 @@ function CalendarViewComponent() {
 	const refreshFromUrlMutation = useMutation(
 		trpc.calendar.refreshFromUrl.mutationOptions({
 			onSuccess: (data) => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.list });
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.calendar.list,
+				});
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 
 				toast.success(
 					`Calendar refreshed! ${data.importedEvents} event(s) imported, ${data.skippedDuplicates} duplicate(s) skipped.`,

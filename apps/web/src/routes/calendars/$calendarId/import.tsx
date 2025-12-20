@@ -127,9 +127,9 @@ function ImportIntoCalendarComponent() {
 								<Checkbox
 									id="remove-duplicates"
 									checked={removeDuplicates}
-									onCheckedChange={(checked) =>
-										setRemoveDuplicates(checked as boolean)
-									}
+									onCheckedChange={(checked) => {
+										setRemoveDuplicates(checked as boolean);
+									}}
 									disabled={importMutation.isPending}
 								/>
 								<Label

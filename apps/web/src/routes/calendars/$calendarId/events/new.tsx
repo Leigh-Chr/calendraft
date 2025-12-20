@@ -62,11 +62,13 @@ function NewEventComponent() {
 	const createMutation = useMutation(
 		trpc.event.create.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Event created successfully");
 				navigate({ to: `/calendars/${calendarId}` });
 			},

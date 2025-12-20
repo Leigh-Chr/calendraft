@@ -67,10 +67,12 @@ export function ShareCalendarDialog({
 		trpc.share.create.mutationOptions({
 			onSuccess: () => {
 				// Invalidate using the same key structure tRPC uses
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["share", "list"]],
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				setNewLinkName("");
 				toast.success("Sharing link created");
 			},
@@ -84,10 +86,12 @@ export function ShareCalendarDialog({
 	const updateMutation = useMutation(
 		trpc.share.update.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["share", "list"]],
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 			},
 			onError: (error) => {
 				toast.error(error.message || "Error during update");
@@ -99,10 +103,12 @@ export function ShareCalendarDialog({
 	const deleteMutation = useMutation(
 		trpc.share.delete.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["share", "list"]],
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Sharing link deleted");
 			},
 			onError: (error) => {
@@ -290,9 +296,9 @@ export function ShareCalendarDialog({
 												<Switch
 													id={`active-${link.id}`}
 													checked={link.isActive}
-													onCheckedChange={(checked) =>
-														handleToggleActive(link.id, checked)
-													}
+													onCheckedChange={(checked) => {
+														handleToggleActive(link.id, checked);
+													}}
 												/>
 											</div>
 											<Button

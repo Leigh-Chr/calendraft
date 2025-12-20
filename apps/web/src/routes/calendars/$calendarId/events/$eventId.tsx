@@ -285,9 +285,9 @@ function DuplicateDialog({
 							id="day-offset"
 							type="number"
 							value={dayOffset}
-							onChange={(e) =>
-								onDayOffsetChange(Number.parseInt(e.target.value, 10) || 0)
-							}
+							onChange={(e) => {
+								onDayOffsetChange(Number.parseInt(e.target.value, 10) || 0);
+							}}
 							placeholder="0"
 						/>
 						<p className="text-muted-foreground text-xs">
@@ -345,8 +345,8 @@ function EditEventComponent() {
 	const duplicateMutation = useMutation(
 		trpc.event.duplicate.mutationOptions({
 			onSuccess: (duplicatedEvent) => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
 				toast.success("Event duplicated successfully");
@@ -374,11 +374,13 @@ function EditEventComponent() {
 	const updateMutation = useMutation(
 		trpc.event.update.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Event updated successfully");
 				navigate({ to: `/calendars/${calendarId}` });
 			},

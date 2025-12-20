@@ -38,10 +38,10 @@ export function InviteGroupMemberDialog({
 	const inviteMutation = useMutation(
 		trpc.calendar.group.inviteMember.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["calendar", "group", "listMembers"]],
 				});
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["calendar", "group", "getById"]],
 				});
 				toast.success("Invitation sent");

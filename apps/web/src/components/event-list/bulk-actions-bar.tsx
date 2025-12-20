@@ -49,9 +49,13 @@ export function BulkActionsBar({
 	const bulkDeleteMutation = useMutation(
 		trpc.event.bulkDelete.mutationOptions({
 			onSuccess: (data) => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.all });
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.calendar.all,
+				});
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success(`${data.deletedCount} event(s) deleted`);
 				onExitSelectionMode();
 			},
@@ -106,7 +110,9 @@ export function BulkActionsBar({
 					<Button
 						variant="outline"
 						size="sm"
-						onClick={() => setMoveDialogOpen(true)}
+						onClick={() => {
+							setMoveDialogOpen(true);
+						}}
 						disabled={isPending || selectedCount === 0}
 						className="h-10 min-h-[44px] sm:h-8 sm:min-h-0"
 						aria-label={`Move ${selectedCount} selected event${selectedCount !== 1 ? "s" : ""} to another calendar`}

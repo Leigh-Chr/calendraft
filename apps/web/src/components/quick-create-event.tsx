@@ -75,11 +75,13 @@ export function QuickCreateEvent({
 	const createMutation = useMutation(
 		trpc.event.create.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Event created!");
 				onClose();
 			},
@@ -206,7 +208,9 @@ export function QuickCreateEvent({
 									variant="outline"
 									size="sm"
 									className="h-10 min-h-[44px] text-xs sm:h-7 sm:min-h-0"
-									onClick={() => handleDurationChange(preset)}
+									onClick={() => {
+										handleDurationChange(preset);
+									}}
 									disabled={createMutation.isPending}
 								>
 									{preset.label}
@@ -220,7 +224,9 @@ export function QuickCreateEvent({
 								<MapPin className="h-4 w-4 text-muted-foreground" />
 								<Input
 									value={location}
-									onChange={(e) => setLocation(e.target.value)}
+									onChange={(e) => {
+										setLocation(e.target.value);
+									}}
 									placeholder="Location"
 									className="h-8 flex-1"
 									disabled={createMutation.isPending}

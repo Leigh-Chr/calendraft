@@ -105,7 +105,7 @@ export function ShareCalendarsDialog({
 	const createMutation = useMutation(
 		trpc.share.bundle.create.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["share", "bundle", "list"]],
 				});
 				setNewBundleName("");
@@ -122,7 +122,7 @@ export function ShareCalendarsDialog({
 	const updateMutation = useMutation(
 		trpc.share.bundle.update.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["share", "bundle", "list"]],
 				});
 			},
@@ -136,7 +136,7 @@ export function ShareCalendarsDialog({
 	const deleteMutation = useMutation(
 		trpc.share.bundle.delete.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["share", "bundle", "list"]],
 				});
 				toast.success("Sharing bundle deleted");
@@ -444,7 +444,9 @@ function BundleItem({
 						<Switch
 							id={`active-${bundle.id}`}
 							checked={bundle.isActive}
-							onCheckedChange={(checked) => onToggleActive(bundle.id, checked)}
+							onCheckedChange={(checked) => {
+								onToggleActive(bundle.id, checked);
+							}}
 						/>
 					</div>
 					<Button

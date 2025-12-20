@@ -188,11 +188,13 @@ function useDeleteEvent(calendarId: string) {
 	const mutation = useMutation(
 		trpc.event.delete.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Event deleted");
 			},
 			onError: (error: unknown) => {
@@ -219,11 +221,13 @@ function useDuplicateEvent(calendarId: string) {
 	const mutation = useMutation(
 		trpc.event.duplicate.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Event duplicated");
 			},
 			onError: (error: unknown) => {
@@ -396,9 +400,9 @@ export function EventListView({
 						sortDirection: sortBy === "date" ? filters.sortDirection : "asc",
 					});
 				}}
-				onSortDirectionChange={(sortDirection) =>
-					updateFilterWithReset({ sortDirection })
-				}
+				onSortDirectionChange={(sortDirection) => {
+					updateFilterWithReset({ sortDirection });
+				}}
 			/>
 
 			{/* Bulk actions bar */}

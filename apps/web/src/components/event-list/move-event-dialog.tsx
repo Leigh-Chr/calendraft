@@ -66,9 +66,13 @@ export function MoveEventDialog({
 	const bulkMoveMutation = useMutation(
 		trpc.event.bulkMove.mutationOptions({
 			onSuccess: (data) => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.calendar.all });
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.calendar.all,
+				});
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success(
 					`${data.movedCount} event(s) moved to "${data.targetCalendarName}"`,
 				);

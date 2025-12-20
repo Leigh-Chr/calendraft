@@ -263,11 +263,13 @@ export function CalendarView({
 	const updateEventMutation = useMutation(
 		trpc.event.update.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({
 					queryKey: QUERY_KEYS.calendar.byId(calendarId),
 				});
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboard.all });
+				void queryClient.invalidateQueries({
+					queryKey: QUERY_KEYS.dashboard.all,
+				});
 				toast.success("Event updated");
 			},
 			onError: (error: unknown) => {
@@ -275,7 +277,7 @@ export function CalendarView({
 					error instanceof Error ? error.message : "Error during update";
 				toast.error(message);
 				// Refetch to revert optimistic update
-				queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
+				void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.event.all });
 			},
 		}),
 	);

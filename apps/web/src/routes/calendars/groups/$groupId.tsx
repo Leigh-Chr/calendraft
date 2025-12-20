@@ -239,7 +239,7 @@ function useGroupActions(
 	const deleteMutation = useMutation(
 		trpc.calendar.group.delete.mutationOptions({
 			onSuccess: () => {
-				queryClient.invalidateQueries({
+				void queryClient.invalidateQueries({
 					queryKey: [["calendar", "group"]],
 				});
 				toast.success("Group deleted");
@@ -594,9 +594,9 @@ function GroupDetailComponent() {
 							keyword={searchKeyword}
 							sortBy={sortBy}
 							onKeywordChange={setSearchKeyword}
-							onSortChange={(newSortBy) =>
-								setSortBy(newSortBy as CalendarSortBy)
-							}
+							onSortChange={(newSortBy) => {
+								setSortBy(newSortBy as CalendarSortBy);
+							}}
 							showDirectionToggle={false}
 							sortOptions={[
 								{ value: "name", label: "Name A-Z" },
