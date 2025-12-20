@@ -10,7 +10,7 @@ This is a Calendraft project - a web platform for managing, editing, and creatin
 - **`README.md`** - Project overview, features, getting started, stack, scripts
 - **`ARCHITECTURE.md`** - Package structure, dependency diagram, package contents
 - **`DEPLOYMENT.md`** - Production deployment guide, environment variables, monitoring
-- **`PRODUCTION_COMMANDS.md`** - Complete production management guide, scripts usage, Docker commands, monitoring, troubleshooting
+- **`PRODUCTION_COMMANDS.md`** - Production management scripts guide (see DEPLOYMENT.md for Docker commands)
 - **`VPS_DEPLOYMENT.md`** - VPS initial setup and deployment guide (first-time installation)
 - **`CONTRIBUTING.md`** - Contribution guidelines, code standards, PR process
 - **`SECURITY.md`** - Security policy, vulnerability reporting, security measures

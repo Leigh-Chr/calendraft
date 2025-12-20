@@ -1,54 +1,54 @@
-# Scripts de Production - Calendraft
+# Production Scripts - Calendraft
 
-Collection de scripts pour gérer Calendraft en production de manière sécurisée et efficace.
+Collection of scripts to manage Calendraft in production securely and efficiently.
 
-> 📚 **Documentation complète** : Consultez `PRODUCTION_COMMANDS.md` à la racine du projet pour le guide de référence complet.
+> 📚 **Complete documentation**: See `PRODUCTION_COMMANDS.md` at the project root for the complete reference guide.
 
-## 🚀 Démarrage Rapide
+## 🚀 Quick Start
 
 ```bash
-# 1. Rendre les scripts exécutables
+# 1. Make scripts executable
 chmod +x scripts/production/*.sh
 
-# 2. Installer sur le serveur (optionnel)
+# 2. Install on server (optional)
 ./scripts/production/install.sh user@server
 
-# 3. Vérifier la santé
+# 3. Check health
 ./scripts/production/health-check.sh
 
-# 4. Déployer
+# 4. Deploy
 ./scripts/production/deploy.sh --backup
 ```
 
-## 📋 Scripts Disponibles
+## 📋 Available Scripts
 
 | Script | Description | Usage |
 |--------|-------------|-------|
-| `deploy.sh` | Déploiement avec sauvegarde et migrations | `./deploy.sh [--backup] [--migrate] [--service=SERVICE]` |
-| `backup.sh` | Sauvegarde et restauration de la base de données | `./backup.sh [--list] [--restore=FILE]` |
-| `rollback.sh` | Retour à une version précédente | `./rollback.sh [--commit=HASH] [--no-backup] [--no-db]` |
-| `monitor.sh` | Monitoring des services et ressources | `./monitor.sh [--all\|--health\|--stats\|--logs\|--errors]` |
-| `health-check.sh` | Vérification complète de santé | `./health-check.sh [--verbose]` |
-| `security-audit.sh` | Audit de sécurité complet | `./security-audit.sh [--verbose]` |
-| `verify-backup.sh` | Vérification d'intégrité des sauvegardes | `./verify-backup.sh [FILE]` |
-| `report.sh` | Rapport d'état (texte ou JSON) | `./report.sh [--format=text\|json] [--output=FILE]` |
-| `cleanup.sh` | Nettoyage des ressources Docker | `./cleanup.sh [--all\|--images\|--volumes\|--build-cache\|--logs\|--system]` |
-| `quick-commands.sh` | Commandes Docker fréquentes | `./quick-commands.sh [command] [service]` |
-| `install.sh` | Installation sur serveur distant | `./install.sh user@server` |
-| `help.sh` | Aide intégrée | `./help.sh [script]` |
+| `deploy.sh` | Deployment with backup and migrations | `./deploy.sh [--backup] [--migrate] [--service=SERVICE]` |
+| `backup.sh` | Database backup and restoration | `./backup.sh [--list] [--restore=FILE]` |
+| `rollback.sh` | Revert to a previous version | `./rollback.sh [--commit=HASH] [--no-backup] [--no-db]` |
+| `monitor.sh` | Service and resource monitoring | `./monitor.sh [--all\|--health\|--stats\|--logs\|--errors]` |
+| `health-check.sh` | Complete health check | `./health-check.sh [--verbose]` |
+| `security-audit.sh` | Complete security audit | `./security-audit.sh [--verbose]` |
+| `verify-backup.sh` | Backup integrity verification | `./verify-backup.sh [FILE]` |
+| `report.sh` | Status report (text or JSON) | `./report.sh [--format=text\|json] [--output=FILE]` |
+| `cleanup.sh` | Docker resource cleanup | `./cleanup.sh [--all\|--images\|--volumes\|--build-cache\|--logs\|--system]` |
+| `quick-commands.sh` | Frequent Docker commands | `./quick-commands.sh [command] [service]` |
+| `install.sh` | Installation on remote server | `./install.sh user@server` |
+| `help.sh` | Built-in help | `./help.sh [script]` |
 
 ## 🔧 Configuration
 
-Les scripts utilisent des variables d'environnement avec des valeurs par défaut :
+Scripts use environment variables with default values:
 
 ```bash
-PROJECT_DIR=~/calendraft      # Détecté automatiquement si docker-compose.yml présent
-BACKUP_DIR=~/backups          # Répertoire des sauvegardes
-LOG_FILE=~/deploy.log         # Fichier de log pour deploy.sh
-RETENTION_DAYS=30             # Rétention des sauvegardes (jours)
+PROJECT_DIR=~/calendraft      # Auto-detected if docker-compose.yml present
+BACKUP_DIR=~/backups          # Backup directory
+LOG_FILE=~/deploy.log         # Log file for deploy.sh
+RETENTION_DAYS=30             # Backup retention (days)
 ```
 
-Vous pouvez les surcharger avant d'exécuter les scripts :
+You can override them before running scripts:
 
 ```bash
 export BACKUP_DIR=/mnt/backups
@@ -56,93 +56,93 @@ export RETENTION_DAYS=60
 ./backup.sh
 ```
 
-## 🎯 Cas d'Usage Courants
+## 🎯 Common Use Cases
 
-### Déploiement Régulier
+### Regular Deployment
 
 ```bash
-# Déploiement avec sauvegarde automatique
+# Deployment with automatic backup
 ./deploy.sh --backup --migrate
 ```
 
-### Sauvegarde Quotidienne
+### Daily Backup
 
 ```bash
-# Créer une sauvegarde (rotation automatique après 30 jours)
+# Create a backup (automatic rotation after 30 days)
 ./backup.sh
 
-# Vérifier l'intégrité
+# Verify integrity
 ./verify-backup.sh
 ```
 
-### Monitoring Quotidien
+### Daily Monitoring
 
 ```bash
-# Vue d'ensemble complète
+# Complete overview
 ./monitor.sh --all
 
-# Vérification de santé rapide
+# Quick health check
 ./health-check.sh
 ```
 
-### En Cas de Problème
+### In Case of Problem
 
 ```bash
-# 1. Diagnostiquer
+# 1. Diagnose
 ./monitor.sh --errors
 ./health-check.sh --verbose
 
-# 2. Rollback si nécessaire
+# 2. Rollback if necessary
 ./rollback.sh --commit=HEAD~1
 
-# 3. Restaurer depuis sauvegarde si nécessaire
+# 3. Restore from backup if necessary
 ./backup.sh --restore=~/backups/db-backup-20251213-120000.sql.gz
 
-# Note: Le rollback ne restaure pas automatiquement la base de données
-# pour des raisons de sécurité. Utilisez --no-db si vous voulez
-# seulement revenir au code précédent sans toucher à la DB.
+# Note: Rollback does not automatically restore the database
+# for security reasons. Use --no-db if you only want
+# to revert to previous code without touching the DB.
 ```
 
-### Audit de Sécurité
+### Security Audit
 
 ```bash
-# Audit complet
+# Complete audit
 ./security-audit.sh --verbose
 
-# Rapport d'état pour documentation
+# Status report for documentation
 ./report.sh --format=json --output=status-report.json
 ```
 
-## 🛠️ Prérequis
+## 🛠️ Prerequisites
 
-- Docker et Docker Compose v2
+- Docker and Docker Compose v2
 - Git
 - Bash 4.0+
-- `curl` (pour les health checks)
-- `gzip` (pour les sauvegardes)
+- `curl` (for health checks)
+- `gzip` (for backups)
 
-Les scripts vérifient automatiquement ces prérequis avant l'exécution.
+Scripts automatically check these prerequisites before execution.
 
-## 🔒 Sécurité
+## 🔒 Security
 
-Tous les scripts incluent :
+All scripts include:
 
-- ✅ Validation des entrées utilisateur
-- ✅ Vérification des prérequis (Docker, Git, etc.)
-- ✅ Protection contre l'injection de commandes
-- ✅ Gestion d'erreurs robuste
-- ✅ Confirmations pour opérations destructives
+- ✅ User input validation
+- ✅ Prerequisites check (Docker, Git, etc.)
+- ✅ Protection against command injection
+- ✅ Robust error handling
+- ✅ Confirmations for destructive operations
 
 ## 📝 Notes
 
-- Tous les scripts sont conçus pour être exécutés depuis le répertoire du projet
-- Les scripts détectent automatiquement le répertoire si `docker-compose.yml` est présent
-- Les logs sont sauvegardés dans `LOG_FILE` (par défaut `~/deploy.log` pour `deploy.sh`)
-- Les sauvegardes sont automatiquement compressées et rotées après `RETENTION_DAYS`
+- All scripts are designed to be run from the project directory
+- Scripts automatically detect the directory if `docker-compose.yml` is present
+- Logs are saved in `LOG_FILE` (default `~/deploy.log` for `deploy.sh`)
+- Backups are automatically compressed and rotated after `RETENTION_DAYS`
 
 ## 🆘 Support
 
-Pour obtenir de l'aide sur un script spécifique :
+To get help on a specific script:
 
 ```bash
 ./help.sh deploy
@@ -150,4 +150,4 @@ Pour obtenir de l'aide sur un script spécifique :
 # etc.
 ```
 
-Pour la documentation complète avec tous les exemples et cas d'usage détaillés, consultez `PRODUCTION_COMMANDS.md` à la racine du projet.
+For complete documentation with all examples and detailed use cases, see `PRODUCTION_COMMANDS.md` at the project root.

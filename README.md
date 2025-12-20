@@ -137,6 +137,21 @@ CORS_ORIGIN=http://localhost:3001
 BETTER_AUTH_SECRET=your-secret-key
 BETTER_AUTH_URL=http://localhost:3000
 
+# Redis (optional - for distributed rate limiting)
+# If not set, rate limiting falls back to in-memory
+REDIS_URL=redis://localhost:6379
+
+# Email Service Configuration (required for email verification)
+# Option A: Resend (Recommended)
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+EMAIL_FROM=noreply@calendraft.com
+
+# Option B: SMTP (Alternative)
+# SMTP_HOST=smtp.example.com
+# SMTP_PORT=587
+# SMTP_SECURE=false
+# SMTP_USER=your-email@example.com
+# SMTP_PASSWORD=your-password
 ```
 
 Create a `.env` file in `apps/web`:
@@ -164,6 +179,8 @@ This automatically:
 - Starts PostgreSQL and Redis in Docker
 - Checks database initialization
 - Launches apps in development mode
+
+**Note**: Redis is optional - rate limiting will work with in-memory fallback if Redis is not available.
 
 See [scripts/dev/README.md](scripts/dev/README.md) for all available development scripts.
 
@@ -193,54 +210,19 @@ bun run dev:web
 
 The project is fully dockerized to facilitate deployment.
 
-### 🚀 Quick Start
-
-#### Option 1: Development (PostgreSQL Docker + Local Apps)
-
-**Using scripts (recommended):**
+**Quick start:**
 ```bash
-# First time setup
-./scripts/dev/dev-setup.sh
+# Development (PostgreSQL Docker + Local Apps)
+./scripts/dev/dev-setup.sh  # First time
+./scripts/dev/dev.sh        # Daily development
 
-# Daily development
-./scripts/dev/dev.sh
-```
-
-**Or manually:**
-```bash
-# 1. Start PostgreSQL
-docker-compose -f docker-compose.dev.yml up -d
-
-# 2. Initialize the database
-bun run db:push
-
-# 3. Launch apps locally (hot reload)
-bun run dev
-```
-
-#### Option 2: Full Production (Everything in Docker)
-
-```bash
-# 1. Configure environment
+# Production (Everything in Docker)
 cp docker.env.example .env
 # Edit .env with your values
-
-# 2. Build and start
-docker-compose up -d --build
-
-# 3. View logs
-docker-compose logs -f
+docker compose up -d --build
 ```
 
-### Docker Services
-
-| Service | Port | Description |
-|---------|------|-------------|
-| `db` | 5432 | PostgreSQL 16 |
-| `server` | 3000 | Backend API (Bun + Hono) |
-| `web` | 3001 | Frontend (Nginx) |
-
-📖 **Complete guide**: See [DOCKER.md](./DOCKER.md) for all commands and troubleshooting.
+📖 **Complete guide**: See [DEPLOYMENT.md](./DEPLOYMENT.md) for Docker deployment, commands, and troubleshooting.
 
 ## Development Scripts
 
@@ -272,7 +254,7 @@ For managing the application in production, a comprehensive set of scripts is av
 
 ### Quick Production Checklist
 
-- [ ] Environment variables configured (see `apps/server/.env.example`)
+- [ ] Environment variables configured (see `docker.env.example` for Docker or configure `apps/server/.env` manually)
 - [ ] `CORS_ORIGIN` defined (required, do not use `*`)
 - [ ] `BETTER_AUTH_SECRET` generated (min 32 characters)
 - [ ] Database initialized
@@ -292,7 +274,11 @@ For managing the application in production, a comprehensive set of scripts is av
 
 ### Security
 
-- Rate limiting: 100 requests/minute per IP
+- Rate limiting: 
+  - General routes: 100 requests/minute per IP
+  - Authentication: 10 requests/minute
+  - Sign-up: 5 requests/minute
+  - Uses Redis for distributed rate limiting (optional, falls back to in-memory)
 - HTTP security headers configured automatically
 - Input validation (max file size: 5MB)
 - Anonymous user limitations: 
@@ -393,11 +379,12 @@ calendraft/
 |----------|-------------|
 | [README.md](README.md) | This file - Overview and quick start |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Package architecture and dependency diagram |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Complete production deployment guide |
-| [PRODUCTION_COMMANDS.md](PRODUCTION_COMMANDS.md) | Production management commands and scripts guide |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Complete production deployment guide (Docker, manual, monitoring) |
 | [VPS_DEPLOYMENT.md](VPS_DEPLOYMENT.md) | VPS initial setup and deployment guide |
+| [PRODUCTION_COMMANDS.md](PRODUCTION_COMMANDS.md) | Production management scripts guide |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Project contribution guide |
 | [SECURITY.md](SECURITY.md) | Security policy and vulnerability reporting |
+| [AUTHENTICATION.md](AUTHENTICATION.md) | Authentication flow and configuration |
 
 ### Package Documentation
 
@@ -440,5 +427,3 @@ While Calendraft is licensed under AGPL v3, the maintainer requests that:
 - **Contributions**: All contributions are welcome via Pull Requests. The maintainer reserves the right to accept or reject any contribution to maintain project quality and direction.
 
 These requests are not legally binding but are community guidelines that we ask users to respect.
-
-For detailed usage conditions and examples, see [USAGE.md](USAGE.md).

@@ -63,8 +63,16 @@ Protection against brute force and denial of service attacks:
 | General (`/*`) | 100 requests | 1 minute |
 | Authentication (`/api/auth/*`) | 10 requests | 1 minute |
 | Sign-up (`/api/auth/sign-up/email`) | 5 requests | 1 minute |
+| Email verification resend | 1 request | 30 seconds |
+| Password reset request | 3 requests | 1 hour |
+| Password change | 10 requests | 1 hour |
+| Profile update | 20 requests | 1 hour |
+| Account deletion | 1 request | 1 hour |
 
-Rate limiting events are logged for audit.
+**Implementation**:
+- Uses Redis for distributed rate limiting across multiple instances (optional)
+- Falls back to in-memory rate limiting if Redis is unavailable (single instance only)
+- Rate limiting events are logged for audit
 
 ### API Protection
 

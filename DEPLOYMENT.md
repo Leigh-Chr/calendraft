@@ -11,6 +11,29 @@ This guide describes the steps to deploy Calendraft in production.
 
 ## Environment Variables
 
+### Docker Secrets Support
+
+Calendraft supports Docker secrets for sensitive configuration (production best practice). Secrets are read from `/run/secrets/` with fallback to environment variables.
+
+**Supported secrets** (can use Docker secrets or env vars):
+- `BETTER_AUTH_SECRET`
+- `RESEND_API_KEY`
+- `SMTP_PASSWORD`
+
+**Docker Compose example:**
+```yaml
+services:
+  server:
+    secrets:
+      - better_auth_secret
+      - resend_api_key
+secrets:
+  better_auth_secret:
+    file: ./secrets/better_auth_secret.txt
+  resend_api_key:
+    file: ./secrets/resend_api_key.txt
+```
+
 ### Backend (`apps/server/.env`)
 
 Create a `.env` file in `apps/server/` with the following variables:
@@ -28,12 +51,30 @@ BETTER_AUTH_URL=https://api.your-domain.com
 
 # Sentry (optional - error monitoring)
 SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
+
+# Redis (optional - for distributed rate limiting)
+# If not set, rate limiting falls back to in-memory (single instance only)
+REDIS_URL=redis://redis:6379
+
+# Email Service Configuration (required for email verification)
+# Option A: Resend (Recommended)
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+EMAIL_FROM=noreply@your-domain.com
+
+# Option B: SMTP (Alternative)
+# SMTP_HOST=smtp.example.com
+# SMTP_PORT=587
+# SMTP_SECURE=false
+# SMTP_USER=your-email@example.com
+# SMTP_PASSWORD=your-password
 ```
 
 **Important**:
 - `CORS_ORIGIN`: MUST be defined in production, do not use `*`
 - `BETTER_AUTH_SECRET`: Generate a secure key (e.g., `openssl rand -base64 32`)
 - `SENTRY_DSN`: Optional, retrieve it from your Sentry project
+- `REDIS_URL`: Optional, but recommended for distributed rate limiting in production
+- `RESEND_API_KEY` or SMTP config: Required for email verification
 - Never commit the `.env` file to the repository
 
 ### Frontend (`apps/web/.env`)
@@ -61,13 +102,65 @@ SENTRY_AUTH_TOKEN=sntrys_xxx
 
 The easiest way to deploy Calendraft is using Docker.
 
-### 1. Configure Environment Variables
+### Quick Start
+
+#### Development (PostgreSQL Docker + Local Apps)
 
 ```bash
-cp docker.env.example .env
+# 1. Start PostgreSQL
+docker compose -f docker-compose.dev.yml up -d
+
+# 2. Configure environment
+echo 'DATABASE_URL="postgresql://calendraft:calendraft_dev@localhost:5432/calendraft_dev"
+PORT=3000
+CORS_ORIGIN=http://localhost:3001
+BETTER_AUTH_SECRET=dev-secret-key-min-32-characters-long
+BETTER_AUTH_URL=http://localhost:3000' > apps/server/.env
+
+# 3. Initialize the database
+bun run db:push
+
+# 4. Launch apps locally (hot reload)
+bun run dev
 ```
 
-Edit `.env` with your production values:
+**Access:**
+- Frontend: http://localhost:3001
+- Backend: http://localhost:3000
+- PostgreSQL: localhost:5432
+
+#### Production (Everything in Docker)
+
+```bash
+# 1. Configure environment variables
+cp docker.env.example .env
+# Edit .env with your production values
+
+# 2. Build and start all services
+docker compose up -d --build
+
+# 3. Verify everything works
+docker compose ps
+docker compose logs -f
+```
+
+**Access:**
+- Frontend: http://localhost:3001
+- Backend: http://localhost:3000
+- PostgreSQL: localhost:5432
+
+### Docker Services
+
+| Service | Port | Description |
+|---------|------|-------------|
+| `db` | 5432 | PostgreSQL 16 |
+| `redis` | 6379 | Redis (Rate limiting - optional, falls back to in-memory) |
+| `server` | 3000 | Backend API (Bun + Hono) |
+| `web` | 3001 | Frontend (Nginx) |
+
+### Environment Variables
+
+Copy `docker.env.example` to `.env` and configure:
 
 ```env
 # Database
@@ -77,37 +170,128 @@ POSTGRES_DB=calendraft
 
 # Backend
 CORS_ORIGIN=https://your-domain.com
-BETTER_AUTH_SECRET=your-secret-min-32-characters
+BETTER_AUTH_SECRET=$(openssl rand -base64 32)
 BETTER_AUTH_URL=https://api.your-domain.com
+
+# Redis (optional - for distributed rate limiting)
+REDIS_URL=redis://redis:6379
+
+# Email Service (required for email verification)
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+EMAIL_FROM=noreply@your-domain.com
 
 # Frontend
 VITE_SERVER_URL=https://api.your-domain.com
 ```
 
-### 2. Build and Start
+### Ports
 
-```bash
-docker compose up -d --build
+By default:
+- **3000**: Backend API
+- **3001**: Frontend Web
+- **5432**: PostgreSQL
+
+Modify in `.env` if necessary:
+```env
+SERVER_PORT=3000
+WEB_PORT=3001
+POSTGRES_PORT=5432
 ```
 
-### 3. Verify Deployment
+### Useful Docker Commands
 
 ```bash
-# View service status
-docker compose ps
-
 # View logs
-docker compose logs -f
+docker compose logs -f              # All services
+docker compose logs -f server       # Specific service
+docker compose logs -f web
+docker compose logs -f db
 
-# Test health check
-curl http://localhost:3000/health
-```
+# Stop services
+docker compose down                  # Stop (keep data)
+docker compose down -v               # Stop and remove volumes (⚠️ deletes data)
 
-### Update
+# Restart a service
+docker compose restart server
+docker compose restart web
 
-```bash
+# Rebuild a service
+docker compose up -d --build server
+docker compose up -d --build web
+
+# Access PostgreSQL
+docker compose exec db psql -U calendraft -d calendraft
+
+# Database backup
+docker compose exec db pg_dump -U calendraft calendraft > backup.sql
+
+# Restore database
+docker compose exec -T db psql -U calendraft calendraft < backup.sql
+
+# Update
 git pull
 docker compose up -d --build
+```
+
+### Docker Troubleshooting
+
+#### Docker Build Fails
+
+```bash
+# Rebuild without cache
+docker compose build --no-cache
+
+# Check logs
+docker compose logs
+```
+
+#### Database Won't Start
+
+```bash
+# Check logs
+docker compose logs db
+
+# Check that port is not already in use
+lsof -i :5432
+```
+
+#### Server Cannot Connect to Database
+
+```bash
+# Check that database is healthy
+docker compose ps
+
+# Test connection
+docker compose exec server wget -O- http://localhost:3000/health
+```
+
+#### Data Doesn't Persist
+
+Check that the volume is created:
+```bash
+docker volume ls | grep postgres
+```
+
+### Service Structure
+
+```
+┌─────────────────────────────────────────┐
+│         docker-compose.yml              │
+├─────────────────────────────────────────┤
+│  ┌──────────┐  ┌──────────┐  ┌──────┐ │
+│  │    db    │  │  server  │  │ web  │ │
+│  │PostgreSQL│◄─│ Bun+Hono │◄─│Nginx │ │
+│  │  :5432   │  │  :3000   │  │ :80  │ │
+│  └──────────┘  └──────────┘  └──────┘ │
+│       │            │                    │
+│  ┌────┴────────────┴────┐              │
+│  │      redis           │              │
+│  │   (Rate Limiting)    │              │
+│  │      :6379           │              │
+│  └──────────────────────┘              │
+│       │                                  │
+│  postgres_data, redis_data (volumes)    │
+└─────────────────────────────────────────┘
 ```
 
 ---
@@ -220,30 +404,6 @@ server {
 - [ ] Database backup configured
 - [ ] Sentry configured (optional but recommended)
 
-## Useful Docker Commands
-
-```bash
-# View logs for a specific service
-docker compose logs -f server
-
-# Access PostgreSQL container
-docker compose exec db psql -U calendraft -d calendraft
-
-# Database backup
-docker compose exec db pg_dump -U calendraft calendraft > backup.sql
-
-# Restore database
-docker compose exec -T db psql -U calendraft calendraft < backup.sql
-
-# Restart a service
-docker compose restart server
-
-# Rebuild a service
-docker compose up -d --build server
-
-# Remove volumes (WARNING: deletes data)
-docker compose down -v
-```
 
 ## Monitoring
 
@@ -307,7 +467,16 @@ pm2 logs calendraft-api
 
 ### Active Protections
 
-- ✅ Rate limiting: 100 req/min general, 10 req/min for auth
+- ✅ Rate limiting: 
+  - General routes: 100 req/min
+  - Authentication: 10 req/min
+  - Sign-up: 5 req/min
+  - Email verification resend: 1 req/30s
+  - Password reset request: 3 req/hour
+  - Password change: 10 req/hour
+  - Profile update: 20 req/hour
+  - Account deletion: 1 req/hour
+  - Uses Redis for distributed rate limiting (falls back to in-memory if Redis unavailable)
 - ✅ SSRF protection for external URL imports
 - ✅ Content Security Policy (frontend and backend)
 - ✅ HTTP security headers (X-Frame-Options, X-Content-Type-Options, etc.)
@@ -316,6 +485,7 @@ pm2 logs calendraft-api
 - ✅ Limit of 10 sharing links per calendar
 - ✅ Security event logging
 - ✅ Sentry configured without PII
+- ✅ Docker secrets support (with fallback to environment variables)
 
 ### Production Security Checklist
 
@@ -354,10 +524,17 @@ It is recommended to perform periodic rotation:
 
 ### Rate limiting too strict
 → Adjust limits in `apps/server/src/middleware/rate-limit.ts`
+→ Note: Rate limiting uses Redis if `REDIS_URL` is set, otherwise falls back to in-memory (single instance only)
 
 ### 429 Too Many Requests errors
-→ Normal if you exceed 100 requests/minute
+→ Normal if you exceed rate limits (see Security section for details)
 → Wait for the time window to end
+→ Check Redis connection if using distributed rate limiting
+
+### Redis connection issues
+→ Rate limiting will automatically fall back to in-memory if Redis is unavailable
+→ Check `REDIS_URL` configuration
+→ Verify Redis service is running: `docker compose ps redis`
 
 ## Support
 
@@ -367,6 +544,8 @@ For any questions or issues, consult the main README.md or open an issue.
 
 - [README.md](README.md) - Overview and quick start
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Package architecture
+- [VPS_DEPLOYMENT.md](VPS_DEPLOYMENT.md) - VPS initial setup guide
+- [PRODUCTION_COMMANDS.md](PRODUCTION_COMMANDS.md) - Production management scripts
 - [SECURITY.md](SECURITY.md) - Security policy
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guide
 
